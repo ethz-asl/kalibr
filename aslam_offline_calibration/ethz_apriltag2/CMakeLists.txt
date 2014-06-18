@@ -18,7 +18,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/)
 find_package(Eigen REQUIRED)
 find_package(OpenCV REQUIRED)
 
-add_definitions(-fPIC -O3)
+add_definitions(-fPIC -O3 -msse2 -mssse3 -march=native)
 include_directories(include  ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 if(NOT APPLE)
