@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package>
+    <name>aslam_cv_serialization</name>
+    <version>0.0.1</version>
+    <description>aslam_cv_serialization</description>
+    <maintainer email="paul.furgale@mavt.ethz.ch">Paul Furgale</maintainer>
+    <license>New BSD</license>
+    <buildtool_depend>catkin</buildtool_depend>
+    <buildtool_depend>catkin_simple</buildtool_depend>
+
+    <build_depend>aslam_cameras</build_depend>
+    <build_depend>aslam_frames</build_depend>
+    <build_depend>aslam_features2d</build_depend>
+    <build_depend>aslam_camera_system</build_depend>
+    <build_depend>aslam_time</build_depend>
+
+    <build_depend>sm_common</build_depend>
+    <build_depend>sm_boost</build_depend>
+    <build_depend>sm_property_tree</build_depend>
+    <build_depend>sm_eigen</build_depend>
+    <build_depend>sm_kinematics</build_depend>
+    <build_depend>sm_opencv</build_depend>
+    <build_depend>sm_logging</build_depend>
+    <build_depend>opencv2_catkin</build_depend>
+
+    <build_depend>eigen</build_depend>
+</package>
