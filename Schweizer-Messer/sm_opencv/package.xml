@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package>
+  <name>sm_opencv</name>
+  <version>0.0.1</version>
+  <description>sm_opencv</description>
+
+  <maintainer email="paul.furgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <license>New BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>sm_common</build_depend>
+
+  <run_depend>sm_common</run_depend>
+</package>

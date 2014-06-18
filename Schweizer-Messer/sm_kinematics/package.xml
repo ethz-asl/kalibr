@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>sm_kinematics</name>
+  <version>0.0.1</version>
+  <description>sm_kinematics</description>
+
+  <maintainer email="paul.furgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <license>New BSD</license>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>sm_boost</build_depend>
+  <build_depend>sm_common</build_depend>
+  <build_depend>sm_eigen</build_depend>
+  <build_depend>sm_random</build_depend>
+
+  <run_depend>sm_boost</run_depend>
+  <run_depend>sm_common</run_depend>
+  <run_depend>sm_eigen</run_depend>
+  <run_depend>sm_random</run_depend>
+  
+  <test_depend>gtest</test_depend>
+</package>

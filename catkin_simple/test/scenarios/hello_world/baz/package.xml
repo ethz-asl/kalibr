@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package>
+  <name>baz</name>
+  <version>0.1.0</version>
+  <description>The baz package</description>
+  <maintainer email="william@osrfoundation.org">William Woodall</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <run_depend>boost</run_depend>
+  <build_depend>boost-dev</build_depend>
+
+</package>

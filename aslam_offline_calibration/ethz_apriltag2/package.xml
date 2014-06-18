@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <name>ethz_apriltag2</name>
+  <description>
+  ethz_apriltag2
+
+	ros lib of http://people.csail.mit.edu/kaess/apriltags/
+</description>
+  <version>0.0.1</version>
+  <maintainer email="paulfurgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <author>Paul Furgale</author>
+  <license>New BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>opencv</build_depend>
+  <build_depend>eigen2</build_depend>
+</package>

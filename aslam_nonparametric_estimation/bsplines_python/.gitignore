@@ -1,0 +1,3 @@
+python/bsplines/libbsplines.so
+*.pyc
+/LocalBuildType.cmake

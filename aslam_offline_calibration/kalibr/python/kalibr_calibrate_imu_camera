@@ -1,0 +1,207 @@
+#!/usr/bin/env python
+print "importing libraries"
+import sm
+import kalibr_common as kc
+from kalibr_imu_camera_calibration import *
+
+import numpy as np
+import argparse
+import signal
+import sys   
+
+# make numpy print prettier
+np.set_printoptions(suppress=True)
+
+def signal_exit(signal, frame):
+    print
+    sm.logWarn("Shutting down! (CTRL+C)")
+    sys.exit(1)
+
+#helper to constrain certain arguments to be specified only once
+class Once(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string = None):
+        if getattr(namespace, self.dest) is not None:
+            msg = '{o} can only be specified once'.format(o = option_string)
+            raise argparse.ArgumentError(None, msg)
+        setattr(namespace, self.dest, values)
+
+def parseArgs():
+    class KalibrArgParser(argparse.ArgumentParser):
+        def error(self, message):
+            self.print_help()
+            sm.logError('%s' % message)
+            sys.exit(2)
+        def format_help(self):
+            formatter = self._get_formatter()
+            formatter.add_text(self.description)
+            formatter.add_usage(self.usage, self._actions,
+                                self._mutually_exclusive_groups)
+            for action_group in self._action_groups:
+                formatter.start_section(action_group.title)
+                formatter.add_text(action_group.description)
+                formatter.add_arguments(action_group._group_actions)
+                formatter.end_section()
+            formatter.add_text(self.epilog)
+            return formatter.format_help()     
+        
+    usage = """
+    Example usage to calibrate a camera system against an IMU using an aprilgrid
+    with temporal calibration enabled.
+    
+    %(prog)s --bag MYROSBAG.bag --cam camchain.yaml --imu imu.yaml \\
+             --target aprilgrid.yaml --time-calibration
+    
+    camchain.yaml: is the camera-system calibration output of the multiple-camera
+                   calibratin tool (kalibr_calibrate_cameras)
+    
+    example aprilgrid.yaml:       |  example imu.yaml: (ADIS16448)
+        target_type: 'aprilgrid'  |      accelerometer_noise_density: 0.006  
+        tagCols: 6                |      accelerometer_random_walk: 0.0002
+        tagRows: 6                |      gyroscope_noise_density: 0.0004
+        tagSize: 0.088            |      gyroscope_random_walk: 4.0e-06
+        tagSpacing: 0.3           |      update_rate: 200.0"""    
+
+    #setup the argument list
+    parser = KalibrArgParser(description='Calibrate the spatial and temporal parameters of an IMU to a camera chain.', usage=usage)
+    
+    #data source
+    groupData = parser.add_argument_group('Dataset source')
+    groupData.add_argument('--bag', dest='bagfile', nargs=1, help='Ros bag file containing image and imu data (rostopics specified in the yamls)', action=Once, required=True)
+    groupData.add_argument('--bag-from-to', metavar='bag_from_to', type=float, nargs=2, help='Use the bag data starting from up to this time [s]')
+    
+    #configuration files
+    groupCam = parser.add_argument_group('Camera system configuration')
+    groupCam.add_argument('--cams', dest='chainYaml', help='Camera system configuration as yaml file', action=Once)
+    
+    groupImu = parser.add_argument_group('Imu configuration')
+    groupImu.add_argument('--imu', dest='imuYamls', nargs='+', help='Imu configuration as yaml files', required=True, action=Once)
+    
+    groupTarget = parser.add_argument_group('Calibration target')
+    groupTarget.add_argument('--target', dest='target_yaml', help='Calibration target configuration as yaml file', required=True, action=Once)
+    
+    #optimization options
+    groupOpt = parser.add_argument_group('Optimization options')
+    groupOpt.add_argument('--time-calibration', action='store_false', dest='no_time', help='Enable the temporal calibration', required=False)      
+    groupOpt.add_argument('--max-iter', type=int, default=30, dest='max_iter', help='Max. iterations (default: %(default)s)', required=False)
+    groupOpt.add_argument('--recover-covariance', action='store_true', dest='recover_cov', help='Recover the covariance of the design variables.', required=False)
+
+    #Result options  
+    outputSettings = parser.add_argument_group('Output options')
+    outputSettings.add_argument('--show-extraction', action='store_true', dest='showextraction', help='Show the calibration target extraction.')
+    outputSettings.add_argument('--extraction-stepping', action='store_true', dest='extractionstepping', help='Show each image during calibration target extraction', required=False)
+    outputSettings.add_argument('--verbose', action='store_true', dest='verbose', help='Verbose output')
+    outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
+     
+    #print help if no argument is specified
+    if len(sys.argv)==1:
+        parser.print_help()
+        sys.exit(2)
+        
+    #Parser the argument list
+    try:
+        parsed = parser.parse_args()
+    except:
+        sys.exit(2)
+                 
+    if parsed.verbose:
+        parsed.showextraction = True             
+    
+    return parsed
+
+def main():
+    # Parse the arguments
+    parsed = parseArgs();
+    
+    #logging modess
+    if parsed.verbose:
+        sm.setLoggingLevel(sm.LoggingLevel.Debug)
+    else:
+        sm.setLoggingLevel(sm.LoggingLevel.Info)
+        
+    signal.signal(signal.SIGINT, signal_exit)
+    
+        
+    print "Initializing IMUs:"
+    if len(parsed.imuYamls)>1:
+        sm.logWarn("Only one imu supported at the moment!")
+        sys.exit(-s)
+            
+    imus=list()
+    for imu_yaml in parsed.imuYamls:
+        imuConfig = kc.ImuParameters(imu_yaml)
+        imuConfig.printDetails()
+        imus.append( sens.IccImu(imuConfig, parsed) )
+    
+    #load calibration target configuration 
+    targetConfig = kc.CalibrationTargetParameters(parsed.target_yaml)
+       
+    print "Initializing calibration target:"
+    targetConfig.printDetails()
+    
+    print "Initializing camera chain:"
+    chain = kc.CameraChainParameters(parsed.chainYaml)      
+    chain.printDetails()   
+    camChain = sens.IccCameraChain(chain, targetConfig, parsed)
+
+    #create a calibrator instance
+    iCal = IccCalibrator()
+
+    #register sensors with calibrator
+    iCal.registerSensor( camChain )
+    for imu in imus:
+        iCal.registerSensor( imu )
+
+    print
+    print "Building the problem"
+    iCal.buildProblem(splineOrder=6, 
+                      poseKnotsPerSecond=70, 
+                      biasKnotsPerSecond=50, 
+                      doPoseMotionError=False,
+                      doBiasMotionError=True,
+                      blakeZisserCam=-1,
+                      huberAccel=-1,
+                      huberGyro=-1,
+                      noTimeCalibration=parsed.no_time,
+                      maxIterations=parsed.max_iter,
+                      timeOffsetPadding=0.02,
+                      verbose = parsed.verbose)
+
+    print
+    print "Before Optimization"
+    print "==================="
+    util.printErrorStatistics(iCal)
+    util.printResults(iCal,  withCov=False)
+    
+    print
+    print "Optimizing..."
+    iCal.optimize(maxIterations=parsed.max_iter, recoverCov=parsed.recover_cov)
+     
+    print
+    print "After Optimization (Results)"
+    print "=================="
+    util.printErrorStatistics(iCal)
+    util.printResults(iCal, withCov=parsed.recover_cov)
+    
+    print
+    bagtag = parsed.bagfile[0].translate(None, "<>:/\|?*").replace('.bag', '', 1)
+    yamlFilename = "camchain-imucam-" + bagtag + ".yaml"
+    iCal.saveParametersYaml(yamlFilename)
+    print "  Saving calibration to file: {0}".format(yamlFilename)
+
+    resultFileTxt = "results-imucam-" + bagtag + ".txt"
+    util.saveResultTxt(iCal, filename=resultFileTxt)
+    print "  Detailed results written to file: {0}".format(resultFileTxt)
+    
+    print "Generating result report..."    
+    reportFile = "report-imucam-" + bagtag + ".pdf"
+    util.generateReport(iCal, filename=reportFile, showOnScreen=not parsed.dontShowReport)
+    print "  Report written to {0}".format(reportFile)
+    
+if __name__ == "__main__":
+    main()
+#     try:
+#         main()
+#     except Exception,e:
+#         sm.logError("Exception: {0}".format(e))
+#         sys.exit(-1)
+        

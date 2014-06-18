@@ -1,0 +1,18 @@
+<package>
+  <name>suitesparse</name>
+  <version>4.2.1</version>
+  <description>suitesparse</description>
+  <maintainer email="davis@cise.ufl.edu">Dr. Tim Davis</maintainer>
+
+  <license>LGPLv3 or later</license>
+
+  <url type="website">https://www.cise.ufl.edu/research/sparse/SuiteSparse/</url>
+
+  <author>Dr. Tim Davis</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>lapack</build_depend>
+  <build_depend>blas</build_depend>
+  <build_depend>gfortran</build_depend>
+
+</package>

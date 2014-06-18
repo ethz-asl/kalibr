@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <name>kalibr</name>
+  <version>0.0.1</version>
+  <description>kalibr</description>
+  <maintainer email="paulfurgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <author>Paul Furgale</author>
+  <license>New BSD</license>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>.
+
+  <build_depend>aslam_cv_python</build_depend>
+  <build_depend>aslam_backend</build_depend>
+  <build_depend>aslam_backend_expressions</build_depend>
+  <build_depend>aslam_backend_python</build_depend>
+  <build_depend>incremental_calibration_python</build_depend>
+  <build_depend>aslam_cameras_april</build_depend>
+  <build_depend>aslam_cameras_april_python</build_depend>
+  <build_depend>aslam_splines_python</build_depend>
+  <build_depend>eigen_catkin</build_depend>
+  <build_depend>numpy_eigen</build_depend>
+  <build_depend>python_module</build_depend>
+  <build_depend>sparse_block_matrix</build_depend>
+  <build_depend>sm_python</build_depend>
+       
+  <run_depend>aslam_cameras_april_python</run_depend>
+  <run_depend>aslam_backend_python</run_depend>
+  <run_depend>incremental_calibration_python</run_depend>
+  <run_depend>aslam_splines_python</run_depend>
+
+</package>

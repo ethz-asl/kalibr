@@ -1,0 +1,544 @@
+
+\documentclass[11pt,a4paper,oneside]{article}
+% Packages
+%\usepackage{caption}
+\usepackage{times}
+\usepackage{amssymb,amsfonts,amsmath,amscd}
+\usepackage[usenames]{xcolor}
+\usepackage[pdftex,
+            breaklinks=true,
+            colorlinks=true,
+            citecolor=Gray,
+            linkcolor=Gray,
+            urlcolor=Gray
+           ]{hyperref}
+\definecolor{Gray}{rgb}{0.1,0.1,0.35}
+\usepackage{url}
+\usepackage[pdftex]{graphicx}
+\usepackage[loose]{subfigure}
+\usepackage{fancyhdr}
+\usepackage{natbib}
+\usepackage[printonlyused]{acronym}
+% Set the page geometry
+\usepackage[headheight=1cm,
+            headsep=0.6cm,
+            hmargin={2cm,2cm},
+            vmargin={2cm,2cm},
+            includeheadfoot%
+           ]{geometry}
+%\usepackage{geometry}
+\usepackage{todonotes}
+
+\newcommand{\ignore}[1]{}
+
+% Set the caption labeling font
+%\renewcommand{\captionlabelfont}{\sf\bfseries}
+
+\input{notation-math-defs}
+
+% Include the common figures path.
+\graphicspath{{figs/}{../common/figs/}}
+
+
+% - User Input --------------------------------------------------
+%
+% Insert the program, document title, author, 
+\newcommand{\ASLprogram}{N/A}
+\newcommand{\ASLtitle}{ Continuous-Time Estimation of Orientation\\using B-Splines on \SOThree }
+\newcommand{\ASLdocument}{Doc NT-2012-PTF002}
+\newcommand{\ASLrevision}{Rev: 0.1}
+\newcommand{\ASLauthor}{Paul Furgale, Hannes Sommer, and James Forbes}
+\newcommand{\ASLreviewer}{}
+
+\newcommand{\discuss}[1]{\todo[inline,color=yellow!40]{\textbf{Discuss:} #1}}
+\newcommand{\paul}[1]{\todo[inline,color=green!40]{\textbf{Paul:} #1}}
+\newcommand{\hannes}[1]{\todo[inline,color=red!40]{\textbf{Hannes:} #1}}
+\newcommand{\SOThree}{\text{SO(3) }}
+
+\newcommand{\order}{m}
+
+
+% PDF setup
+\hypersetup{%
+    pdftitle={\ASLdocument: \ASLtitle},
+    pdfauthor={\ASLauthor},
+    pdfkeywords={},
+    pdfsubject={\ASLprogram},
+    pdfstartview={},
+    urlcolor=black,
+    linkcolor=black,
+}%
+
+% ---------------------------------------------------------------
+\title{\sf\bfseries \ASLtitle }
+
+\author{ Paul Furgale${}^1$, Hannes Sommer${}^1$, and James Forbes${}^2$ \\
+        \small ${}^1$ ETH Z\"{u}rich\\
+        \small ${}^2$ McGill University
+%       \small \texttt{<paul.furgale@mavt.ethz.ch>}
+       }
+\date{}
+% --------------------------------------------------------------
+\begin{document}
+
+% Define the basic page style
+\fancypagestyle{plain}{%
+    \fancyhf{}%
+    \fancyfoot[C]{}%
+    \fancyhead[R]{\begin{tabular}[b]{r}\small\sf \ASLdocument\\
+        \small\sf\today \end{tabular}}%
+    \fancyhead[L]{\includegraphics[height=1.2cm]%
+        {asl_black_logo.pdf} \begin{tabular}[b]{l}\small\sf{ETH Z\"{u}rich} \\ \small\sf{Autonomous Systems Lab} \end{tabular}}%
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}}
+% Set the page style for the document
+\pagestyle{fancy}
+% Set the page headers and footers.
+\lhead{ \includegraphics[height=1cm]%
+        {asl_black.pdf} \begin{tabular}[b]{l}\small\sf{ETH Z\"{u}rich} \\ \small\sf{Autonomous Systems Lab} \end{tabular}}
+\rhead{ \begin{tabular}[b]{r}\small\sf \ASLdocument\\
+        \small\sf\today \end{tabular}}
+\chead{}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+
+
+
+% ---------------------------------------------------------------
+
+\maketitle%
+\section{Introduction}
+\discuss{How to write SO(3)? there were different versions in this paper: $SO(3)$ and \SOThree - I introduced a command and normalized to the latter\ldots}
+Continuous-time estimation using temporal basis functions (proposed in \citet{Furgale1200}) enables the use of batch, maximum-likelihood estimation for problems that were previously intractable, or solvable only using filtering algorithms. In discrete time, the question of how to parameterize a three-degree-of-freedom orientation---a member of the non-commutative group \SOThree ---has been subject of decades of research and debate (fill in citations). The question is no less important in continuous time, where we must decide how to parameterize a continuously time-varying orientation. \citet{Furgale1200} use the simple approach of defining a $3 \times 1$ B-spline of Cayley-Gibbs-Add "Rodrigues" to dictionary parameters \citep{Bauchau0300}. The B-spline provides analytical formulas for parameter rates, allowing the computation of angular velocity at any point \citet{Hughes8600}. 
+
+However, it is unclear if a B-spline over a minimal rotation parameterization is a good representation of orientation in continuous time. There are several issues in particular that need to be addressed. In the absence of other information, a batch estimator will produce an answer that takes the shortest distance in parameter space. This is not necessarily the same as the shortest distance in the space of rotations\footnote{This concept will be formalized in Section~XXX}. Because of this the estimate produced may be dependent on the coordinate frame in which we choose to express the problem, as this coordinate frame decides what part of parameter space the answer lives in. Furthermore, every minimal parameterization of rotation has a singularity and so, when using this approach, there may be a danger of approaching this singularity during the estimation process.
+
+\citet{Kim9500} propose a method of generating B-splines on \SOThree using unit-length quaternions and their associated exponential map. The curves generated by this approach are valid unit-length quaternions at every point, and time derivatives of the curve are found by a straightforward use of the properties of the exponential map. Consequently, we would like to evaluate the approach proposed in \citet{Furgale1200} with the one proposed in \citet{Kim9500}. To do so, we must further develop the theory presented in \citet{Kim9500} to be suitable for estimation. Specifically, we need the following:
+\begin{enumerate}
+\item the equation for angular velocity of a body, 
+\item the equation for angular acceleration of a body, 
+\item analytical Jacobians that relate changes in the (unit-length quaternion) spline control vertices to small changes in orientation, angular velocity, and angular acceleration, and
+\item a method of initializing the spline control vertices to act as an initial guess for batch, nonlinear minimization.
+\end{enumerate}
+We will develop these for both the simple approach and quaternion splines and then compare them on a simulated spacecraft-attitude-estimation problem with the following evaluation:
+\begin{enumerate}
+\item RMS error with or without a motion model constraining angular acceleration (angular acceleration = white noise)
+\item computational complexity of each approach.
+\item sensitivity of each approach to the choice of coordinate frame (and proof that the Kim splines are bi-invariant).
+\end{enumerate}
+% This note will present derivations useful for adapting B-splines for parameterizing states in robotics estimation problems. In \citet{Furgale1200}, we propose moving robotic estimation problems into continuous time. If our goal is to estimate a set of robot states, $\mbf x(t)$, over a time interval, $T = [t_0, t_K]$, we may approximate $\mbf x(t)$ as the weighted sum of a finite set of known temporal
+% basis functions,
+% \begin{equation}
+%   \mbs \Phi(t) := \bbm \mbs \phi_1(t) & \dots & \mbs \phi_M(t) \ebm, \;\;\;\; \label{eq:basis-functions}
+%   \mbf x(t) := \mbs \Phi(t) \mbf c.
+% \end{equation}
+% When $\mbf x(t)$ is $D$-dimensional, each individual basis function, $\mbs \phi_j(t)$, is also $D$-dimensional and the stacked basis matrix, $\mbs \Phi(t)$, is $D \times M$.
+% Under the basis function formulation, our goal is to estimate the $M \times 1$ column of coefficients, $\mbf c$. 
+\section{Related Work}
+
+\section{Theory}
+\subsection{Curves in Parameter Space}
+\begin{enumerate}
+\item the equation for angular velocity of a body, 
+\item the equation for angular acceleration of a body, 
+\item analytical Jacobians that relate changes in the (unit-length quaternion) spline control vertices to small changes in orientation, angular velocity, and angular acceleration, and
+\item a method of initializing the spline control vertices to act as an initial guess for batch, nonlinear minimization.
+\end{enumerate}
+
+
+\subsection{Quaternion B-Splines}
+\begin{enumerate}
+\item the equation for angular velocity of a body, 
+\item the equation for angular acceleration of a body, 
+\item analytical Jacobians that relate changes in the (unit-length quaternion)
+spline control vertices to small changes in orientation, angular velocity, and angular acceleration, and
+\item a method of initializing the spline control vertices to act as an initial guess for batch, nonlinear minimization.
+\end{enumerate}
+\discuss{Was this meant as an table of content and should be updated or as a TODO list and thus should be removed?}
+
+%%TODO citet{Bartels8700}
+In this section, we outline the approach for unit quaternion B-splines presented in \citet{Kim9500}, derive the Jacobians required for state estimation, and present the equations for angular velocity and acceleration. Fundamental to the approach in \citet{Kim9500} is the use of the quaternion exponential and quaternion logarithm operations on unit length quaternions, $\left\{\mbf q | \mbf q \in \mathbb{R}^4, \mbf q^T \mbf q = 1 \right\}$. We will rely on the quaternion algebra presented in \citet{Barfoot1100}. In this notation, we define the components of the quaternion to be
+\begin{equation}
+  \label{eq:quatcomp}
+  \mbf q =: \bbm \mbs \epsilon \\ \eta \ebm,
+\end{equation}
+where $\mbs \epsilon$ is $3\times 1$ and $\eta$ is a scalar. 
+The quaternion {\em left-hand compound} operator, $(\cdot)^+$, and the {\em right-hand compound} operator, $(\cdot)^\oplus$, will be defined as
+\begin{equation}
+  \label{eq:quatplus}
+\qc{\mbf{q}} := \bbm \eta\mbf{1} - \mbs{\ep}^\times & \mbs{\ep} \\
+-\mbs{\ep}^T & \eta \ebm \mbox{~~and~~} \qo{\mbf{q}}
+:= \bbm \eta\mbf{1} + \mbs{\ep}^\times & \mbs{\ep} \\
+-\mbs{\ep}^T & \eta \ebm
+\end{equation}
+where $\mbf{1}$ is the $3 \times 3$ identity matrix. 
+\discuss{something strange with the sign before $\mbs{\ep}^\times$ : it would result in $\omega \sim -2 \phi$}
+
+Under these definitions, the {\em multiplication} of quaternions, $\mbf{q}$ and $\mbf{r}$, which is denoted as $\mbf{q}\cdot\mbf{r}$ or just $\mbf{q}\mbf{r}$, is equal to
+\begin{equation}
+  \label{eq:quat-plusoplus}
+\qc{\mbf{q}} \mbf{r} \mbox{~~or~~} \qo{\mbf{r}}\mbf{q},
+\end{equation}
+which are both products of a $4 \times 4$ matrix with a $4 \times 1$ column.
+The set of quaternions without zero forms with their multiplication a {\em non-commutative group}. Both compound operators, $(\cdot)^+$ and $(\cdot)^\oplus$, are injective homomorphisms on that multiplicative group. The former into $GL(4, \mathbb{R})$ (the group of invertible 4x4 real matrices) and the latter into $GL(4, \mathbb{R})^{\text{op}}$ (the opposite group, with reversed multiplication) \citep{shuster93}.
+\discuss{I once repaired the latter statement. The former version (cited from shuster93 ?) was just broken, but most likely wanted to say something like it does now. But firstly is that still citing and secondly for what do we need that statement, anyway? For the following 'thus'?}
+%Many of the identities above are prerequisites to showing this fact.  
+
+The {\em identity element} of the quaternion group,
+$\mbs{\iota} := \bbm 0 & 0 & 0 & 1 \ebm^T$, is thus such that
+\begin{equation}
+\qc{\mbs{\iota}} = \qo{\mbs{\iota}} = \mbf{1},
+\end{equation}
+where $\mbf{1}$ is the $4 \times 4$ identity matrix. 
+
+None of the preceding constructs require the quaternions to be of unit length.
+However, given two unit-length quaternions, $\mbf q$ and $\mbf r$, 
+\begin{equation}
+  \label{eq:unit-len}
+  \mbf q^T \mbf q = 1, \quad \mbf r^T \mbf r = 1,
+\end{equation}
+both the $(\cdot)^+$ and $(\cdot)^\oplus$ operators preserve the unit length (because the quaternion multiplication does) :
+\begin{equation}	
+  \label{eq:unit-length}
+  \left(\qc{\mbf q}\mbf r \right)^T\left(\qc{\mbf q}\mbf r\right) = 1, \quad   \left(\qo{\mbf q}\mbf r \right)^T\left(\qo{\mbf q}\mbf r\right) = 1
+\end{equation}
+and the {\em conjugate} operator coincides with multiplicative inverse operator
+\begin{equation}
+\qi{\mbf{q}} = \bbm -\mbs{\ep} \\ \eta \ebm.
+\end{equation}
+The special rotation matrix, $\mbf C\in $ \SOThree, associated with the unit length $\mbf q$ by the usual equality $\forall_{\mbf x\in \R^3}\mbf C \mbf x = \mbf q^{-1} [\mbf x\, 0]^T \mbf q$ may be built using
+\begin{equation}
+  \label{eq:qtor}
+  \mbf q ^{+} {\mbf q^{-1}}^{\oplus} = \bbm \mbf C & \mbf 0 \\ \mbf 0^T & 1 \ebm.
+\end{equation}
+
+The Lie-Group of unit-length quaternions' Lie-Algebra consists exactly of the pure imaginary quaternions. We will represent this Lie-Algebra vectors with three vectors $\mbs \phi \in \R^3$ representing the pure imaginary quaternion $[ \mbs{\phi} \, 0]^T \in \mathbb H$. To convert from three to four vectors we will use the $4\times 3$ matrix
+\begin{equation}
+  \label{eq:defV}
+  \mbf V := \bbm \mbf 1 \\ \mbf 0^T \ebm \text{, implying } \mbf V\mbs\phi = \bbm \mbs \phi \\ 0 \ebm.
+\end{equation}
+This Lie-Group's $\log$ and $\exp$ functions are this way defined on respectively into $\R^3$ and besides that just the restrictions of their counterparts for the full quaternions and can be calculated the following way
+\begin{equation}
+	\label{eq:qexplog}
+	\exp(\mbs \phi) = 
+		\left\{\begin{matrix}
+			\mbs{\iota}&, \mbs\phi = 0\\ 
+			\bbm (\sin \phi) \mbf a \\ \cos \phi \ebm &, \mbs\phi \not = 0 
+		\end{matrix}\right.,
+	\;\; 
+	\log(\mbs q) = 
+		\left\{\begin{array}{cl}
+			0 &, \mbs q = \mbs{\iota} \\
+			\frac{\arccos \eta}{\sqrt{1 - \eta^2}}\mbs \epsilon &, \mbs q \not = \pm\mbs{\iota}\\ 
+			\text{undefined} &, \mbs q = -\mbs{\iota}
+		\end{array}\right.
+	,
+\end{equation}
+where $\mbs \phi$ is $3\times 1$, $\phi := \sqrt{\mbs \phi^T \mbs \phi}$, and $\mbf a := \mbs \phi / \phi$. Note that
+\begin{equation}
+  \label{eq:log-exp-identities}
+  \log(\mbf q^{-1}) = -\log(\mbf q), \qquad \exp(-\mbs \phi) = \exp(\mbs\phi)^{-1},
+\end{equation}
+
+\subsection{Construction of Quaternion B-splines}
+\citet{Kim9500} define a B-spline quaternion curve based on {\em cumulative} B-spline basis functions. Cumulative basis functions represent an alternative but equivalent method of evaluating a B-spline function.  A B-spline function of spline order $m$ at time $t \in [t_i, t_{i+1})$, with $t_i$ is the $i$-th knot, may be written for $i\geq m$ as
+\begin{equation}
+  b(t) = \sum_{j = s}^i b_{j}(t) \mbf c_{j}, 
+\end{equation}
+where $s:=i - (m - 1)$, $\mbf c_j \in V$ denoting the $j$-th control vertex in a $\mathbb R$-vector space $V$ and $b_j$ denoting the $j$-th B-Spline basis function belonging to spline order $m$.
+This expression may be rearranged into the cumulative form as follows
+\begin{equation}
+  \label{eq:bs-cumulative}
+  b(t) = \sum_{j = s}^i b_{j}(t) \mbf c_{j} = \mbf c_s + \sum_{j = s + 1}^i \big(\sum_{k = j}^i b_{k}(t)\big) (\mbf c_{j} - \mbf c_{j - 1}) = \mbf c_s + \sum_{j = 1}^{m - 1} \beta_{i,j}(t)(\mbf c_{j} - \mbf c_{j - 1}),
+\end{equation}
+defining the cumulative basis functions $\beta_{i,j}(t) := \sum_{k = s+j}^i b_{k}(t)$ for $1 \leq j \leq m - 1$.
+\discuss {the Kim definition is not segment local as our $\beta$s, which is important in his paper to make the the $C^{k-2}$ continuity at the knots obvious. Should we mention / explain this difference in notation?}
+
+The B-spline quaternion curve in \citet{Kim9500} is built from \eqref{eq:bs-cumulative} by analogy using the Lie algebra associated with the Lie group of the unit length quaternions. Rather than by vectors, $\mbf c_i$, the curve is defined by a family of unit length quaternions control vertices, $\mbf q_i$. The quaternion equivalent of \eqref{eq:bs-cumulative} becomes
+\begin{equation}
+  \label{eq:quat-curve}
+  \mbf q(t) := \mbf q_s \prod_{j = 1}^{m - 1} \mbf r_{i,j}(t),
+\end{equation}
+where
+\begin{equation}
+  \label{eq:qdelta1}
+  \mbf r_{i,j}(t) := \exp\left(\beta_{i,j}(t) \mbs \varphi_{s + j} \right), 
+\end{equation}
+and
+\begin{equation}
+  \label{eq:quatdelta}
+  \mbs \varphi_k := \log\left({\mbf q_{k-1}^{-1}}\mbf q_{k}   \right).
+\end{equation}
+
+Defining a curve to represent \SOThree in this way has two properties that make it desirable: (a) it has no singularities, and (b) it satisfies the property of {\em bi-invariance} as described in \citet{Park9700}.
+\hannes{Insert proof - here or in the appendix}
+To use these curves for estimation, we require several pieces not derived in \cite{Kim9500}, Jacobians and the equations for angular velocity and angular acceleration.
+
+\subsection{Derivatives of Quaternion B-splines}
+%TODO text 
+\subsubsection{Time Derivatives}
+We can calculate the B-Splines derivatives with respect to $t$ using the product rule, which holds for quaternion functions as usual.
+%TODO introduce s, order
+\begin{equation}
+	\frac { d^k }{d t^k} \mbf q(t)
+		 = \frac { d^k }{d t^k} \mbf q_s \prod_{j = 1}^{\order - 1} \mbf  r_{i, j}(t)\\	
+		 = k! \mbf q_s \sum_{\substack{\mbs\alpha \in \mathbb{N}^{\order - 1} \\ \sum \mbs\alpha = k}} \prod_{j = 1}^{\order - 1} \frac{ 1 }{ \mbs\alpha_j ! }  \frac { d^{\mbs\alpha_j} }{d t^{\mbs\alpha_j}} \mbf r_{i, j}(t)
+\end{equation}
+This requires the derivatives of $\mbf r_{i,j}$ up to $k$. We only calculate those up to $k = 2$, because we luckily won't need more. In order to save the calculation of the whole differential of the exponential map here, we introduce the following directional exponential for any $\mbf q \in \mathbb H$ as function of $t \in \mathbb R$:
+\begin{equation}
+	\exp^\mbf q (t):= \exp(t \mbf q)
+\end{equation}
+For its derivative we will benefit from the well known property of the exponential map on the quaternions (it holds just as for the matrix exponential map):
+\begin{equation}
+	\frac{d}{d t}\exp^\mbf q(t) = \mbf q \exp^\mbf q(t)
+\end{equation}
+Using the directional exponential map we can easily derive expressions for the derivatives of the $\mbf r_{i, j}(t)$ expressions.
+\begin{equation}
+	\frac { d }{d t} \mbf r_{i, j}(t) = \frac { d }{d t} \exp^{\mbs \varphi_{s + j}} (\beta_{i, j}(t)) = \beta'_{i, j}(t) \mbs \varphi_{s + j} \exp^{\mbs \varphi_{s + j}} (\beta_{i,j}(t)) = \beta'_{i,j}(t) \mbs \varphi_{s+j} \mbf r_{i,j}(t) 
+\end{equation}
+
+\begin{equation}
+	\frac { d^2 }{d t^2} \mbf r_{i, j}(t) 
+	%= \mbs \varphi_{i}^2 \exp^{\mbs \varphi_{i}} (\beta_{i}(t)) \beta'_{i}(t)^2 + \mbs \varphi_{i}\exp^{\mbs \varphi_{i}} (\beta_{i}(t)) \beta''_{i}(t)
+	= (\beta'_{i,j}(t)^2  \mbs \varphi_{s + j} + \beta''_{i,j}(t)\mbs{\iota}) \mbs \varphi_{s+j}\mbf r_{i,j}(t)
+\end{equation}
+
+% \begin{equation}
+% 	\frac { d^3 }{d t^3} r_{i}(t) 
+% 	%= \mbs \varphi_{i}^2\exp^{\mbs \varphi_{i}} (\beta_{i}(t)) \beta'_{i}(t)^2 + \mbs \varphi_{i}\exp^{\mbs \varphi_{i}} (\beta_{i}(t)) \beta''_{i}(t)
+% 	= \mbs \varphi_{i}\exp^{\mbs \varphi_{i}} (\beta_{i}(t)) \left( \beta'_{i}(t)\mbs\varphi_{i}(\beta'_{i}(t)^2 \mbs \varphi_{i} + \beta''_{i}(t)) + 2\beta'_{i}(t)\beta''_{i}(t) \mbs \varphi_{i} + \beta'''_{i}(t)\mbs{\iota}\right)
+% \end{equation}
+
+
+\subsubsection{Angular velocity}
+Assuming a unit quaternion curve $\mbf q(t) = [\mbs \epsilon(t)\, \eta(t)]^T$ - interpreted as curve through \SOThree the resulting angular velocity of a rotated frame holds (s. [?]):
+
+\begin{equation}
+	\mbs \omega = 2 ( \eta \dot {\mbs \epsilon} -  \dot \eta \mbs \epsilon - \mbs\epsilon \times \dot {\mbs\epsilon})
+\end{equation}
+
+\subsubsection{Angular acceleration}
+Under the same assumptions as for the angular velocity it follows as expression for the angular acceleration :
+\begin{equation}
+	\mbs \alpha = \dot {\mbs \omega} =2 ( \eta \ddot {\mbs \epsilon} - \ddot \eta \mbs \epsilon - \mbs\epsilon \times \ddot {\mbs\epsilon})
+\end{equation}
+\discuss{derivation needed? It's short and rather simple \ldots}
+
+\subsubsection{Jacobians of Quaternion B-splines}
+The Levenberg Marquardt method is the predominant method of estimation in robotics. To implement this method analytically, we must have access to an expression for the Jacobian (with respect to small changes in the state variables) for any nonlinear function that appears in our error terms. In this case, the state variables are the unit-length quaternion-valued control vertex.
+Unit-length quaternions use four parameters for three degrees of freedom, but rather than performing constrained estimation, it is usual to use a {\em minimal perturbation} in the tangent space mapped to the manifold via its exponential map, when using quaternions in unconstrained estimation, according to:
+\begin{equation}
+	\label{eq:q-perturbed}
+%	\mbf q(\mbsdel \phi ) \approx \left(\iota + \mbf V \mbsdel \phi \right)^{+} \mbfbar q ,
+	\mbf q(\mbsdel \phi ) = \exp(\mbsdel \phi)\mbfbar q ,
+\end{equation}
+where
+$\mbfbar q$ is our current guess, and $\mbsdel \phi$ is a minimal, $3 \times 1$, perturbation. When an iteration of Levenberg-Marquardt produces an answer for $\mbsdel \phi$, the update is applied as
+\begin{equation}
+  \label{eq:q-update}
+  \mbfbar q \leftarrow \exp(\mbsdel \phi)\mbfbar q.
+\end{equation}
+This update is {\em constraint sensitive} in that the updated $\mbfbar q$ is still of unit length. We would like to use the same method to perform unconstrained optimization using quaternion curves. The question is, what is the Jacobian of \eqref{eq:quat-curve} with respect to small changes in the individual control vertices?
+
+So let's derive the partial derivative of the whole spline with respect to the small perturbations $\mbs \phi_l$ at zero while considering the control vertices $\mbf q_l(\mbs\phi_l) = \exp(\mbs\phi_l)\bar {\mbf q}_l $ as functions of $\mbs \phi_l$ and omitting the time parameter: 
+\begin{equation}\label{eq:qcontrol-vertec-derivation}
+ \frac{\partial \mbf q}{\partial \mbs \phi_l} 
+ = \frac{\partial}{\partial \mbs \phi_l} \mbf q_{s}\prod_{j = 1}^{\order - 1} \mbf r_{i, j}
+ = \left(\prod_{j = 1}^{\order - 1}  \mbf r_{i, j}\right)^\oplus \frac{\partial \mbf q_{s}}{\partial \mbs \phi_l} + \mbf q_{s}^+ \sum_{k = 1}^{\order - 1} \left(\prod_{j = 1}^{k-1}\mbf r_{i, j}\right)^{+} \left(\prod_{j = k + 1}^{\order - 1}\mbf r_{i, j}\right)^\oplus \frac{\partial \mbf r_{i, k}}{\partial \mbs \phi_l} 
+\end{equation}
+For the first summand we have $\frac{\partial \mbf q_{s}}{\partial \mbs \phi_l} = \delta_{sl} \mbf q_s^{\oplus} \mbf V$. For the derivatives of the $\mbf r_{i, k}$ recalling their definition we firstly note that they vanish for any $l \not \in \{k + s, k - 1 + s\} $.
+So the whole upper expression consists only of up to three non zero summands (depending on the relation of $l$ and $s$). To further derive the $\mbf r_{i, j}$ derivatives, we require some intermediate results. First, we define the Jacobian of the $\log(\cdot)$ function with respect to perturbations of the form in \eqref{eq:q-perturbed},
+\begin{equation}
+	\label{eq:qlog-perturbed}
+	%\log\left( \left(\iota + \mbf V \mbsdel \phi \right)\mbfbar q \right) 
+	\log\left( \exp(\mbsdel \phi)\mbfbar q \right) 
+	\approx \log(\mbfbar q) + \mbf L(\mbfbar q) \mbsdel \phi,
+\end{equation}
+where
+\begin{equation}
+	\label{eq:loginvS}
+	\mbf L(\mbf q) := \left\{ \begin{matrix} \mbf 1 &, \mbf q = \mbs \iota \\ \mbf 1 + \mbs \phi^\times + \left(1 - \frac{\phi }{\tan \phi} \right)\mbf a^\times \mbf a^\times &, \mbf q \not= \mbs\iota \end{matrix}\right.,
+\end{equation}
+and we have used $\mbs \phi := \log(\mbf q)$, $ \phi := \sqrt{\mbs \phi^T \mbs \phi}$, and $\mbf a := \mbs \phi /  \phi$. 
+%%% Note, this is correct as well, just not as elegant.
+% \begin{equation}
+%   \label{eq:qlog-perturbed}
+%   \log\left( \left(\iota + \mbf V \mbsdel \phi \right)^{+} \mbfbar q \right) \approx \log(\mbfbar q) + \mbf L(\mbfbar q) \mbfbar q^{\oplus}\mbf V \mbsdel \phi
+% \end{equation}
+% where
+% \begin{equation}
+%   \label{eq:logS}
+%   \mbf L(\mbfbar q) := \bbm 2 \arccos \bar \eta \mbf 1 & \frac{1}{1 - \bar \eta^2}\left(\bar \eta \log\left(\mbfbar q\right) - 2\mbsbar \epsilon \right) \ebm
+% \end{equation}
+Next, we need the Jacobian of the $\exp(\cdot)$ function with respect to perturbations in $\mbs\theta$. This can be written as
+\begin{equation}
+  \label{eq:qexp-perturbed}
+  \exp\left(\mbsbar \theta + \mbsdel \theta\right)
+  \approx \left(\mbs \iota + \mbf V \mbf S\left(\mbsbar \theta\right) \mbsdel \theta \right)^{+}\exp\left(\mbsbar \theta\right) 
+  = \exp\left(\mbsbar \theta\right) + \exp\left(\mbsbar \theta\right)^\oplus  \mbf V  \mbf S\left(\mbsbar \theta\right) \mbsdel \theta,
+\end{equation}
+where
+\begin{equation}
+	\label{eq:expS}
+	\mbf S(\mbs \theta) := \mbf 1 - \frac{1}{\theta} \sin^2 \theta\, \mbf a^\times + \frac{1}{\theta}(\theta - \frac 1 2 \sin 2\theta) \mbf a^\times \mbf a^\times.
+\end{equation} 
+We note, without proof, that $\mbf L(\mbf q) = \mbf S( \log(\mbf q) )^{-1}$.
+\discuss{For what the last sentence? I think, we don't need it.}
+Next, we see how perturbations of the form \eqref{eq:q-perturbed} become perturbations in $\mbs \varphi_k$ from \eqref{eq:quatdelta}:
+\begin{subequations} \label{eq:perturb-varphi-i}
+\begin{flalign}
+	\mbs \varphi_k &= \log\left( {\mbf q_{k-1}^{-1}}\mbf q_k\right)\\
+	&= \log \left( {\mbfbar q_{k-1}^{-1}}\left(\mbs \iota - \mbf V \mbsdel \phi_{k-1}\right) \left( \mbs \iota + \mbf V \mbsdel \phi_{k}\right)  \mbfbar q_k\right)\\
+	&\approx \log \left( {\mbfbar q_{k-1}^{-1}} \mbfbar q_k - {\mbfbar q_{k-1}^{-1}} (\mbf V \mbsdel \phi_{k-1}) \mbfbar q_k + {\mbfbar q_{k-1}^{-1}} (\mbf V \mbsdel \phi_{k}) \mbfbar q_k\right)\label{seq:perturb-varphi-i-3}\\
+	&= \log \left( {\mbfbar q_{k-1}^{-1}} \mbfbar q_k - (\mbf V \mbfbar C_{k-1}^T \mbsdel \phi_{k-1}) {\mbfbar q_{k-1}^{-1}} \mbfbar q_k + (\mbf V \mbfbar C_{k-1}^T \mbsdel \phi_{k}) {\mbfbar q_{k-1}^{-1}} \mbfbar q_k\right)\label{seq:perturb-varphi-i-4}\\
+	&= \log \left( \left( \iota + \left( \mbf V \mbfbar C_{k-1}^T \mbsdel \phi_{k} - \mbf V \mbf C_{k-1}^T \mbsdel \phi_{k-1} \right) \right){\mbfbar q_{k-1}^{-1}} \mbfbar q_k\right)\\
+	&= \log \left( \left( \iota + \left( \mbf V \bbm \mbfbar C_{k-1}^T & -\mbfbar C_{k-1}^T \ebm \bbm \mbsdel \phi_{k}\\\mbsdel \phi_{k-1}\ebm \right) \right){\mbfbar q_{k-1}^{-1}} \mbfbar q_k\right)\\
+	&\approx \log\left({\mbfbar q_{k-1}^{-1}} \mbfbar q_k\right) + \mbf L\left({\mbfbar q_{k-1}^{-1}} \mbfbar q_k\right)\bbm \mbfbar C_{k-1}^T & -\mbfbar C_{k-1}^T \ebm \bbm \mbsdel \phi_{k}\\\mbsdel \phi_{k-1}\ebm
+\end{flalign}
+\end{subequations}
+In the above derivation we used many identities from the quaternion algebra presented in \citet{Barfoot1100}. We have also defined $\mbfbar C_{k-1}$ to be the rotation matrix built from the quaternion $\mbfbar q_{k-1}$. The trickiest manipulation was between \eqref{seq:perturb-varphi-i-3} and \eqref{seq:perturb-varphi-i-4}. The sub expressions were simplified as follows (subscripts omitted for clarity):
+\begin{subequations}
+	\begin{flalign}
+		\mbf q(\mbf V \mbsdel \phi) &= \mbf q(\mbf V \mbsdel \phi) \underbrace{{\mbf q^{-1}} \mbf q}_{\mbs \iota}\\
+	%	&= \left(\mbf q(\mbf V \mbsdel \phi) {\mbf q^{-1}}\right) \mbf q\\ 
+		&= \left(\mbf q^+{\mbf q^{-1}}^{\oplus}\mbf V \mbsdel \phi\right) \mbf q\\ 
+		&= \left(\bbm \mbf C & \mbf 0 \\ \mbf 0^T & 1 \ebm \bbm \mbf 1 \\ \mbf 0^T \ebm \mbsdel \phi\right)\mbf q\\
+		&= \left(\bbm \mbf C  \\ \mbf 0^T \ebm  \mbsdel \phi\right)\mbf q\\
+	%	&= \left(\bbm \mbf 1  \\ \mbf 0^T \ebm  \mbf C \mbsdel \phi\right)\mbf q\\
+		&= \left(\mbf V  \mbf C \mbsdel \phi\right)\mbf q
+	\end{flalign}
+\end{subequations}
+In the above, 
+%$\mbf V$ is defined in \eqref{eq:defV} and 
+$\mbf C$ is the rotation matrix built from the quaternion, $\mbf q$. 
+Altogether we finally get for any $1 \leq j < m$ and $k:=s + j$
+\begin{equation}
+	\frac{\partial \mbf r_{i, j}}{\partial \mbs\phi_k} = \frac{\partial}{\partial \mbs\phi_k} \exp\left( \beta_{i, j} \log\left({\mbf q_{k-1}^{-1}}\mbf q_k \right) \right)
+	= \exp(\beta_{i, j}\mbsbar \varphi_{k})^\oplus \mbf  V\mbf S(\beta_{i, j}\mbsbar \varphi_{k}) \beta_{i, j} \mbf L\left({\mbfbar q_{k-1}^{-1}}\mbfbar q_k\right) \mbfbar C_{k-1}^T
+\end{equation}
+and
+\begin{equation}\label{eq:rcontrol-vertex-derivation-antisymmetry}
+  \frac{\partial \mbf r_{i, j}}{\partial \mbs \phi_{k - 1}} = -\frac{\partial \mbf r_k}{\partial \mbs \phi_k} 
+\end{equation}
+We will also need the corresponding Jacobians for the time derivatives of the B-Spline and their derived quantities. Considering (\ref{eq:qcontrol-vertec-derivation}) and (\ref{eq:rcontrol-vertex-derivation-antisymmetry}) we have to essentially derive the following - not expanding the derivatives of $\mbs \varphi_k$ for the sake of readability:
+\begin{equation}
+	\frac{\partial}{\partial\mbs \phi_k} \frac {d}{d t} \mbf r_{i, j}(t)
+	= \beta'_{i, j}(t) \frac{\partial }{\partial \mbs\phi_k} (\mbf V \mbs \varphi_{k})\mbf r_{i, j}(t)
+	= \beta'_{i, j}(t) \left(\mbf r_{i, j}(t)^{\oplus} \mbf V \frac{\partial \mbs \varphi_{k}}{\partial \mbs \phi_{k}} + (\mbf V\mbs \varphi_{k})\frac{\partial \mbf r_{i, j}(t)}{\partial \mbs \phi_{k}} \right)
+\end{equation}
+\begin{flalign}
+	\frac{\partial }{\partial \mbs \phi_{j}} \frac {d^2}{d t^2} \mbf r_{i, j}(t)
+	&= \frac{\partial }{\partial \mbs \phi_{k}} (\beta'_{i, j}(t)^2 \mbf V  \mbs \varphi_{k} + \beta''_{i, j}(t)\mbs{\iota}) (\mbf V \mbs \varphi_{k})\mbf r_{i, j}(t)\notag\\
+	&= \left(\beta'_{i, j}(t)^2 \mbf V  \mbs \varphi_{k} + \beta''_{i, j}(t)\mbs{\iota}\right)^{+} \left( \mbf r_{i, j}(t)^{\oplus} \mbf V \frac{\partial \mbs \varphi_{k}}{\partial \mbs \phi_{k}} + (\mbf V\mbs \varphi_{k})^{+} \frac{\partial \mbf r_{i,j}(t)}{\partial \mbs\phi_{k}} \right)\notag\\
+	&\;\;\;\;\;+ ((\mbf V \mbs \varphi_{k})\mbf r_{i, j}(t))^{\oplus} (\beta'_{i, j}(t)^2 \mbf V  \frac{\partial \mbs \varphi_{k}}{\partial \mbs \phi_{k}})
+\end{flalign}
+
+
+
+\subsubsection{Angular velocity}
+The Jacobians of the angular velocity with respect to minimal perturbations of the control vertices are also required. So let again $1 \leq j < m$ and $k:=s + j$ 
+\begin{equation}
+	\frac 1 2 \frac{\partial  \mbs \omega }{\partial\mbs \phi_k}= \frac{\partial \eta}{\partial\mbs \phi_k} \dot {\mbs \epsilon} + \eta \frac{\partial \dot {\mbs \epsilon}}{\partial\mbs \phi_k}  - \frac{\partial\dot \eta}{\partial\mbs \phi_k} \mbs \epsilon - \dot \eta  \frac{\partial\mbs \epsilon}{\partial\mbs \phi_k} - \frac{\partial\mbs\epsilon}{\partial\mbs \phi_k} \times \dot {\mbs\epsilon} - \mbs\epsilon \times \frac{\partial \dot {\mbs\epsilon}}{\partial\mbs \phi_k}
+\end{equation}
+\hannes{Add Jacobians derivation?}
+where the two $\times$-operators are formally generalized to one three vector and one three by something matrix argument by applying the cross product column-wise: Let $\mbf A = [\mbf A_j]_{j=1}^\mu\in \R^{3 \times \mu}$, where $\mbf A_j$ denotes the $j$-th column of $\mbf A$ and $\mu\in\mathbb N$ and define
+\[ \mbf y \times \mbf A := [ \mbf y \times \mbf A_j ]_{j=1}^\mu, \mbf A \times \mbf y := [ \mbf A_j \times \mbf y ]_{j=1}^\mu  \]
+
+\subsubsection{Angular acceleration}
+For the angular acceleration it yields analogously:
+\begin{equation}
+	\frac 1 2 \frac{\partial\mbs \alpha}{\partial\mbs \phi_k}  = \frac{\partial\eta}{\partial\mbs \phi_k} \ddot {\mbs \epsilon} + \eta \frac{\partial\ddot {\mbs \epsilon}}{\partial\mbs \phi_k}  - \frac{\partial\ddot \eta}{\partial\mbs \phi_k} \mbs \epsilon - \ddot \eta \frac{\partial\mbs \epsilon}{\partial\mbs \phi_k} - \frac{\partial\mbs\epsilon}{\partial\mbs \phi_k} \times \ddot {\mbs\epsilon} - \mbs\epsilon \times \frac{\partial\ddot {\mbs\epsilon}}{\partial\mbs \phi_k}
+\end{equation}
+
+
+
+\section{Experiments}
+In this section we apply the state representation derived above to two spacecraft attitude estimation problems. The goal is to estimate the attitude of a coordinate frame attached to the vehicle body, $\cframe{b}$, with respect to an inertial frame, $\cframe{i}$, over a time interval of interest, $T=\left[t_{0}, t_{K}\right]$. In the notation of the previous sections, we would like to estimate $\mbf q_{ib}(t)$ over $T$.
+
+In both problems, the vehicle has a bearing sensor that takes measurements at discrete time instances, $\left\{t_{m}|m=1 \dots M\right\}$. The bearing sensor is rigidly attached to the vehicle body at coordinate frame $\cframe{s}$. We assume that the orientation of the sensor frame with respect to the body frame, $\mbf{C}_{sb}$, is known. We assume that the beacon being observed by the sensor is very far away from the vehicle (such as the Sun or another star). Let $\mbf{b}^{\ell}_{i}$ be the bearing of beacon $\ell$, expressed in the inertial frame. A measurement of beacon $\ell$ at time $m$, written $\mbf{y}_{m\ell}$, is modelled as
+\begin{equation}
+  \label{eq:measurement-model}
+  \mbf{y}_{m\ell} = \mbf{h}\left( \mbf{C}_{sb} \mbc{C}^T\bigl(\mbf{q}_{ib}(t_m)\bigr) \mbf{b}^{\ell}_{i} \right) + \mbf{n}_{m\ell}, \qquad \mbf{n}_{m\ell} \sim \mathcal{N}\left(\mbf{0}, \mbf{R}_{m\ell}\right),
+\end{equation}
+where the bearing vector is first rotated into the sensor frame, $\mbf{h}(\cdot)$ is a nonlinear observation model, and $\mbf{n}_{m\ell}$ is zero-mean Gaussian noise with covariance $\mbf{R}_{m\ell}$. 
+Following the standard practice of maximum likelihood estimation, we define the error term associated with this measurement to be
+\begin{equation}
+  \label{eq:measurement-error}
+  \mbf{e}_{m\ell} := \mbf{y}_{m\ell} - \mbf{h}\left( \mbf{C}_{sb} \mbc{C}^T\bigl(\mbf{q}_{ib}(t_m)\bigr)\mbf{b}^{\ell}_{i} \right),
+\end{equation}
+where $\mbc{C}$ is the function that builds a rotation matrix from a quaternion. These errors contribute to the term $J_{y}$ in our overall objective function,
+\begin{equation}
+  \label{eq:measurement-objective}
+  J_{y} := \frac{1}{2} \sum_{m=1}^{M} \mbf{e}_{m\ell}^{T} \mbf{R}_{m\ell}^{-1} \mbf{e}_{m\ell}.
+\end{equation}
+
+Although both experiments use this common setup, they differ in terms of the dynamics model used. In Experiment~1, we use a dynamics model based on Euler's equation and the vehicle inertia matrix. In Experiment~2, we use measured angular velocities from a gyroscope.
+\subsection{Experiment 1}
+In Experiment 1, we consider a spacecraft attitude estimation problem that uses a vehicle dynamics model based on Euler's equation.
+The dynamics model is
+\begin{equation}
+  \label{eq:dynamics}
+  \mbf{I} \mbsdot{\omega}(t) + \mbs{\omega}^{\times}(t) \mbf{I} \mbs{\omega}(t) = \mbf{u}(t) + \mbf{w}(t),
+\end{equation}
+where $t$ is time, $\mbf{I}$ is the vehicle inertia matrix, $\mbs{\omega}(t)$ is the angular velocity of the vehicle's center of mass as seen from the inertial frame, $\mbf{u}(t)$ is a known control input, and $\mbf{w}(t)$ is a zero-mean white Gaussian process with covariance $\mbf{Q}_{d}$,
+\begin{equation}
+  \label{eq:process-noise}
+ \mbf w(t) \sim \mathcal{GP}\left(\mbf 0,  \delta(t - t^{\prime}) \mbf{Q}_{d} \right),
+\end{equation}
+where $\delta(\cdot)$ is Dirac's delta function. 
+Following \citet{Furgale1200}, we define the error for the dynamics model at time $t$ to be
+\begin{equation}
+  \label{eq:error-dynamics}
+  \mbf{e}_{d}(t) := \mbf{I} \mbsdot{\omega}(t) + \mbs{\omega}^{\times}(t) \mbf{I} \mbs{\omega}(t) - \mbf{u}(t).
+\end{equation}
+The resulting term in our objective function is
+\begin{equation}
+  \label{eq:objective-dynamics}
+  \mbf J_{d} := \frac{1}{2} \int_{t_0}^{t_K} \mbf{e}_{d}^T(t) \mbf{Q}^{-1}_{d} \mbf{e}_{d}(t)\,dt.
+\end{equation}
+Together, \eqref{eq:measurement-objective} and \eqref{eq:objective-dynamics} define the combined objective function that we would like to minimize, $J := J_{y} + J_{d}$. Let $\mbc{Q}$ be the stacked matrix of quaternion control vertices. Our goal is to estimate
+\begin{equation}
+  \label{eq:e1-argmin}
+  \mbc{Q}^{\star} = \argmin_{\mbc{Q}} J.
+\end{equation}
+
+
+\subsection{Experiment 2}
+In Experiment 2, we consider an estimation problem that neglects analytical vehicle dynamics in favor of measured dynamics from a three-axis gyroscope. For simplicity, we choose to place our vehicle body frame at the center of our gyroscope measurement frame. The gyroscope measurement model follows the one commonly used in robotics \citep{Mirzaei0800,Kelly1100},
+\begin{subequations}
+\label{eq:measurement-gyro}
+\begin{flalign}
+  \mbs{\varpi}_{g} = \mbc{C}^{T}\left(\mbf{q}_{ib}\right)\mbs{\omega}(t_g) + \mbf b(t_g) + \mbf{n}_{g\omega},&\qquad \mbf{n}_{g\omega} \sim \mathcal{N}(\mbf 0, \mbf R_{g\omega}),\\
+\mbfdot{b}(t) = \mbf{w}_{b}(t),&\qquad \mbf{w}_{b}(t) \sim \mathcal{GP}\left(\mbf 0,  \delta(t - t^{\prime}\mbf Q_{b}) \right).
+\end{flalign}
+\end{subequations}
+In these equations, the gyroscope the $G$ gyroscope measurements are assumed to be subject to both zero-mean Gaussian measurement noise, $\mbf n_{g\omega}$, and a slowly evolving bias, $\mbf{b}(t)$\footnote{The noise characteristics of a particular gyroscope may be identified using the method described in \citet{ieee1998ieee}}. We model the bias as a B-spline function, $\mbf{b}(t) := \mbs{\Phi}_{b}(t) \mbf{c}_{b}$, where $\mbs{\Phi}_{b}(\cdot)$ is the stacked matrix of known B-spline basis functions and $\mbf{c}_{b}$ is the unknown coefficient vector. The error for a single gyroscope measurement may be written as
+\begin{equation}
+  \label{eq:gyro-error}
+  \mbf{e}_{g\omega} := \mbs{\varpi}_{g} - \mbc{C}^{T}\left(\mbf{q}_{ib}\right)\mbs{\omega}(t_{g}) - \mbf b(t_g),
+\end{equation}
+which becomes a term, $J_{\omega}$, in our objective function:
+\begin{equation}
+  \label{eq:gyro-objective}
+  J_{\omega} := \frac{1}{2} \sum_{g=1}^{G} \mbf{e}_{g\omega}^{T} \mbf R_{g\omega}^{-1} \mbf{e}_{g\omega}\,.
+\end{equation}
+The bias motion error may be written as
+\begin{equation}
+  \label{eq:bias-motion-error}
+  \mbf e_{b}(t) := \mbfdot{b}(t).
+\end{equation}
+This error contributes to our objective function as
+\begin{equation}
+  \label{eq:bias-objective}
+  J_{b} := \frac{1}{2} \int_{t_{0}}^{t_{K}} \mbf{e}_{b}^{T}(t) \mbf Q_{b}^{-1} \mbf{e}_{b}(t)\,dt.
+\end{equation}
+Together, \eqref{eq:measurement-objective}, \eqref{eq:gyro-objective}, and \eqref{eq:bias-objective} define the combined objective function that we would like to minimize, $J := J_{y} + J_{\omega} + J_{b}$. Let $\mbc Q$ be the stacked matrix of quaternion control vertices. Our goal is to estimate
+\begin{equation}
+  \label{eq:e2-argmin}
+  \left\{\mbc{Q}^{\star}, \mbf{c}_{b}^{\star}\right\} = \argmin_{\mbc{Q}, \mbf{c}_{b}} J\,.
+\end{equation}
+
+\bibliographystyle{apalike}
+\bibliography{thesis}
+\end{document} 

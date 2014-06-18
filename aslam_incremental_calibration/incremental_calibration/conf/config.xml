@@ -1,0 +1,26 @@
+<!--Sample configuration file for the incremental estimator.-->
+<!--Insert this in your problems.-->
+<!--Commenting tags leave them to their default value-->
+<estimator>
+  <checkValidity>true</checkValidity>
+  <infoGainDelta>0.2</infoGainDelta>
+  <groupId>1</groupId>
+  <verbose>false</verbose>
+  <optimizer>
+    <convergenceDeltaJ>1e-3</convergenceDeltaJ>
+    <convergenceDeltaX>1e-3</convergenceDeltaX>
+    <maxIterations>20</maxIterations>
+    <linearSolverMaximumFails>0</linearSolverMaximumFails>
+    <nThreads>16</nThreads>
+    <verbose>true</verbose>
+    <linearSolver>
+      <columnScaling>true</columnScaling>
+      <epsNorm>1e-16</epsNorm>
+      <epsSVD>1e-16</epsSVD>
+      <epsQR>1e-16</epsQR>
+      <svdTol>-1</svdTol>
+      <qrTol>-1</qrTol>
+      <verbose>false</verbose>
+    </linearSolver>
+  </optimizer>
+</estimator>

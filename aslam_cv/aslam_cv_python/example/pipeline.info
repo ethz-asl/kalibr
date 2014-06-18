@@ -1,0 +1,385 @@
+
+NullPipeline {
+  nThreads 2
+  doBackProjection true
+  doBackProjectionUncertainty false
+  cameraSystemName /grobi_cvg_may2013_second  ; The full path of the camera system in the config file
+  timestampTolerance 0.001 ; The tolerance for accepting images as being seen at the same time (seconds)
+  
+  undistorter0 {
+    ; The type of undistorter. See UndistorterBase for a list
+    ; The null undistorters don't do undistortion but they may scale
+    ; the image
+    type NullMaskedDistortedOmniCameraGeometry
+    ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image)
+    alpha 0.0
+    ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
+    interpolation 1
+    ; scale the image?
+    scale 1.0
+    makeCopy true
+  } ; undistorter0
+ 
+  frameBuilder0 {
+    type surf_cpu
+    surf_cpu
+    {
+      hessianThreshold 200
+      upright false
+      nOctaves 4 
+      nOctaveLayers 2
+      extended false
+    }
+  } ; frameBuilder0
+
+  undistorter1 {
+    ; The type of undistorter. See UndistorterBase for a list
+    ; The null undistorters don't do undistortion but they may scale
+    ; the image
+    type NullMaskedDistortedOmniCameraGeometry
+    ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image)
+    alpha 0.0
+    ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
+    interpolation 1
+    ; scale the image?
+    scale 1.0
+    makeCopy true
+  } ; undistorter1
+ 
+  frameBuilder1 {
+    type surf_cpu
+    surf_cpu
+    {
+      hessianThreshold 200
+      upright false
+      nOctaves 4 
+      nOctaveLayers 2
+      extended false
+    }
+  } ; frameBuilder1
+
+  undistorter2 {
+    ; The type of undistorter. See UndistorterBase for a list
+    ; The null undistorters don't do undistortion but they may scale
+    ; the image
+    type NullMaskedDistortedOmniCameraGeometry
+    ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image)
+    alpha 0.0
+    ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
+    interpolation 1
+    ; scale the image?
+    scale 1.0
+    makeCopy true
+  } ; undistorter2
+ 
+  frameBuilder2 {
+    type surf_cpu
+    surf_cpu
+    {
+      hessianThreshold 200
+      upright false
+      nOctaves 4 
+      nOctaveLayers 2
+      extended false
+    }
+  } ; frameBuilder2
+
+  undistorter3 {
+    ; The type of undistorter. See UndistorterBase for a list
+    ; The null undistorters don't do undistortion but they may scale
+    ; the image
+    type NullMaskedDistortedOmniCameraGeometry
+    ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image)
+    alpha 0.0
+    ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
+    interpolation 1
+    ; scale the image?
+    scale 1.0
+    makeCopy true
+  } ; undistorter3
+ 
+  frameBuilder3 {
+    type surf_cpu
+    surf_cpu
+    {
+      hessianThreshold 200
+      upright false
+      nOctaves 4 
+      nOctaveLayers 2
+      extended false
+    }
+  } ; frameBuilder3
+
+}
+
+
+UndistortingPipeline {
+  nThreads 0
+  doBackProjection true
+  doBackProjectionUncertainty false
+  cameraSystemName /grobi_cvg_may2013_second  ; The full path of the camera system in the config file
+  timestampTolerance 0.001 ; The tolerance for accepting images as being seen at the same time (seconds)
+  
+  undistorter0 {
+    ; The type of undistorter. See UndistorterBase for a list
+    ; The null undistorters don't do undistortion but they may scale
+    ; the image
+    type MaskedOmniUndistorter
+    ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image)
+    alpha 0.0
+    ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
+    interpolation 1
+    ; scale the image?
+    scale 1.0
+    makeCopy true
+  } ; undistorter0
+ 
+  frameBuilder0 {
+    type surf_cpu
+    surf_cpu
+    {
+      hessianThreshold 200
+      upright false
+      nOctaves 4 
+      nOctaveLayers 2
+      extended false
+    }
+  } ; frameBuilder0
+
+  undistorter1 {
+    ; The type of undistorter. See UndistorterBase for a list
+    ; The null undistorters don't do undistortion but they may scale
+    ; the image
+    type MaskedOmniUndistorter
+    ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image)
+    alpha 0.0
+    ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
+    interpolation 1
+    ; scale the image?
+    scale 1.0
+    makeCopy true
+  } ; undistorter1
+ 
+  frameBuilder1 {
+    type surf_cpu
+    surf_cpu
+    {
+      hessianThreshold 200
+      upright false
+      nOctaves 4 
+      nOctaveLayers 2
+      extended false
+    }
+  } ; frameBuilder1
+
+  undistorter2 {
+    ; The type of undistorter. See UndistorterBase for a list
+    ; The null undistorters don't do undistortion but they may scale
+    ; the image
+    type MaskedOmniUndistorter
+    ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image)
+    alpha 0.0
+    ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
+    interpolation 1
+    ; scale the image?
+    scale 1.0
+    makeCopy true
+  } ; undistorter2
+ 
+  frameBuilder2 {
+    type surf_cpu
+    surf_cpu
+    {
+      hessianThreshold 200
+      upright false
+      nOctaves 4 
+      nOctaveLayers 2
+      extended false
+    }
+  } ; frameBuilder2
+
+  undistorter3 {
+    ; The type of undistorter. See UndistorterBase for a list
+    ; The null undistorters don't do undistortion but they may scale
+    ; the image
+    type MaskedOmniUndistorter
+    ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image)
+    alpha 0.0
+    ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
+    interpolation 1
+    ; scale the image?
+    scale 1.0
+    makeCopy true
+  } ; undistorter3
+ 
+  frameBuilder3 {
+    type surf_cpu
+    surf_cpu
+    {
+      hessianThreshold 200
+      upright false
+      nOctaves 4 
+      nOctaveLayers 2
+      extended false
+    }
+  } ; frameBuilder3
+
+}
+
+
+
+grobi_cvg_may2013_second {
+  nCameras 4
+  vehicle-name grobi_cvg_may2013_second
+  compute-overlaps  0
+  intrinsics0 {
+    ; The front camera intrinsics
+    projection {
+      xi  2.08685514589
+      fu  1291.5401445
+      fv  1293.30949252
+      cu  668.470297131
+      cv  407.046502189
+      ru  1280
+      rv  800
+      distortion {
+        k1  -0.987434485774
+        k2  0.918697852674
+        p1  -0.00433403483603
+        p2  8.78094632122e-05
+      }
+    }
+    mask {
+      mask-file  na.png
+    }
+  }
+  extrinsics0 {
+    ; The front camera extrinsics
+    T_v_c {
+      q_a_b {
+        x  0.456161139791
+        y  -0.460656536115
+        z  0.540378061222
+        w  0.536380575054
+      }
+      t_a_b_a {
+        x  3.5857441246
+        y  0.1335050543
+        z  0.5876957529
+      }
+    }
+  }
+  intrinsics1 {
+    ; The left camera intrinsics
+    projection {
+      xi  2.04856460301
+      fu  1270.72641791
+      fv  1267.52841185
+      cu  652.347198843
+      cv  386.798720172
+      ru  1280
+      rv  800
+      distortion {
+        k1  -0.152102074844
+        k2  0.487263254155
+        p1  -0.00357996123412
+        p2  0.00253825661998
+      }
+    }
+    mask {
+      mask-file  na.png
+    }
+  }
+  extrinsics1 {
+    ; The left camera extrinsics
+    T_v_c {
+      q_a_b {
+        x  0.890660106733
+        y  -0.00411498861608
+        z  0.00908276565196
+        w  0.454560385959
+      }
+      t_a_b_a {
+        x  2.1286692038
+        y  1.1058196974
+        z  0.9295545137
+      }
+    }
+  }
+  intrinsics2 {
+    ; The rear camera intrinsics
+    projection {
+      xi  2.13747506603
+      fu  1320.76392529
+      fv  1329.68118797
+      cu  662.150326434
+      cv  407.663308367
+      ru  1280
+      rv  800
+      distortion {
+        k1  -0.9955200380184
+        k2  0.900335822581
+        p1  -0.00521588542495
+        p2  0.00095794904665
+      }
+    }
+    mask {
+      mask-file  na.png
+    }
+  }
+  extrinsics2 {
+    ; The rear camera extrinsics
+    T_v_c {
+      q_a_b {
+        x  0.481080636203
+        y  0.484885627749
+        z  -0.519193223088
+        w  0.513698108411
+      }
+      t_a_b_a {
+        x  -0.4291296334
+        y  0.0995101184
+        z  0.8552963525
+      }
+    }
+  }
+  intrinsics3 {
+    ; The right camera intrinsics
+    projection {
+      xi  1.99276816779
+      fu  1245.52706251
+      fv  1250.09542488
+      cu  645.083367295
+      cv  397.488177419
+      ru  1280
+      rv  800
+      distortion {
+        k1  -0.943996526942
+        k2  0.980965208046
+        p1  -0.00465978539784
+        p2  -0.000738772635551
+      }
+    }
+    mask {
+      mask-file  na.png
+    }
+  }
+  extrinsics3 {
+    ; The right camera extrinsics
+    T_v_c {
+      q_a_b {
+        x  0.0260815193269
+        y  -0.894174849736
+        z  0.446718723853
+        w  0.0146107581239
+      }
+      t_a_b_a {
+        x  2.0772429129
+        y  -0.8544574605
+        z  0.9576435289
+      }
+    }
+  }
+}
+
+

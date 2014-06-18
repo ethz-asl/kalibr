@@ -1,0 +1,106 @@
+#!/usr/bin/env python
+import kalibr_common as kc
+
+import numpy as np
+import pylab as pl
+import sm
+import argparse
+import sys
+
+from matplotlib.colors import LogNorm 
+np.set_printoptions(suppress=True)
+
+#That's how it should look like:
+
+# 
+# base_topic: /
+# cameras:
+#     - {image_base_topic: cam0/, image_topic: image_raw, info_topic: camera_info,
+#        T_SC:
+#        [  0.0158177,  -0.999874 ,  -0.00133516, -0.01402297,
+#           0.99987346,  0.01581992, -0.00166903, -0.07010539,
+#           0.00168994, -0.00130859,  0.99999772,  0.00471241,
+#           0. ,         0.    ,      0.       ,   1.       ],
+#        image_dimension: [752, 480],
+#        distortion_coefficients: [-0.0016170650137774234, 0.017615842489373677, -0.020236038143470282,
+#     0.010279726211982943],
+#        distortion_type: equidistant,
+#        focal_length: [460.27046835000937, 458.7889758618953],
+#        principal_point: [355.2403080101758, 232.60725397709305]}
+    
+def printCameraBlock(camConfig, T_SC):
+    #example topic= /cam0/image_raw
+    topic = camConfig.getRosTopic()
+    
+    #extract image name 
+    tokens=topic.split("/") 
+    image_topic=tokens[-1] #=image_raw
+    
+    #extract base topic
+    tokens=topic.split(image_topic)
+    image_base_topic=tokens[0].replace("/", "", 1) #=cam0/    
+    
+    STRING_OUT=""
+    STRING_OUT+="    - {"+"image_base_topic: {0}, image_topic: {1}, info_topic: camera_info,\n".format(image_base_topic, image_topic)
+    
+    STRING_OUT+="       T_SC:\n"
+    STRING_OUT+="       [ {0}, {1}, {2}, {3},\n".format(T_SC[0,0], T_SC[0,1], T_SC[0,2], T_SC[0,3])
+    STRING_OUT+="         {0}, {1}, {2}, {3},\n".format(T_SC[1,0], T_SC[1,1], T_SC[1,2], T_SC[1,3])
+    STRING_OUT+="         {0}, {1}, {2}, {3},\n".format(T_SC[2,0], T_SC[2,1], T_SC[2,2], T_SC[2,3])
+    STRING_OUT+="          0.0, 0.0, 0.0, 1.0],\n"
+    
+    resolution = camConfig.getResolution()
+    STRING_OUT+="       image_dimension: [752, 480],\n".format(resolution[0], resolution[1])    
+
+    distortion = camConfig.getDistortion()
+    dist_model = distortion[0]
+    dist_params = distortion[1]
+    
+    if dist_model=="radtan":
+        dist_model="radialtangential" #aslam has a different name...
+
+    STRING_OUT+="       distortion_coefficients: [{0}, {1}, {2}, {3}],\n".format(dist_params[0], dist_params[1], dist_params[2], dist_params[3])
+    STRING_OUT+="       distortion_type: {0},\n".format(dist_model)
+    
+    intrinsics = camConfig.getIntrinsics()
+    proj_model = intrinsics[0]
+    intrinsic_params = intrinsics[1]
+    
+    if proj_model!="pinhole":
+        sm.logFatal("aslam only supports pinhole projection. removed camera with topic {0}!".format(topic))
+        return ""
+    
+    STRING_OUT+="       focal_length: [{0}, {1}],\n".format(intrinsic_params[0], intrinsic_params[1])
+    STRING_OUT+="       principal_point: [{0}, {1}]".format(intrinsic_params[2], intrinsic_params[3]) + "}\n"
+    STRING_OUT+="\n"
+    
+    return STRING_OUT
+
+if __name__ == "__main__":        
+    parser = argparse.ArgumentParser(description='Convert a camchain_imu.yaml to an aslam camera configuration block.')
+    parser.add_argument('--cam', dest='chainYaml', help='Camera configuration as yaml file', required=True)
+    parsed = parser.parse_args()
+            
+    #load the camchain.yaml
+    camchain = kc.ConfigReader.CameraChainParameters(parsed.chainYaml)
+
+    #create camera config block    
+    CONFIG=""
+    CONFIG+="base_topic: /\n"
+    CONFIG+="\n"
+    CONFIG+= "cameras:\n"
+    
+    #export each camera
+    for cidx in range(0, camchain.numCameras()):
+        camConfig = camchain.getCameraParameters(cidx)
+        
+        T_SC = camchain.getExtrinsicsImuToCam(cidx).inverse().T()
+        CONFIG += printCameraBlock(camConfig, T_SC)
+
+    #output the stuff
+    print
+    print "Copy the following block to your aslam configuration:"
+    print "-----------------------------------------------------"
+    print
+    print CONFIG
+    

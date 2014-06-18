@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>foo</name>
+  <version>0.1.0</version>
+  <description>The foo package</description>
+  <maintainer email="william@osrfoundation.org">William Woodall</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+  <run_depend>bar</run_depend>
+  <build_depend>bar</build_depend>
+  <run_depend>baz</run_depend>
+  <build_depend>baz</build_depend>
+  <run_depend>boost</run_depend>
+  <build_depend>boost-dev</build_depend>
+
+</package>

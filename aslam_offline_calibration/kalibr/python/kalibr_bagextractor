@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+print "importing libraries"
+
+import kalibr_common as kc
+import cv
+import cv2
+import csv
+import os
+import sys
+import argparse
+
+#setup the argument list
+parser = argparse.ArgumentParser(description='Extract a ROS bag containing a image and imu topics.')
+parser.add_argument('--bag', metavar='bag', help='ROS bag file')
+parser.add_argument('--image-topics',  metavar='image_topics', nargs='+', default="/cam0/image_raw", help='Image topics %(default)s')
+parser.add_argument('--imu-topics',  metavar='imu_topics', nargs='+', default="/imu0", help='Imu topics %(default)s')
+parser.add_argument('--output-folder',  metavar='output_folder', nargs='?', default="output", help='Output folder %(default)s')
+
+#print help if no argument is specified
+if len(sys.argv)<2:
+    parser.print_help()
+    sys.exit(0)
+
+#parse the args
+parsed = parser.parse_args()
+
+#create output folder
+try:
+  os.makedirs(parsed.output_folder)
+except:
+  pass
+
+#extract images
+for cidx, topic in enumerate(parsed.image_topics):
+  dataset = kc.BagImageDatasetReader(parsed.bag, topic)
+  os.makedirs("{0}/cam{1}".format(parsed.output_folder, cidx))   
+  for timestamp, image in dataset:
+    params = list()
+    params.append(cv.CV_IMWRITE_PNG_COMPRESSION)
+    params.append(0) #0: loss-less  
+    filename = "{0}{1:09d}.png".format(timestamp.secs, timestamp.nsecs)
+    cv2.imwrite( "{0}/cam{1}/{2}".format(parsed.output_folder, cidx, filename), image, params )
+
+#extract imu data
+for iidx, topic in enumerate(parsed.imu_topics):
+    dataset = kc.BagImuDatasetReader(parsed.bag, topic)
+    filename = "imu{0}.csv".format(iidx)
+    with open( "{0}/{1}".format(parsed.output_folder, filename), 'wb') as imufile:
+      spamwriter = csv.writer(imufile, delimiter=',')
+      spamwriter.writerow(["timestamp", "omega_x", "omega_y", "omega_z", "alpha_x", "alpha_y", "alpha_z"])
+      for timestamp, omega, alpha in dataset:
+        timestamp_int = int(timestamp.toSec()*1e9)
+        spamwriter.writerow([timestamp_int, omega[0],omega[1],omega[2], alpha[0],alpha[1],alpha[2] ])
+
