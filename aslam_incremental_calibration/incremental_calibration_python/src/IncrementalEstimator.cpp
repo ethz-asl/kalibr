@@ -198,6 +198,7 @@ void exportIncrementalEstimator() {
     .def("getSigma2ThetaObsScaled", &getSigma2ThetaObsScaled)
     .def("getSingularValues", &getSingularValues)
     .def("getScaledSingularValues", &getScaledSingularValues)
-    .def("getProblem", &IncrementalEstimator::getProblem, boost::python::return_internal_reference<>())
+    .def("getProblem", &IncrementalEstimator::getProblem,
+      boost::python::return_internal_reference<>())
     ;
 }

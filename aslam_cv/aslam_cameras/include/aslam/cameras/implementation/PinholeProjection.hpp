@@ -705,108 +705,6 @@ public:
 /// \brief initialize the intrinsics based on one view of a gridded calibration target
 /// These functions are based on functions from Lionel Heng and the excellent camodocal
 /// https://github.com/hengli/camodocal
-//this algorithm can be used with low distortion lenses
-//template<typename DISTORTION_T>
-//bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<GridCalibrationTargetObservation> &observations) {
-//  SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
-//  SM_ASSERT_TRUE(Exception, observations.size() != 0, "Need min. one observation");
-//
-//  // First, initialize the image center at the center of the image.
-//  _cu = (observations[0].imCols()-1.0) / 2.0;
-//  _cv = (observations[0].imRows()-1.0) / 2.0;
-//  _ru = observations[0].imCols();
-//  _rv = observations[0].imRows();
-//  _distortion.clear();
-//
-//  //process all images
-//  size_t nImages = observations.size();
-//
-//  // Z. Zhang, A Flexible New Technique for Camera Calibration, PAMI 2000
-//  cv::Mat A;
-//  cv::Mat b;
-//
-//  for (size_t i = 0; i < nImages; ++i)
-//  {
-//    const GridCalibrationTargetObservation& obs = observations.at(i);
-//    SM_ASSERT_TRUE(Exception, obs.target(), "The GridCalibrationTargetObservation has no target object");
-//
-//    //get the observed corners
-//    std::vector<cv::Point3f> objectPoints3d;
-//    unsigned int numCorners = obs.getCornersTargetFrame(objectPoints3d);
-//
-//    std::vector<cv::Point2f> objectPoints(numCorners);
-//    for (size_t j = 0; j < objectPoints3d.size(); ++j)
-//      objectPoints.at(j) = cv::Point2f(objectPoints3d.at(j).x, objectPoints3d.at(j).y);
-//
-//    std::vector<cv::Point2f> imagePoints;
-//    obs.getCornersImageFrame(imagePoints);
-//
-//    //arbitary threshold on min. corners in image to use it
-//    if(numCorners<16)
-//      continue;
-//
-//     cv::Mat H = cv::findHomography(objectPoints, imagePoints);
-//
-//     H.at<double>(0,0) -= H.at<double>(2,0) * _cu;
-//     H.at<double>(0,1) -= H.at<double>(2,1) * _cu;
-//     H.at<double>(0,2) -= H.at<double>(2,2) * _cu;
-//     H.at<double>(1,0) -= H.at<double>(2,0) * _cv;
-//     H.at<double>(1,1) -= H.at<double>(2,1) * _cv;
-//     H.at<double>(1,2) -= H.at<double>(2,2) * _cv;
-//
-//     double h[3], v[3], d1[3], d2[3];
-//     double n[4] = {0,0,0,0};
-//
-//     for (int j = 0; j < 3; ++j)
-//     {
-//         double t0 = H.at<double>(j,0);
-//         double t1 = H.at<double>(j,1);
-//         h[j] = t0; v[j] = t1;
-//         d1[j] = (t0 + t1) * 0.5;
-//         d2[j] = (t0 - t1) * 0.5;
-//         n[0] += t0 * t0; n[1] += t1 * t1;
-//         n[2] += d1[j] * d1[j]; n[3] += d2[j] * d2[j];
-//     }
-//
-//     for (int j = 0; j < 4; ++j)
-//     {
-//         n[j] = 1.0 / sqrt(n[j]);
-//     }
-//
-//     for (int j = 0; j < 3; ++j)
-//     {
-//         h[j] *= n[0]; v[j] *= n[1];
-//         d1[j] *= n[2]; d2[j] *= n[3];
-//     }
-//
-//     cv::Mat A_image(2, 2, CV_64F);
-//     cv::Mat b_image(2, 1, CV_64F);
-//     A_image.at<double>(0, 0) = h[0] * v[0];
-//     A_image.at<double>(0, 1) = h[1] * v[1];
-//     A_image.at<double>(1, 0) = d1[0] * d2[0];
-//     A_image.at<double>(1, 1) = d1[1] * d2[1];
-//     b_image.at<double>(0, 0) = -h[2] * v[2];
-//     b_image.at<double>(1, 0) = -d1[2] * d2[2];
-//
-//     //stack this equation
-//     A.push_back(A_image);
-//     b.push_back(b_image);
-//  }
-//
-//  cv::Mat f(2, 1, CV_64F);
-//  cv::solve(A, b, f, cv::DECOMP_NORMAL | cv::DECOMP_LU);
-//
-//   //set the estimate
-//   _fu = sqrt(fabs(1.0 / f.at<double>(0)));
-//   _fv = sqrt(fabs(1.0 / f.at<double>(1)));
-//  updateTemporaries();
-//  return true;
-//}
-
-
-/// \brief initialize the intrinsics based on one view of a gridded calibration target
-/// These functions are based on functions from Lionel Heng and the excellent camodocal
-/// https://github.com/hengli/camodocal
 //this algorithm can be used with high distortion lenses
 template<typename DISTORTION_T>
 bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<GridCalibrationTargetObservation> &observations) {
@@ -947,15 +845,6 @@ bool PinholeProjection<DISTORTION_T>::estimateTransformation(
       Ms.at(count).x = x / z;
       Ms.at(count).y = y / z;
       ++count;
-    } else {
-//      SM_DEBUG_STREAM("Skipping point " << i << ", point was observed: " << imagePoint
-//              << ", projection success: "
-//              << keypointToEuclidean(imagePoint, backProjection)
-//              << ", in front of camera: " << (backProjection[2] > 0.0)
-//              << "image point: " << imagePoint.transpose()
-//              << ", backProjection: " << backProjection.transpose()
-//              << ", camera params (fu,fv,cu,cv):" << fu() << ", " << fv()
-//              << ", " << cu() << ", " << cv());
     }
   }
 
@@ -967,14 +856,10 @@ bool PinholeProjection<DISTORTION_T>::estimateTransformation(
   cv::Mat rvec(3, 1, CV_64F);
   cv::Mat tvec(3, 1, CV_64F);
 
-  if (Ps.size() < 4) {
-    //SM_DEBUG_STREAM("At least 4 points are needed for calling PnP. Found " << Ps.size());
+  if (Ps.size() < 4)
     return false;
-  }
 
   // Call the OpenCV pnp function.
-//  SM_DEBUG_STREAM("Calling solvePnP with " << Ps.size()
-//                  << " world points and " << Ms.size() << " image points");
   cv::solvePnP(Ps, Ms, cv::Mat::eye(3, 3, CV_64F), distCoeffs, rvec, tvec);
 
   // convert the rvec/tvec to a transformation
@@ -989,9 +874,6 @@ bool PinholeProjection<DISTORTION_T>::estimateTransformation(
   }
 
   out_T_t_c.set(T_camera_model.inverse());
-
-  //SM_DEBUG_STREAM("solvePnP solution:" << out_T_t_c.T());
-
   return true;
 }
 

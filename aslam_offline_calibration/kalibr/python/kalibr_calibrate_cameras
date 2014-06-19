@@ -101,8 +101,8 @@ def parseArgs():
     outlierSettings.add_argument('--plot-outliers', action='store_true', dest='doPlotOutliers', help='Plot the detect outliers during extraction (this could be slow)')
     
     outputSettings = parser.add_argument_group('Output options')
-    outputSettings.add_argument('--verbose', action='store_true', dest='verbose', help='Enable (really) verbose output')
-    outputSettings.add_argument('--show-extraction', action='store_true', dest='showextraction', help='Show the calibration target extraction.')
+    outputSettings.add_argument('--verbose', action='store_true', dest='verbose', help='Enable (really) verbose output (disables plots)')
+    outputSettings.add_argument('--show-extraction', action='store_true', dest='showextraction', help='Show the calibration target extraction. (disables plots)')
     outputSettings.add_argument('--plot', action='store_true', dest='plot', help='Plot during calibration (this could be slow).')
     outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
        
@@ -116,7 +116,7 @@ def parseArgs():
         parsed = parser.parse_args()
     except:
         sys.exit(2)
-        
+    
     #some checks
     if len(parsed.topics) != len(parsed.models):
         sm.logError("Please specify exactly one camera model (--models) for each topic (--topics).")
@@ -125,7 +125,12 @@ def parseArgs():
     if parsed.minViewOutlier<1:
         sm.logError("Please specify a positive integer (--min-views-outlier).")
         sys.exit(2)
-        
+    
+    #there is a with the gtk plot widget, so we cant plot if we have opencv windows open...
+    #--> disable the plots in these special situations
+    if parsed.showextraction or parsed.verbose:
+        parsed.dontShowReport = True
+    
     return parsed
 
 

@@ -2,12 +2,17 @@
 <package>
   <name>incremental_calibration_python</name>
   <version>0.0.1</version>
-  <description>incremental_calibration_python</description>
-  <maintainer email="paulfurgale@mavt.ethz.ch">Paul Furgale</maintainer>
-  <author>Paul Furgale</author>
-  <license>New BSD</license>
+  <description>
+    A C++-based library for providing python interface to the incremental
+    calibration package.
+  </description>
+  <maintainer email="jerome.maye@mavt.ethz.ch">Jerome Maye</maintainer>
+  <license>LGPLv3</license>
+  <url type="website">https://github.com/ethz-asl/aslam_incremental_calibration</url>
+  <author email="jerome.maye@mavt.ethz.ch">Jerome Maye</author>
+
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>catkin_simple</buildtool_depend>.
+  <buildtool_depend>catkin_simple</buildtool_depend>
 
   <build_depend>incremental_calibration</build_depend>
   <build_depend>numpy_eigen</build_depend>

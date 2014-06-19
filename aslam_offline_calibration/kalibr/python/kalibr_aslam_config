@@ -10,8 +10,7 @@ import sys
 from matplotlib.colors import LogNorm 
 np.set_printoptions(suppress=True)
 
-#That's how it should look like:
-
+#That's how the output should should look like:
 # 
 # base_topic: /
 # cameras:

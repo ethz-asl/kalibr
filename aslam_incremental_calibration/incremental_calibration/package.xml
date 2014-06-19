@@ -2,12 +2,16 @@
 <package>
   <name>incremental_calibration</name>
   <version>0.0.1</version>
-  <description>incremental_calibration</description>
-  <maintainer email="paulfurgale@mavt.ethz.ch">Paul Furgale</maintainer>
-  <author>Paul Furgale</author>
-  <license>New BSD</license>
+  <description>
+    A C++-based library for calibrating robot sensors.
+  </description>
+  <maintainer email="jerome.maye@mavt.ethz.ch">Jerome Maye</maintainer>
+  <license>LGPLv3</license>
+  <url type="website">https://github.com/ethz-asl/aslam_incremental_calibration</url>
+  <author email="jerome.maye@mavt.ethz.ch">Jerome Maye</author>
+
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>catkin_simple</buildtool_depend>.
+  <buildtool_depend>catkin_simple</buildtool_depend>
 
   <build_depend>sm_eigen</build_depend>
   <build_depend>aslam_backend</build_depend>
@@ -16,6 +20,4 @@
 
   <run_depend>sm_eigen</run_depend>
   <run_depend>aslam_backend</run_depend>
-
-
 </package>

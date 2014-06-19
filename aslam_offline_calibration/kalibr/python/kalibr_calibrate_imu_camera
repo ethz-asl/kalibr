@@ -87,16 +87,16 @@ def parseArgs():
 
     #Result options  
     outputSettings = parser.add_argument_group('Output options')
-    outputSettings.add_argument('--show-extraction', action='store_true', dest='showextraction', help='Show the calibration target extraction.')
-    outputSettings.add_argument('--extraction-stepping', action='store_true', dest='extractionstepping', help='Show each image during calibration target extraction', required=False)
-    outputSettings.add_argument('--verbose', action='store_true', dest='verbose', help='Verbose output')
+    outputSettings.add_argument('--show-extraction', action='store_true', dest='showextraction', help='Show the calibration target extraction. (disables plots)')
+    outputSettings.add_argument('--extraction-stepping', action='store_true', dest='extractionstepping', help='Show each image during calibration target extraction  (disables plots)', required=False)
+    outputSettings.add_argument('--verbose', action='store_true', dest='verbose', help='Verbose output (disables plots)')
     outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
      
     #print help if no argument is specified
     if len(sys.argv)==1:
         parser.print_help()
         sys.exit(2)
-        
+    
     #Parser the argument list
     try:
         parsed = parser.parse_args()
@@ -105,6 +105,11 @@ def parseArgs():
                  
     if parsed.verbose:
         parsed.showextraction = True             
+    
+    #there is a with the gtk plot widget, so we cant plot if we have opencv windows open...
+    #--> disable the plots in these special situations
+    if parsed.showextraction or parsed.extractionstepping or parsed.verbose:
+        parsed.dontShowReport = True
     
     return parsed
 

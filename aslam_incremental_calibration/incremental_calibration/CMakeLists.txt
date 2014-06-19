@@ -6,8 +6,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/../cmake/)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
-
-
 if(APPLE)
   set(CMAKE_CXX_FLAGS "-std=c++11")
 else()
@@ -45,7 +43,8 @@ cs_add_library(${PROJECT_NAME}
 find_package(Boost REQUIRED COMPONENTS system thread)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
-# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
+# Avoid clash with tr1::tuple:
+# https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
 add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
 catkin_add_gtest(${PROJECT_NAME}_test

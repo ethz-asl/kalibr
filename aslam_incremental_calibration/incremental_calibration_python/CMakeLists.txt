@@ -10,7 +10,6 @@ else()
   add_definitions(-std=c++0x)
 endif()
 
-
 add_python_export_library(${PROJECT_NAME} src/incremental_calibration
   src/module.cpp
   src/OptimizationProblem.cpp
