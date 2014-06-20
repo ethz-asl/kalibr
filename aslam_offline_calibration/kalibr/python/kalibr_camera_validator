@@ -23,10 +23,6 @@ import sys
 import getopt
 import igraph
 
-from scipy.interpolate import griddata
-import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm 
-
 # make numpy print prettier
 np.set_printoptions(suppress=True)
 
@@ -96,14 +92,14 @@ class CameraChainValidator(object):
             cidx_src = edge.source
             cidx_dest = edge.target
 
-            edge["rect_map"]=dict();edge["R"]=dict();edge["P"]=dict();
+            edge["rect_map"]=dict();edge["R"]=dict();edge["A"]=dict();
             
             edge["rect_map"][cidx_src], \
             edge["rect_map"][cidx_dest], \
             edge["R"][cidx_src], \
             edge["R"][cidx_dest], \
-            edge["P"][cidx_src], \
-            edge["P"][cidx_dest] = self.prepareStereoRectificationMaps(cidx_src, cidx_dest)
+            edge["A"][cidx_src], \
+            edge["A"][cidx_dest] = self.prepareStereoRectificationMaps(cidx_src, cidx_dest)
                 
         #register the callback for the synchronized images
         sync_sub = message_filters.TimeSynchronizer([val.image_sub for val in self.monovalidators],1)
@@ -142,16 +138,11 @@ class CameraChainValidator(object):
             #undistort the image
             if type(validator.camera.geometry) == acv.DistortedOmniCameraGeometry:
                 validator.undist_image = validator.undistorter.undistortImageToPinhole(np_image)
-                
-#                 pl.imshow(validator.undist_image)
-#                 pl.show()
             else:
                 validator.undist_image = validator.undistorter.undistortImage(np_image)
-                
-                
+                            
             #generate a mono view for each cam
             validator.generateMonoview(np_image, observation, success)            
-            
             
         #generate all rectification views
         for edge in self.G.es:
@@ -178,7 +169,24 @@ class CameraChainValidator(object):
             T_BA = T_high_low.inverse()
         
         return T_BA
-            
+
+    def rectifyImages(self, imageA, mapA, imageB, mapB):
+        #rectify images
+        rect_image_A = cv2.remap(imageA,
+                                 mapA[0],
+                                 mapA[1],
+                                 cv2.INTER_LINEAR)
+        
+        rect_image_B = cv2.remap(imageB,
+                                 mapB[0],
+                                 mapB[1],
+                                 cv2.INTER_LINEAR)
+        
+        #combine the images    
+        np_rect_image = np.hstack( (rect_image_A, rect_image_B) )
+        
+        return np_rect_image
+
     def generatePairView(self, camAnr, camBnr):
         #prepare the window
         windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
@@ -191,33 +199,6 @@ class CameraChainValidator(object):
         #get baseline between camA & camB
         T_BA = self.getTransformationCamFromTo(camAnr, camBnr)
         
-        #rectify the undistorted images
-        edge_idx = self.G.get_eid(camAnr, camBnr)
-        edge = self.G.es[edge_idx]
-        
-        
-        #resize images        
-        rect_image_A = cv2.remap(camA.undist_image, 
-                                 edge["rect_map"][camAnr][0], 
-                                 edge["rect_map"][camAnr][1], 
-                                 cv2.INTER_LINEAR)
-        
-        rect_image_B = cv2.remap(camB.undist_image, 
-                                 edge["rect_map"][camBnr][0], 
-                                 edge["rect_map"][camBnr][1], 
-                                 cv2.INTER_LINEAR)
-        
-        #combine the images    
-        np_image_rect = np.hstack( (rect_image_A, rect_image_B) )
-        
-        np_image_rect = cv2.cvtColor(np_image_rect, cv2.COLOR_GRAY2BGR)
-        
-        #draw some epilines
-        n=10
-        for i in range(0,n):
-            y = np_image_rect.shape[0]*i/n
-            cv2.line(np_image_rect, (0,y), (2*np_image_rect.shape[1],y),(0,255,0));
-                
         #extract the common corners for the camera in pair
         keypoints_A = camA.obs.getCornersImageFrame()
         keypoints_A_id = camA.obs.getCornersIdx()
@@ -255,37 +236,30 @@ class CameraChainValidator(object):
                 
                 #reprojection errors in original camera geomtery
                 reproj_errs = np.hstack((reproj_errs, reprojErr_A.flatten()))
-                reproj_errs = np.hstack((reproj_errs, reprojErr_B.flatten()))
-                
-                #apply undistorted/rectified camera geometry
-                reprojs_A.append( camA.undist_camera.euclideanToKeypoint(reprojA) )
-                reprojs_B.append( camB.undist_camera.euclideanToKeypoint(reprojB) )             
+                reproj_errs = np.hstack((reproj_errs, reprojErr_B.flatten()))     
                 
             reproj_errs = reproj_errs[2:]
             reproj_errs = reproj_errs.reshape(2, reproj_errs.shape[0]/2)
-
-
-
-#             #draw reprojections
-#             for point in reprojs_A:
-#                 point=point.flatten()
-#                 #convert pixel to fixed point (opencv subpixel rendering...)
-#                 shift = 4; radius = 0.5; thickness = 1
-#                 px_fix =  int(point[0] * 2**shift)
-#                 py_fix =  int(point[1] * 2**shift)
-#                 radius_fix = int(radius * 2**shift)
-#                 cv2.circle(np_image_rect, (px_fix, py_fix), radius=radius_fix, color=(255,255,0), thickness=thickness, shift=shift, lineType=cv2.CV_AA)
-#                 
-#             for point in reprojs_B:
-#                 point=point.flatten()
-#                 #convert pixel to fixed point (opencv subpixel rendering...)
-#                 shift = 4; radius = 0.5; thickness = 1
-#                 px_fix =  int((point[0]+image_undist_A.shape[1]) * 2**shift)
-#                 py_fix =  int(point[1] * 2**shift) 
-#                 radius_fix = int(radius * 2**shift)
-#                 cv2.circle(np_image_rect, (px_fix, py_fix), radius=radius_fix, color=(255,255,0), thickness=thickness, shift=shift, lineType=cv2.CV_AA)
-                
+                    
+        #rectify the undistorted images
+        edge_idx = self.G.get_eid(camAnr, camBnr)
+        edge = self.G.es[edge_idx]
+        A_rect = edge["A"][camAnr] #some for cam B
+        
+        np_image_rect = self.rectifyImages(camA.undist_image, 
+                                           edge["rect_map"][camAnr], 
+                                           camB.undist_image, 
+                                           edge["rect_map"][camBnr])
+        
+        #draw some epilines
+        np_image_rect = cv2.cvtColor(np_image_rect, cv2.COLOR_GRAY2BGR)
+        n=10
+        for i in range(0,n):
+            y = np_image_rect.shape[0]*i/n
+            cv2.line(np_image_rect, (0,y), (2*np_image_rect.shape[1],y),(0,255,0));
     
+    
+        if len(common_ids) > 0:
             #draw error statistics
             reproj_L2_errs = np.sum(np.abs(reproj_errs)**2, axis=-2)**(1./2)
             outputList = [ ( "mean_x:  ", np.mean(reproj_errs[:,0]) ),
@@ -327,7 +301,7 @@ class CameraChainValidator(object):
         camIdealB = self.monovalidators[camBnr].undist_camera.projection().getParameters().flatten()
         camIdealA = np.array([[camIdealA[0],0,camIdealA[2]], [0,camIdealA[1],camIdealA[3]], [0,0,1]])
         camIdealB = np.array([[camIdealB[0],0,camIdealB[2]], [0,camIdealB[1],camIdealB[3]], [0,0,1]])
-        imageSize = (self.monovalidators[camAnr].undist_camera.projection().ru()*2, self.monovalidators[camAnr].undist_camera.projection().rv()*2)
+        imageSize = (self.monovalidators[camAnr].undist_camera.projection().ru(), self.monovalidators[camAnr].undist_camera.projection().rv())
         
         #get the baseline between the cams       
         baseline_BA = self.getTransformationCamFromTo(camAnr, camBnr)
@@ -386,7 +360,7 @@ class CameraChainValidator(object):
                                                                  imageSize,
                                                                  cv2.CV_16SC2)
         
-        return (rect_map_x_a, rect_map_y_a), (rect_map_x_b, rect_map_y_b), Ra, Rb, Ta, Tb
+        return (rect_map_x_a, rect_map_y_a), (rect_map_x_b, rect_map_y_b), Ra, Rb, A, A
     
         
 class MonoCameraValidator(object):
