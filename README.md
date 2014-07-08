@@ -10,6 +10,8 @@ Kalibr is a toolbox that solves the following calibration problems:
 
 **Please find more information on the [wiki pages](https://github.com/ethz-asl/kalibr/wiki) of this repository.**
 
+For questions or comments, please use the [user forum](https://groups.google.com/forum/#!forum/kalibr-users)
+
 ##Authors
 * Paul Furgale ([email](paul.furgale@mavt.ethz.ch))
 * Jérôme Maye ([email](jerome.maye@mavt.ethz.ch))
