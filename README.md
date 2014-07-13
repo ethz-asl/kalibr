@@ -10,7 +10,7 @@ Kalibr is a toolbox that solves the following calibration problems:
 
 **Please find more information on the [wiki pages](https://github.com/ethz-asl/kalibr/wiki) of this repository.**
 
-For questions or comments, please use the [user forum](https://groups.google.com/forum/#!forum/kalibr-users)
+**For questions or comments, please use the [user forum](https://groups.google.com/forum/#!forum/kalibr-users).**
 
 ##Authors
 * Paul Furgale ([email](paul.furgale@mavt.ethz.ch))
@@ -25,6 +25,8 @@ The calibration approaches used in Kalibr are based on the following papers. Ple
 1. <a name="paul2"></a>Paul Furgale, T D Barfoot, G Sibley (2012). Continuous-Time Batch Estimation Using Temporal Basis Functions. In Proceedings of the IEEE International Conference on Robotics and Automation (ICRA), pp. 2088–2095, St. Paul, MN.
 1. <a name="jmaye"></a> J. Maye, P. Furgale, R. Siegwart (2013). Self-supervised Calibration for Robotic Systems, In Proc. of the IEEE Intelligent Vehicles Symposium (IVS)
 
+## Acknowledgments
+This work is supported in part by the European Community's Seventh Framework Programme (FP7/2007-2013) under grant #269916 (V-Charge).
 
 ##License (BSD)
 Copyright (c) 2014, Paul Furgale, Jérôme Maye and Jörn Rehder, Autonomous Systems Lab, ETH Zurich, Switzerland<br>
