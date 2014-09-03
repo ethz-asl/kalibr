@@ -114,6 +114,6 @@ class BagImageDatasetReader(object):
             img_data = np.reshape(self.uncompress(np.fromstring(data.data, dtype='uint8')),(data.height,data.width), order="C")
             
         else:
-            img_data = np.array(self.CVB.imgmsg_to_cv(data))  
+            img_data = np.array(self.CVB.imgmsg_to_cv2(data))  
         return (ts, img_data)
      

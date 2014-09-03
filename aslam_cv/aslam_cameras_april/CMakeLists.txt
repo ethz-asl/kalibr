@@ -7,7 +7,7 @@ catkin_simple()
 find_package(OpenCV REQUIRED)
 
 ADD_DEFINITIONS(-DASLAM_USE_ROS )
-include_directories(${Eigen_INCLUDE_DIRS})
+include_directories(${EIGEN3_INCLUDE_DIR})
 
 
 cs_add_library(${PROJECT_NAME} 
