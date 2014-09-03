@@ -121,7 +121,7 @@ class CameraChainValidator(object):
         for cam_nr, msg in enumerate(cam_msgs):
             #convert image to numpy
             try:
-                cv_image = self.bridge.imgmsg_to_cv(msg)
+                cv_image = self.bridge.imgmsg_to_cv2(msg)
                 np_image = np.array(cv_image)
             except CvBridgeError, e:
                 print e
