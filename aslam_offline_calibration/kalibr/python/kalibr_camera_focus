@@ -19,7 +19,7 @@ class CameraFocus:
     def callback(self, msg):
         #convert image to opencv
         try:
-            cv_image = self.bridge.imgmsg_to_cv(msg)
+            cv_image = self.bridge.imgmsg_to_cv2(msg)
             np_image= np.array(cv_image)
         except CvBridgeError, e:
             print "Could not convert ros message to opencv image: ", e
