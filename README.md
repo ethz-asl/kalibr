@@ -1,4 +1,4 @@
-![Kalibr](https://raw.githubusercontent.com/wiki/schneith/Kalibr-test/images/kalibr_small.png)
+![Kalibr](https://raw.githubusercontent.com/wiki/ethz-asl/kalibr/images/kalibr_small.png)
 
 ##Introduction
 Kalibr is a toolbox that solves the following calibration problems:
