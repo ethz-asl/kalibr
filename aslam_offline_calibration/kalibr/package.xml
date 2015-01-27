@@ -11,6 +11,7 @@
   <buildtool_depend>catkin_simple</buildtool_depend>.
 
   <build_depend>aslam_cv_python</build_depend>
+  <build_depend>aslam_cv_backend_python</build_depend>
   <build_depend>aslam_backend</build_depend>
   <build_depend>aslam_backend_expressions</build_depend>
   <build_depend>aslam_backend_python</build_depend>
