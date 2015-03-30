@@ -15,7 +15,8 @@
   <build_depend>sm_logging</build_depend>
   <build_depend>sm_matrix_archive</build_depend>
   <build_depend>sm_property_tree</build_depend>
-  
+  <build_depend>cmake_modules</build_depend>
+
   <run_depend>sm_common</run_depend>
   <run_depend>numpy_eigen</run_depend>
   <run_depend>python_module</run_depend>
@@ -24,4 +25,5 @@
   <run_depend>sm_logging</run_depend>
   <run_depend>sm_matrix_archive</run_depend>
   <run_depend>sm_property_tree</run_depend>
+  <run_depend>cmake_modules</run_depend>
 </package>

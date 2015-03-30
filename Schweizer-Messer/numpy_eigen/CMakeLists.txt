@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(numpy_eigen)
 
+find_package(cmake_modules REQUIRED)
 find_package(catkin REQUIRED COMPONENTS python_module)
 include_directories(${catkin_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system)
