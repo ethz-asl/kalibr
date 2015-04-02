@@ -154,7 +154,7 @@ def generateCheckerboard(canvas, n_cols, n_rows, size_cols, size_rows):
 if __name__ == "__main__":
     usage="""
     Example Aprilgrid:
-        kalibr_create_target_pdf --type apriltag --nx 6 --ny 6 -tsize 0.08 --tspace 0.3
+        kalibr_create_target_pdf --type apriltag --nx 6 --ny 6 --tsize 0.08 --tspace 0.3
     Example Checkerboard:
         kalibr_create_target_pdf --type checkerboard --nx 6 --ny 6 -csx 0.05 --csy 0.1
     """
@@ -207,4 +207,3 @@ if __name__ == "__main__":
     
     if parsed.do_eps:
         c.writeEPSfile(parsed.output)
-    
