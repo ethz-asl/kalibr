@@ -103,8 +103,7 @@ bool GridCalibrationTargetCheckerboard::computeObservation(const cv::Mat & image
     //image with refined (blue) and raw corners (red)
     cv::Mat imageCopy1 = image.clone();
     cv::cvtColor(imageCopy1, imageCopy1, CV_GRAY2RGB);
-    cv::drawChessboardCorners(imageCopy1, cv::Size(rows(), cols()), centers,
-                              true);
+    cv::drawChessboardCorners(imageCopy1, patternSize, centers, true);
 
     // write error msg
     if (!success)
