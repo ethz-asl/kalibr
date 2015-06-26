@@ -3,7 +3,7 @@ project(sm_python)
 
 #catkin_python_setup()
 
-find_package(catkin REQUIRED COMPONENTS sm_common numpy_eigen sm_kinematics 
+find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common numpy_eigen sm_kinematics 
                                         sm_timing sm_logging sm_matrix_archive
                                         sm_property_tree python_module)
 include_directories(${catkin_INCLUDE_DIRS})

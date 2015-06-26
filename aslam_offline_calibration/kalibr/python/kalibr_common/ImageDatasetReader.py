@@ -35,21 +35,21 @@ class BagImageDatasetReader(object):
         # Get the message indices
         conx = self.bag._get_connections(topics=imagetopic)
         indices = self.bag._get_indexes(conx)
-        
+
         try:
             self.index = indices.next()
         except:
             raise RuntimeError("Could not find topic {0} in {1}.".format(imagetopic, self.bagfile))
-        
+
         self.indices = np.arange(len(self.index))
-        
+
         #sort the indices by header.stamp
         self.indices = self. sortByTime(self.indices)
-        
+
         #go through the bag and remove the indices outside the timespan [bag_start_time, bag_end_time]
         if bag_from_to:
             self.indices = self.truncateIndicesFromTime(self.indices, bag_from_to)
-    
+
     #sort the ros messegaes by the header time not message time
     def sortByTime(self, indices):
         timestamps=list()
@@ -57,7 +57,7 @@ class BagImageDatasetReader(object):
             topic, data, stamp = self.bag._read_message(self.index[idx].position)
             timestamp = data.header.stamp.secs*1e9 + data.header.stamp.nsecs
             timestamps.append(timestamp)
-        
+
         sorted_tuples = sorted(zip(timestamps, indices))
         sorted_indices = [tuple_value[1] for tuple_value in sorted_tuples]
         return sorted_indices
@@ -85,14 +85,14 @@ class BagImageDatasetReader(object):
         valid_indices = []
         for idx, timestamp in enumerate(timestamps):
              if timestamp>=(bagstart+bag_from_to[0]) and timestamp<=(bagstart+bag_from_to[1]):
-                 valid_indices.append(idx)  
+                 valid_indices.append(idx)
         sm.logWarn("BagImageDatasetReader: truncated {0} / {1} images.".format(len(indices)-len(valid_indices), len(indices)))
         return valid_indices
-    
+
     def __iter__(self):
         # Reset the bag reading
         return self.readDataset()
-    
+
     def readDataset(self):
         return BagImageDatasetReaderIterator(self, self.indices)
 
@@ -112,8 +112,8 @@ class BagImageDatasetReader(object):
                 from snappy import uncompress
                 self.uncompress = uncompress
             img_data = np.reshape(self.uncompress(np.fromstring(data.data, dtype='uint8')),(data.height,data.width), order="C")
-            
+
         else:
-            img_data = np.array(self.CVB.imgmsg_to_cv(data))  
+            img_data = np.squeeze(np.array(self.CVB.imgmsg_to_cv2(data, "mono8")))
         return (ts, img_data)
-     
+
