@@ -40,6 +40,7 @@ namespace aslam {
 
     class DesignVariable;
     class ErrorTerm;
+    class ScalarNonSquaredErrorTerm;
 
   }
   namespace calibration {
@@ -63,6 +64,7 @@ namespace aslam {
         DesignVariablesP;
       /// Error term type
       typedef aslam::backend::ErrorTerm ErrorTerm;
+      typedef aslam::backend::ScalarNonSquaredErrorTerm ScalarNonSquaredErrorTerm;
       /// Error term type (shared pointer)
       typedef boost::shared_ptr<ErrorTerm> ErrorTermSP;
       /// Fast lookup container for error terms pointers
@@ -173,6 +175,19 @@ namespace aslam {
         std::set<ErrorTerm*>& outErrorSet);
       /// Returns the group id an index falls in
       void getGroupId(size_t idx, size_t& groupId, size_t& idxGroup) const;
+
+
+      /// \brief the number of non-squared error terms in this optimization problem
+      virtual size_t numNonSquaredErrorTermsImplementation() const{ return 0;}
+      /// \brief get non-squared error term n
+      virtual ScalarNonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t){ throw std::runtime_error("Not implemented");}
+      /// \brief get non-squared error term n
+      virtual const ScalarNonSquaredErrorTerm* nonSquaredErrorTermImplementation(size_t) const{ throw std::runtime_error("Not implemented");}
+
+      /// \brief get all of the non-squared error terms associated with design variable dv.
+      virtual void getNonSquaredErrorsImplementation(const DesignVariable*, std::set<ScalarNonSquaredErrorTerm*>&) { }
+
+
       /** @}
         */
 
