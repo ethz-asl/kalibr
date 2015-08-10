@@ -5,21 +5,21 @@ project(ethz_apriltag2)
 find_package(catkin)
 include_directories(${catkin_INCLUDE_DIRS})
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 catkin_package(
     DEPENDS eigen opencv
-    INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
+    INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
     LIBRARIES ${PROJECT_NAME}
 )
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/)
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
 add_definitions(-fPIC -O3)
-include_directories(include  ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(include  ${EIGEN3_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 if(NOT APPLE)
   # The clang compiler (on osx) is somehow much more strict
