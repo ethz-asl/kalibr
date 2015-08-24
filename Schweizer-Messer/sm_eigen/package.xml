@@ -9,9 +9,11 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>sm_common</build_depend>
   <build_depend>sm_random</build_depend>
- 
+  <build_depend>cmake_modules</build_depend>
+
   <run_depend>sm_common</run_depend>
   <run_depend>sm_random</run_depend>
+  <run_depend>cmake_modules</run_depend>
 
   <test_depend>gtest</test_depend>
 </package>

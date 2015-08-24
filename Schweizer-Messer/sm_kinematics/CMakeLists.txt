@@ -4,6 +4,7 @@ project(sm_kinematics)
 find_package(catkin REQUIRED COMPONENTS sm_common sm_eigen sm_boost sm_random)
 include_directories(${catkin_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system serialization filesystem)
+find_package(cmake_modules REQUIRED)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 find_package(Eigen REQUIRED)

@@ -5,6 +5,7 @@ project(ethz_apriltag2)
 find_package(catkin)
 include_directories(${catkin_INCLUDE_DIRS})
 
+find_package(cmake_modules REQUIRED)
 find_package(Eigen REQUIRED)
 
 catkin_package(
