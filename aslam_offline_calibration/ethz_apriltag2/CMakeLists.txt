@@ -21,13 +21,6 @@ find_package(OpenCV REQUIRED)
 add_definitions(-fPIC -O3)
 include_directories(include  ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
-if(NOT APPLE)
-  # The clang compiler (on osx) is somehow much more strict
-  # than the compilers on ubuntu and so this does not seem
-  # possible on OSX just yet.
-  add_definitions( -Werror )
-endif()
-
 #library
 file(GLOB SOURCE_FILES "src/*.cc")
 add_library(${PROJECT_NAME}  ${SOURCE_FILES})
