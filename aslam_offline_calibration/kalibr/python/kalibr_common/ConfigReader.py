@@ -45,10 +45,24 @@ class AslamCamera(object):
                 self.keypointType = cv.Keypoint2
                 self.reprojectionErrorType = cvb.EquidistantDistortedPinholeReprojectionErrorSimple
                 self.undistorterType = cv.EquidistantPinholeUndistorterNoMask
+                
+            elif dist_model == 'fov':
+                dist = cv.FovDistortion(dist_coeff[0])
+                
+                proj = cv.FovPinholeProjection(focalLength[0], focalLength[1], 
+                                               principalPoint[0], principalPoint[1], 
+                                               resolution[0], resolution[1], dist)
+                
+                self.geometry = cv.FovDistortedPinholeCameraGeometry(proj)
+                
+                self.frameType = cv.FovDistortedPinholeFrame
+                self.keypointType = cv.Keypoint2
+                self.reprojectionErrorType = cvb.FovDistortedPinholeReprojectionErrorSimple
+                self.undistorterType = cv.FovPinholeUndistorterNoMask
             else:
                 proj = cv.PinholeProjection(focalLength[0], focalLength[1], 
-                                               principalPoint[0], principalPoint[1], 
-                                               resolution[0], resolution[1])
+                                            principalPoint[0], principalPoint[1], 
+                                            resolution[0], resolution[1])
                 
                 self.camera = cv.PinholeCameraGeometry(proj)
                 
@@ -237,14 +251,15 @@ class CameraParameters(ParametersBase):
     
     #distortion
     def checkDistortion(self, model, coeffs):
-        distortionModels = ['radtan', 
-                            'equidistant', 
-                            'none']
-        
-        if model not in distortionModels:
+        distortionModelsAndNumParams = {'radtan': 4,
+                                        'equidistant': 4, 
+                                        'fov': 1, 
+                                        'none': 0}
+               
+        if model not in distortionModelsAndNumParams:
             self.raiseError('Unknown distortion model. Supported models: {0}. )'.format(distortionModels) )
         
-        if len(coeffs) != 4:
+        if len(coeffs) != distortionModelsAndNumParams[model]:
             self.raiseError("distortion model requires 4 coefficients")
     
     @catch_keyerror

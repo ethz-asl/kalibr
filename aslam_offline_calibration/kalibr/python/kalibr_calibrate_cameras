@@ -33,6 +33,7 @@ def initBagDataset(bagfile, topic, from_to):
 #available models
 cameraModels = { 'pinhole-radtan': acvb.DistortedPinhole,
                  'pinhole-equi':   acvb.EquidistantPinhole,
+                 'pinhole-fov':    acvb.FovPinhole,
                  'omni-radtan':    acvb.DistortedOmni }
 
 def signal_exit(signal, frame):

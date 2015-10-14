@@ -95,24 +95,32 @@ void exportCameraGeometries() {
       "DistortedPinholeCameraGeometry");
   exportCameraGeometry<EquidistantDistortedPinholeCameraGeometry>(
       "EquidistantDistortedPinholeCameraGeometry");
+  exportCameraGeometry<FovDistortedPinholeCameraGeometry>(
+      "FovDistortedPinholeCameraGeometry");
 
   exportCameraGeometry<PinholeRsCameraGeometry>("PinholeRsCameraGeometry");
   exportCameraGeometry<DistortedPinholeRsCameraGeometry>(
       "DistortedPinholeRsCameraGeometry");
   exportCameraGeometry<EquidistantDistortedPinholeRsCameraGeometry>(
       "EquidistantDistortedPinholeRsCameraGeometry");
+  exportCameraGeometry<FovDistortedPinholeRsCameraGeometry>(
+        "FovDistortedPinholeRsCameraGeometry");
 
   exportCameraGeometry<OmniRsCameraGeometry>("OmniRsCameraGeometry");
   exportCameraGeometry<DistortedOmniRsCameraGeometry>(
       "DistortedOmniRsCameraGeometry");
   exportCameraGeometry<EquidistantDistortedOmniRsCameraGeometry>(
       "EquidistantDistortedOmniRsCameraGeometry");
+  exportCameraGeometry<FovDistortedOmniRsCameraGeometry>(
+      "FovDistortedOmniRsCameraGeometry");
 
   exportCameraGeometry<OmniCameraGeometry>("OmniCameraGeometry");
   exportCameraGeometry<DistortedOmniCameraGeometry>(
       "DistortedOmniCameraGeometry");
   exportCameraGeometry<EquidistantDistortedOmniCameraGeometry>(
       "EquidistantDistortedOmniCameraGeometry");
+  exportCameraGeometry<FovDistortedOmniCameraGeometry>(
+      "FovDistortedOmniCameraGeometry");
 
   exportCameraGeometry<MaskedPinholeCameraGeometry>(
       "MaskedPinholeCameraGeometry");
@@ -120,6 +128,8 @@ void exportCameraGeometries() {
       "MaskedDistortedPinholeCameraGeometry");
   exportCameraGeometry<MaskedEquidistantDistortedPinholeCameraGeometry>(
       "MaskedEquidistantDistortedPinholeCameraGeometry");
+  exportCameraGeometry<MaskedFovDistortedPinholeCameraGeometry>(
+      "MaskedFovDistortedPinholeCameraGeometry");
 
   exportCameraGeometry<MaskedPinholeRsCameraGeometry>(
       "MaskedPinholeRsCameraGeometry");
@@ -127,6 +137,8 @@ void exportCameraGeometries() {
       "MaskedDistortedPinholeRsCameraGeometry");
   exportCameraGeometry<MaskedEquidistantDistortedPinholeRsCameraGeometry>(
       "MaskedEquidistantDistortedPinholeRsCameraGeometry");
+  exportCameraGeometry<MaskedFovDistortedPinholeRsCameraGeometry>(
+      "MaskedFovDistortedPinholeRsCameraGeometry");
 
   exportCameraGeometry<MaskedOmniRsCameraGeometry>(
       "MaskedOmniRsCameraGeometry");
@@ -134,18 +146,24 @@ void exportCameraGeometries() {
       "MaskedDistortedOmniRsCameraGeometry");
   exportCameraGeometry<MaskedEquidistantDistortedOmniRsCameraGeometry>(
       "MaskedEquidistantDistortedOmniRsCameraGeometry");
+  exportCameraGeometry<MaskedFovDistortedOmniRsCameraGeometry>(
+      "MaskedFovDistortedOmniRsCameraGeometry");
 
   exportCameraGeometry<MaskedOmniCameraGeometry>("MaskedOmniCameraGeometry");
   exportCameraGeometry<MaskedDistortedOmniCameraGeometry>(
       "MaskedDistortedOmniCameraGeometry");
   exportCameraGeometry<MaskedEquidistantDistortedOmniCameraGeometry>(
       "MaskedEquidistantDistortedOmniCameraGeometry");
+  exportCameraGeometry<MaskedFovDistortedOmniCameraGeometry>(
+      "MaskedFovDistortedOmniCameraGeometry");
 
   exportCameraGeometry<DepthCameraGeometry>("DepthCameraGeometry");
   exportCameraGeometry<DistortedDepthCameraGeometry>(
       "DistortedDepthCameraGeometry");
   exportCameraGeometry<EquidistantDistortedDepthCameraGeometry>(
       "EquidistantDistortedDepthCameraGeometry");
+  exportCameraGeometry<FovDistortedDepthCameraGeometry>(
+      "FovDistortedDepthCameraGeometry");
 
   class_<ImageMask, boost::shared_ptr<ImageMask> >("ImageMask", init<>())
       .def("setMask", &ImageMask::setMaskFromMatrix)
@@ -157,5 +175,4 @@ void exportCameraGeometries() {
 
   def("triangulate", &triangulateWrap,
       "(outTriangulatedPoint, outGap, outS0, outS1 ) = triangulate( point0, ray0, point1, ray1)");
-
 }
