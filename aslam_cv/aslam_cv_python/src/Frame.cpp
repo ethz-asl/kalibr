@@ -172,6 +172,9 @@ void exportFrame() {
       "DistortedPinholeFrame");
   aslam::python::exportFrame<EquidistantDistortedPinholeCameraGeometry>(
         "EquidistantDistortedPinholeFrame");
+  aslam::python::exportFrame<FovDistortedPinholeCameraGeometry>(
+          "FovDistortedPinholeFrame");
+
   aslam::python::exportFrame<PinholeRsCameraGeometry>("PinholeRsFrame");
   aslam::python::exportFrame<DistortedPinholeRsCameraGeometry>(
       "DistortedPinholeRsFrame");
