@@ -11,23 +11,6 @@ import rospkg
 from matplotlib.colors import LogNorm
 np.set_printoptions(suppress=True)
 
-#That's how the output should should look like:
-#
-# base_topic: /
-# cameras:
-#     - {image_base_topic: cam0/, image_topic: image_raw, info_topic: camera_info,
-#        T_SC:
-#        [  0.0158177,  -0.999874 ,  -0.00133516, -0.01402297,
-#           0.99987346,  0.01581992, -0.00166903, -0.07010539,
-#           0.00168994, -0.00130859,  0.99999772,  0.00471241,
-#           0. ,         0.    ,      0.       ,   1.       ],
-#        image_dimension: [752, 480],
-#        distortion_coefficients: [-0.0016170650137774234, 0.017615842489373677, -0.020236038143470282,
-#     0.010279726211982943],
-#        distortion_type: equidistant,
-#        focal_length: [460.27046835000937, 458.7889758618953],
-#        principal_point: [355.2403080101758, 232.60725397709305]}
-
 def printCameraBlock(camConfig, T_SC, q_SC_jpl):
     #example topic= /cam0/image_raw
     topic = camConfig.getRosTopic()
