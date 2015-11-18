@@ -116,5 +116,5 @@ if __name__ == "__main__":
     with open(kalibr_path + '/python/rovio_footer.txt', 'r') as file_:
         CONFIG += file_.read()
 
-    with open('rovio_test.txt', 'w') as file_:
+    with open('rovio_test.info', 'w') as file_:
       file_.write(CONFIG)

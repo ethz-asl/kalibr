@@ -74,6 +74,8 @@ def printCameraBlock(camConfig, T_SC):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert a camchain_imu.yaml to an aslam camera configuration block.')
     parser.add_argument('--cam', dest='chainYaml', help='Camera configuration as yaml file', required=True)
+    parser.add_argument('--mav', dest='mavName', help='Name of mav', required=True)
+    parser.add_argument('--out', dest='outLoc', help='Path to output parameters to', required=False)
     parsed = parser.parse_args()
 
     #load the camchain.yaml
@@ -83,7 +85,7 @@ if __name__ == "__main__":
 
     #create camera config block
     CONFIG=""
-    CONFIG+="label: \"TEST\"\n"
+    CONFIG+="label: \"{0}\"\n".format(parsed.mavName)
     CONFIG+="id: {0}\n".format(ncam_id)
     CONFIG+= "cameras:\n"
 
@@ -95,12 +97,13 @@ if __name__ == "__main__":
         CONFIG += printCameraBlock(camConfig, T_SC)
 
     #output the stuff
-    print
-    print "Copy the following block to your aslam configuration:"
-    print "-----------------------------------------------------"
-    print
-    print CONFIG
+    if(parsed.outLoc):
+        with open(parsed.outLoc, 'w') as file_:
+          file_.write(CONFIG)
+    else:
+        print
+        print "Copy the following block to your swe configuration:"
+        print "---------------------------------------------------"
+        print
+        print CONFIG
 
-
-    with open('swe_ncamera_test.yaml', 'w') as file_:
-      file_.write(CONFIG)
