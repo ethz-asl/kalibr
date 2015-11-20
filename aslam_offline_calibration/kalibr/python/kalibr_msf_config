@@ -26,6 +26,7 @@ if __name__ == "__main__":
     T_B = camchain_B.getExtrinsicsImuToCam(0)
 
     #find the transformation between the imus
+    T_B_SB = T_B.inverse().T().dot(T_SB.T()); 
     T_SB_B = T_SB.inverse().T().dot(T_B.T());    
     q_SB_B = sm.r2quat(T_SB_B[0:3,0:3])
     
@@ -44,9 +45,9 @@ if __name__ == "__main__":
     CONFIG += "pose_sensor/init/q_ic/y: {0}\n".format(q_SB_B[1])
     CONFIG += "pose_sensor/init/q_ic/z: {0}\n".format(q_SB_B[2])
     CONFIG += "pose_sensor/init/q_ic/w: {0}\n\n".format(q_SB_B[3])
-    CONFIG += "pose_sensor/init/p_ic/x: {0}\n".format(T_SB_B[0,3])
-    CONFIG += "pose_sensor/init/p_ic/y: {0}\n".format(T_SB_B[1,3])
-    CONFIG += "pose_sensor/init/p_ic/z: {0}\n".format(T_SB_B[2,3])
+    CONFIG += "pose_sensor/init/p_ic/x: {0}\n".format(T_B_SB[0,3])
+    CONFIG += "pose_sensor/init/p_ic/y: {0}\n".format(T_B_SB[1,3])
+    CONFIG += "pose_sensor/init/p_ic/z: {0}\n".format(T_B_SB[2,3])
     
     #write the footer
     with open(kalibr_path + '/python/msf_footer.txt', 'r') as file_:
