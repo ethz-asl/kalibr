@@ -7,6 +7,7 @@ import sm
 import argparse
 import sys
 import rospkg
+import yaml
 
 from matplotlib.colors import LogNorm 
 from sm.libsm_python import Transformation
@@ -39,6 +40,18 @@ if __name__ == "__main__":
     #write the header
     with open(kalibr_path + '/python/msf_header.txt', 'r') as file_:
         CONFIG = file_.read()
+
+    #read in yaml file
+    mav_yaml = open(parsed.mavYaml)
+    mav_data = yaml.safe_load(mav_yaml)
+    mav_yaml.close()
+    
+    #write timedelay section
+    CONFIG += "pose_sensor/pose_delay: {0}\n".format(-mav_data['cam0']['timeshift_cam_imu'])
+
+    #write mid section
+    with open(kalibr_path + '/python/msf_mid.txt', 'r') as file_:
+        CONFIG += file_.read()
     
     #write the body
     CONFIG += "pose_sensor/init/q_ic/x: {0}\n".format(q_SB_B[0])
