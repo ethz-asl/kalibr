@@ -1,0 +1,3 @@
+pose_sensor/pose_noise_meas_p: 0.002
+pose_sensor/pose_noise_meas_q: 0.005
+

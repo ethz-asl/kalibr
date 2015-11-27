@@ -2,8 +2,8 @@
 ; #include "/home/user/workspace/rovio/cfg/rovio_custom.info"
 Common
 {
-	doVECalibration true;		Should the camera-IMU extrinsics be calibrated online
-	depthType 1;				Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
-	verbose false;				Is the verbose active
+    doVECalibration true;                                       Should the camera-IMU extrinsics be calibrated online
+    depthType 1;                                                Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
+    verbose false;                                              Is the verbose active
 }
 
