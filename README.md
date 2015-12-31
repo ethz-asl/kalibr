@@ -1,6 +1,15 @@
 ![Kalibr](https://raw.githubusercontent.com/wiki/schneith/Kalibr-test/images/kalibr_small.png)
 
 ##Introduction
+
+Kalibr is a collection of tools developed at the Autonomous Systems Lab at ETH Zurich is a collection of tools for calibrating multi-camera systems as well as sensor units comprised of one or multiple cameras and an IMU.
+Similarly to the well established camera calibration toolbox by Jean-Yves Bouguet [citation], it allows for intrinsic and extrinsic calibration of camera systems. Kalibr extends this functionality by supporting both N-camera systems as well as different projection and distortion models, which makes it  well suited for both pinhole and unified projection cameras cameras [cite Christopher Mei's projection model here that Paul is presumably using?] as well as for heterogeneous systems, where both types of cameras are present.  The ROS camera calibration toolbox [citation] introduced a heuristic for selecting a set of dissimilar views of the calibration target  from a stream of images to reduce redundancy in the calibration data and improve results. Kalibr takes this approach a step further by incorporating a more theoretically grounded, information theoretical measure to [cite Jerome here] for novel view selection.
+
+In contrast to other EKF-based calibration methods [cite Jonathan Kelly, Mourikis here], the camera/IMU calibration tool employs a continuous-time batch formulation of the estimation problem, which allows for a simultaneous estimation of both the rigid transformation between the cameras and the IMU as well as the temporal offset between these sensors. In previous research [cite Paul here], this method has proven to accurately estimate time offsets of a fraction of the sampling time and emphasized the importance of accounting for exposure periods when timestaming camera images.
+
+In addition to it core functionality, the toolbox provides convenience tools for focusing cameras and verifying calibration results.
+
+
 Kalibr is a toolbox that solves the following calibration problems:
 
 1. **Multiple camera calibration**: 
