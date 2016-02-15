@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+import kalibr_common as kc
+
+import numpy as np
+import pylab as pl
+import sm
+import argparse
+import sys
+import md5
+
+from matplotlib.colors import LogNorm
+np.set_printoptions(suppress=True)
+
+def printCameraBlock(camConfig, T_SC):
+    #example topic= /cam0/image_raw
+    topic = camConfig.getRosTopic()
+
+    #extract image name
+    tokens=topic.split("/")
+    image_topic=tokens[-1] #=image_raw
+
+    #extract base topic
+    tokens=topic.split(image_topic)
+    image_base_topic=tokens[0].replace("/", "", -1) #=cam0/
+
+    cam0_id = md5.new(str(T_SC)).hexdigest()
+    STRING_OUT=""
+    STRING_OUT+="- camera:\n"
+    STRING_OUT+="    label: {0}\n".format(image_base_topic)
+    STRING_OUT+="    id: {0}\n".format(cam0_id)
+    STRING_OUT+="    line-delay-nanoseconds: 0\n"
+
+    resolution = camConfig.getResolution()
+    STRING_OUT+="    image_height: {0}\n".format(resolution[1])
+    STRING_OUT+="    image_width: {0}\n".format(resolution[0])
+
+    intrinsics = camConfig.getIntrinsics()
+    proj_model = intrinsics[0]
+    intrinsic_params = intrinsics[1]
+
+    if proj_model!="pinhole":
+        sm.logFatal("aslam only supports pinhole projection. removed camera with topic {0}!".format(topic))
+        return ""
+
+    STRING_OUT+="    type: {0}\n".format(proj_model)
+    STRING_OUT+="    intrinsics:\n"
+    STRING_OUT+="      cols: 1\n"
+    STRING_OUT+="      rows: 4\n"
+    STRING_OUT+="      data: [{0}, {1}, {2}, {3}]\n".format(intrinsic_params[0], intrinsic_params[1], intrinsic_params[2], intrinsic_params[3])
+
+    distortion = camConfig.getDistortion()
+    dist_model = distortion[0]
+    dist_params = distortion[1]
+
+    STRING_OUT+="    distortion:\n"
+    STRING_OUT+="      type: {0}\n".format(dist_model)
+    STRING_OUT+="      parameters:\n"
+    STRING_OUT+="        cols: 1\n"
+    STRING_OUT+="        rows: 4\n"
+    STRING_OUT+="        data: [{0}, {1}, {2}, {3}]\n".format(dist_params[0], dist_params[1], dist_params[2], dist_params[3])
+
+    STRING_OUT+="  T_B_C:\n"
+    STRING_OUT+="    cols: 4\n"
+    STRING_OUT+="    rows: 4\n"
+    STRING_OUT+="    data: [{0}, {1}, {2}, {3},\n".format(T_SC[0,0], T_SC[0,1], T_SC[0,2], T_SC[0,3])
+    STRING_OUT+="         {0}, {1}, {2}, {3},\n".format(T_SC[1,0], T_SC[1,1], T_SC[1,2], T_SC[1,3])
+    STRING_OUT+="         {0}, {1}, {2}, {3},\n".format(T_SC[2,0], T_SC[2,1], T_SC[2,2], T_SC[2,3])
+    STRING_OUT+="          0.0, 0.0, 0.0, 1.0],\n"
+
+    STRING_OUT+="\n"
+
+    return STRING_OUT
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Convert a camchain_imu.yaml to an aslam camera configuration block.')
+    parser.add_argument('--cam', dest='chainYaml', help='Camera configuration as yaml file', required=True)
+    parser.add_argument('--mav', dest='mavName', help='Name of mav', required=True)
+    parser.add_argument('--out', dest='outLoc', help='Path to output parameters to', required=False)
+    parsed = parser.parse_args()
+
+    #load the camchain.yaml
+    camchain = kc.ConfigReader.CameraChainParameters(parsed.chainYaml)
+
+    ncam_id = md5.new(str(camchain)).hexdigest()
+
+    #create camera config block
+    CONFIG=""
+    CONFIG+="label: \"{0}\"\n".format(parsed.mavName)
+    CONFIG+="id: {0}\n".format(ncam_id)
+    CONFIG+= "cameras:\n"
+
+    #export each camera
+    for cidx in range(0, camchain.numCameras()):
+        camConfig = camchain.getCameraParameters(cidx)
+
+        T_SC = camchain.getExtrinsicsImuToCam(cidx).inverse().T()
+        CONFIG += printCameraBlock(camConfig, T_SC)
+
+    #output the stuff
+    if(parsed.outLoc):
+        with open(parsed.outLoc, 'w') as file_:
+          file_.write(CONFIG)
+    else:
+        print
+        print "Copy the following block to your swe configuration:"
+        print "---------------------------------------------------"
+        print
+        print CONFIG
+

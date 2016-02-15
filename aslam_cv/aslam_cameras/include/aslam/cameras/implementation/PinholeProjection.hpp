@@ -1,4 +1,5 @@
 #include <opencv2/core/eigen.hpp>
+#include <Eigen/StdVector>
 
 namespace aslam {
 
@@ -736,7 +737,7 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
     SM_ASSERT_TRUE(Exception, obs.target(), "The GridCalibrationTargetObservation has no target object");
     const GridCalibrationTargetBase & target = *obs.target();
 
-    Eigen::Vector2d center[target.rows()];
+    std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> center(target.rows());
     double radius[target.rows()];
     bool skipImage=false;
 

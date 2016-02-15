@@ -18,7 +18,7 @@ catkin_package(
 )
 
 ExternalProject_Add(suitesparse_src
-  DOWNLOAD_COMMAND rm -f SuiteSparse-${VERSION}.tar.gz && wget https://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-${VERSION}.tar.gz
+  DOWNLOAD_COMMAND rm -f SuiteSparse-${VERSION}.tar.gz && wget http://faculty.cse.tamu.edu/davis/SuiteSparse/SuiteSparse-${VERSION}.tar.gz
   PATCH_COMMAND tar -xzf ../SuiteSparse-${VERSION}.tar.gz && rm -rf ../suitesparse_src-build/SuiteSparse && sed -i.bu "s/\\/usr\\/local\\/lib/..\\/lib/g" SuiteSparse/SuiteSparse_config/SuiteSparse_config.mk && sed -i.bu "s/\\/usr\\/local\\/include/..\\/include/g" SuiteSparse/SuiteSparse_config/SuiteSparse_config.mk && mv SuiteSparse ../suitesparse_src-build/
   CONFIGURE_COMMAND ""
   BUILD_COMMAND cd SuiteSparse && make library -j8 -l8

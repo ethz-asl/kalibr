@@ -18,6 +18,7 @@ cs_add_library(${PROJECT_NAME}
   src/NoDistortion.cpp
   src/RadialTangentialDistortion.cpp
   src/EquidistantDistortion.cpp
+  src/FovDistortion.cpp
   src/ImageMask.cpp
   src/GridCalibrationTargetObservation.cpp
   src/GridCalibrationTargetBase.cpp
@@ -45,6 +46,7 @@ catkin_add_gtest(${PROJECT_NAME}_tests
   test/OmniCameraGeometry.cpp
   test/RadialTangentialDistortion.cpp
   test/EquidistantDistortion.cpp
+  test/FovDistortion.cpp
   test/Triangulation.cpp
   test/testFrame.cpp
   test/GridCalibration.cpp

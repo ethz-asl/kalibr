@@ -30,6 +30,9 @@ BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
   aslam::python::exportReprojectionErrors<EquidistantDistortedPinholeCameraGeometry>("EquidistantDistortedPinhole");
   aslam::python::exportReprojectionErrors<EquidistantDistortedPinholeRsCameraGeometry>("EquidistantDistortedPinholeRs");
 
+  aslam::python::exportReprojectionErrors<FovDistortedPinholeCameraGeometry>("FovDistortedPinhole");
+  aslam::python::exportReprojectionErrors<FovDistortedPinholeRsCameraGeometry>("FovDistortedPinholeRs");
+
   aslam::python::exportReprojectionErrors<OmniCameraGeometry>("Omni");
   aslam::python::exportReprojectionErrors<OmniRsCameraGeometry>("OmniRs");
 
@@ -39,57 +42,72 @@ BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
   aslam::python::exportReprojectionErrors<EquidistantDistortedOmniCameraGeometry>("EquidistantDistortedOmni");
   aslam::python::exportReprojectionErrors<EquidistantDistortedOmniRsCameraGeometry>("EquidistantDistortedOmniRs");
 
+  aslam::python::exportReprojectionErrors<FovDistortedOmniCameraGeometry>("FovDistortedOmni");
+  aslam::python::exportReprojectionErrors<FovDistortedOmniRsCameraGeometry>("FovDistortedOmniRs");
+
   // Export the camera design variables:
   using namespace aslam::python;
 
   exportCameraDesignVariables<PinholeCameraGeometry>("PinholeCameraGeometry");
   exportCameraDesignVariables<DistortedPinholeCameraGeometry>("DistortedPinholeCameraGeometry");
   exportCameraDesignVariables<EquidistantDistortedPinholeCameraGeometry>("EquidistantDistortedPinholeCameraGeometry");
+  exportCameraDesignVariables<FovDistortedPinholeCameraGeometry>("FovDistortedPinholeCameraGeometry");
 
   exportCameraDesignVariables<PinholeRsCameraGeometry>("PinholeRsCameraGeometry");
   exportCameraDesignVariables<DistortedPinholeRsCameraGeometry>("DistortedPinholeRsCameraGeometry");
   exportCameraDesignVariables<EquidistantDistortedPinholeRsCameraGeometry>("EquidistantDistortedPinholeRsCameraGeometry");
+  exportCameraDesignVariables<FovDistortedPinholeRsCameraGeometry>("FovDistortedPinholeRsCameraGeometry");
 
   exportCameraDesignVariables<OmniRsCameraGeometry>("OmniRsCameraGeometry");
   exportCameraDesignVariables<DistortedOmniRsCameraGeometry>("DistortedOmniRsCameraGeometry");
   exportCameraDesignVariables<EquidistantDistortedOmniRsCameraGeometry>("EquidistantDistortedOmniRsCameraGeometry");
+  exportCameraDesignVariables<FovDistortedOmniRsCameraGeometry>("FovDistortedOmniRsCameraGeometry");
 
   exportCameraDesignVariables<OmniCameraGeometry>("OmniCameraGeometry");
   exportCameraDesignVariables<DistortedOmniCameraGeometry>("DistortedOmniCameraGeometry");
   exportCameraDesignVariables<EquidistantDistortedOmniCameraGeometry>("EquidistantDistortedOmniCameraGeometry");
+  exportCameraDesignVariables<FovDistortedOmniCameraGeometry>("FovDistortedOmniCameraGeometry");
 
   exportCameraDesignVariables<MaskedPinholeCameraGeometry>("MaskedPinholeCameraGeometry");
   exportCameraDesignVariables<MaskedDistortedPinholeCameraGeometry>("MaskedDistortedPinholeCameraGeometry");
   exportCameraDesignVariables<MaskedEquidistantDistortedPinholeCameraGeometry>("MaskedEquidistantDistortedPinholeCameraGeometry");
+  exportCameraDesignVariables<MaskedFovDistortedPinholeCameraGeometry>("MaskedFovDistortedPinholeCameraGeometry");
 
   exportCameraDesignVariables<MaskedPinholeRsCameraGeometry>("MaskedPinholeRsCameraGeometry");
   exportCameraDesignVariables<MaskedDistortedPinholeRsCameraGeometry>("MaskedDistortedPinholeRsCameraGeometry");
   exportCameraDesignVariables<MaskedEquidistantDistortedPinholeRsCameraGeometry>("MaskedEquidistantDistortedPinholeRsCameraGeometry");
+  exportCameraDesignVariables<MaskedFovDistortedPinholeRsCameraGeometry>("MaskedFovDistortedPinholeRsCameraGeometry");
 
   exportCameraDesignVariables<MaskedOmniRsCameraGeometry>("MaskedOmniRsCameraGeometry");
   exportCameraDesignVariables<MaskedDistortedOmniRsCameraGeometry>("MaskedDistortedOmniRsCameraGeometry");
   exportCameraDesignVariables<MaskedEquidistantDistortedOmniRsCameraGeometry>("MaskedEquidistantDistortedOmniRsCameraGeometry");
+  exportCameraDesignVariables<MaskedFovDistortedOmniRsCameraGeometry>("MaskedFovDistortedOmniRsCameraGeometry");
 
   exportCameraDesignVariables<MaskedOmniCameraGeometry>("MaskedOmniCameraGeometry");
   exportCameraDesignVariables<MaskedDistortedOmniCameraGeometry>("MaskedDistortedOmniCameraGeometry");
   exportCameraDesignVariables<MaskedEquidistantDistortedOmniCameraGeometry>("MaskedEquidistantDistortedOmniCameraGeometry");
+  exportCameraDesignVariables<MaskedFovDistortedOmniCameraGeometry>("MaskedFovDistortedOmniCameraGeometry");
 
   exportCameraDesignVariables<DepthCameraGeometry>("DepthCameraGeometry");
   exportCameraDesignVariables<DistortedDepthCameraGeometry>("DistortedDepthCameraGeometry");
   exportCameraDesignVariables<EquidistantDistortedDepthCameraGeometry>("EquidistantDistortedDepthCameraGeometry");
+  exportCameraDesignVariables<FovDistortedDepthCameraGeometry>("FovDistortedDepthCameraGeometry");
 
   // Export Projection and Distortion Model Design Variables:
   exportGenericProjectionDesignVariable<NoDistortion>("NoDistortion");
   exportGenericProjectionDesignVariable<RadialTangentialDistortion>("RadialTangentialDistortion");
   exportGenericProjectionDesignVariable<EquidistantDistortion>("EquidistantDistortion");
+  exportGenericProjectionDesignVariable<FovDistortion>("FovDistortion");
 
   exportGenericProjectionDesignVariable< PinholeProjection<NoDistortion> >("PinholeProjection");
   exportGenericProjectionDesignVariable< PinholeProjection<RadialTangentialDistortion> >("DistortedPinholeProjection");
   exportGenericProjectionDesignVariable< PinholeProjection<EquidistantDistortion> >("EquidistantDistortedPinholeProjection");
+  exportGenericProjectionDesignVariable< PinholeProjection<FovDistortion> >("FovDistortedPinholeProjection");
 
   exportGenericProjectionDesignVariable< OmniProjection<NoDistortion> >("OmniProjection");
   exportGenericProjectionDesignVariable< OmniProjection<RadialTangentialDistortion> >("DistortedOmniProjection");
   exportGenericProjectionDesignVariable< OmniProjection<EquidistantDistortion> >("EquidistantDistortedOmniProjection");
+  exportGenericProjectionDesignVariable< OmniProjection<FovDistortion> >("FovDistortedOmniProjection");
 
   // Export Shutter Design Variables:
   exportShutterDesignVariable< GlobalShutter >("GlobalShutter");

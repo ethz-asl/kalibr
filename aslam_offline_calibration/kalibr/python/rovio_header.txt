@@ -1,0 +1,9 @@
+; You can partially override parameter set in this file by creating your own subset of parameter in a separate info-file and include it with:
+; #include "/home/user/workspace/rovio/cfg/rovio_custom.info"
+Common
+{
+    doVECalibration true;                                       Should the camera-IMU extrinsics be calibrated online
+    depthType 1;                                                Type of depth parametrization (0: normal, 1: inverse depth, 2: log, 3: hyperbolic)
+    verbose false;                                              Is the verbose active
+}
+

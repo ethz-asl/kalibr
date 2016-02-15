@@ -3,6 +3,7 @@
 #include <aslam/cameras/OmniProjection.hpp>
 #include <aslam/cameras/NoDistortion.hpp>
 #include <aslam/cameras/EquidistantDistortion.hpp>
+#include <aslam/cameras/FovDistortion.hpp>
 #include <aslam/cameras/RadialTangentialDistortion.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <sm/python/boost_serialization_pickle.hpp>
@@ -210,7 +211,13 @@ void exportGenericDistortionFunctions(T & dist) {
            "Set the Parameter Vector/Matrix");
   dist.def("getParameters", &getParameters<C>,
            "Get the Parameter Vector/Matrix");
+}
 
+void exportFovDistortionFunctions() {
+  class_<FovDistortion, boost::shared_ptr<FovDistortion> > distortion("FovDistortion", init<>());
+  exportGenericDistortionFunctions<FovDistortion>(distortion);
+  distortion.def(init<double>(("FovDistortion(double w)")));
+  distortion.def("w", &FovDistortion::w);
 }
 
 void exportRadialTangentialDistortionFunctions() {
@@ -231,7 +238,6 @@ void exportRadialTangentialDistortionFunctions() {
   //rtDistortion.def("distortionError", &RadialTangentialDistortion::distortionError);
 
   //exportGenericProjectionDesignVariable<RadialTangentialDistortion>("RadialTangentialDistortion");
-
 }
 
 template<typename D>
@@ -335,15 +341,19 @@ void exportCameraProjections() {
   //exportGenericProjectionDesignVariable<NoDistortion>("NoDistortion");
 
   exportRadialTangentialDistortionFunctions();
+  exportFovDistortionFunctions();
 
   exportPinholeProjection<NoDistortion>("PinholeProjection");
   exportPinholeProjection<RadialTangentialDistortion>(
       "DistortedPinholeProjection");
   exportPinholeProjection<EquidistantDistortion>(
       "EquidistantPinholeProjection");
+  exportPinholeProjection<FovDistortion>(
+        "FovPinholeProjection");
 
   exportOmniProjection<NoDistortion>("OmniProjection");
   exportOmniProjection<RadialTangentialDistortion>("DistortedOmniProjection");
+  exportOmniProjection<FovDistortion>("FovOmniProjection");
 
   // distortion:
   // exportAPrioriInformationError<aslam::backend::DesignVariableAdapter< RadialTangentialDistortion > >("RadialTangentialDistortionAPrioriInformationError");

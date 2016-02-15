@@ -650,9 +650,11 @@ def printDebugEnd(cself):
 def saveChainParametersYaml(cself, resultFile, graph):
     cameraModels = {acvb.DistortedPinhole: 'pinhole',
                     acvb.EquidistantPinhole: 'pinhole',
+                    acvb.FovPinhole: 'pinhole',
                     acvb.DistortedOmni: 'omni'}
     distortionModels = {acvb.DistortedPinhole: 'radtan',
                         acvb.EquidistantPinhole: 'equidistant',
+                        acvb.FovPinhole: 'fov',
                         acvb.DistortedOmni: 'radtan'}
 
     chain = cr.CameraChainParameters(resultFile, createYaml=True)
