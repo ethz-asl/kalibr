@@ -65,7 +65,7 @@ def printCameraBlock(camConfig, T_SC):
     STRING_OUT+="    data: [{0}, {1}, {2}, {3},\n".format(T_SC[0,0], T_SC[0,1], T_SC[0,2], T_SC[0,3])
     STRING_OUT+="         {0}, {1}, {2}, {3},\n".format(T_SC[1,0], T_SC[1,1], T_SC[1,2], T_SC[1,3])
     STRING_OUT+="         {0}, {1}, {2}, {3},\n".format(T_SC[2,0], T_SC[2,1], T_SC[2,2], T_SC[2,3])
-    STRING_OUT+="          0.0, 0.0, 0.0, 1.0],\n"
+    STRING_OUT+="          0.0, 0.0, 0.0, 1.0]\n"
 
     STRING_OUT+="\n"
 
