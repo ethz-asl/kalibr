@@ -366,7 +366,7 @@ bool OmniProjection<DISTORTION_T>::keypointToHomogeneous(
 
   Eigen::MatrixBase<DERIVED_JK> & Jk =
       const_cast<Eigen::MatrixBase<DERIVED_JK> &>(outJk);
-  Jk.derived().resize(2, 4);
+  Jk.derived().resize(4, 2);
   Jk.setZero();
 
   Eigen::MatrixBase<DERIVED_P> & p =
