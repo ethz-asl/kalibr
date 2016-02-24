@@ -5,7 +5,6 @@ find_package(catkin_simple REQUIRED)
 
 catkin_simple()
 
-
 cs_add_library(${PROJECT_NAME}
   src/ReprojectionError.cpp
   src/GridCalibrationTargetDesignVariableContainer.cpp
@@ -22,6 +21,9 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/testReprojectionError.cpp
 )
 
+find_package(Boost REQUIRED COMPONENTS system)
+
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
 cs_install()
