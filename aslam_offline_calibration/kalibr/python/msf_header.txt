@@ -1,0 +1,15 @@
+core/data_playback: true
+core/fixed_bias: 0
+
+#########IMU PARAMETERS#######
+core/core_noise_acc: 0.083
+core/core_noise_accbias: 0.00005
+core/core_noise_gyr: 0.0013
+core/core_noise_gyrbias: 0.0000013
+
+pose_sensor/fixed_scale: 1.0
+pose_sensor/pose_noise_scale: 0.0
+pose_sensor/pose_noise_p_wv: 0.0
+pose_sensor/pose_noise_q_wv: 0.0
+pose_sensor/pose_noise_q_ic: 0.0
+pose_sensor/pose_noise_p_ic: 0.0
