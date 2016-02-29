@@ -16,6 +16,7 @@
   <build_depend>aslam_time</build_depend>
   <build_depend>aslam_cameras</build_depend>
   <build_depend>aslam_backend</build_depend>
+  <build_depend>aslam_cv_backend</build_depend>
   <build_depend>aslam_backend_expressions</build_depend>
   <build_depend>sm_boost</build_depend>
   <build_depend>sm_eigen</build_depend>

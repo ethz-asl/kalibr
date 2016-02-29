@@ -10,11 +10,22 @@ namespace aslam {
 
 
     template<typename F>
-    CovarianceReprojectionError<F>::CovarianceReprojectionError(const frame_t * frame, int keypointIndex,
-					    HomogeneousExpression point, CameraDesignVariable<camera_geometry_t> camera, spline_t* spline, Scalar* lineDelayDv) :
-      _frame(frame), _keypointIndex(keypointIndex), _point(point), _camera(camera), _spline(spline), _lineDelayDv(lineDelayDv)
+    CovarianceReprojectionError<F>::CovarianceReprojectionError(
+      const frame_t * frame,
+      int keypointIndex,
+			HomogeneousExpression point,
+      CameraDesignVariable<camera_geometry_t> camera,
+      spline_t* spline
+    ) :
+      _frame(frame),
+      _keypointIndex(keypointIndex),
+      _point(point),
+      _camera(camera),
+      _spline(spline)
     {
       SM_ASSERT_TRUE(Exception, frame != NULL, "The frame must not be null");
+      SM_ASSERT_TRUE(Exception, _frame->numKeypoints() > _keypointIndex, "Keypoint index must be in bounds of frame.");
+
       // if a spline is given, estimate the covariance in each iteration
       //if(!spline)
       //    parent_t::_invR = _frame->keypoint(_keypointIndex).invR();
@@ -23,7 +34,6 @@ namespace aslam {
       camera.getDesignVariables(dvs);	// camera dv's
 
       parent_t::setDesignVariablesIterator(dvs.begin(), dvs.end());
-      
     }
 
 
@@ -44,14 +54,10 @@ namespace aslam {
     	Eigen::Matrix<double, 2,4> outJp;
     	cam.homogeneousToKeypoint(p, hat_y, outJp);
 
-
     	double lineDelay;
-    	if(_lineDelayDv)
-    		lineDelay = _lineDelayDv->toScalar();
-    	else
-    		lineDelay = cam.shutter().lineDelay();
+  		lineDelay = cam.shutter().lineDelay();
 
-    	double observationTime = _frame->keypointTime(_keypointIndex).toSec() + k.y()(1) * lineDelay;
+    	double observationTime = this->observationTime();
 
     	Eigen::VectorXd splinePoint = _spline->spline().evalD(observationTime, 0);
     	// evaluate the covariance:
@@ -92,7 +98,7 @@ namespace aslam {
       Eigen::Vector4d p = _point.toHomogeneous();
       measurement_t hat_y;
       Eigen::Matrix<double, 2,4> outJp;
-	  cam.homogeneousToKeypoint(p, hat_y, outJp);
+	    cam.homogeneousToKeypoint(p, hat_y, outJp);
 
       parent_t::setError(k.y() - hat_y);
 
@@ -115,30 +121,25 @@ namespace aslam {
     double CovarianceReprojectionError<F>::observationTime()
     {
     	double lineDelay;
-    	if(_lineDelayDv)
-    		lineDelay = _lineDelayDv->toScalar();
-    	else
-    		lineDelay = _frame->geometry().shutter().lineDelay();
+  		lineDelay = _frame->geometry().shutter().lineDelay();
     	return _frame->keypointTime(_keypointIndex).toSec() + _frame->keypoint(_keypointIndex).y()(1) * lineDelay;
     }
 
 
-      
     template<typename F>
     void CovarianceReprojectionError<F>::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & _jacobians)
     {
       //const keypoint_t & k = _frame->keypoint(_keypointIndex);
       const camera_geometry_t & cam = _frame->geometry();
-      
+
       Eigen::Vector4d p = _point.toHomogeneous();
       typename camera_geometry_t::jacobian_homogeneous_t J;
       measurement_t hat_y;
-	  cam.homogeneousToKeypoint(p, hat_y, J);
+	    cam.homogeneousToKeypoint(p, hat_y, J);
 
       _point.evaluateJacobians(_jacobians, -J);
 
       _camera.evaluateJacobians(_jacobians, p);
-
     }
 
 
