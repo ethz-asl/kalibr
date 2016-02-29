@@ -12,14 +12,15 @@
 #include <aslam/cameras/RollingShutter.hpp>
 
 void exportGridCalibration();
-void exportCameraGeometryDvc();
+// void exportCameraGeometryDvc();
 //void exportNCameraSystemDvc();
 
 BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
 {
   exportGridCalibration();
-  exportCameraGeometryDvc();
-//exportNCameraSystemDvc();
+  // exportCameraGeometryDvc();
+  //exportNCameraSystemDvc();
+
   using namespace aslam::cameras;
   aslam::python::exportReprojectionErrors<PinholeCameraGeometry>("Pinhole");
   aslam::python::exportReprojectionErrors<PinholeRsCameraGeometry>("PinholeRs");

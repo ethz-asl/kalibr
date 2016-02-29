@@ -7,8 +7,8 @@ catkin_simple()
 
 cs_add_library(${PROJECT_NAME}
   src/GridCalibrationTargetDesignVariableContainer.cpp
-  src/CameraGeometryDesignVariableContainer.cpp
   # src/CameraGeometryDesignVariableContainer.cpp
+  # src/NCameraSystemDesignVariableContainer.cpp
 )
 
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
