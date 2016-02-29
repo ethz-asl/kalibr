@@ -3,7 +3,7 @@
 #include <sstream>
 #include <aslam/Frame.hpp>
 #include <aslam/backend/ReprojectionError.hpp>
-//#include <aslam/backend/CovarianceReprojectionError.hpp>
+#include <aslam/backend/CovarianceReprojectionError.hpp>
 #include <aslam/backend/SimpleReprojectionError.hpp>
 #include <aslam/backend/HomogeneousExpression.hpp>
 #include <aslam/backend/CameraDesignVariable.hpp>
@@ -60,31 +60,43 @@ void exportReprojectionError(const std::string & camName) {
 
 }
 
-// \todo Find a place for the covariance reprojection error...
-// template<typename CAMERA_GEOMETRY_T>
-// void exportCovarianceReprojectionError(const std::string & camName)
-// {
-//     std::string name = camName + "ReprojectionErrorAdaptiveCovariance";
-//   using namespace boost::python;
-//   using namespace aslam;
-//   using namespace aslam::backend;
-//   typedef CAMERA_GEOMETRY_T geometry_t;
-//   typedef DescriptorBase descriptor_t;
-//   typedef Frame<geometry_t> frame_t;
-//   typedef typename frame_t::keypoint_t keypoint_t;
+template<typename CAMERA_GEOMETRY_T>
+void exportCovarianceReprojectionError(const std::string & camName)
+{
+  std::string name = camName + "ReprojectionErrorAdaptiveCovariance";
+  using namespace boost::python;
+  using namespace aslam;
+  using namespace aslam::backend;
+  typedef CAMERA_GEOMETRY_T geometry_t;
+  typedef DescriptorBase descriptor_t;
+  typedef Frame<geometry_t> frame_t;
+  typedef typename frame_t::keypoint_t keypoint_t;
 
-//   class_< CovarianceReprojectionError<frame_t>, boost::shared_ptr<CovarianceReprojectionError<frame_t> >, bases< ErrorTerm > >( name.c_str(),
-// 		  init<const frame_t * , int ,HomogeneousExpression, CameraDesignVariable<geometry_t>, aslam::splines::BSplinePoseDesignVariable*, aslam::backend::Scalar* >( (name + "( frame, keypointIndex, homogeneousPointExpression, CameraDesignVariable, bsplineDesignVariable, lineDelayDv)").c_str()) )
-// 		.def("observationTime", &CovarianceReprojectionError<frame_t>::observationTime)
-// 		.def("covarianceMatrix",  &CovarianceReprojectionError<frame_t>::covarianceMatrix)
-// 				;
+  class_<
+    CovarianceReprojectionError<frame_t>,
+    boost::shared_ptr<CovarianceReprojectionError<frame_t>
+  >,bases< ErrorTerm > >(
+      name.c_str(),
+		  init<
+        const frame_t *,
+        int,
+        HomogeneousExpression,
+        CameraDesignVariable<geometry_t>,
+        aslam::splines::BSplinePoseDesignVariable*
+      >
+      (
+        (name + "( frame, keypointIndex, homogeneousPointExpression, CameraDesignVariable, bsplineDesignVariable)").c_str()
+      )
+    )
+		.def("observationTime", &CovarianceReprojectionError<frame_t>::observationTime)
+		.def("covarianceMatrix",  &CovarianceReprojectionError<frame_t>::covarianceMatrix)
+		;
 
-// }
+}
 
 template<typename CAMERA_GEOMETRY_T>
 void exportReprojectionErrors(const std::string & camName) {
   exportReprojectionError<CAMERA_GEOMETRY_T>(camName);
-  //exportCovarianceReprojectionError<CAMERA_GEOMETRY_T>(camName);
 }
 
 }  // namespace python

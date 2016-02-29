@@ -23,27 +23,36 @@ BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
   using namespace aslam::cameras;
   aslam::python::exportReprojectionErrors<PinholeCameraGeometry>("Pinhole");
   aslam::python::exportReprojectionErrors<PinholeRsCameraGeometry>("PinholeRs");
+  aslam::python::exportCovarianceReprojectionError<PinholeRsCameraGeometry>("PinholeRs");
 
   aslam::python::exportReprojectionErrors<DistortedPinholeCameraGeometry>("DistortedPinhole");
   aslam::python::exportReprojectionErrors<DistortedPinholeRsCameraGeometry>("DistortedPinholeRs");
+  aslam::python::exportCovarianceReprojectionError<DistortedPinholeRsCameraGeometry>("DistortedPinholeRs");
 
   aslam::python::exportReprojectionErrors<EquidistantDistortedPinholeCameraGeometry>("EquidistantDistortedPinhole");
   aslam::python::exportReprojectionErrors<EquidistantDistortedPinholeRsCameraGeometry>("EquidistantDistortedPinholeRs");
+  aslam::python::exportCovarianceReprojectionError<EquidistantDistortedPinholeRsCameraGeometry>("EquidistantDistortedPinholeRs");
 
   aslam::python::exportReprojectionErrors<FovDistortedPinholeCameraGeometry>("FovDistortedPinhole");
   aslam::python::exportReprojectionErrors<FovDistortedPinholeRsCameraGeometry>("FovDistortedPinholeRs");
+  aslam::python::exportCovarianceReprojectionError<FovDistortedPinholeRsCameraGeometry>("FovDistortedPinholeRs");
 
   aslam::python::exportReprojectionErrors<OmniCameraGeometry>("Omni");
   aslam::python::exportReprojectionErrors<OmniRsCameraGeometry>("OmniRs");
+  aslam::python::exportCovarianceReprojectionError<OmniRsCameraGeometry>("OmniRs");
 
   aslam::python::exportReprojectionErrors<DistortedOmniCameraGeometry>("DistortedOmni");
   aslam::python::exportReprojectionErrors<DistortedOmniRsCameraGeometry>("DistortedOmniRs");
+  aslam::python::exportCovarianceReprojectionError<DistortedOmniRsCameraGeometry>("DistortedOmniRs");
 
   aslam::python::exportReprojectionErrors<EquidistantDistortedOmniCameraGeometry>("EquidistantDistortedOmni");
   aslam::python::exportReprojectionErrors<EquidistantDistortedOmniRsCameraGeometry>("EquidistantDistortedOmniRs");
+  aslam::python::exportCovarianceReprojectionError<EquidistantDistortedOmniRsCameraGeometry>("EquidistantDistortedOmniRs");
 
   aslam::python::exportReprojectionErrors<FovDistortedOmniCameraGeometry>("FovDistortedOmni");
   aslam::python::exportReprojectionErrors<FovDistortedOmniRsCameraGeometry>("FovDistortedOmniRs");
+  aslam::python::exportCovarianceReprojectionError<FovDistortedOmniRsCameraGeometry>("FovDistortedOmniRs");
+
 
   // Export the camera design variables:
   using namespace aslam::python;

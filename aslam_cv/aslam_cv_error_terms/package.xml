@@ -24,4 +24,5 @@
   <build_depend>sparse_block_matrix</build_depend>
   <build_depend>suitesparse</build_depend>
   <build_depend>opencv2_catkin</build_depend>
+  <build_depend>aslam_splines</build_depend>
 </package>
