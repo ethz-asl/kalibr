@@ -13,7 +13,7 @@ namespace aslam {
     CovarianceReprojectionError<F>::CovarianceReprojectionError(
       const frame_t * frame,
       int keypointIndex,
-			HomogeneousExpression point,
+			const HomogeneousExpression & point,
       CameraDesignVariable<camera_geometry_t> camera,
       spline_t* spline
     ) :
@@ -76,14 +76,14 @@ namespace aslam {
 
     	A(0,1) += J(0);
     	A(1,1) += J(1);
-        
+
         // make sure, the variance of v remains positive and set to 0 if it is negative
-        
+
        // if (A(1,1) < 0) {
        //     std::cout << "set one of them to zero..." << std::endl;
        //     A(1,1) = 0; ======> THIS IS BAD!
        // }
-        
+
     	return A;
 
     }
@@ -94,7 +94,7 @@ namespace aslam {
     {
       const keypoint_t & k = _frame->keypoint(_keypointIndex);
       const camera_geometry_t & cam = _frame->geometry();
-      
+
       Eigen::Vector4d p = _point.toHomogeneous();
       measurement_t hat_y;
       Eigen::Matrix<double, 2,4> outJp;
@@ -121,8 +121,8 @@ namespace aslam {
     double CovarianceReprojectionError<F>::observationTime()
     {
     	double lineDelay;
-  		lineDelay = _frame->geometry().shutter().lineDelay();
-    	return _frame->keypointTime(_keypointIndex).toSec() + _frame->keypoint(_keypointIndex).y()(1) * lineDelay;
+  		// lineDelay = _frame->geometry().shutter().lineDelay();
+    	return _frame->keypointTime(_keypointIndex).toSec(); // + _frame->keypoint(_keypointIndex).y()(1) * lineDelay;
     }
 
 

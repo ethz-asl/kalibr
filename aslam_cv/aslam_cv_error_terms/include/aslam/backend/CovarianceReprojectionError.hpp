@@ -38,7 +38,7 @@ namespace aslam {
       CovarianceReprojectionError(
         const frame_t * frame,
         int keypointIndex,
-        HomogeneousExpression point,
+        const HomogeneousExpression & point,
         CameraDesignVariable<camera_geometry_t> camera,
         spline_t* spline = NULL
       );
