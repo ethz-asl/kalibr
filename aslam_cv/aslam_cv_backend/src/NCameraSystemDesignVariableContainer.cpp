@@ -2,6 +2,7 @@
 #include <aslam/backend/MapTransformation.hpp>
 #include <boost/foreach.hpp>
 
+/// \remarks This file is neither in use nor compiled.
 namespace aslam {
 
 NCameraSystemDesignVariableContainer::NCameraSystemDesignVariableContainer(

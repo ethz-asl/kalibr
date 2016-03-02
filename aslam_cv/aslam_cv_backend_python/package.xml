@@ -8,7 +8,7 @@
   <license>New BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
-  
+
   <build_depend>sm_common</build_depend>
   <build_depend>sm_python</build_depend>
   <build_depend>sm_opencv</build_depend>
@@ -27,6 +27,7 @@
   <build_depend>aslam_camera_system</build_depend>
   <build_depend>aslam_frames</build_depend>
   <build_depend>aslam_cv_error_terms</build_depend>
+  <build_depend>aslam_splines</build_depend>
   <build_depend>aslam_cv_python</build_depend>
   <build_depend>aslam_cv_backend</build_depend>
   <build_depend>aslam_time</build_depend>

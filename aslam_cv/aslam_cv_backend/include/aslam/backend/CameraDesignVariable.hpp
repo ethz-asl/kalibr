@@ -4,13 +4,18 @@
 #include <aslam/backend/DesignVariable.hpp>
 #include <aslam/backend/DesignVariableAdapter.hpp>
 #include <aslam/backend/JacobianContainer.hpp>
-
+#include <aslam/backend/ScalarExpressionNodeKeypointTime.hpp>
+#include <aslam/backend/ScalarExpression.hpp>
+#include <aslam/Time.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 namespace aslam {
 	namespace backend {
 
 	template<typename CAMERA_T>
-	class CameraDesignVariable
+	class CameraDesignVariable:
+		public boost::enable_shared_from_this<CameraDesignVariable<CAMERA_T> >
 	{
 	public:
         SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
@@ -41,6 +46,14 @@ namespace aslam {
 		boost::shared_ptr<DesignVariableAdapter<shutter_t> > shutterDesignVariable()  { return _shutterDv; }
 
 		boost::shared_ptr<camera_t> camera() { return _camera; }
+
+		/// \brief Get the keypoint time as an expression. If the shutter
+		///        parameters are being estimated, this will be hooked up
+		///        to the camera design variable
+		backend::ScalarExpression keypointTime(const aslam::Time & imageStamp, const Eigen::VectorXd & y);
+
+		// get the temporal offset of the a given keypoint y
+		backend::ScalarExpression temporalOffset(const Eigen::VectorXd & y);
 
 	private:
 		boost::shared_ptr<camera_t> _camera;

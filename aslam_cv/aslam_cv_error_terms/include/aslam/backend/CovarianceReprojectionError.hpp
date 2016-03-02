@@ -12,12 +12,12 @@
 
 namespace aslam {
   namespace backend {
-    
+
     template<typename FRAME_T>
     class CovarianceReprojectionError : public ErrorTermFs< FRAME_T::KeypointDimension >
     {
     public:
-      EIGEN_MAKE_ALIGNED_OPERATOR_NEW 
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
 
 
@@ -35,12 +35,13 @@ namespace aslam {
       typedef ErrorTermFs< KeypointDimension > parent_t;
 
       CovarianceReprojectionError();
-      // we take the lineDelayDv scalar design variable as an additional parameter as it was
-      // the structure in the first place and the Jacobians of the Shutters are not yet
-      // implemented. This should be removed at some point, to only keep the camera
-      // design variable.
-      // if the lineDelayDv is initialised to NULL, the camera design variable will be used.
-      CovarianceReprojectionError(const frame_t * frame, int keypointIndex, HomogeneousExpression point, CameraDesignVariable<camera_geometry_t> camera, spline_t* spline = NULL, Scalar * lineDelayDv = NULL);
+      CovarianceReprojectionError(
+        const frame_t * frame,
+        int keypointIndex,
+        const HomogeneousExpression & point,
+        CameraDesignVariable<camera_geometry_t> camera,
+        spline_t* spline = NULL
+      );
       virtual ~CovarianceReprojectionError();
 
       double observationTime();
@@ -50,13 +51,13 @@ namespace aslam {
     protected:
       /// \brief evaluate the error term
       virtual double evaluateErrorImplementation();
-      
+
       /// \brief evaluate the jacobian
       virtual void evaluateJacobiansImplementation(JacobianContainer & J);
 
       /// \brief the frame that this measurement comes from.
       const frame_t * _frame;
-      
+
       /// \brief the keypoint index within the frame.
       int _keypointIndex;
 
@@ -66,7 +67,6 @@ namespace aslam {
       CameraDesignVariable<camera_geometry_t> _camera;
 
       spline_t * _spline;
-      Scalar * _lineDelayDv;
     };
   } // namespace backend
 } // namespace aslam
