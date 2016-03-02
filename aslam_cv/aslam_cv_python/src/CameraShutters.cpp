@@ -40,6 +40,8 @@ void exportGlobalShutter(std::string name) {
       name.c_str(), init<>());
   globalShutter.def(init<>((name + "()").c_str()));
 
+  register_ptr_to_python<boost::shared_ptr<GlobalShutter> >();
+
   exportGenericShutterFunctions<GlobalShutter>(globalShutter);
 }
 
@@ -51,6 +53,8 @@ void exportRollingShutter(std::string name) {
       init<double>((name + "(double lineDelay)").c_str())).def(
       "lineDelay", &RollingShutter::lineDelay,
       "Returns the Line Delay of the Rolling Shutter");
+
+  register_ptr_to_python<boost::shared_ptr<RollingShutter> >();
 
   exportGenericShutterFunctions<RollingShutter>(rollingShutter);
 }
