@@ -284,22 +284,79 @@ namespace bsplines {
       return omega;
     }
 
-    /*
-    // \alpha_b_{w,b} (angular acceleration of the world frame as seen from the body frame, expressed in the body frame)
+    // \omega_dot_b_{w,b} (angular acceleration of the world frame as seen from the body frame, expressed in the body frame)
     Eigen::Vector3d BSplinePose::angularAccelerationBodyFrame(double tk) const
     {
-      Eigen::VectorXd r = evalD(tk,0);
-      Eigen::VectorXd v = evalD(tk,1);
-      Eigen::VectorXd a = evalD(tk,2);
-      Eigen::Matrix3d C_w_b = rotation_->parametersToRotationMatrix(r.tail<3>(), NULL);
+    	Eigen::Vector3d omega;
+    	Eigen::VectorXd r = evalD(tk,0);
+    	Eigen::VectorXd v = evalD(tk,2);
+    	Eigen::Matrix3d S;
+    	Eigen::Matrix3d C_w_b = rotation_->parametersToRotationMatrix(r.tail<3>(), &S);
 
-      // \alpha_b_{w,b} = - C_{b,w} * \alpha_w_{b,w}
-      Eigen::Vector3d alpha_w = - C_w_b.transpose() * rotation_->angularAccelerationAndJacobian(r.tail<3>(), v.tail<3>(), a.tail<3>(), NULL);
-
-      return alpha;
+    	// \omega = S(\bar \theta) \dot \theta
+    	omega = -C_w_b.transpose() * S * v.tail<3>();
+    	return omega;
 
     }
-    */
+
+    // \omega_dot_b_{w,b} (angular acceleration of the world frame as seen from the body frame, expressed in the body frame)
+    Eigen::Vector3d BSplinePose::angularAccelerationBodyFrameAndJacobian(double tk, Eigen::MatrixXd * J, Eigen::VectorXi * coefficientIndices) const
+    {
+    	Eigen::Vector3d omega;
+    	Eigen::Vector3d p;
+    	Eigen::Vector3d pdot;
+    	Eigen::MatrixXd Jp;
+    	Eigen::MatrixXd Jpdot;
+    	p = evalDAndJacobian(tk,0,&Jp,NULL).tail<3>();
+    	pdot = evalDAndJacobian(tk,2,&Jpdot,coefficientIndices).tail<3>();
+
+    	Eigen::MatrixXd Jr;
+    	Eigen::Matrix3d C_w_b = inverseOrientationAndJacobian(tk,&Jr,NULL);
+
+    	// Rearrange the spline jacobian matrices. Now Jpdot is the
+    	// jacobian of p wrt the spline coefficients stacked on top
+    	// of the jacobian of pdot wrt the spline coefficients.
+    	Jpdot.block(0,0,3,Jpdot.cols()) = Jp.block(3,0,3,Jp.cols());
+
+    	Eigen::Matrix<double,3,6> Jo;
+    	omega = -C_w_b * rotation_->angularVelocityAndJacobian(p,pdot,&Jo);
+    	Jo = (-C_w_b * Jo).eval();
+    	if(J)
+    	{
+    		*J = Jo * Jpdot + sm::kinematics::crossMx(omega) * Jr;
+    	}
+
+    	return omega;
+
+    }
+
+
+    // \omega_dot_w_{b,w} (angular acceleration of the body frame as seen from the world frame, expressed in the world frame)
+    Eigen::Vector3d BSplinePose::angularAccelerationAndJacobian(double tk, Eigen::MatrixXd * J, Eigen::VectorXi * coefficientIndices) const
+    {
+
+    	Eigen::Vector3d omega;
+    	Eigen::Vector3d p;
+    	Eigen::Vector3d pdot;
+    	Eigen::MatrixXd Jp;
+    	Eigen::MatrixXd Jpdot;
+    	p = evalDAndJacobian(tk,0,&Jp,NULL).tail<3>();
+    	pdot = evalDAndJacobian(tk,2,&Jpdot,coefficientIndices).tail<3>();
+
+    	// Rearrange the spline jacobian matrices. Now Jpdot is the
+    	// jacobian of p wrt the spline coefficients stacked on top
+    	// of the jacobian of pdot wrt the spline coefficients.
+    	Jpdot.block(0,0,3,Jpdot.cols()) = Jp.block(3,0,3,Jp.cols());
+
+    	Eigen::Matrix<double,3,6> Jo;
+    	omega = rotation_->angularVelocityAndJacobian(p,pdot,&Jo);
+    	if(J)
+    	{
+    		*J = Jo * Jpdot;
+    	}
+
+    	return omega;
+    }
 
     void BSplinePose::initPoseSpline(double t0, double t1, const Eigen::Matrix4d & T_n_t0, const Eigen::Matrix4d & T_n_t1)
     {

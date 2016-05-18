@@ -353,6 +353,30 @@ namespace aslam {
         boost::shared_ptr<HomogeneousExpressionNode> _root;
       };
 
+    /**
+      * \class EuclideanExpressionNodeElementwiseMultiplyEuclidean
+      *
+      * \brief A class representing the elementwise product of two euclidean expressions.
+      *
+      */
+     class EuclideanExpressionNodeElementwiseMultiplyEuclidean : public EuclideanExpressionNode
+     {
+     public:
+       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+       EuclideanExpressionNodeElementwiseMultiplyEuclidean(boost::shared_ptr<EuclideanExpressionNode> lhs,
+           boost::shared_ptr<EuclideanExpressionNode> rhs);
+       virtual ~EuclideanExpressionNodeElementwiseMultiplyEuclidean();
+
+     private:
+       virtual Eigen::Vector3d toEuclideanImplementation() const;
+       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+       boost::shared_ptr<EuclideanExpressionNode> _lhs;
+       boost::shared_ptr<EuclideanExpressionNode> _rhs;
+     };
 
   
   
