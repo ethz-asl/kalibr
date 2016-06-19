@@ -16,19 +16,21 @@ import pylab as pl
 import scipy.optimize
 
 
-def initCameraBagDataset(bagfile, topic, from_to=None):
+def initCameraBagDataset(bagfile, topic, from_to=None, perform_synchronization=False):
     print "Initializing camera rosbag dataset reader:"
     print "\tDataset:          {0}".format(bagfile)
     print "\tTopic:            {0}".format(topic)
-    reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to)
+    reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to, \
+                                      perform_synchronization=perform_synchronization)
     print "\tNumber of images: {0}".format(len(reader.index))
     return reader
 
-def initImuBagDataset(bagfile, topic, from_to=None):
+def initImuBagDataset(bagfile, topic, from_to=None, perform_synchronization=False):
     print "Initializing imu rosbag dataset reader:"
     print "\tDataset:          {0}".format(bagfile)
     print "\tTopic:            {0}".format(topic)
-    reader = kc.BagImuDatasetReader(bagfile, topic, bag_from_to=from_to)
+    reader = kc.BagImuDatasetReader(bagfile, topic, bag_from_to=from_to, \
+                                      perform_synchronization=perform_synchronization)
     print "\tNumber of messages: {0}".format(len(reader.index))
     return reader
 
@@ -415,7 +417,8 @@ class IccCameraChain():
         self.camList = []
         for camNr in range(0, chainConfig.numCameras()):
             camConfig = chainConfig.getCameraParameters(camNr)
-            dataset = initCameraBagDataset(parsed.bagfile[0], camConfig.getRosTopic(), parsed.bag_from_to)               
+            dataset = initCameraBagDataset(parsed.bagfile[0], camConfig.getRosTopic(), \
+                                           parsed.bag_from_to, parsed.perform_synchronization)
             
             #create the camera
             self.camList.append( IccCamera( camConfig, 
@@ -585,7 +588,8 @@ class IccImu(object):
         self.imuConfig = self.ImuParameters(imuConfig)
 
         #load dataset
-        self.dataset = initImuBagDataset(parsed.bagfile[0], imuConfig.getRosTopic(), parsed.bag_from_to)
+        self.dataset = initImuBagDataset(parsed.bagfile[0], imuConfig.getRosTopic(), \
+                                         parsed.bag_from_to, parsed.perform_synchronization)
         
         #statistics
         self.accelUncertaintyDiscrete, self.accelRandomWalk, self.accelUncertainty = self.imuConfig.getAccelerometerStatistics()

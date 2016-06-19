@@ -68,6 +68,8 @@ def parseArgs():
     groupData = parser.add_argument_group('Dataset source')
     groupData.add_argument('--bag', dest='bagfile', nargs=1, help='Ros bag file containing image and imu data (rostopics specified in the yamls)', action=Once, required=True)
     groupData.add_argument('--bag-from-to', metavar='bag_from_to', type=float, nargs=2, help='Use the bag data starting from up to this time [s]')
+    groupData.add_argument('--perform-synchronization',  action='store_true', dest='perform_synchronization', \
+                          help='Perform a clock synchronization according to \'Clock synchronization algorithms for network measurements\' by Zhang et al. (2002).')
     
     #configuration files
     groupCam = parser.add_argument_group('Camera system configuration')
