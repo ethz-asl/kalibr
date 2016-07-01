@@ -46,7 +46,7 @@ namespace aslam {
 
       double observationTime();
 
-      Eigen::MatrixXd covarianceMatrix();
+      Eigen::MatrixXd covarianceMap();
 
     protected:
       /// \brief evaluate the error term

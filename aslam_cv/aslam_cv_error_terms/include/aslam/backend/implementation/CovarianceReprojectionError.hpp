@@ -54,8 +54,7 @@ namespace aslam {
     	Eigen::Matrix<double, 2,4> outJp;
     	cam.homogeneousToKeypoint(p, hat_y, outJp);
 
-    	double lineDelay;
-  		lineDelay = cam.shutter().lineDelay();
+    	double lineDelay = cam.shutter().lineDelay();
 
     	double observationTime = this->observationTime();
 
@@ -88,7 +87,6 @@ namespace aslam {
 
     }
 
-
     template<typename F>
     double CovarianceReprojectionError<F>::evaluateErrorImplementation()
     {
@@ -104,10 +102,10 @@ namespace aslam {
 
       if(_spline) {
 
-    	  Eigen::MatrixXd A = covarianceMatrix();
+    	  Eigen::MatrixXd A = covarianceMap();
     	  //std::cout << A << std::endl;
 
-          parent_t::setInvR ( ((A*_frame->keypoint(_keypointIndex).invR().inverse()*A.transpose()).inverse())); // invert
+          parent_t::setInvR (((A*_frame->keypoint(_keypointIndex).invR().inverse()*A.transpose()).inverse())); // invert
     	  // setInvR(A*_frame->keypoint(_keypointIndex).invR()*A.transpose());
 
     	  // std::cout << "A: " << std::endl << A << std::endl ;
@@ -120,8 +118,6 @@ namespace aslam {
     template<typename F>
     double CovarianceReprojectionError<F>::observationTime()
     {
-    	double lineDelay;
-  		// lineDelay = _frame->geometry().shutter().lineDelay();
     	return _frame->keypointTime(_keypointIndex).toSec(); // + _frame->keypoint(_keypointIndex).y()(1) * lineDelay;
     }
 

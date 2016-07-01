@@ -52,7 +52,7 @@ namespace aslam {
 		///        to the camera design variable
 		backend::ScalarExpression keypointTime(const aslam::Time & imageStamp, const Eigen::VectorXd & y);
 
-		// get the temporal offset of the a given keypoint y
+		// get the temporal offset of a given keypoint y
 		backend::ScalarExpression temporalOffset(const Eigen::VectorXd & y);
 
 	private:
