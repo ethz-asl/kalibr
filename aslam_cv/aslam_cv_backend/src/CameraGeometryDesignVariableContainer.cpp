@@ -2,6 +2,8 @@
 #include <aslam/ReprojectionError.hpp>
 #include <aslam/ScalarExpressionNodeKeypointTime.hpp>
 #include <sm/logging.hpp>
+
+/// \remarks This file is neither in use nor compiled.
 namespace aslam {
 
 CameraGeometryDesignVariableContainer::CameraGeometryDesignVariableContainer(

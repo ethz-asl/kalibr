@@ -26,7 +26,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/test_main.cpp
   test/TestErrorTerms.cpp
   )
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME}_errorterms)
 
 ##################################
 # EXPORT

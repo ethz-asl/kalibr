@@ -11,6 +11,7 @@
 
 namespace aslam {
 
+/// \remarks This class is neither in use nor compiled.
 class NCameraSystemDesignVariableContainer {
  public:
 

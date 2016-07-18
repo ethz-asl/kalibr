@@ -89,7 +89,13 @@ class ExpressionJacobianTestTraits<RotationExpression> {
       Eigen::MatrixXd Jest = numdiff.estimateJacobian(dp);
 
       auto JcM = Jc.asSparseMatrix();
-      sm::eigen::assertNear(Jc.asSparseMatrix(), Jest, expressionTester.getTolerance(), SM_SOURCE_FILE_POS, static_cast<std::stringstream&>(std::stringstream("Testing the RotationExpression's Jacobian (column=") << i <<")").str());
+      sm::eigen::assertNear(
+        Jc.asSparseMatrix(),
+        Jest,
+        expressionTester.getTolerance(),
+        SM_SOURCE_FILE_POS,
+        (std::stringstream("Testing the RotationExpression's Jacobian (column=") << i << ")").str()
+      );
       if (expressionTester.getPrintResult()) {
         std::cout << "Jest=\n" << Jest << std::endl;
         std::cout << "Jc=\n" << JcM << std::endl;

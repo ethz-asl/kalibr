@@ -14,26 +14,26 @@ include_directories(${EIGEN_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system)
 
 cs_add_library(${PROJECT_NAME}
-  src/RotationExpression.cpp 
+  src/RotationExpression.cpp
   src/RotationExpressionNode.cpp
   src/RotationQuaternion.cpp
   src/MappedRotationQuaternion.cpp
   src/Vector2RotationQuaternionExpressionAdapter.cpp
 
-  src/MatrixExpression.cpp 
+  src/MatrixExpression.cpp
   src/MatrixExpressionNode.cpp
   src/MatrixTransformation.cpp
 
-  src/TransformationExpression.cpp 
+  src/TransformationExpression.cpp
   src/TransformationExpressionNode.cpp
   src/TransformationBasic.cpp
 
-  src/EuclideanExpression.cpp 
+  src/EuclideanExpression.cpp
   src/EuclideanExpressionNode.cpp
   src/EuclideanPoint.cpp
   src/MappedEuclideanPoint.cpp
 
-  src/HomogeneousExpression.cpp 
+  src/HomogeneousExpression.cpp
   src/HomogeneousExpressionNode.cpp
   src/HomogeneousPoint.cpp
   src/MappedHomogeneousPoint.cpp
@@ -48,7 +48,7 @@ cs_add_library(${PROJECT_NAME}
   src/ErrorTermEuclidean.cpp
 
   src/MapTransformation.cpp
-  )
+)
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
@@ -61,7 +61,7 @@ catkin_add_gtest(${PROJECT_NAME}_test
   test/HomogeneousExpression.cpp
   test/MatrixAndEuclideanExpression.cpp
   # \todo reenable after I can talk to Hannes.
-  test/FixedPointNumberTest.cpp
+  # test/FixedPointNumberTest.cpp
   test/GenericScalarExpressionTest.cpp
   test/GenericMatrixExpression.cpp
   test/QuaternionExpression.cpp

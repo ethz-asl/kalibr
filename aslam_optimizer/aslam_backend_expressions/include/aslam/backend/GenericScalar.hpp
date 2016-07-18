@@ -35,7 +35,7 @@ class GenericScalar : public GenericScalarExpressionNode<Scalar_>, public Design
   virtual void updateImplementation(const double * dp, int size);
 
   /// \brief the size of an update step
-  virtual inline constexpr int minimalDimensionsImplementation() const { return MinimalDimension; }
+  virtual inline int minimalDimensionsImplementation() const { return MinimalDimension; }
  private:
   virtual Scalar toScalarImplementation() const;
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd * applyChainRule) const;
