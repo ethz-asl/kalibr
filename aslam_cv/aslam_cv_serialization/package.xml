@@ -22,6 +22,7 @@
     <build_depend>sm_opencv</build_depend>
     <build_depend>sm_logging</build_depend>
     <build_depend>opencv2_catkin</build_depend>
+    <build_depend>sm_random</build_depend>
 
     <build_depend>eigen</build_depend>
 </package>

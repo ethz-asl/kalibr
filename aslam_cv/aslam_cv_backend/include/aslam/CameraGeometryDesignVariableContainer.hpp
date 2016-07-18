@@ -8,6 +8,8 @@
 #include <aslam/backend/ScalarExpression.hpp>
 #include <aslam/backend/HomogeneousExpression.hpp>
 
+
+/// \remarks This class is neither in use nor compiled.
 namespace aslam {
 
 class ReprojectionError;

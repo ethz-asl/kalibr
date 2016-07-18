@@ -2,10 +2,10 @@
 
 namespace aslam {
     namespace backend {
-        
+
         TrustRegionPolicy::TrustRegionPolicy(){}
         TrustRegionPolicy::~TrustRegionPolicy(){}
-            
+
 
         /// \brief get the linear system solver
         boost::shared_ptr<LinearSystemSolver> TrustRegionPolicy::getSolver()
@@ -18,30 +18,33 @@ namespace aslam {
         {
             _solver = solver;
         }
-            
+
         bool TrustRegionPolicy::revertOnFailure()
         {
             return true;
         }
 
-            
+
         /// \brief called by the optimizer when an optimization is starting
         void TrustRegionPolicy::optimizationStarting(double J)
         {
             _J = J;
             _p_J = J;
-            _isFirstIteration=true;
+            _last_successful_J = J;
+            _isFirstIteration = true;
             optimizationStartingImplementation(J);
         }
-            
+
         // Returns true if the solution was successful
-    bool TrustRegionPolicy::solveSystem(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx)
+        bool TrustRegionPolicy::solveSystem(double J, bool previousIterationFailed, int nThreads, Eigen::VectorXd& outDx)
         {
-            if(!previousIterationFailed)
-            {
-                _p_J = _J;
+            if(previousIterationFailed) {
+                _J = J;
+            } else {
+                _p_J = _last_successful_J;
+                _last_successful_J = J;
+                _J = J;
             }
-            _J = J;
 
             bool success = solveSystemImplementation(J, previousIterationFailed, nThreads, outDx);
             _isFirstIteration = false;
@@ -52,7 +55,7 @@ namespace aslam {
         {
             return _p_J - _J;
         }
-        
+
 
 
     } // namespace backend

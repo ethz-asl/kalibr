@@ -24,7 +24,11 @@ struct RotationQuaternionAsVectorExpressionNode : public VectorExpressionNode<4>
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const { evaluateJacobiansImplementation(outJacobians, Eigen::Matrix3d::Identity()); };
   virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const {
     if(AssumeLieAlgebraVectorInputInJacobian){
-      quat.evaluateJacobians(outJacobians, applyChainRule * sm::kinematics::quatOPlus(quat.getQuaternion() * 0.5).topLeftCorner<4,3>());
+      Eigen::Matrix4d tmp = sm::kinematics::quatOPlus(quat.getQuaternion() * 0.5);
+      quat.evaluateJacobians(
+        outJacobians,
+          applyChainRule * tmp.topLeftCorner<4,3>()
+      );
     }else{
       quat.evaluateJacobians(outJacobians, applyChainRule);
     }
