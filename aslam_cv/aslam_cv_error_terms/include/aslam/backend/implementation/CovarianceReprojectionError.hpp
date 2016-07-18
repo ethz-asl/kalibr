@@ -44,7 +44,7 @@ namespace aslam {
     }
 
     template<typename F>
-    Eigen::MatrixXd CovarianceReprojectionError<F>::covarianceMatrix() {
+    Eigen::MatrixXd CovarianceReprojectionError<F>::covarianceMap() {
 
     	const keypoint_t & k = _frame->keypoint(_keypointIndex);
     	const camera_geometry_t & cam = _frame->geometry();
