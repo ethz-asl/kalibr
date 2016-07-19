@@ -43,9 +43,7 @@ FRAME_FILE_HEADER="""
 """
 
 
-BOOST_SERIALIZATION_HEADERS="""
-
-// Standard serialization headers
+BOOST_SERIALIZATION_HEADERS="""// Standard serialization headers
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -61,14 +59,14 @@ BOOST_SERIALIZATION_HEADERS="""
 FRAME_EXPORT="""
 namespace aslam {{
     
-template void Frame< aslam::cameras::{0} >::save<>(boost::archive::text_oarchive & ar, const unsigned int version) const;
-template void Frame< aslam::cameras::{0} >::load<>(boost::archive::text_iarchive & ar, const unsigned int version);
-template void Frame< aslam::cameras::{0} >::save<>(boost::archive::xml_oarchive & ar, const unsigned int version) const;
-template void Frame< aslam::cameras::{0} >::load<>(boost::archive::xml_iarchive & ar, const unsigned int version);
-template void Frame< aslam::cameras::{0} >::save<>(boost::archive::binary_oarchive & ar, const unsigned int version) const;
+template void Frame<aslam::cameras::{0} >::save<>(boost::archive::text_oarchive & ar, const unsigned int version) const;
+template void Frame<aslam::cameras::{0} >::load<>(boost::archive::text_iarchive & ar, const unsigned int version);
+template void Frame<aslam::cameras::{0} >::save<>(boost::archive::xml_oarchive & ar, const unsigned int version) const;
+template void Frame<aslam::cameras::{0} >::load<>(boost::archive::xml_iarchive & ar, const unsigned int version);
+template void Frame<aslam::cameras::{0} >::save<>(boost::archive::binary_oarchive & ar, const unsigned int version) const;
 template void Frame< aslam::cameras::{0} >::load<>(boost::archive::binary_iarchive & ar, const unsigned int version);
-template void Frame< aslam::cameras::{0} >::save<>(boost::archive::portable_binary_oarchive & ar, const unsigned int version) const;
-template void Frame< aslam::cameras::{0} >::load<>(boost::archive::portable_binary_iarchive & ar, const unsigned int version);
+template void Frame<aslam::cameras::{0} >::save<>(boost::archive::portable_binary_oarchive & ar, const unsigned int version) const;
+template void Frame<aslam::cameras::{0} >::load<>(boost::archive::portable_binary_iarchive & ar, const unsigned int version);
 
 }} // namespace aslam
 
@@ -77,6 +75,7 @@ template void Frame< aslam::cameras::{0} >::load<>(boost::archive::portable_bina
 cameras = ["PinholeCameraGeometry",
            "DistortedPinholeCameraGeometry",
            "EquidistantDistortedPinholeCameraGeometry",
+           "FovDistortedPinholeCameraGeometry",
            "OmniCameraGeometry",
            "DistortedOmniCameraGeometry",
            "EquidistantDistortedOmniCameraGeometry",
@@ -107,7 +106,7 @@ cameras = ["PinholeCameraGeometry",
 with open('include/aslam/cameras/CameraBaseSerialization.hpp','w') as outf:
     outf.write(CAMERA_FILE_HEADER)
     for cam in cameras:
-        outf.write( 'BOOST_CLASS_EXPORT_KEY( aslam::cameras::%s );\n' % cam )
+        outf.write( 'BOOST_CLASS_EXPORT_KEY(aslam::cameras::%s);\n' % cam )
     outf.write( '\n\n' )
 
 # write the individual camera class files
@@ -118,7 +117,7 @@ for cam in cameras:
     with open(fname,'w') as outf:
         outf.write('#include <aslam/cameras/CameraBaseSerialization.hpp>\n\n')
         outf.write(BOOST_SERIALIZATION_HEADERS)
-        outf.write('BOOST_CLASS_EXPORT_IMPLEMENT( aslam::cameras::%s );\n\n' % cam)
+        outf.write('BOOST_CLASS_EXPORT_IMPLEMENT(aslam::cameras::%s);\n\n' % cam)
 
 # write the CMake File
 with open('autogen_cameras.cmake','w') as outf:
@@ -133,7 +132,7 @@ with open('autogen_cameras.cmake','w') as outf:
 with open('include/aslam/FrameBaseSerialization.hpp','w') as outf:
     outf.write(FRAME_FILE_HEADER)
     for cam in cameras:
-        outf.write( 'BOOST_CLASS_EXPORT_KEY( aslam::Frame<aslam::cameras::%s> );\n' % cam )
+        outf.write( 'BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::%s >);\n' % cam )
     outf.write( '\n\n' )
     #outf.write( 'inline void exportFrameBase()\n' )
     #outf.write( '{\n' )
@@ -153,13 +152,13 @@ for cam in cameras:
         outf.write('#include <aslam/Frame.hpp>\n')
         outf.write('#include <aslam/FrameBaseSerialization.hpp>\n\n')
         outf.write(BOOST_SERIALIZATION_HEADERS)
-        outf.write('BOOST_CLASS_EXPORT_IMPLEMENT( aslam::Frame<aslam::cameras::%s> );\n\n' % cam)
+        outf.write('BOOST_CLASS_EXPORT_IMPLEMENT(aslam::Frame<aslam::cameras::%s >);\n\n' % cam)
         outf.write(FRAME_EXPORT.format( cam ) )
         outf.write("\n\n")
 
 # write the "linkCvSerialization" cpp file
 with open('src/LinkCvSerialization.cpp', 'w') as outf:
-    outf.write('#include <aslam/LinkCvSerialization.hpp>\n"
+    outf.write('#include <aslam/LinkCvSerialization.hpp>\n')
                   
 # write the CMake File
 with open('autogen_frames.cmake','w') as outf:

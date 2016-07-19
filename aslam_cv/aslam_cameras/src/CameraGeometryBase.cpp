@@ -28,6 +28,10 @@ boost::shared_ptr<CameraGeometryBase> CameraGeometryBase::create(
     rval.reset(
         new CameraGeometry<PinholeProjection<EquidistantDistortion>,
             GlobalShutter, NoMask>(config));
+  } else if (type == "FovDistortedPinhole") {
+    rval.reset(
+        new CameraGeometry<PinholeProjection<FovDistortion>,
+            GlobalShutter, NoMask>(config));
   } else if (type == "Omni") {
     rval.reset(
         new CameraGeometry<OmniProjection<NoDistortion>, GlobalShutter, NoMask>(
