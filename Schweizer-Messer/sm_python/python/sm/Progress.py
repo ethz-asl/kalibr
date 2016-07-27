@@ -46,8 +46,9 @@ class Progress2(object):
         self.startTime = 0
         self.numIterations = numIterations
         self.iteration = 0
+        self.nextPrintIteration = 0
 
-    def sample(self, steps=1):
+    def sample(self, steps=1, print_steps=1):
         """
         Call this function at each iteration. It prints the remaining steps and time.
         """
@@ -63,8 +64,10 @@ class Progress2(object):
             if h > 0: t_remaining_str = "%d h " % h
             if m > 0: t_remaining_str = t_remaining_str + "%dm " % m
             if s > 0: t_remaining_str = t_remaining_str + "%ds" % s
-            print "\r  Progress {0} / {1} \t Time remaining: {2}                 ".format(self.iteration, self.numIterations, t_remaining_str),
-            sys.stdout.flush()
+            if self.iteration >= self.nextPrintIteration:
+                self.nextPrintIteration = self.nextPrintIteration + print_steps
+                print "\r  Progress {0} / {1} \t Time remaining: {2}                 ".format(self.iteration, self.numIterations, t_remaining_str),
+                sys.stdout.flush()
         else:
             self.startTime = time.time()
             self.iteration = 0
@@ -78,5 +81,6 @@ class Progress2(object):
         self.elapsed = 0
         self.startTime = 0
         self.iteration = 0
+        self.nextPrintIteration = 0
         if numIterations != -1:
             self.numIterations = numIterations

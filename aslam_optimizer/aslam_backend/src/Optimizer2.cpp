@@ -226,7 +226,7 @@ namespace aslam {
                 if (!solutionSuccess) {
                     _options.verbose && std::cout << "[WARNING] System solution failed\n";
                     previousIterationFailed = true;
-                    linearSolverFailure = true;
+                    //linearSolverFailure = true;  //TODO(jrn) this results in the optimizer iterating for the maximum number of iterations, since it is never reset.
                     srv.failedIterations++;
                 } else {
                     /// Apply the state update. _A, _b, _dx, and _H are passed in implicitly.

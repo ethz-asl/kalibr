@@ -15,6 +15,8 @@ namespace aslam {
 
             aslam::backend::EuclideanExpression toEuclideanExpression(double time, int order);
 
+            aslam::backend::EuclideanExpression toEuclideanExpressionAtTime(const aslam::backend::ScalarExpression & time, int order, double leftBuffer, double rightBuffer);
+
             Eigen::Vector3d toEuclidean(double time, int order);
         };
 

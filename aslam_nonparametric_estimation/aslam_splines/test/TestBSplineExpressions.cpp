@@ -8,6 +8,7 @@
 #include <aslam/backend/RotationExpression.hpp>
 #include <aslam/backend/HomogeneousPoint.hpp>
 #include <aslam/splines/BSplinePoseDesignVariable.hpp>
+#include <aslam/splines/EuclideanBSplineDesignVariable.hpp>
 //#include <aslam/splines/BSplineRSPoseDesignVariable.hpp>
 #include <sm/kinematics/EulerRodriguez.hpp>
 #include <aslam/backend/Scalar.hpp>
@@ -108,6 +109,27 @@ BSplinePoseDesignVariable generateRandomSpline()
 }
 
 
+EuclideanBSplineDesignVariable generateRandomEuclideanBSpline()
+{
+    BSpline bspline(6);
+    const int N = 10;
+    Eigen::VectorXd times = Eigen::VectorXd::LinSpaced(N,0.0,9.0);
+
+    Eigen::Matrix<double, 3, Eigen::Dynamic> K(3,N);
+    K.setRandom();
+
+    bspline.initSpline3(times, K, 6, 1e-4);
+  
+    EuclideanBSplineDesignVariable bdv(bspline);
+    for(size_t i = 0; i < bdv.numDesignVariables(); ++i)
+    {
+        bdv.designVariable(i)->setActive(true);
+        bdv.designVariable(i)->setBlockIndex(i);
+    }
+    return bdv;
+
+}
+
 TEST(BSplineExpressionTestSuite, testPositionExpression)
 {
     try {
@@ -194,23 +216,8 @@ TEST(BSplineExpressionTestSuite, testAccelerationExpression)
 
 // aslam::backend::EuclideanExpression linearAcceleration(double tk);
 
-TEST(BSplineExpressionTestSuite, testAngularAccelerationBodyFrameExpression)
-{
-    try {
-        BSplinePoseDesignVariable bdv = generateRandomSpline();
 
-        EuclideanExpression ep = bdv.angularAccelerationBodyFrame(5.0);
-
-        ExpressionNodeFunctor<EuclideanExpression> functor(ep);
-
-        functor.testJacobian();
-    }
-    catch(const std::exception & e)
-    {
-        FAIL() << e.what();
-    }
-
-}
+// aslam::backend::EuclideanExpression angularVelocityBodyFrame(double tk);
 TEST(BSplineExpressionTestSuite, testAngularVelocityExpression)
 {
     try {
@@ -229,60 +236,81 @@ TEST(BSplineExpressionTestSuite, testAngularVelocityExpression)
   
 }
 
-//BSplineRSPoseDesignVariable generateRandomSplineRS()
-//{
-//    boost::shared_ptr<EulerRodriguez> rk( new EulerRodriguez );
-//    BSplinePose bsplinePose(4, rk);
-//    const int N = 10;
-//    Eigen::VectorXd times(N);
-//    for(int i = 0; i < N; ++i)
-//        times(i) = i;
-//
-//    Eigen::Matrix<double, 6, Eigen::Dynamic> K(6,N);
-//    K.setRandom();
-//
-//
-//    bsplinePose.initPoseSpline3(times, K, 6, 1e-4);
-//
-//    // random linedelay:
-//    double lineDelay = double(rand()) / RAND_MAX * 0.005;
-//
-//    BSplineRSPoseDesignVariable bdv(bsplinePose, lineDelay);
-//    for(size_t i = 0; i < bdv.numDesignVariables(); ++i)
-//    {
-//        bdv.designVariable(i)->setActive(true);
-//        bdv.designVariable(i)->setBlockIndex(i);
-//    }
-//    return bdv;
-//
-//}
-//
-//
-//
-//
-//TEST(BSplineExpressionTestSuite, testRSTransformationExpression)
-//{
-//    try {
-//        HomogeneousPoint hp(Eigen::Vector4d::Random());
-//        HomogeneousExpression he = hp.toExpression();
-//
-//        BSplineRSPoseDesignVariable bdv = generateRandomSplineRS();
-//
-//
-//        TransformationExpression T = bdv.transformation(5.0, 100);
-//        HomogeneousExpression The = T * he;
-//        ExpressionNodeFunctor<HomogeneousExpression> functor(The);
-//
-//        SCOPED_TRACE("");
-//        functor.testJacobian();
-//    }
-//    catch(const std::exception & e)
-//    {
-//        FAIL() << e.what();
-//    }
-//
-//}
+TEST(BSplineExpressionTestSuite, testAngularAccelerationExpression)
+{
+    try {
+        BSplinePoseDesignVariable bdv = generateRandomSpline();
 
+        EuclideanExpression ep = bdv.angularAccelerationBodyFrame(5.0);
+
+        ExpressionNodeFunctor<EuclideanExpression> functor(ep);
+
+        functor.testJacobian();
+    } 
+    catch(const std::exception & e)
+    {
+        FAIL() << e.what();
+    }
+  
+}
+
+
+
+/*
+BSplineRSPoseDesignVariable generateRandomSplineRS()
+{
+    boost::shared_ptr<EulerRodriguez> rk( new EulerRodriguez );
+    BSplinePose bsplinePose(4, rk);
+    const int N = 10;
+    Eigen::VectorXd times(N);
+    for(int i = 0; i < N; ++i)
+        times(i) = i;
+    
+    Eigen::Matrix<double, 6, Eigen::Dynamic> K(6,N);
+    K.setRandom();
+    
+    
+    bsplinePose.initPoseSpline3(times, K, 6, 1e-4);
+    
+    // random linedelay:
+    double lineDelay = double(rand()) / RAND_MAX * 0.005;
+    
+    BSplineRSPoseDesignVariable bdv(bsplinePose, lineDelay);
+    for(size_t i = 0; i < bdv.numDesignVariables(); ++i)
+    {
+        bdv.designVariable(i)->setActive(true);
+        bdv.designVariable(i)->setBlockIndex(i);
+    }
+    return bdv;
+    
+}
+
+
+
+
+TEST(BSplineExpressionTestSuite, testRSTransformationExpression)
+{
+    try {
+        HomogeneousPoint hp(Eigen::Vector4d::Random());
+        HomogeneousExpression he = hp.toExpression();
+        
+        BSplineRSPoseDesignVariable bdv = generateRandomSplineRS();
+        
+        
+        TransformationExpression T = bdv.transformation(5.0, 100);
+        HomogeneousExpression The = T * he;
+        ExpressionNodeFunctor<HomogeneousExpression> functor(The);
+        
+        SCOPED_TRACE("");
+        functor.testJacobian();
+    } 
+    catch(const std::exception & e)
+    {
+        FAIL() << e.what();
+    }
+    
+}
+*/
 
 
 TEST(BSplineExpressionTestSuite, testTransformationAtTimeExpression)
@@ -294,6 +322,9 @@ TEST(BSplineExpressionTestSuite, testTransformationAtTimeExpression)
         BSplinePoseDesignVariable bdv = generateRandomSpline();
 
         Scalar s(5.0);
+        s.setActive(true);
+        s.setBlockIndex(bdv.numDesignVariables());
+
         ScalarExpression se = s.toExpression();
         TransformationExpression T = bdv.transformationAtTime(se, 1.0,1.0);
 
@@ -310,3 +341,78 @@ TEST(BSplineExpressionTestSuite, testTransformationAtTimeExpression)
   
 }
 
+TEST(BSplineExpressionTestSuite, testAngularVelocityAtTimeExpression)
+{
+    try {
+        BSplinePoseDesignVariable bdv = generateRandomSpline();
+
+        Scalar s(3.0);
+        s.setActive(true);
+        s.setBlockIndex(bdv.numDesignVariables());
+
+        ScalarExpression se = s.toExpression();
+        EuclideanExpression e = bdv.angularVelocityBodyFrameAtTime(se, 1.0, 1.0);
+
+        ExpressionNodeFunctor<EuclideanExpression> functor(e);
+
+        SCOPED_TRACE("");
+        functor.testJacobian();
+    } 
+    catch(const std::exception & e)
+    {
+        FAIL() << e.what();
+    }
+  
+}
+
+
+TEST(BSplineExpressionTestSuite, testBSplineEuclideanAtTimeExpression)
+{
+    try {
+        EuclideanBSplineDesignVariable bdv = generateRandomEuclideanBSpline();
+
+        Scalar s(5.0);
+        s.setActive(true);
+        s.setBlockIndex(bdv.numDesignVariables());
+
+        ScalarExpression se = s.toExpression();
+        EuclideanExpression e = bdv.toEuclideanExpressionAtTime(se, 0, 1.0, 1.0);
+
+        ExpressionNodeFunctor<EuclideanExpression> functor(e);
+
+        SCOPED_TRACE("");
+        functor.testJacobian();
+    } 
+    catch(const std::exception & e)
+    {
+        FAIL() << e.what();
+    }  
+}
+
+TEST(BSplineExpressionTestSuite, testOrientationAtTimeExpression)
+{
+    try {
+        BSplinePoseDesignVariable bdv = generateRandomSpline();
+
+        Scalar s(3.0);
+        s.setActive(true);
+        s.setBlockIndex(bdv.numDesignVariables());
+
+        EuclideanPoint ep(Eigen::Vector3d::Random());
+        ep.setActive(true);
+        ep.setBlockIndex(bdv.numDesignVariables()+1);
+
+        ScalarExpression se = s.toExpression();
+        RotationExpression e = bdv.orientationAtTime(se, 1.0, 1.0);
+
+        ExpressionNodeFunctor<EuclideanExpression> functor(e.inverse() * ep.toExpression());
+
+        SCOPED_TRACE("");
+        functor.testJacobian();
+    } 
+    catch(const std::exception & e)
+    {
+        FAIL() << e.what();
+    }
+  
+}

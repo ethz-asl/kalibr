@@ -178,6 +178,7 @@ namespace aslam {
          
         };
 
+
         template<int DIM>
         class BSplineVectorExpressionNode : public aslam::backend::VectorExpressionNode<DIM>
         {
@@ -245,6 +246,84 @@ namespace aslam {
             int _order;
         };
 
+////////////////////////////////////////////////
+        class AngularVelocityTimeOffsetExpressionNode : public aslam::backend::EuclideanExpressionNode
+        {
+        public:    
+        
+            AngularVelocityTimeOffsetExpressionNode(BSplinePoseDesignVariable * bspline, const aslam::backend::ScalarExpression & time,
+            										double bufferTmin = 0.0, double bufferTmax = 0.0);
+            virtual ~AngularVelocityTimeOffsetExpressionNode();
+
+        protected:
+            virtual Eigen::Vector3d toEuclideanImplementation() const;
+            virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJacobians) const;
+            virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+            virtual void getDesignVariablesImplementation(aslam::backend::DesignVariable::set_t & designVariables) const;
+
+
+            BSplinePoseDesignVariable * _spline;
+            aslam::backend::ScalarExpression  _time;
+
+            int _bufferLeft;
+            int _bufferRight;
+            double _bufferTmin;
+            double _bufferTmax;
+            Eigen::VectorXi _localCoefficientIndices;
+
+        };
+
+        class BSplineEuclideanExpressionAtTimeNode : public aslam::backend::EuclideanExpressionNode
+        {
+        public:
+            BSplineEuclideanExpressionAtTimeNode(bsplines::BSpline * spline, const std::vector<aslam::backend::DesignVariable *> & designVariables, const aslam::backend::ScalarExpression & time, 
+                                                 int derivativeOrder, double bufferTmin = 0.0, double bufferTmax = 0.0);
+            virtual ~BSplineEuclideanExpressionAtTimeNode();
+
+        protected:
+            virtual Eigen::Vector3d toEuclideanImplementation() const;
+            virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJacobians) const;
+            virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+            virtual void getDesignVariablesImplementation(aslam::backend::DesignVariable::set_t & designVariables) const;
+
+            bsplines::BSpline * _spline;
+            std::vector<aslam::backend::DesignVariable *> _designVariables;
+            aslam::backend::ScalarExpression _time;
+            int _order;
+
+            int _bufferLeft;
+            int _bufferRight;
+            double _bufferTmin;
+            double _bufferTmax;
+            Eigen::VectorXi _localCoefficientIndices;
+
+        };
+
+        class RotationTimeOffsetExpressionNode : public aslam::backend::RotationExpressionNode
+        {
+        public:    
+        
+            RotationTimeOffsetExpressionNode(BSplinePoseDesignVariable * bspline, const aslam::backend::ScalarExpression & time,
+            										double bufferTmin = 0, double bufferTmax = 0);
+            virtual ~RotationTimeOffsetExpressionNode();
+
+        protected:
+            virtual Eigen::Matrix3d toRotationMatrixImplementation() const;
+            virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJacobians) const;
+            virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+            virtual void getDesignVariablesImplementation(aslam::backend::DesignVariable::set_t & designVariables) const;
+
+
+            BSplinePoseDesignVariable * _spline;
+            aslam::backend::ScalarExpression  _time;
+
+            int _bufferLeft;
+            int _bufferRight;
+            double _bufferTmin;
+            double _bufferTmax;
+            Eigen::VectorXi _localCoefficientIndices;
+
+        };
 
 
     } // namespace splines

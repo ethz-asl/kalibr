@@ -218,8 +218,33 @@ namespace aslam {
             boost::shared_ptr<TransformationTimeOffsetExpressionNode> root( new TransformationTimeOffsetExpressionNode( this, time, leftBuffer, rightBuffer) );
       
             return aslam::backend::TransformationExpression(root);
-
         }
 
+
+aslam::backend::EuclideanExpression BSplinePoseDesignVariable::angularVelocityBodyFrameAtTime(const aslam::backend::ScalarExpression & time)
+{
+	return angularVelocityBodyFrameAtTime(time, 0.0,0.0);
+}
+
+aslam::backend::EuclideanExpression BSplinePoseDesignVariable::angularVelocityBodyFrameAtTime(const aslam::backend::ScalarExpression & time, double leftBuffer, double rightBuffer)
+{
+	boost::shared_ptr<AngularVelocityTimeOffsetExpressionNode> root( new AngularVelocityTimeOffsetExpressionNode( this, time, leftBuffer, rightBuffer) );
+
+	return aslam::backend::EuclideanExpression(root);
+
+}
+
+aslam::backend::RotationExpression BSplinePoseDesignVariable::orientationAtTime(const aslam::backend::ScalarExpression & time)
+{
+	return orientationAtTime(time, 0.0,0.0);
+}
+
+
+aslam::backend::RotationExpression BSplinePoseDesignVariable::orientationAtTime(const aslam::backend::ScalarExpression & time, double leftBuffer, double rightBuffer)
+{
+	boost::shared_ptr<RotationTimeOffsetExpressionNode> root( new RotationTimeOffsetExpressionNode( this, time, leftBuffer, rightBuffer) );
+
+	return aslam::backend::RotationExpression(root);
+}
     } // namespace splines
 } // namespace aslam

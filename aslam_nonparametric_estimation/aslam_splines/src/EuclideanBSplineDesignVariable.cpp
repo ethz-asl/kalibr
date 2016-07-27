@@ -36,5 +36,20 @@ namespace aslam {
             return _bspline.evalD(time,order);
         }
         
+        aslam::backend::EuclideanExpression EuclideanBSplineDesignVariable::toEuclideanExpressionAtTime(const aslam::backend::ScalarExpression & time, 
+                                                                                                        int order, double leftBuffer, double rightBuffer) {
+
+
+            //Eigen::VectorXi dvidxs = _bspline.localVvCoefficientVectorIndices(time);
+            std::vector<aslam::backend::DesignVariable *> dvs;
+            for(int i = 0; i < _designVariables.size(); ++i)
+            {
+                dvs.push_back(&_designVariables[i]);
+            }
+            boost::shared_ptr<aslam::splines::BSplineEuclideanExpressionAtTimeNode > root( new aslam::splines::BSplineEuclideanExpressionAtTimeNode(&_bspline, dvs, time, order, leftBuffer, rightBuffer) );
+            
+            return aslam::backend::EuclideanExpression(root);
+        }
+
     } // namespace splines
 } // namespace aslam
