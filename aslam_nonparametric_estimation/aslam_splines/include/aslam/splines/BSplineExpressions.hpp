@@ -159,8 +159,7 @@ namespace aslam {
 
         };
 
-        /*
-        // Fabio (not used and not tested):
+
         class BSplineAngularAccelerationBodyFrameExpressionNode : public aslam::backend::EuclideanExpressionNode
         {
         public:
@@ -178,7 +177,6 @@ namespace aslam {
         double _time;
          
         };
-        */
 
         template<int DIM>
         class BSplineVectorExpressionNode : public aslam::backend::VectorExpressionNode<DIM>

@@ -68,6 +68,23 @@ boost::python::tuple linearAccelerationAndVelocityWrapper(const bsplines::BSplin
   return boost::python::make_tuple(a,J,coefficientIndices);
 }
 
+boost::python::tuple angularAccelerationAndJacobianWrapper(const bsplines::BSplinePose * bsp, double t)
+{
+  Eigen::MatrixXd J;
+  Eigen::VectorXi coefficientIndices;
+  Eigen::Vector3d omega = bsp->angularAccelerationAndJacobian(t, &J, &coefficientIndices);
+  return boost::python::make_tuple(omega,J,coefficientIndices);
+}
+
+boost::python::tuple angularAccelerationBodyFrameAndJacobianWrapper(const bsplines::BSplinePose * bsp, double t)
+{
+  Eigen::MatrixXd J;
+  Eigen::VectorXi coefficientIndices;
+  Eigen::Vector3d omega = bsp->angularAccelerationBodyFrameAndJacobian(t, &J, &coefficientIndices);
+  return boost::python::make_tuple(omega,J,coefficientIndices);
+}
+
+
 void import_bspline_pose_python()
 {
   using namespace bsplines;
@@ -101,6 +118,8 @@ void import_bspline_pose_python()
     .def("angularVelocityAndJacobian", &angularVelocityAndJacobianWrapper)
     .def("angularVelocityBodyFrame", &BSplinePose::angularVelocityBodyFrame)
     .def("angularVelocityBodyFrameAndJacobian", &angularVelocityBodyFrameAndJacobianWrapper)
+    .def("angularAccelerationBodyFrame", &BSplinePose::angularAccelerationBodyFrame)
+    .def("angularAccelerationBodyFrameAndJacobian", &angularAccelerationBodyFrameAndJacobianWrapper)
     .def("rotation", &BSplinePose::rotation);
   //.def("", &BSplinePose::, "")
 

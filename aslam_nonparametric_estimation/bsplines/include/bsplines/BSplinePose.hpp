@@ -78,7 +78,9 @@ namespace bsplines {
       Eigen::Vector3d angularVelocityAndJacobian(double tk, Eigen::MatrixXd * J, Eigen::VectorXi * coefficientIndices) const;
 
       // Fabio (not used and not tested)
-      //Eigen::Vector3d angularAccelerationBodyFrame(double tk) const;
+      Eigen::Vector3d angularAccelerationBodyFrame(double tk) const;
+      Eigen::Vector3d angularAccelerationAndJacobian(double tk, Eigen::MatrixXd * J, Eigen::VectorXi * coefficientIndices) const;
+      Eigen::Vector3d angularAccelerationBodyFrameAndJacobian(double tk, Eigen::MatrixXd * J, Eigen::VectorXi * coefficientIndices) const;
 
       void initPoseSpline(double t0, double t1, const Eigen::Matrix4d & T_n_t0, const Eigen::Matrix4d & T_n_t);
       void initPoseSpline2(const Eigen::VectorXd & times, const Eigen::Matrix<double, 6, Eigen::Dynamic> & poses, int numSegments, double lambda);

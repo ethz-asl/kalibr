@@ -23,9 +23,10 @@ class BagImageDatasetReaderIterator(object):
         return self.dataset.getImage(idx)
 
 class BagImageDatasetReader(object):
-    def __init__(self, bagfile, imagetopic, bag_from_to=None):
+    def __init__(self, bagfile, imagetopic, bag_from_to=None, perform_synchronization=False):
         self.bagfile = bagfile
         self.topic = imagetopic
+        self.perform_synchronization = perform_synchronization
         self.bag = rosbag.Bag(bagfile)
         self.uncompress = None
         if imagetopic is None:
@@ -44,7 +45,7 @@ class BagImageDatasetReader(object):
         self.indices = np.arange(len(self.index))
         
         #sort the indices by header.stamp
-        self.indices = self. sortByTime(self.indices)
+        self.indices = self.sortByTime(self.indices)
         
         #go through the bag and remove the indices outside the timespan [bag_start_time, bag_end_time]
         if bag_from_to:
@@ -52,11 +53,15 @@ class BagImageDatasetReader(object):
     
     #sort the ros messegaes by the header time not message time
     def sortByTime(self, indices):
+        self.timestamp_corrector = sm.DoubleTimestampCorrector()
         timestamps=list()
         for idx in self.indices:
             topic, data, stamp = self.bag._read_message(self.index[idx].position)
             timestamp = data.header.stamp.secs*1e9 + data.header.stamp.nsecs
             timestamps.append(timestamp)
+            if self.perform_synchronization:
+                self.timestamp_corrector.correctTimestamp(data.header.stamp.to_sec(), \
+                                                          stamp.to_sec())
         
         sorted_tuples = sorted(zip(timestamps, indices))
         sorted_indices = [tuple_value[1] for tuple_value in sorted_tuples]
@@ -106,14 +111,22 @@ class BagImageDatasetReader(object):
 
     def getImage(self,idx):
         topic, data, stamp = self.bag._read_message(self.index[idx].position)
-        ts = acv.Time( data.header.stamp.secs, data.header.stamp.nsecs )
+        if self.perform_synchronization:
+            timestamp = acv.Time(self.timestamp_corrector.getLocalTime(data.header.stamp.to_sec()))
+        else:
+            timestamp = acv.Time( data.header.stamp.secs, data.header.stamp.nsecs )
         if data._type == 'mv_cameras/ImageSnappyMsg':
             if self.uncompress is None:
                 from snappy import uncompress
                 self.uncompress = uncompress
-            img_data = np.reshape(self.uncompress(np.fromstring(data.data, dtype='uint8')),(data.height,data.width), order="C")
+            img_data = np.reshape(self.uncompress(np.fromstring(data.data, dtype='uint8')),\
+                                  (data.height,data.width), order="C")
             
         else:
-            img_data = np.array(self.CVB.imgmsg_to_cv2(data))  
-        return (ts, img_data)
+            img_data = np.array(self.CVB.imgmsg_to_cv2(data))
+
+        if img_data.ndim == 3:
+            img_data = cv2.cvtColor(img_data, cv2.COLOR_BGR2GRAY)
+
+        return (timestamp, img_data)
      

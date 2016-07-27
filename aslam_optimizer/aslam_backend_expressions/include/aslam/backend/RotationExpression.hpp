@@ -42,9 +42,9 @@ namespace aslam {
       /// \brief Evaluate the Jacobians in the form (1 - (S \delta v)^\times) \bar C
       void evaluateJacobians(JacobianContainer & outJacobians) const;
 
-      RotationExpression operator*(const RotationExpression & p);
-      EuclideanExpression operator*(const EuclideanExpression & p);
-      HomogeneousExpression operator*(const HomogeneousExpression & p);
+      RotationExpression operator*(const RotationExpression & p) const;
+      EuclideanExpression operator*(const EuclideanExpression & p) const;
+      HomogeneousExpression operator*(const HomogeneousExpression & p) const;
 
       TransformationExpression toTransformationExpression();
 

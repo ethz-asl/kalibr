@@ -404,9 +404,20 @@ class ImuParameters(ParametersBase):
         print >> dest, "  Gyroscope:"
         print >> dest, "    Noise density: {0}".format(gyroUncertainty)
         print >> dest, "    Noise density (discrete): {0} ".format(gyroUncertaintyDiscrete)
-        print >> dest, "    Random walk: {0}".format(gyroRandomWalk)   
-            
+        print >> dest, "    Random walk: {0}".format(gyroRandomWalk)
         
+class ImuSetParameters(ParametersBase):
+    def __init__(self, yamlFile, createYaml=False):
+        ParametersBase.__init__(self, yamlFile, "ImuSetConfig", createYaml)
+        self.imuCount = 0
+        
+    def addImuParameters(self, imu_parameters, name=None):
+        if name is None:
+            name = "imu%d" % self.imuCount
+        self.imuCount += 1
+        self.data[name] = imu_parameters.getYamlDict()
+
+
 class CalibrationTargetParameters(ParametersBase):
     def __init__(self, yamlFile, createYaml=False):
         ParametersBase.__init__(self, yamlFile, "CalibrationTargetConfig", createYaml)
