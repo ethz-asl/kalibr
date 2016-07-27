@@ -331,6 +331,16 @@ class ImuParameters(ParametersBase):
     def getRosTopic(self):
         self.checkRosTopic(self.data["rostopic"])
         return self.data["rostopic"]
+
+    @catch_keyerror
+    def getAccelerometerRosTopic(self):
+        self.checkRosTopic(self.data["accelerometer_rostopic"])
+        return self.data["accelerometer_rostopic"]
+
+    @catch_keyerror
+    def getGyroscopeRosTopic(self):
+        self.checkRosTopic(self.data["gyroscope_rostopic"])
+        return self.data["gyroscope_rostopic"]
     
     def setRosTopic(self, topic):
         self.checkRosTopic(topic)

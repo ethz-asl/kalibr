@@ -90,7 +90,7 @@ def plotAccelErrorPerAxis(cself, iidx, fno=1, clearFigure=True, noShow=False):
 def plotAccelBias(cself, imu_idx, fno=1, clearFigure=True, noShow=False):
     imu = cself.ImuList[imu_idx]
     bias = imu.accelBiasDv.spline()
-    times = np.array([im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > bias.t_min() \
+    times = np.array([im.stamp.toSec() for im in imu.accelerometerMeasurements if im.stamp.toSec() > bias.t_min() \
                       and im.stamp.toSec() < bias.t_max() ])
     acc_bias_spline = np.array([bias.evalD(t,0) for t in times]).T
     times = times - times[0]     #remove time offset
@@ -110,7 +110,7 @@ def plotAccelBias(cself, imu_idx, fno=1, clearFigure=True, noShow=False):
 def plotAngularVelocityBias(cself, imu_idx, fno=1, clearFigure=True, noShow=False):
     imu = cself.ImuList[imu_idx]
     bias = imu.gyroBiasDv.spline()
-    times = np.array([im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > bias.t_min() \
+    times = np.array([im.stamp.toSec() for im in imu.gyroscopeMeasurements if im.stamp.toSec() > bias.t_min() \
                       and im.stamp.toSec() < bias.t_max() ])
     gyro_bias_spline = np.array([bias.evalD(t,0) for t in times]).T
     times = times - times[0]     #remove time offset
@@ -132,7 +132,7 @@ def plotAngularVelocities(cself, iidx, fno=1, clearFigure=True, noShow=False):
     #predicted (over the time of the imu)
     imu = cself.ImuList[iidx]
     bodyspline = cself.poseDv.spline()   
-    times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.imuData \
+    times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.gyroscopeMeasurements \
                       if im.stamp.toSec() + imu.timeOffset > bodyspline.t_min() \
                       and im.stamp.toSec() + imu.timeOffset < bodyspline.t_max() ])
     predictedAng_body =  np.array([err.getPredictedMeasurement() for err in imu.gyroErrors]).T
@@ -161,7 +161,7 @@ def plotAccelerations(cself, iidx, fno=1, clearFigure=True, noShow=False):
     #predicted 
     imu = cself.ImuList[iidx]
     bodyspline = cself.poseDv.spline()   
-    times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.imuData \
+    times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.accelerometerMeasurements \
                       if im.stamp.toSec() + imu.timeOffset > bodyspline.t_min() \
                       and im.stamp.toSec() + imu.timeOffset < bodyspline.t_max() ])
     predicetedAccel_body =  np.array([err.getPredictedMeasurement() for err in imu.accelErrors]).T

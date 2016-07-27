@@ -34,6 +34,23 @@ def initImuBagDataset(bagfile, topic, from_to=None, perform_synchronization=Fals
     print "\tNumber of messages: {0}".format(len(reader.index))
     return reader
 
+def initAccelBagDataset(bagfile, topic, from_to=None, perform_synchronization=False):
+    print "Initializing accelerometer rosbag dataset reader:"
+    print "\tDataset:          {0}".format(bagfile)
+    print "\tTopic:            {0}".format(topic)
+    reader = kc.BagAccelDatasetReader(bagfile, topic, bag_from_to=from_to, \
+                                      perform_synchronization=perform_synchronization)
+    print "\tNumber of messages: {0}".format(len(reader.index))
+    return reader
+
+def initGyroBagDataset(bagfile, topic, from_to=None, perform_synchronization=False):
+    print "Initializing gyroscope rosbag dataset reader:"
+    print "\tDataset:          {0}".format(bagfile)
+    print "\tTopic:            {0}".format(topic)
+    reader = kc.BagGyroDatasetReader(bagfile, topic, bag_from_to=from_to, \
+                                     perform_synchronization=perform_synchronization)
+    print "\tNumber of messages: {0}".format(len(reader.index))
+    return reader
 
 #mono camera
 class IccCamera():
@@ -60,10 +77,13 @@ class IccCamera():
         #extract corners
         self.setupCalibrationTarget( targetConfig, showExtraction=showCorners, showReproj=showReproj, imageStepping=showOneStep )
         multithreading = not (showCorners or showReproj or showOneStep)
-        self.targetObservations = kc.extractCornersFromDataset(self.dataset, self.detector, multithreading=multithreading)
+        if self.dataset:
+            self.targetObservations = kc.extractCornersFromDataset(self.dataset, self.detector, multithreading=multithreading)
         
         #an estimate of the gravity in the world coordinate frame  
         self.gravity_w = np.array([9.80655, 0., 0.])
+        
+        self.allReprojectionErrors = []
         
     def setupCalibrationTarget(self, targetConfig, showExtraction=False, showReproj=False, imageStepping=False):
         
@@ -133,7 +153,7 @@ class IccCamera():
         #initialize a pose spline using the camera poses
         poseSpline = self.initPoseSplineFromCamera( timeOffsetPadding=0.0 )
         
-        for im in imu.imuData:
+        for im in imu.gyroscopeMeasurements:
             tk = im.stamp.toSec()
             if tk > poseSpline.t_min() and tk < poseSpline.t_max():        
                 #DV expressions
@@ -180,7 +200,7 @@ class IccCamera():
 
         #estimate gravity in the world coordinate frame as the mean specific force
         a_w = []
-        for im in imu.imuData:
+        for im in imu.accelerometerMeasurements:
             tk = im.stamp.toSec()
             if tk > poseSpline.t_min() and tk < poseSpline.t_max():
                 a_w.append(np.dot(poseSpline.orientation(tk), np.dot(R_i_c, - im.alpha)))
@@ -223,7 +243,7 @@ class IccCamera():
         omega_measured_norm = []
         omega_predicted_norm = []
         
-        for im in imu.imuData:
+        for im in imu.gyroscopeMeasurements:
             tk = im.stamp.toSec()
             if tk > poseSpline.t_min() and tk < poseSpline.t_max():
                 
@@ -246,7 +266,7 @@ class IccCamera():
         discrete_shift = corr.argmax() - (np.size(omega_measured_norm) - 1)
         
         #get cont. time shift
-        times = [im.stamp.toSec() for im in imu.imuData]
+        times = [im.stamp.toSec() for im in imu.gyroscopeMeasurements]
         dT = np.mean(np.diff( times ))
         shift = -discrete_shift*dT
         
@@ -417,9 +437,12 @@ class IccCameraChain():
         self.camList = []
         for camNr in range(0, chainConfig.numCameras()):
             camConfig = chainConfig.getCameraParameters(camNr)
-            dataset = initCameraBagDataset(parsed.bagfile[0], camConfig.getRosTopic(), \
-                                           parsed.bag_from_to, parsed.perform_synchronization)
-            
+            try:
+                dataset = initCameraBagDataset(parsed.bagfile[0], camConfig.getRosTopic(), \
+                                               parsed.bag_from_to, parsed.perform_synchronization)
+            except:
+                dataset = None
+
             #create the camera
             self.camList.append( IccCamera( camConfig, 
                                             targetConfig, 
@@ -459,7 +482,7 @@ class IccCameraChain():
         tEnd = acv.Time( 0.0 )
         
         for cam in self.camList:
-            if len(cam.targetObservations)>0:
+            if cam.dataset and len(cam.targetObservations)>0:
                 tStartCam = cam.targetObservations[0].time()
                 tEndCam   = cam.targetObservations[-1].time()
                 
@@ -507,14 +530,14 @@ class IccCameraChain():
         #now add all baselines starting from the second camera up to the desired one
         for cam in self.camList[1:camNr+1]:
             T_cNplus1_cN = sm.Transformation( cam.T_c_b_Dv.T() )
-            T_cN_imu = T_cNplus1_cN*T_cN_imu
+            T_cN_imu = T_cNplus1_cN * T_cN_imu
 
         return T_cN_imu
     
     def getResultTimeShift(self, camNr):
         return self.camList[camNr].cameraTimeToImuTimeDv.toScalar() + self.camList[camNr].timeshiftCamToImuPrior
     
-    def addDesignVariables(self, problem, noTimeCalibration = True, noChainExtrinsics = True):
+    def addDesignVariables(self, problem, noTimeCalibration=True, noChainExtrinsics=True):
         #add the design variables (T(R,t) & time)  for all induvidual cameras
         for camNr, cam in enumerate( self.camList ):
             #the first "baseline" dv is between the imu and cam0
@@ -522,7 +545,10 @@ class IccCameraChain():
                 noExtrinsics = False
                 baselinedv_group_id = ic.CALIBRATION_GROUP_ID
             else:
-                noExtrinsics = noChainExtrinsics
+                if cam.dataset:
+                    noExtrinsics = noChainExtrinsics
+                else:
+                    noExtrinsics = True
                 baselinedv_group_id = ic.HELPER_GROUP_ID
             cam.addDesignVariables(problem, noExtrinsics, noTimeCalibration, baselinedv_group_id=baselinedv_group_id)
     
@@ -542,7 +568,8 @@ class IccCameraChain():
             T_cN_b = T_chain
             
             #add the error terms
-            cam.addCameraErrorTerms( problem, poseSplineDv, T_cN_b, blakeZissermanDf, timeOffsetPadding )
+            if cam.dataset:
+                cam.addCameraErrorTerms( problem, poseSplineDv, T_cN_b, blakeZissermanDf, timeOffsetPadding )
 
 #IMU
 class IccImu(object):
@@ -598,8 +625,8 @@ class IccImu(object):
         self.imuConfig = self.ImuParameters(imuConfig)
 
         #load dataset
-        self.dataset = initImuBagDataset(parsed.bagfile[0], imuConfig.getRosTopic(), \
-                                         parsed.bag_from_to, parsed.perform_synchronization)
+        #self.dataset = initImuBagDataset(parsed.bagfile[0], imuConfig.getRosTopic(), \
+        #                                 parsed.bag_from_to, parsed.perform_synchronization)
         
         #statistics
         self.accelUncertaintyDiscrete, self.accelRandomWalk, self.accelUncertainty = self.imuConfig.getAccelerometerStatistics()
@@ -609,8 +636,14 @@ class IccImu(object):
         self.GyroBiasPrior = np.array([0,0,0])
         self.GyroBiasPriorCount = 0
         
-        #load the imu dataset
-        self.loadImuData()
+#         #load the imu dataset
+#         self.loadImuData()
+#         
+#         self.gyroscopeMeasurements = self.imuData
+#         self.accelerometerMeasurements = self.imuData
+
+        self.loadImuDataIndividually(parsed, imuConfig.getAccelerometerRosTopic(), \
+                                     imuConfig.getGyroscopeRosTopic())
 
         #initial estimates for multi IMU calibration
         self.q_i_b_prior = np.array([0., 0., 0., 1.]) 
@@ -625,9 +658,54 @@ class IccImu(object):
             self.alphaR = Raccel
             self.alphaInvR = np.linalg.inv(Raccel)
             self.stamp = stamp
+
+    class AccelerometerMeasurement(object):
+        def __init__(self, stamp, alpha, Raccel):
+            self.alpha = alpha
+            self.alphaR = Raccel
+            self.alphaInvR = np.linalg.inv(Raccel)
+            self.stamp = stamp
+
+    class GyroscopeMeasurement(object):
+        def __init__(self, stamp, omega, Rgyro):
+            self.omega = omega
+            self.omegaR = Rgyro
+            self.omegaInvR = np.linalg.inv(Rgyro)
+            self.stamp = stamp
+
+    def loadImuDataIndividually(self, parsed, accelTopic, gyroTopic):
+#         print "Reading accel data ({0})".format(self.dataset.topic)
+            
+        # prepare progess bar
+        Rgyro = np.eye(3) * self.gyroUncertaintyDiscrete * self.gyroUncertaintyDiscrete
+        Raccel = np.eye(3) * self.accelUncertaintyDiscrete * self.accelUncertaintyDiscrete
         
+        self.accelDataset = initAccelBagDataset(parsed.bagfile[0], accelTopic, parsed.bag_from_to, \
+                                                parsed.perform_synchronization)
+        iProgress = sm.Progress2( self.accelDataset.numMessages() )
+        iProgress.sample()
+        accelerometer = []
+        for timestamp, alpha in self.accelDataset:
+            timestamp = acv.Time( timestamp.toSec() ) 
+            accelerometer.append( self.AccelerometerMeasurement(timestamp, alpha, Raccel) )
+            iProgress.sample()
+        self.accelerometerMeasurements = accelerometer
+
+        self.gyroDataset = initGyroBagDataset(parsed.bagfile[0], gyroTopic, parsed.bag_from_to, \
+                                              parsed.perform_synchronization)
+        iProgress = sm.Progress2( self.gyroDataset.numMessages() )
+        iProgress.sample()
+        gyroscope = []
+        for timestamp, omega in self.gyroDataset:
+            timestamp = acv.Time( timestamp.toSec() ) 
+            gyroscope.append( self.GyroscopeMeasurement(timestamp, omega, Rgyro) )
+            iProgress.sample()
+        self.gyroscopeMeasurements = gyroscope
+        
+        self.imuData = []
+
     def loadImuData(self):
-        print "Reading IMU data ({0})".format(self.dataset.topic)
+#         print "Reading IMU data ({0})".format(self.dataset.topic)
             
         # prepare progess bar
         iProgress = sm.Progress2( self.dataset.numMessages() )
@@ -677,10 +755,9 @@ class IccImu(object):
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
                                    accelNoiseScale=1.0):
         print
-        print "Adding accelerometer error terms ({0})".format(self.dataset.topic)
+        print "Adding accelerometer error terms ({0})".format(self.accelDataset.topic)
         
-        #progress bar
-        iProgress = sm.Progress2( len(self.imuData) )
+        iProgress = sm.Progress2( len(self.accelerometerMeasurements) )
         iProgress.sample()
         
         # AccelerometerError(measurement,  invR,  C_b_w,  acceleration_w,  bias,  g_w)
@@ -693,7 +770,7 @@ class IccImu(object):
         else:
             mest = aopt.NoMEstimator()
             
-        for im in self.imuData:
+        for im in self.accelerometerMeasurements:
             tk = im.stamp.toSec() + self.timeOffset
             if tk > poseSplineDv.spline().t_min() and tk < poseSplineDv.spline().t_max():
                 C_b_w = poseSplineDv.orientation(tk).inverse()
@@ -715,16 +792,16 @@ class IccImu(object):
             #update progress bar
             iProgress.sample(print_steps=100)
 
-        print "\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped )
+        print "\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.accelerometerMeasurements)-num_skipped, len(self.accelerometerMeasurements), num_skipped )
         self.accelErrors = accelErrors
 
     def addGyroscopeErrorTerms(self, problem, poseSplineDv, mSigma=0.0, gyroNoiseScale=1.0, \
                                g_w=None):
         print
-        print "Adding gyroscope error terms ({0})".format(self.dataset.topic)
+        print "Adding gyroscope error terms ({0})".format(self.gyroDataset.topic)
         
         #progress bar
-        iProgress = sm.Progress2( len(self.imuData) )
+        iProgress = sm.Progress2( len(self.gyroscopeMeasurements) )
         iProgress.sample()
 
         num_skipped = 0
@@ -735,7 +812,7 @@ class IccImu(object):
         else:
             mest = aopt.NoMEstimator()
             
-        for im in self.imuData:
+        for im in self.gyroscopeMeasurements:
             tk = im.stamp.toSec() + self.timeOffset
             #TODO(jrn) this is a work around until time offsets are implemented for all expressions
             #          and the offset can directly be added to tk
@@ -766,7 +843,7 @@ class IccImu(object):
             #update progress bar
             iProgress.sample(print_steps=100)
 
-        print "\r  Added {0} of {1} gyroscope error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped )           
+        print "\r  Added {0} of {1} gyroscope error terms (skipped {2} out-of-bounds measurements)".format( len(self.gyroscopeMeasurements)-num_skipped, len(self.gyroscopeMeasurements), num_skipped )           
         self.gyroErrors = gyroErrors
 
     def initBiasSplines(self, poseSpline, splineOrder, biasKnotsPerSecond):
@@ -811,8 +888,8 @@ class IccImu(object):
         problem.addDesignVariable(q_i_b_Dv)
 
         # Add spline representing rotational velocity of in body frame
-        startTime = self.imuData[0].stamp.toSec()
-        endTime = self.imuData[-1].stamp.toSec()
+        startTime = self.gyroscopeMeasurements[0].stamp.toSec()
+        endTime = self.gyroscopeMeasurements[-1].stamp.toSec()
         knotsPerSecond = 50
         knots = int( round( (endTime - startTime) * knotsPerSecond) )
 
@@ -830,7 +907,7 @@ class IccImu(object):
         referenceGyroBiasDv.setActive(True)
         problem.addDesignVariable(referenceGyroBiasDv)
 
-        for im in referenceImu.imuData:
+        for im in referenceImu.gyroscopeMeasurements:
             tk = im.stamp.toSec()
             if tk > angularVelocity.t_min() and tk < angularVelocity.t_max():        
                 #DV expressions
@@ -864,11 +941,11 @@ class IccImu(object):
 
         referenceAbsoluteOmega = lambda dt = np.array([0.]): \
                 np.asarray([np.linalg.norm(angularVelocityDv.toEuclidean(im.stamp.toSec() + dt[0], 0)) \
-                            for im in self.imuData \
+                            for im in self.gyroscopeMeasurements \
                             if (im.stamp.toSec() + dt[0] > angularVelocity.t_min() \
                                 and im.stamp.toSec() + dt[0] < angularVelocity.t_max())])
         absoluteOmega = lambda dt = np.array([0.]): \
-                np.asarray([np.linalg.norm(im.omega) for im in self.imuData \
+                np.asarray([np.linalg.norm(im.omega) for im in self.gyroscopeMeasurements \
                             if (im.stamp.toSec() + dt[0] > angularVelocity.t_min() \
                                 and im.stamp.toSec() + dt[0] < angularVelocity.t_max())])
 
@@ -882,7 +959,7 @@ class IccImu(object):
         corr = np.correlate(referenceAbsoluteOmega(), absoluteOmega(), "full")
         discrete_shift = corr.argmax() - (np.size(absoluteOmega()) - 1)
         #get cont. time shift
-        times = [im.stamp.toSec() for im in self.imuData]
+        times = [im.stamp.toSec() for im in self.gyroscopeMeasurements]
         dT = np.mean(np.diff( times ))
         shift = discrete_shift*dT
         
@@ -901,7 +978,7 @@ class IccImu(object):
         gyroBiasDv.setActive(True)
         problem.addDesignVariable(gyroBiasDv)
 
-        for im in self.imuData:
+        for im in self.gyroscopeMeasurements:
             tk = im.stamp.toSec() + self.timeOffset
             if tk > angularVelocity.t_min() and tk < angularVelocity.t_max():        
                 #DV expressions
@@ -988,10 +1065,10 @@ class IccScaledMisalignedImu(IccImu):
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
                                    accelNoiseScale=1.0):
         print
-        print "Adding accelerometer error terms ({0})".format(self.dataset.topic)
+        print "Adding accelerometer error terms ({0})".format(self.accelDataset.topic)
         
         #progress bar
-        iProgress = sm.Progress2( len(self.imuData) )
+        iProgress = sm.Progress2( len(self.accelerometerMeasurements) )
         iProgress.sample()
         
         # AccelerometerError(measurement,  invR,  C_b_w,  acceleration_w,  bias,  g_w)
@@ -1004,7 +1081,7 @@ class IccScaledMisalignedImu(IccImu):
         else:
             mest = aopt.NoMEstimator()
             
-        for im in self.imuData:
+        for im in self.accelerometerMeasurements:
             tk = im.stamp.toSec() + self.timeOffset
             if tk > poseSplineDv.spline().t_min() and tk < poseSplineDv.spline().t_max():
                 C_b_w = poseSplineDv.orientation(tk).inverse()
@@ -1028,15 +1105,15 @@ class IccScaledMisalignedImu(IccImu):
             #update progress bar
             iProgress.sample(print_steps=100)
 
-        print "\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped )
+        print "\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.accelerometerMeasurements)-num_skipped, len(self.accelerometerMeasurements), num_skipped )
         self.accelErrors = accelErrors
 
     def addGyroscopeErrorTerms(self, problem, poseSplineDv, mSigma=0.0, gyroNoiseScale=1.0, g_w=None):
         print
-        print "Adding gyroscope error terms ({0})".format(self.dataset.topic)
+        print "Adding gyroscope error terms ({0})".format(self.gyroDataset.topic)
         
         #progress bar
-        iProgress = sm.Progress2( len(self.imuData) )
+        iProgress = sm.Progress2( len(self.gyroscopeMeasurements) )
         iProgress.sample()
 
         num_skipped = 0
@@ -1047,7 +1124,7 @@ class IccScaledMisalignedImu(IccImu):
         else:
             mest = aopt.NoMEstimator()
             
-        for im in self.imuData:
+        for im in self.gyroscopeMeasurements:
             tk = im.stamp.toSec() + self.timeOffset
             if tk > poseSplineDv.spline().t_min() and tk < poseSplineDv.spline().t_max() and \
                tk + self.gyroTimeDv.toScalar() > poseSplineDv.spline().t_min() and \
@@ -1092,7 +1169,7 @@ class IccScaledMisalignedImu(IccImu):
             #update progress bar
             iProgress.sample(print_steps=100)
 
-        print "\r  Added {0} of {1} gyroscope error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped )           
+        print "\r  Added {0} of {1} gyroscope error terms (skipped {2} out-of-bounds measurements)".format( len(self.gyroscopeMeasurements)-num_skipped, len(self.gyroscopeMeasurements), num_skipped )           
         self.gyroErrors = gyroErrors
 
 class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
@@ -1154,10 +1231,10 @@ class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
                                    accelNoiseScale=1.0):
         print
-        print "Adding accelerometer error terms ({0})".format(self.dataset.topic)
+        print "Adding accelerometer error terms ({0})".format(self.accelDataset.topic)
         
         #progress bar
-        iProgress = sm.Progress2( len(self.imuData) )
+        iProgress = sm.Progress2( len(self.accelerometerMeasurements) )
         iProgress.sample()
         
         # AccelerometerError(measurement,  invR,  C_b_w,  acceleration_w,  bias,  g_w)
@@ -1170,7 +1247,7 @@ class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
         else:
             mest = aopt.NoMEstimator()
             
-        for im in self.imuData:
+        for im in self.accelerometerMeasurements:
             tk = im.stamp.toSec() + self.timeOffset
             if tk > poseSplineDv.spline().t_min() and tk < poseSplineDv.spline().t_max():
                 C_b_w = poseSplineDv.orientation(tk).inverse()
@@ -1202,5 +1279,5 @@ class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
             #update progress bar
             iProgress.sample(print_steps=100)
 
-        print "\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped )
+        print "\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.accelerometerMeasurements)-num_skipped, len(self.accelerometerMeasurements), num_skipped )
         self.accelErrors = accelErrors

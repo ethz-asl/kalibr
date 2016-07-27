@@ -117,3 +117,24 @@ class BagImuDatasetReader(object):
         alpha = np.array( [data.linear_acceleration.x, data.linear_acceleration.y, data.linear_acceleration.z] )
         
         return (timestamp, omega, alpha)
+    
+    
+class BagAccelDatasetReader(BagImuDatasetReader):
+    def getMessage(self,idx):
+        topic, data, stamp = self.bag._read_message(self.index[idx].position)
+        if self.perform_synchronization:
+            timestamp = acv.Time(self.timestamp_corrector.getLocalTime(data.header.stamp.to_sec()))
+        else:
+            timestamp = acv.Time( data.header.stamp.secs, data.header.stamp.nsecs )
+        alpha = np.array( [data.linear_acceleration.x, data.linear_acceleration.y, data.linear_acceleration.z] )
+        return (timestamp, alpha)
+
+class BagGyroDatasetReader(BagImuDatasetReader):
+    def getMessage(self,idx):
+        topic, data, stamp = self.bag._read_message(self.index[idx].position)
+        if self.perform_synchronization:
+            timestamp = acv.Time(self.timestamp_corrector.getLocalTime(data.header.stamp.to_sec()))
+        else:
+            timestamp = acv.Time( data.header.stamp.secs, data.header.stamp.nsecs )
+        omega = np.array( [data.angular_velocity.x, data.angular_velocity.y, data.angular_velocity.z])
+        return (timestamp, omega)

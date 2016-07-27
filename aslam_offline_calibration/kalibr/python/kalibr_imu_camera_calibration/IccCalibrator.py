@@ -102,7 +102,8 @@ class IccCalibrator(object):
         self.noTimeCalibration = noTimeCalibration
         if not noTimeCalibration:
             for cam in self.CameraChain.camList:
-                cam.findTimeshiftCameraImuPrior(self.ImuList[0], verbose)
+                if cam.dataset:
+                    cam.findTimeshiftCameraImuPrior(self.ImuList[0], verbose)
         
         #obtain orientation prior between main imu and camera chain (if no external input provided)
         #and initial estimate for the direction of gravity
