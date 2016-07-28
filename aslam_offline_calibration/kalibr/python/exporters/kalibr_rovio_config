@@ -100,7 +100,7 @@ if __name__ == "__main__":
     #load the camchain.yaml
     camchain = kc.ConfigReader.CameraChainParameters(parsed.chainYaml)
 
-    with open(kalibr_path + '/python/rovio_header.txt', 'r') as file_:
+    with open(kalibr_path + '/python/exporters/auxiliary_files/rovio_header.txt', 'r') as file_:
         CONFIG = file_.read()
 
     CONFIG+="\n"
@@ -113,7 +113,7 @@ if __name__ == "__main__":
         q_SC_jpl = camchain.getExtrinsicsImuToCam(cidx).q()
         CONFIG += printCameraBlock(camConfig, T_SC, q_SC_jpl)
 
-    with open(kalibr_path + '/python/rovio_footer.txt', 'r') as file_:
+    with open(kalibr_path + '/python/exporters/auxiliary_files/rovio_footer.txt', 'r') as file_:
         CONFIG += file_.read()
 
     with open('rovio_test.info', 'w') as file_:

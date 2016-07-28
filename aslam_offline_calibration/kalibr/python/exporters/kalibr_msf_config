@@ -38,7 +38,7 @@ if __name__ == "__main__":
     kalibr_path = rospack.get_path('kalibr')
     
     #write the header
-    with open(kalibr_path + '/python/msf_header.txt', 'r') as file_:
+    with open(kalibr_path + '/python/exporters/auxiliary_files/msf_header.txt', 'r') as file_:
         CONFIG = file_.read()
 
     #read in yaml file
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     CONFIG += "pose_sensor/pose_delay: {0}\n".format(-mav_data['cam0']['timeshift_cam_imu'])
 
     #write mid section
-    with open(kalibr_path + '/python/msf_mid.txt', 'r') as file_:
+    with open(kalibr_path + '/python/exporters/auxiliary_files/msf_mid.txt', 'r') as file_:
         CONFIG += file_.read()
     
     #write the body
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     CONFIG += "pose_sensor/init/p_ic/z: {0}\n".format(T_B_SB[2,3])
     
     #write the footer
-    with open(kalibr_path + '/python/msf_footer.txt', 'r') as file_:
+    with open(kalibr_path + '/python/exporters/auxiliary_files/msf_footer.txt', 'r') as file_:
         CONFIG += file_.read()
     
     #output the stuff
