@@ -161,6 +161,20 @@ namespace aslam {
 
         }
 
+        aslam::backend::EuclideanExpression BSplinePoseDesignVariable::angularAccelerationBodyFrame(double tk)
+        {
+        	Eigen::VectorXi dvidxs = _bsplinePose.localVvCoefficientVectorIndices(tk);
+        	std::vector<aslam::backend::DesignVariable *> dvs;
+        	for(int i = 0; i < dvidxs.size(); ++i)
+        	{
+        		dvs.push_back(&_designVariables[dvidxs[i]]);
+        	}
+
+        	boost::shared_ptr<BSplineAngularAccelerationBodyFrameExpressionNode> root( new BSplineAngularAccelerationBodyFrameExpressionNode(&_bsplinePose, dvs, tk) );
+
+        	return aslam::backend::EuclideanExpression(root);
+
+        }
 
         void BSplinePoseDesignVariable::addSegment(double t, Eigen::Matrix4d T)
         {

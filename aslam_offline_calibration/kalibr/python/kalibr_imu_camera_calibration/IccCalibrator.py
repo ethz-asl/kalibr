@@ -1,13 +1,14 @@
-import sm
-import IccUtil as util
 import aslam_backend as aopt
 import aslam_splines as asp
+import IccUtil as util
 import incremental_calibration as inc
+import kalibr_common as kc
+import sm
 
+import gc
 import numpy as np
 import multiprocessing
 import sys
-import gc
 
 # make numpy print prettier
 np.set_printoptions(suppress=True)
@@ -23,18 +24,19 @@ def addSplineDesignVariables(problem, dvc, setActive=True, group_id=HELPER_GROUP
 
 class IccCalibrator(object):
     def __init__(self):
-        pass
+        self.ImuList = []
 
-    def initDesignVariables(self, problem, poseSpline, noTimeCalibration, estimateGravityLength=False):        
+    def initDesignVariables(self, problem, poseSpline, noTimeCalibration, noChainExtrinsics=True, \
+                            estimateGravityLength=False, initialGravityEstimate=np.array([0.0,9.81,0.0])):        
         # Initialize the system pose spline (always attached to imu0) 
         self.poseDv = asp.BSplinePoseDesignVariable( poseSpline )
         addSplineDesignVariables(problem, self.poseDv)
 
         # Add the calibration target orientation design variable. (expressed as gravity vector in target frame)
         if estimateGravityLength:
-            self.gravityDv = aopt.EuclideanPointDv( np.array([0.0,-9.81,0.0]) )
+            self.gravityDv = aopt.EuclideanPointDv( initialGravityEstimate )
         else:
-            self.gravityDv = aopt.EuclideanDirection( np.array([0.0,-9.81,0.0]) )
+            self.gravityDv = aopt.EuclideanDirection( initialGravityEstimate )
         self.gravityExpression = self.gravityDv.toExpression()  
         self.gravityDv.setActive( True )
         problem.addDesignVariable(self.gravityDv, HELPER_GROUP_ID)
@@ -44,7 +46,7 @@ class IccCalibrator(object):
             imu.addDesignVariables( problem )
         
         #Add all DVs for the camera chain    
-        self.CameraChain.addDesignVariables( problem, noTimeCalibration )
+        self.CameraChain.addDesignVariables( problem, noTimeCalibration, noChainExtrinsics )
 
     def addPoseMotionTerms(self, problem, tv, rv):
         wt = 1.0/tv;
@@ -53,19 +55,11 @@ class IccCalibrator(object):
         asp.addMotionErrorTerms(problem, self.poseDv, W, errorOrder)
         
     #add camera to sensor list (create list if necessary)
-    def registerSensor(self, sensor):
-        
-        className = sensor.__class__.__name__
-                
-        if className == "IccCameraChain":
-            self.CameraChain = sensor
+    def registerCamChain(self, sensor):
+        self.CameraChain = sensor
 
-        elif className == "IccImu":
-            try:
-                self.ImuList.append( sensor )
-            except AttributeError:
-                self.ImuList=[]
-                self.ImuList.append( sensor )
+    def registerImu(self, sensor):
+        self.ImuList.append( sensor )
             
     def buildProblem( self, 
                       splineOrder=6, 
@@ -79,6 +73,7 @@ class IccCalibrator(object):
                       huberAccel=-1,
                       huberGyro=-1,
                       noTimeCalibration=False,
+                      noChainExtrinsics=True,
                       maxIterations=20,
                       gyroNoiseScale=1.0,
                       accelNoiseScale=1.0,
@@ -93,8 +88,8 @@ class IccCalibrator(object):
         print "\tBias knots per second: %d" % (biasKnotsPerSecond)
         print "\tDo bias motion regularization: %s" % (doBiasMotionError)
         print "\tBlake-Zisserman on reprojection errors %s" % blakeZisserCam
-        print "\tAcceleration Huber width (m/s^2): %f" % (huberAccel)
-        print "\tGyroscope Huber width (rad/s): %f" % (huberGyro)
+        print "\tAcceleration Huber width (sigma): %f" % (huberAccel)
+        print "\tGyroscope Huber width (sigma): %f" % (huberGyro)
         print "\tDo time calibration: %s" % (not noTimeCalibration)
         print "\tMax iterations: %d" % (maxIterations)
         print "\tTime offset padding: %f" % (timeOffsetPadding)
@@ -110,7 +105,9 @@ class IccCalibrator(object):
                 cam.findTimeshiftCameraImuPrior(self.ImuList[0], verbose)
         
         #obtain orientation prior between main imu and camera chain (if no external input provided)
+        #and initial estimate for the direction of gravity
         self.CameraChain.findOrientationPriorCameraChainToImu(self.ImuList[0])
+        estimatedGravity = self.CameraChain.getEstimatedGravity()
 
         ############################################
         ## init optimization problem
@@ -121,12 +118,12 @@ class IccCalibrator(object):
         # Initialize bias splines for all IMUs
         for imu in self.ImuList:
             imu.initBiasSplines(poseSpline, splineOrder, biasKnotsPerSecond)
-            
+        
         # Now I can build the problem
         problem = inc.CalibrationOptimizationProblem()
 
         # Initialize all design variables.
-        self.initDesignVariables(problem, poseSpline, noTimeCalibration)
+        self.initDesignVariables(problem, poseSpline, noTimeCalibration, noChainExtrinsics, initialGravityEstimate = estimatedGravity)
         
         ############################################
         ## add error terms
@@ -137,8 +134,8 @@ class IccCalibrator(object):
         # Initialize IMU error terms.
         for imu in self.ImuList:
             imu.addAccelerometerErrorTerms(problem, self.poseDv, self.gravityExpression, mSigma=huberAccel, accelNoiseScale=accelNoiseScale)
-            imu.addGyroscopeErrorTerms(problem, self.poseDv, mSigma=huberGyro, gyroNoiseScale=gyroNoiseScale)
-            
+            imu.addGyroscopeErrorTerms(problem, self.poseDv, mSigma=huberGyro, gyroNoiseScale=gyroNoiseScale, g_w=self.gravityExpression)
+
             # Add the bias motion terms.
             if doBiasMotionError:
                 imu.addBiasMotionTerms(problem)
@@ -157,12 +154,13 @@ class IccCalibrator(object):
             options = aopt.Optimizer2Options()
             options.verbose = True
             options.doLevenbergMarquardt = True
-            options.levenbergMarquardtLambdaInit = 100.0
+            options.levenbergMarquardtLambdaInit = 10.0
             options.nThreads = max(1,multiprocessing.cpu_count()-1)
-            options.convergenceDeltaX = 1e-4
-            options.convergenceDeltaJ = 1
+            options.convergenceDeltaX = 1e-5
+            options.convergenceDeltaJ = 1e-2
             options.maxIterations = maxIterations
             options.trustRegionPolicy = aopt.LevenbergMarquardtTrustRegionPolicy(options.levenbergMarquardtLambdaInit)
+            options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()
 
         #run the optimization
         self.optimizer = aopt.Optimizer2(options)
@@ -202,7 +200,14 @@ class IccCalibrator(object):
         self.std_trafo_ic = np.array(est_stds[0:6])
         self.std_times = np.array(est_stds[6:])
     
-    def saveParametersYaml(self, resultFile):    
+    def saveImuSetParametersYaml(self, resultFile):
+        imuSetConfig = kc.ImuSetParameters(resultFile, True)
+        for imu in self.ImuList:
+            imuConfig = imu.getImuConfig()
+            imuSetConfig.addImuParameters(imu_parameters=imuConfig)
+        imuSetConfig.writeYaml(resultFile)
+
+    def saveCamChainParametersYaml(self, resultFile):    
         chain = self.CameraChain.chainConfig
         nCams = len(self.CameraChain.camList)
     

@@ -43,6 +43,7 @@ namespace aslam {
       EuclideanExpression operator-(const Eigen::Vector3d & p) const;
       EuclideanExpression operator-() const;
       EuclideanExpression operator*(const ScalarExpression& s) const;
+      EuclideanExpression elementwiseMultiply(const EuclideanExpression & p) const;
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 

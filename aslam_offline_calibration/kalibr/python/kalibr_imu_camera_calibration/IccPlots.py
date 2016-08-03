@@ -2,7 +2,7 @@ import numpy as np
 import pylab as pl
 
 def plotGyroError(cself, iidx, fno=1, clearFigure=True, noShow=False):
-    errors = np.array([re.getRawSquaredError() for re in  cself.ImuList[iidx].gyroErrors])
+    errors = np.array([np.dot(re.error(), re.error()) for re in  cself.ImuList[iidx].gyroErrors])
    
     f = pl.figure(fno)
     if clearFigure:
@@ -21,12 +21,31 @@ def plotGyroError(cself, iidx, fno=1, clearFigure=True, noShow=False):
     
     pl.subplot(2, 1, 2)
     pl.hist(errors, len(errors)/100)
-    pl.xlabel('error (rad/sec) squared')
+    pl.xlabel('error ($rad/s$) squared')
     pl.ylabel('error index')
     pl.grid('on')
 
+def plotGyroErrorPerAxis(cself, iidx, fno=1, clearFigure=True, noShow=False):
+    errors = np.array([re.error() for re in  cself.ImuList[iidx].gyroErrors])
+   
+    f = pl.figure(fno)
+    if clearFigure:
+        f.clf()
+    f.suptitle("imu{0}: angular velocities error".format(iidx))
+    
+    for i in xrange(3):
+        pl.subplot(3, 1, i+1)
+        pl.plot(errors[:,i])
+        pl.xlabel('error index')
+        pl.ylabel('error ($rad/s$)')
+        pl.grid('on')
+        sigma = cself.ImuList[iidx].getImuConfig().getGyroStatistics()[0]
+        pl.plot(np.array([0., errors.shape[0]]), sigma * 3.* np.ones(2), 'r--')
+        pl.plot(np.array([0., errors.shape[0]]), -sigma * 3.* np.ones(2), 'r--')
+        pl.xlim([0., errors.shape[0]])
+
 def plotAccelError(cself, iidx, fno=1, clearFigure=True, noShow=False):
-    errors = np.array([re.getRawSquaredError() for re in cself.ImuList[iidx].accelErrors])
+    errors = np.array([np.dot(re.error(), re.error()) for re in cself.ImuList[iidx].accelErrors])
    
     f = pl.figure(fno)
     if clearFigure:
@@ -45,14 +64,34 @@ def plotAccelError(cself, iidx, fno=1, clearFigure=True, noShow=False):
     
     pl.subplot(2, 1, 2)
     pl.hist(errors, len(errors)/100)
-    pl.xlabel('(m/sec*sec) squared')
+    pl.xlabel('($m/s^2$) squared')
     pl.ylabel('Error Number')
     pl.grid('on')
+
+def plotAccelErrorPerAxis(cself, iidx, fno=1, clearFigure=True, noShow=False):
+    errors = np.array([re.error() for re in  cself.ImuList[iidx].accelErrors])
+   
+    f = pl.figure(fno)
+    if clearFigure:
+        f.clf()
+    f.suptitle("imu{0}: acceleration error".format(iidx))
+    
+    for i in xrange(3):
+        pl.subplot(3, 1, i+1)
+        pl.plot(errors[:,i])
+        pl.xlabel('error index')
+        pl.ylabel('error ($m/s^2$)')
+        pl.grid('on')
+        sigma = cself.ImuList[iidx].getImuConfig().getAccelerometerStatistics()[0]
+        pl.plot(np.array([0, errors.shape[0]]), sigma * 3.* np.ones(2), 'r--')
+        pl.plot(np.array([0, errors.shape[0]]), -sigma * 3.* np.ones(2), 'r--')
+        pl.xlim([0., errors.shape[0]])
 
 def plotAccelBias(cself, imu_idx, fno=1, clearFigure=True, noShow=False):
     imu = cself.ImuList[imu_idx]
     bias = imu.accelBiasDv.spline()
-    times = np.array([im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > bias.t_min() and im.stamp.toSec() < bias.t_max() ])
+    times = np.array([im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > bias.t_min() \
+                      and im.stamp.toSec() < bias.t_max() ])
     acc_bias_spline = np.array([bias.evalD(t,0) for t in times]).T
     times = times - times[0]     #remove time offset
 
@@ -60,25 +99,42 @@ def plotAccelBias(cself, imu_idx, fno=1, clearFigure=True, noShow=False):
                        title="imu{0}: estimated accelerometer bias (imu frame)".format(imu_idx), 
                        ylabel="bias ($m/s^2$)", 
                        fno=fno, clearFigure=clearFigure, noShow=noShow)
-    
+
+    sigma_rw = cself.ImuList[imu_idx].getImuConfig().getAccelerometerStatistics()[1]
+    bounds = 3. * sigma_rw * np.sqrt(times)
+    for i in xrange(3):
+        pl.subplot(3, 1, i+1)
+        pl.plot(times, acc_bias_spline[i,0] + bounds, 'r--')
+        pl.plot(times, acc_bias_spline[i,0] - bounds, 'r--')
+
 def plotAngularVelocityBias(cself, imu_idx, fno=1, clearFigure=True, noShow=False):
     imu = cself.ImuList[imu_idx]
     bias = imu.gyroBiasDv.spline()
-    times = np.array([im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > bias.t_min() and im.stamp.toSec() < bias.t_max() ])
-    avimubias_spline = np.array([bias.evalD(t,0) for t in times]).T
+    times = np.array([im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > bias.t_min() \
+                      and im.stamp.toSec() < bias.t_max() ])
+    gyro_bias_spline = np.array([bias.evalD(t,0) for t in times]).T
     times = times - times[0]     #remove time offset
     
-    plotVectorOverTime(times, avimubias_spline, 
+    plotVectorOverTime(times, gyro_bias_spline, 
                        title="imu{0}: estimated gyro bias (imu frame)".format(imu_idx), 
                        ylabel="bias ($rad/s$)", 
                        fno=fno, clearFigure=clearFigure, noShow=noShow)
+
+    sigma_rw = cself.ImuList[imu_idx].getImuConfig().getGyroStatistics()[1]
+    bounds = 3. * sigma_rw * np.sqrt(times)
+    for i in xrange(3):
+        pl.subplot(3, 1, i+1)
+        pl.plot(times, gyro_bias_spline[i,0] + bounds, 'r--')
+        pl.plot(times, gyro_bias_spline[i,0] - bounds, 'r--')
 
 #plots angular velocity of the body fixed spline versus all imu measurements
 def plotAngularVelocities(cself, iidx, fno=1, clearFigure=True, noShow=False):
     #predicted (over the time of the imu)
     imu = cself.ImuList[iidx]
     bodyspline = cself.poseDv.spline()   
-    times = np.array([im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > bodyspline.t_min() and im.stamp.toSec() < bodyspline.t_max() ])
+    times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.imuData \
+                      if im.stamp.toSec() + imu.timeOffset > bodyspline.t_min() \
+                      and im.stamp.toSec() + imu.timeOffset < bodyspline.t_max() ])
     predictedAng_body =  np.array([err.getPredictedMeasurement() for err in imu.gyroErrors]).T
     
     #transform the measurements to the body frame
@@ -105,7 +161,9 @@ def plotAccelerations(cself, iidx, fno=1, clearFigure=True, noShow=False):
     #predicted 
     imu = cself.ImuList[iidx]
     bodyspline = cself.poseDv.spline()   
-    times = np.array([im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > bodyspline.t_min() and im.stamp.toSec() < bodyspline.t_max() ])
+    times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.imuData \
+                      if im.stamp.toSec() + imu.timeOffset > bodyspline.t_min() \
+                      and im.stamp.toSec() + imu.timeOffset < bodyspline.t_max() ])
     predicetedAccel_body =  np.array([err.getPredictedMeasurement() for err in imu.accelErrors]).T
     
     #transform accelerations from imu to body frame (on fixed body and geometry was estimated...)
@@ -163,10 +221,15 @@ def plotReprojectionScatter(cself, cam_id, fno=1, clearFigure=True, noShow=False
         rerrs = np.array([rerr.error() for rerr in rerrs_image])  
         pl.plot(rerrs[:,0], rerrs[:,1], 'x', lw=3, mew=3, color=color)
 
+    #A red uncertainty bound would be more consistent, but it is less well visible.
+    uncertainty_bound = pl.Circle((0,0), 3. * cam.cornerUncertainty, color='k', linestyle='dashed', \
+                                  fill=False, lw=2, zorder=len(cam.allReprojectionErrors))
+    f.gca().add_artist(uncertainty_bound)
+
     pl.axis('equal')
     pl.grid('on')
-    pl.xlabel('error x (pix)')
-    pl.ylabel('error y (pix)')
+    pl.xlabel('error x ($pix$)')
+    pl.ylabel('error y ($pix$)')
     SM = pl.cm.ScalarMappable(pl.cm.colors.Normalize(0.0,numImages), pl.cm.jet)
     SM.set_array(np.arange(numImages));
     cb = pl.colorbar(SM)

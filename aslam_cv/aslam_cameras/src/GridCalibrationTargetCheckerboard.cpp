@@ -78,7 +78,9 @@ bool GridCalibrationTargetCheckerboard::computeObservation(const cv::Mat & image
            Eigen::MatrixXd & outImagePoints, std::vector<bool> &outCornerObserved) const {
 
   // set the open cv flags
-  int flags = cv::CALIB_CB_FAST_CHECK;
+  int flags = 0;
+  if (_options.performFastCheck)
+    flags += cv::CALIB_CB_FAST_CHECK;
   if (_options.useAdaptiveThreshold)
     flags += cv::CALIB_CB_ADAPTIVE_THRESH;
   if ( _options.normalizeImage)
@@ -94,7 +96,7 @@ bool GridCalibrationTargetCheckerboard::computeObservation(const cv::Mat & image
   // do optional subpixel refinement
   if (_options.doSubpixelRefinement && success) {
     cv::cornerSubPix(
-        image, centers, cv::Size(11, 11), cv::Size(-1, -1),
+        image, centers, cv::Size(_options.windowWidth, _options.windowWidth), cv::Size(-1, -1),
         cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
   }
 
@@ -103,7 +105,8 @@ bool GridCalibrationTargetCheckerboard::computeObservation(const cv::Mat & image
     //image with refined (blue) and raw corners (red)
     cv::Mat imageCopy1 = image.clone();
     cv::cvtColor(imageCopy1, imageCopy1, CV_GRAY2RGB);
-    cv::drawChessboardCorners(imageCopy1, patternSize, centers, true);
+    cv::drawChessboardCorners(imageCopy1, cv::Size(rows(), cols()), centers,
+                              true);
 
     // write error msg
     if (!success)

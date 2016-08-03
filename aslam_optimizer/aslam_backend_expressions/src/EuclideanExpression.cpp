@@ -72,6 +72,12 @@ namespace aslam {
       return EuclideanExpression(newRoot);
     }
 
+    EuclideanExpression EuclideanExpression::elementwiseMultiply(const EuclideanExpression & p) const
+    {
+      boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeElementwiseMultiplyEuclidean(_root, p._root));
+      return EuclideanExpression(newRoot);
+    }
+
     EuclideanExpression EuclideanExpression::operator+(const EuclideanExpression & p) const
     {
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeAddEuclidean(_root, p._root));

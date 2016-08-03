@@ -254,6 +254,8 @@ void exportGridCalibration() {
   class_<GridCalibrationTargetCheckerboard::CheckerboardOptions>("CheckerboardOptions", init<>())
     .def_readwrite("useAdaptiveThreshold", &GridCalibrationTargetCheckerboard::CheckerboardOptions::useAdaptiveThreshold)
     .def_readwrite("normalizeImage", &GridCalibrationTargetCheckerboard::CheckerboardOptions::normalizeImage)
+    .def_readwrite("performFastCheck", &GridCalibrationTargetCheckerboard::CheckerboardOptions::performFastCheck)
+    .def_readwrite("windowWidth", &GridCalibrationTargetCheckerboard::CheckerboardOptions::windowWidth)
     .def_readwrite("filterQuads", &GridCalibrationTargetCheckerboard::CheckerboardOptions::filterQuads)
     .def_readwrite("doSubpixelRefinement", &GridCalibrationTargetCheckerboard::CheckerboardOptions::doSubpixelRefinement)
     .def_readwrite("showExtractionVideo", &GridCalibrationTargetCheckerboard::CheckerboardOptions::showExtractionVideo)

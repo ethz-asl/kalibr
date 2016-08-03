@@ -20,10 +20,6 @@ cs_add_library(${PROJECT_NAME}
   src/MappedRotationQuaternion.cpp
   src/Vector2RotationQuaternionExpressionAdapter.cpp
 
-  src/MatrixExpression.cpp 
-  src/MatrixExpressionNode.cpp
-  src/MatrixTransformation.cpp
-
   src/TransformationExpression.cpp 
   src/TransformationExpressionNode.cpp
   src/TransformationBasic.cpp
@@ -48,6 +44,10 @@ cs_add_library(${PROJECT_NAME}
   src/ErrorTermEuclidean.cpp
 
   src/MapTransformation.cpp
+
+  src/MatrixBasic.cpp
+  src/MatrixExpression.cpp
+  src/MatrixExpressionNode.cpp
   )
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})

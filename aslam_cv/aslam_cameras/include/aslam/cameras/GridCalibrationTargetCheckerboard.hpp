@@ -25,15 +25,19 @@ class GridCalibrationTargetCheckerboard : public GridCalibrationTargetBase {
     CheckerboardOptions() :
       useAdaptiveThreshold(true),
       normalizeImage(true),
+      performFastCheck(true),
       filterQuads(false),
       doSubpixelRefinement(true),
-      showExtractionVideo(false) {};
+      showExtractionVideo(false),
+      windowWidth(11) {};
 
     /// \brief opencv options
     bool useAdaptiveThreshold;
     bool normalizeImage;
+    bool performFastCheck;
     bool filterQuads;
     bool doSubpixelRefinement;
+    unsigned int windowWidth;
 
     /// \brief show extracted corners
     bool showExtractionVideo;
@@ -46,18 +50,22 @@ class GridCalibrationTargetCheckerboard : public GridCalibrationTargetBase {
     {
        ar << BOOST_SERIALIZATION_NVP(useAdaptiveThreshold);
        ar << BOOST_SERIALIZATION_NVP(normalizeImage);
+       ar << BOOST_SERIALIZATION_NVP(performFastCheck);
        ar << BOOST_SERIALIZATION_NVP(filterQuads);
        ar << BOOST_SERIALIZATION_NVP(doSubpixelRefinement);
        ar << BOOST_SERIALIZATION_NVP(showExtractionVideo);
+       ar << BOOST_SERIALIZATION_NVP(windowWidth);
     }
     template<class Archive>
     void load(Archive & ar, const unsigned int /*version*/)
     {
        ar >> BOOST_SERIALIZATION_NVP(useAdaptiveThreshold);
        ar >> BOOST_SERIALIZATION_NVP(normalizeImage);
+       ar >> BOOST_SERIALIZATION_NVP(performFastCheck);
        ar >> BOOST_SERIALIZATION_NVP(filterQuads);
        ar >> BOOST_SERIALIZATION_NVP(doSubpixelRefinement);
        ar >> BOOST_SERIALIZATION_NVP(showExtractionVideo);
+       ar >> BOOST_SERIALIZATION_NVP(windowWidth);
     }
   };
 

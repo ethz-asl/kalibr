@@ -50,20 +50,20 @@ namespace aslam {
     }
 
     
-    RotationExpression RotationExpression::operator*(const RotationExpression & p)
+    RotationExpression RotationExpression::operator*(const RotationExpression & p) const
     {
       boost::shared_ptr<RotationExpressionNode> newRoot( new RotationExpressionNodeMultiply(_root, p._root));
       return RotationExpression(newRoot);
     }
 
-    EuclideanExpression RotationExpression::operator*(const EuclideanExpression & p)
+    EuclideanExpression RotationExpression::operator*(const EuclideanExpression & p) const
     {
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeMultiply(_root, p._root));
       return EuclideanExpression(newRoot);
       
     }
 
-  HomogeneousExpression RotationExpression::operator*(const HomogeneousExpression & /* p */)
+  HomogeneousExpression RotationExpression::operator*(const HomogeneousExpression & /* p */) const
     {
       // \todo
         SM_THROW(Exception, "Not implemented yet")
