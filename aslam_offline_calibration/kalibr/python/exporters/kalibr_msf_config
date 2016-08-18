@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+import kalibr_common as kc
+
+import numpy as np
+import pylab as pl
+import sm
+import argparse
+import sys
+import rospkg
+import yaml
+
+from matplotlib.colors import LogNorm 
+from sm.libsm_python import Transformation
+np.set_printoptions(suppress=True)
+    
+if __name__ == "__main__":        
+    parser = argparse.ArgumentParser(description='Convert camchain files generated for each imu into a msf_config file.')
+    parser.add_argument('--viimu', dest='viYaml', help='Camera configuration as yaml file relative to the vi imu', required=True)
+    parser.add_argument('--mavimu', dest='mavYaml', help='Camera configuration as yaml file relative to the mav imu', required=True)
+    parser.add_argument('--out', dest='outLoc', help='Path to output parameters to', required=False)
+    parsed = parser.parse_args()
+            
+    #load the transforms
+    camchain_SB = kc.ConfigReader.CameraChainParameters(parsed.viYaml)
+    T_SB = camchain_SB.getExtrinsicsImuToCam(0)
+    camchain_B = kc.ConfigReader.CameraChainParameters(parsed.mavYaml)
+    T_B = camchain_B.getExtrinsicsImuToCam(0)
+
+    #find the transformation between the imus
+    T_B_SB = T_B.inverse().T().dot(T_SB.T()); 
+    T_SB_B = T_SB.inverse().T().dot(T_B.T());    
+    q_SB_B = sm.r2quat(T_SB_B[0:3,0:3])
+    
+    # get an instance of RosPack with the default search paths
+    rospack = rospkg.RosPack()
+
+    # get the file path
+    kalibr_path = rospack.get_path('kalibr')
+    
+    #write the header
+    with open(kalibr_path + '/python/exporters/auxiliary_files/msf_header.txt', 'r') as file_:
+        CONFIG = file_.read()
+
+    #read in yaml file
+    mav_yaml = open(parsed.mavYaml)
+    mav_data = yaml.safe_load(mav_yaml)
+    mav_yaml.close()
+    
+    #write timedelay section
+    CONFIG += "pose_sensor/pose_delay: {0}\n".format(-mav_data['cam0']['timeshift_cam_imu'])
+
+    #write mid section
+    with open(kalibr_path + '/python/exporters/auxiliary_files/msf_mid.txt', 'r') as file_:
+        CONFIG += file_.read()
+    
+    #write the body
+    CONFIG += "pose_sensor/init/q_ic/x: {0}\n".format(q_SB_B[0])
+    CONFIG += "pose_sensor/init/q_ic/y: {0}\n".format(q_SB_B[1])
+    CONFIG += "pose_sensor/init/q_ic/z: {0}\n".format(q_SB_B[2])
+    CONFIG += "pose_sensor/init/q_ic/w: {0}\n\n".format(q_SB_B[3])
+    CONFIG += "pose_sensor/init/p_ic/x: {0}\n".format(T_B_SB[0,3])
+    CONFIG += "pose_sensor/init/p_ic/y: {0}\n".format(T_B_SB[1,3])
+    CONFIG += "pose_sensor/init/p_ic/z: {0}\n".format(T_B_SB[2,3])
+    
+    #write the footer
+    with open(kalibr_path + '/python/exporters/auxiliary_files/msf_footer.txt', 'r') as file_:
+        CONFIG += file_.read()
+    
+    #output the stuff
+    if(parsed.outLoc):
+        with open(parsed.outLoc, 'w') as file_:
+          file_.write(CONFIG)
+    else:
+        print
+        print "Copy the following block to your msf configuration:"
+        print "-----------------------------------------------------"
+        print
+        print CONFIG

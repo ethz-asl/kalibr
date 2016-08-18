@@ -1,0 +1,1 @@
+#include <aslam/LinkCvSerialization.hpp>

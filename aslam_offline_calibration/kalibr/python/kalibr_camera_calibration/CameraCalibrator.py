@@ -81,7 +81,12 @@ class TargetDetector(object):
         targetType = targetConfig.getTargetType()
 
         if targetType == 'checkerboard':
-            options = acv.CheckerboardOptions(); 
+            options = acv.CheckerboardOptions()
+            options.filterQuads = True
+            options.normalizeImage = True
+            options.useAdaptiveThreshold = True        
+            options.performFastCheck = False
+            options.windowWidth = 5            
             options.showExtractionVideo = showCorners
             
             self.grid = acv.GridCalibrationTargetCheckerboard(targetParams['targetRows'], 
@@ -90,8 +95,8 @@ class TargetDetector(object):
                                                               targetParams['colSpacingMeters'], 
                                                               options)
         elif targetType == 'circlegrid':
-            options = acv.CirclegridOptions(); 
-            options.showExtractionVideo = showCorners;
+            options = acv.CirclegridOptions()
+            options.showExtractionVideo = showCorners
             options.useAsymmetricCirclegrid = targetParams['asymmetricGrid']
             
             selfgrid = acv.GridCalibrationTargetCirclegrid(targetParams['targetRows'],
@@ -100,7 +105,7 @@ class TargetDetector(object):
                                                            options)
          
         elif targetType == 'aprilgrid':
-            options = acv_april.AprilgridOptions();
+            options = acv_april.AprilgridOptions()
             #enforce more than one row --> pnp solution can be bad if all points are almost on a line...
             options.minTagsForValidObs = int( np.max( [targetParams['tagRows'], targetParams['tagCols']] ) + 1 )
             options.showExtractionVideo = showCorners

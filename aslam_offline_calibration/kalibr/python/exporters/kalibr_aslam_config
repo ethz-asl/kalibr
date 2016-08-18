@@ -6,6 +6,7 @@ import pylab as pl
 import sm
 import argparse
 import sys
+import rospkg
 
 from matplotlib.colors import LogNorm 
 np.set_printoptions(suppress=True)
@@ -78,6 +79,8 @@ def printCameraBlock(camConfig, T_SC):
 if __name__ == "__main__":        
     parser = argparse.ArgumentParser(description='Convert a camchain_imu.yaml to an aslam camera configuration block.')
     parser.add_argument('--cam', dest='chainYaml', help='Camera configuration as yaml file', required=True)
+    parser.add_argument('--mav', dest='mavName', help='Name of mav', required=True)
+    parser.add_argument('--out', dest='outLoc', help='Path to output parameters to', required=False)
     parsed = parser.parse_args()
             
     #load the camchain.yaml
@@ -85,7 +88,7 @@ if __name__ == "__main__":
 
     #create camera config block    
     CONFIG=""
-    CONFIG+="base_topic: /\n"
+    CONFIG+="base_topic: /{0}/\n".format(parsed.mavName)
     CONFIG+="\n"
     CONFIG+= "cameras:\n"
     
@@ -96,10 +99,23 @@ if __name__ == "__main__":
         T_SC = camchain.getExtrinsicsImuToCam(cidx).inverse().T()
         CONFIG += printCameraBlock(camConfig, T_SC)
 
+    # get an instance of RosPack with the default search paths
+    rospack = rospkg.RosPack()
+
+    # get the file path
+    kalibr_path = rospack.get_path('kalibr')
+    
+    with open(kalibr_path + '/python/exporters/auxiliary_files/aslam_footer.txt', 'r') as file_:
+        CONFIG += file_.read()
+
     #output the stuff
-    print
-    print "Copy the following block to your aslam configuration:"
-    print "-----------------------------------------------------"
-    print
-    print CONFIG
+    if(parsed.outLoc):
+        with open(parsed.outLoc, 'w') as file_:
+          file_.write(CONFIG)
+    else:
+        print
+        print "Copy the following block to your aslam configuration:"
+        print "-----------------------------------------------------"
+        print
+        print CONFIG
     

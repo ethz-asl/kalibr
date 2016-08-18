@@ -11,5 +11,5 @@
 #include <boost/portable_binary_iarchive.hpp>
 #include <boost/portable_binary_oarchive.hpp>
 
-BOOST_CLASS_EXPORT_IMPLEMENT (aslam::cameras::DistortedOmniCameraGeometry);
+BOOST_CLASS_EXPORT_IMPLEMENT(aslam::cameras::DistortedOmniCameraGeometry);
 

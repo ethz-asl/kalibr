@@ -20,9 +20,10 @@ class BagImuDatasetReaderIterator(object):
         return self.dataset.getMessage(idx)
 
 class BagImuDatasetReader(object):
-    def __init__(self, bagfile, imutopic, bag_from_to=None):
+    def __init__(self, bagfile, imutopic, bag_from_to=None, perform_synchronization=False):
         self.bagfile = bagfile
         self.topic = imutopic
+        self.perform_synchronization = perform_synchronization
         self.bag = rosbag.Bag(bagfile)
         self.uncompress = None
         if imutopic is None:
@@ -48,11 +49,15 @@ class BagImuDatasetReader(object):
             
     #sort the ros messegaes by the header time not message time
     def sortByTime(self, indices):
+        self.timestamp_corrector = sm.DoubleTimestampCorrector()
         timestamps=list()
         for idx in self.indices:
             topic, data, stamp = self.bag._read_message(self.index[idx].position)
             timestamp = data.header.stamp.secs*1e9 + data.header.stamp.nsecs
             timestamps.append(timestamp)
+            if self.perform_synchronization:
+                self.timestamp_corrector.correctTimestamp(data.header.stamp.to_sec(), \
+                                                          stamp.to_sec())
         
         sorted_tuples = sorted(zip(timestamps, indices))
         sorted_indices = [tuple_value[1] for tuple_value in sorted_tuples]
@@ -104,8 +109,10 @@ class BagImuDatasetReader(object):
     
     def getMessage(self,idx):
         topic, data, stamp = self.bag._read_message(self.index[idx].position)
-        
-        timestamp = acv.Time( data.header.stamp.secs, data.header.stamp.nsecs )
+        if self.perform_synchronization:
+            timestamp = acv.Time(self.timestamp_corrector.getLocalTime(data.header.stamp.to_sec()))
+        else:
+            timestamp = acv.Time( data.header.stamp.secs, data.header.stamp.nsecs )
         omega = np.array( [data.angular_velocity.x, data.angular_velocity.y, data.angular_velocity.z])
         alpha = np.array( [data.linear_acceleration.x, data.linear_acceleration.y, data.linear_acceleration.z] )
         

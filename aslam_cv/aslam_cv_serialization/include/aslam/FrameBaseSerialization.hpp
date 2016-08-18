@@ -1,3 +1,4 @@
+
 #ifndef ASLAM_FRAME_BASE_SERIALIZATION_HPP
 #define ASLAM_FRAME_BASE_SERIALIZATION_HPP
 
@@ -12,56 +13,41 @@
  * 
  */
 
+
 #include <boost/serialization/export.hpp>
 #include <aslam/cameras.hpp>
 #include <aslam/Frame.hpp>
 #include "LinkCvSerialization.hpp"
 
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<aslam::cameras::PinholeCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::DistortedPinholeCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::EquidistantDistortedPinholeCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<aslam::cameras::OmniCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<aslam::cameras::DistortedOmniCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::EquidistantDistortedOmniCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<aslam::cameras::PinholeRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::DistortedPinholeRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::EquidistantDistortedPinholeRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<aslam::cameras::OmniRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::DistortedOmniRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::EquidistantDistortedOmniRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<aslam::cameras::MaskedPinholeCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::MaskedDistortedPinholeCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::MaskedEquidistantDistortedPinholeCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<aslam::cameras::MaskedOmniCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::MaskedDistortedOmniCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::MaskedPinholeRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::MaskedDistortedPinholeRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::MaskedEquidistantDistortedPinholeRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<aslam::cameras::MaskedOmniRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::MaskedDistortedOmniRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<aslam::cameras::DepthCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::DistortedDepthCameraGeometry>);
-BOOST_CLASS_EXPORT_KEY (aslam::Frame<
-    aslam::cameras::EquidistantDistortedDepthCameraGeometry>);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::PinholeCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::DistortedPinholeCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::EquidistantDistortedPinholeCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::FovDistortedPinholeCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::OmniCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::DistortedOmniCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::EquidistantDistortedOmniCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::PinholeRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::DistortedPinholeRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::EquidistantDistortedPinholeRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::OmniRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::DistortedOmniRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::EquidistantDistortedOmniRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedPinholeCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedDistortedPinholeCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedEquidistantDistortedPinholeCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedOmniCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedDistortedOmniCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedEquidistantDistortedOmniCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedPinholeRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedDistortedPinholeRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedEquidistantDistortedPinholeRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedOmniRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedDistortedOmniRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::DepthCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::DistortedDepthCameraGeometry >);
+BOOST_CLASS_EXPORT_KEY(aslam::Frame<aslam::cameras::EquidistantDistortedDepthCameraGeometry >);
+
 
 #endif // ASLAM_FRAME_BASE_SERIALIZATION_HPP
 

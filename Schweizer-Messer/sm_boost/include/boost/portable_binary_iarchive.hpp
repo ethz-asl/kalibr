@@ -29,15 +29,13 @@
 #include <boost/archive/detail/common_iarchive.hpp>
 #include <boost/version.hpp>
 
-// breaking changes in boost >=1.56
-#if BOOST_VERSION >= 105600
+#if BOOST_VERSION >= 105600 // see changes in https://github.com/boostorg/serialization/commit/75f09afc895ab09c4eb55d36fcf6f91ef4a0107a
 #include <boost/serialization/shared_ptr.hpp>
 #else
 #include <boost/archive/shared_ptr_helper.hpp>
 #endif
 
 #include <boost/archive/detail/register_archive.hpp>
-
 #include "portable_binary_archive.hpp"
 
 namespace boost {
@@ -88,10 +86,8 @@ class portable_binary_iarchive :
     >,
     public boost::archive::detail::common_iarchive<
         portable_binary_iarchive
-    >
-    ,
-// breaking changes in boost >=1.56
-#if BOOST_VERSION >= 105600
+    >,
+#if BOOST_VERSION >= 105600 // see changes in https://github.com/boostorg/serialization/commit/75f09afc895ab09c4eb55d36fcf6f91ef4a0107a
     public boost::serialization::shared_ptr_helper<boost::shared_ptr>
 #else
     public boost::archive::detail::shared_ptr_helper

@@ -3,40 +3,52 @@
 
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/EuclideanExpression.hpp>
+#include <aslam/backend/MatrixBasic.hpp>
+#include <aslam/backend/MatrixExpression.hpp>
 #include <aslam/backend/RotationExpression.hpp>
+
+#include <kalibr_errorterms/EuclideanError.hpp>
 
 namespace kalibr_errorterms {
 
-class AccelerometerError : public aslam::backend::ErrorTermFs<3> {
- public:
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+class AccelerometerError : public EuclideanError {
+public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  // error = C_b_w(g - alpha) + bias - measurement;
-  AccelerometerError(const Eigen::Vector3d & measurement,
-                     const Eigen::Matrix3d invR,
-                     aslam::backend::RotationExpression C_b_w,
-                     aslam::backend::EuclideanExpression acceleration_w,
-                     aslam::backend::EuclideanExpression bias,
-                     aslam::backend::EuclideanExpression g_w);
-  virtual ~AccelerometerError();
+	// error = C_b_w(g - alpha) + bias - measurement;
+	AccelerometerError(const Eigen::Vector3d & measurement,
+			const Eigen::Matrix3d & invR,
+			const aslam::backend::RotationExpression & C_b_w,
+			const aslam::backend::EuclideanExpression & acceleration_w,
+			const aslam::backend::EuclideanExpression & bias,
+			const aslam::backend::EuclideanExpression & g_w);
+	virtual ~AccelerometerError();
+};
 
-  /// \brief return predicted measurement
-  Eigen::Vector3d getPredictedMeasurement();
 
-  /// \brief return measurement
-  Eigen::Vector3d getMeasurement();
+class AccelerometerErrorEccentric : public EuclideanError {
+public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
- protected:
-  /// \brief evaluate the error term and return the weighted squared error e^T invR e
-  virtual double evaluateErrorImplementation();
+	// error = C_b_w(g - alpha) + bias - measurement;
+	AccelerometerErrorEccentric(
+			const Eigen::Vector3d & measurement,
+			const Eigen::Matrix3d & invR,
+			const aslam::backend::MatrixExpression & M,
+			const aslam::backend::RotationExpression & C_b_w,
+			const aslam::backend::EuclideanExpression & acceleration_w,
+			const aslam::backend::EuclideanExpression & angularVelocity_b,
+			const aslam::backend::EuclideanExpression & angularAcceleration_b,
+			const aslam::backend::RotationExpression & C_i_b,
+			const aslam::backend::EuclideanExpression & rx_b,
+			const aslam::backend::EuclideanExpression & ry_b,
+			const aslam::backend::EuclideanExpression & rz_b,
+			const aslam::backend::EuclideanExpression & bias,
+			const aslam::backend::EuclideanExpression & g_w);
+	virtual ~AccelerometerErrorEccentric();
 
-  /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(
-      aslam::backend::JacobianContainer & _jacobians);
-
- private:
-  Eigen::Vector3d _measurement;
-  aslam::backend::EuclideanExpression _predictedMeasurement;
+private:
+	aslam::backend::MatrixBasic _Ix, _Iy, _Iz;
 };
 
 }  // namespace kalibr_errorterms
