@@ -13,9 +13,7 @@ namespace aslam {
   namespace backend {
     
     class MatrixExpressionNode;
-    class TransformationExpression;
     class EuclideanExpression;
-    class HomogeneousExpression;
 
     class MatrixExpression
     {
@@ -29,19 +27,12 @@ namespace aslam {
       virtual ~MatrixExpression();
 
       /// \brief Evaluate the full transformation matrix.
-      Eigen::Matrix3d toFullMatrix();
-
-      /// \brief return the expression that inverts the transformation.
-      MatrixExpression inverse();
+      Eigen::Matrix3d toMatrix3x3();
       
       /// \brief Evaluate the Jacobians in the form (1 - (S \delta v)^\times) \bar C
       void evaluateJacobians(JacobianContainer & outJacobians) const;
 
-      MatrixExpression operator*(const MatrixExpression & p);
-      EuclideanExpression operator*(const EuclideanExpression & p);
-      HomogeneousExpression operator*(const HomogeneousExpression & p);
-
-      TransformationExpression toTransformationExpression();
+      EuclideanExpression operator*(const EuclideanExpression & p) const;
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 

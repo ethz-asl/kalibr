@@ -44,7 +44,7 @@ namespace aslam {
             aslam::backend::EuclideanExpression linearAcceleration(double tk);
             aslam::backend::EuclideanExpression angularVelocityBodyFrame(double tk);
             // Fabio:
-            //aslam::backend::EuclideanExpression angularAccelerationBodyFrame(double tk);
+            aslam::backend::EuclideanExpression angularAccelerationBodyFrame(double tk);
 
       aslam::backend::EuclideanExpression linearAccelerationBodyFrame(double tk);
 

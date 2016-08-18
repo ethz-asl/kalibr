@@ -395,7 +395,7 @@ def main():
             print "Processed {0} images with {1} images used".format(numViews, calibrator.estimator.getNumBatches())
             kcc.printParameters(calibrator)
             
-            if parsed.verbose:
+            if parsed.verbose and len(calibrator.baselines)>1:
 		        f=pl.figure(100006)
 		        kcc.plotCameraRig(calibrator.baselines, fno=f.number, clearFigure=False)
 		        pl.show()

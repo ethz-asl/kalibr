@@ -68,13 +68,21 @@ def parseArgs():
     groupData = parser.add_argument_group('Dataset source')
     groupData.add_argument('--bag', dest='bagfile', nargs=1, help='Ros bag file containing image and imu data (rostopics specified in the yamls)', action=Once, required=True)
     groupData.add_argument('--bag-from-to', metavar='bag_from_to', type=float, nargs=2, help='Use the bag data starting from up to this time [s]')
+    groupData.add_argument('--perform-synchronization',  action='store_true', dest='perform_synchronization', \
+                          help='Perform a clock synchronization according to \'Clock synchronization algorithms for network measurements\' by Zhang et al. (2002).')
     
     #configuration files
     groupCam = parser.add_argument_group('Camera system configuration')
-    groupCam.add_argument('--cams', dest='chainYaml', help='Camera system configuration as yaml file', action=Once)
+    groupCam.add_argument('--cams', dest='chain_yaml', help='Camera system configuration as yaml file', action=Once)
+    groupCam.add_argument('--recompute-camera-chain-extrinsics',  action='store_true', dest='recompute_chain_extrinsics', \
+                          help='Recompute the camera chain extrinsics. This option is exclusively recommended for debugging purposes in order to identify problems with the camera chain extrinsics.')
+    groupCam.add_argument('--reprojection-sigma', type=float, default=1.0, dest='reprojection_sigma', help='Standard deviation of the distribution of reprojected corner points [px]. (default: %(default)s)', required=False)
     
-    groupImu = parser.add_argument_group('Imu configuration')
-    groupImu.add_argument('--imu', dest='imuYamls', nargs='+', help='Imu configuration as yaml files', required=True, action=Once)
+    groupImu = parser.add_argument_group('IMU configuration')
+    groupImu.add_argument('--imu', dest='imu_yamls', nargs='+', help='Yaml files holding the IMU noise parameters. The first IMU will be the reference IMU.', required=True, action=Once)
+    groupImu.add_argument('--imu-delay-by-correlation', action='store_true', dest='estimate_imu_delay', \
+                          help='Estimate the delay between multiple IMUs by correlation. By default, no temporal calibration between IMUs will be performed.', required=False)      
+    groupImu.add_argument('--imu-models', nargs='+', dest='imu_models', help='The IMU models to estimate. Currently supported are \'calibrated\', \'scale-misalignment\' and \'scale-misalignment-size-effect\'.', action=Once)
     
     groupTarget = parser.add_argument_group('Calibration target')
     groupTarget.add_argument('--target', dest='target_yaml', help='Calibration target configuration as yaml file', required=True, action=Once)
@@ -84,6 +92,7 @@ def parseArgs():
     groupOpt.add_argument('--time-calibration', action='store_false', dest='no_time', help='Enable the temporal calibration', required=False)      
     groupOpt.add_argument('--max-iter', type=int, default=30, dest='max_iter', help='Max. iterations (default: %(default)s)', required=False)
     groupOpt.add_argument('--recover-covariance', action='store_true', dest='recover_cov', help='Recover the covariance of the design variables.', required=False)
+    groupOpt.add_argument('--timeoffset-padding', type=float, default=10.e-3, dest='timeoffset_padding', help='Maximum range in which the timeoffset may change during estimation [s] (default: %(default)s)', required=False)
 
     #Result options  
     outputSettings = parser.add_argument_group('Output options')
@@ -124,18 +133,31 @@ def main():
         sm.setLoggingLevel(sm.LoggingLevel.Info)
         
     signal.signal(signal.SIGINT, signal_exit)
-    
-        
-    print "Initializing IMUs:"
-    if len(parsed.imuYamls)>1:
-        sm.logWarn("Only one imu supported at the moment!")
-        sys.exit(-s)
             
-    imus=list()
-    for imu_yaml in parsed.imuYamls:
+    print "Initializing IMUs:"
+    if  len(parsed.imu_yamls) == 1 and not parsed.imu_models:
+        #Maintain backwards compatibility with previous interface.
+        parsed.imu_models = ['calibrated']
+    elif len(parsed.imu_yamls) != len(parsed.imu_models):
+        sm.logError("Number of IMU yamls and models has to match.")
+        sys.exit(2)
+    
+    imus = list()
+    for (imu_yaml, imu_model) in zip(parsed.imu_yamls, parsed.imu_models):
         imuConfig = kc.ImuParameters(imu_yaml)
         imuConfig.printDetails()
-        imus.append( sens.IccImu(imuConfig, parsed) )
+        if imu_model == 'calibrated':
+            imus.append( sens.IccImu(imuConfig, parsed, isReferenceImu=(not imus), \
+                         estimateTimedelay=parsed.estimate_imu_delay) )
+        elif imu_model == 'scale-misalignment':
+            imus.append( sens.IccScaledMisalignedImu(imuConfig, parsed, isReferenceImu=(not imus), \
+                         estimateTimedelay=parsed.estimate_imu_delay) )
+        elif imu_model == 'scale-misalignment-size-effect':
+            imus.append( sens.IccScaledMisalignedSizeEffectImu(imuConfig, parsed, isReferenceImu=(not imus), \
+                         estimateTimedelay=parsed.estimate_imu_delay) )
+        else:
+            sm.logError("Model {0} is currently unsupported.".format(imu_model))
+            sys.exit(2)
     
     #load calibration target configuration 
     targetConfig = kc.CalibrationTargetParameters(parsed.target_yaml)
@@ -144,7 +166,7 @@ def main():
     targetConfig.printDetails()
     
     print "Initializing camera chain:"
-    chain = kc.CameraChainParameters(parsed.chainYaml)      
+    chain = kc.CameraChainParameters(parsed.chain_yaml)      
     chain.printDetails()   
     camChain = sens.IccCameraChain(chain, targetConfig, parsed)
 
@@ -152,14 +174,16 @@ def main():
     iCal = IccCalibrator()
 
     #register sensors with calibrator
-    iCal.registerSensor( camChain )
+    iCal.registerCamChain(camChain)
     for imu in imus:
-        iCal.registerSensor( imu )
+        iCal.registerImu(imu)
+        if imu is not imus[0]:
+            imu.findOrientationPrior(imus[0])
 
     print
     print "Building the problem"
     iCal.buildProblem(splineOrder=6, 
-                      poseKnotsPerSecond=70, 
+                      poseKnotsPerSecond=100, 
                       biasKnotsPerSecond=50, 
                       doPoseMotionError=False,
                       doBiasMotionError=True,
@@ -167,31 +191,36 @@ def main():
                       huberAccel=-1,
                       huberGyro=-1,
                       noTimeCalibration=parsed.no_time,
+                      noChainExtrinsics=(not parsed.recompute_chain_extrinsics),
                       maxIterations=parsed.max_iter,
-                      timeOffsetPadding=0.02,
+                      timeOffsetPadding=parsed.timeoffset_padding,
                       verbose = parsed.verbose)
 
     print
     print "Before Optimization"
     print "==================="
     util.printErrorStatistics(iCal)
-    util.printResults(iCal,  withCov=False)
     
     print
     print "Optimizing..."
     iCal.optimize(maxIterations=parsed.max_iter, recoverCov=parsed.recover_cov)
-     
+
     print
     print "After Optimization (Results)"
     print "=================="
     util.printErrorStatistics(iCal)
     util.printResults(iCal, withCov=parsed.recover_cov)
-    
+
     print
     bagtag = parsed.bagfile[0].translate(None, "<>:/\|?*").replace('.bag', '', 1)
     yamlFilename = "camchain-imucam-" + bagtag + ".yaml"
-    iCal.saveParametersYaml(yamlFilename)
-    print "  Saving calibration to file: {0}".format(yamlFilename)
+    iCal.saveCamChainParametersYaml(yamlFilename)
+    print "  Saving camera chain calibration to file: {0}".format(yamlFilename)
+
+    print
+    yamlFilename = "imu-" + bagtag + ".yaml"
+    iCal.saveImuSetParametersYaml(yamlFilename)
+    print "  Saving imu calibration to file: {0}".format(yamlFilename)
 
     resultFileTxt = "results-imucam-" + bagtag + ".txt"
     util.saveResultTxt(iCal, filename=resultFileTxt)
@@ -201,6 +230,7 @@ def main():
     reportFile = "report-imucam-" + bagtag + ".pdf"
     util.generateReport(iCal, filename=reportFile, showOnScreen=not parsed.dontShowReport)
     print "  Report written to {0}".format(reportFile)
+    print
     
 if __name__ == "__main__":
     main()

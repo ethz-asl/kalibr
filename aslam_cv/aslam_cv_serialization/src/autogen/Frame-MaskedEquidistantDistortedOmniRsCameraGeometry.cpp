@@ -14,36 +14,21 @@
 #include <boost/portable_binary_iarchive.hpp>
 #include <boost/portable_binary_oarchive.hpp>
 
-BOOST_CLASS_EXPORT_IMPLEMENT (aslam::Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry>);
+BOOST_CLASS_EXPORT_IMPLEMENT(aslam::Frame<aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry >);
+
 
 namespace aslam {
+    
+template void Frame<aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry >::save<>(boost::archive::text_oarchive & ar, const unsigned int version) const;
+template void Frame<aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry >::load<>(boost::archive::text_iarchive & ar, const unsigned int version);
+template void Frame<aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry >::save<>(boost::archive::xml_oarchive & ar, const unsigned int version) const;
+template void Frame<aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry >::load<>(boost::archive::xml_iarchive & ar, const unsigned int version);
+template void Frame<aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry >::save<>(boost::archive::binary_oarchive & ar, const unsigned int version) const;
+template void Frame< aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry >::load<>(boost::archive::binary_iarchive & ar, const unsigned int version);
+template void Frame<aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry >::save<>(boost::archive::portable_binary_oarchive & ar, const unsigned int version) const;
+template void Frame<aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry >::load<>(boost::archive::portable_binary_iarchive & ar, const unsigned int version);
 
-template void Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry>::save<>(
-    boost::archive::text_oarchive & ar, const unsigned int version) const;
-template void Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry>::load<>(
-    boost::archive::text_iarchive & ar, const unsigned int version);
-template void Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry>::save<>(
-    boost::archive::xml_oarchive & ar, const unsigned int version) const;
-template void Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry>::load<>(
-    boost::archive::xml_iarchive & ar, const unsigned int version);
-template void Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry>::save<>(
-    boost::archive::binary_oarchive & ar, const unsigned int version) const;
-template void Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry>::load<>(
-    boost::archive::binary_iarchive & ar, const unsigned int version);
-template void Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry>::save<>(
-    boost::archive::portable_binary_oarchive & ar,
-    const unsigned int version) const;
-template void Frame<
-    aslam::cameras::MaskedEquidistantDistortedOmniRsCameraGeometry>::load<>(
-    boost::archive::portable_binary_iarchive & ar, const unsigned int version);
+} // namespace aslam
 
-}  // namespace aslam
+
 
