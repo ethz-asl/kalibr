@@ -89,7 +89,7 @@ void exportCovarianceReprojectionError(const std::string & camName)
       )
     )
 		.def("observationTime", &CovarianceReprojectionError<frame_t>::observationTime)
-		.def("covarianceMatrix",  &CovarianceReprojectionError<frame_t>::covarianceMatrix)
+		.def("covarianceMap",  &CovarianceReprojectionError<frame_t>::covarianceMap)
 		;
 
 }
