@@ -105,7 +105,7 @@ if __name__ == "__main__":
     # get the file path
     kalibr_path = rospack.get_path('kalibr')
     
-    with open(kalibr_path + '/python/aslam_footer.txt', 'r') as file_:
+    with open(kalibr_path + '/python/exporters/auxiliary_files/aslam_footer.txt', 'r') as file_:
         CONFIG += file_.read()
 
     #output the stuff
