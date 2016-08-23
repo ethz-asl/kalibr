@@ -148,13 +148,16 @@ def main():
         imuConfig.printDetails()
         if imu_model == 'calibrated':
             imus.append( sens.IccImu(imuConfig, parsed, isReferenceImu=(not imus), \
-                         estimateTimedelay=parsed.estimate_imu_delay) )
+                         estimateTimedelay=parsed.estimate_imu_delay, \
+                         estimateGyroscopeTimeDelay=not parsed.no_time) )
         elif imu_model == 'scale-misalignment':
             imus.append( sens.IccScaledMisalignedImu(imuConfig, parsed, isReferenceImu=(not imus), \
-                         estimateTimedelay=parsed.estimate_imu_delay) )
+                         estimateTimedelay=parsed.estimate_imu_delay, \
+                         estimateGyroscopeTimeDelay=not parsed.no_time) )
         elif imu_model == 'scale-misalignment-size-effect':
             imus.append( sens.IccScaledMisalignedSizeEffectImu(imuConfig, parsed, isReferenceImu=(not imus), \
-                         estimateTimedelay=parsed.estimate_imu_delay) )
+                         estimateTimedelay=parsed.estimate_imu_delay, \
+                         estimateGyroscopeTimeDelay=not parsed.no_time) )
         else:
             sm.logError("Model {0} is currently unsupported.".format(imu_model))
             sys.exit(2)
@@ -183,7 +186,7 @@ def main():
     print
     print "Building the problem"
     iCal.buildProblem(splineOrder=6, 
-                      poseKnotsPerSecond=100, 
+                      poseKnotsPerSecond=200, 
                       biasKnotsPerSecond=50, 
                       doPoseMotionError=False,
                       doBiasMotionError=True,
