@@ -31,6 +31,7 @@ class GridCalibrationTargetAprilgrid : public GridCalibrationTargetBase {
   struct AprilgridOptions {
     AprilgridOptions() :
       doSubpixRefinement(true),
+      windowWidth(3),
       maxSubpixDisplacement2(1.5),
       showExtractionVideo(false),
       minTagsForValidObs(4),
@@ -40,6 +41,9 @@ class GridCalibrationTargetAprilgrid : public GridCalibrationTargetBase {
     //options
     /// \brief subpixel refinement of extracted corners
     bool doSubpixRefinement;
+
+    /// \brief width of the window in which sub pixel corner refinement is performed (in pixels)
+    unsigned int windowWidth;
 
     /// \brief max. displacement squarred in subpixel refinement  [px^2]
     double maxSubpixDisplacement2;

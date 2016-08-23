@@ -11,6 +11,7 @@ BOOST_PYTHON_MODULE(libaslam_cameras_april_python)
 
   class_<GridCalibrationTargetAprilgrid::AprilgridOptions>("AprilgridOptions", init<>())
     .def_readwrite("doSubpixRefinement", &GridCalibrationTargetAprilgrid::AprilgridOptions::doSubpixRefinement)
+    .def_readwrite("windowWidth", &GridCalibrationTargetAprilgrid::AprilgridOptions::windowWidth)
     .def_readwrite("showExtractionVideo", &GridCalibrationTargetAprilgrid::AprilgridOptions::showExtractionVideo)
     .def_readwrite("minTagsForValidObs", &GridCalibrationTargetAprilgrid::AprilgridOptions::minTagsForValidObs)
     .def_readwrite("minBorderDistance", &GridCalibrationTargetAprilgrid::AprilgridOptions::minBorderDistance)

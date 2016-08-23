@@ -113,7 +113,8 @@ class IccCamera():
                                                           targetParams['spacingMeters'], 
                                                           options)
         elif targetType == 'aprilgrid':
-            options = acv_april.AprilgridOptions() 
+            options = acv_april.AprilgridOptions()
+            options.windowWidth = 5
             options.showExtractionVideo = showExtraction
             options.minTagsForValidObs = int( np.max( [targetParams['tagRows'], targetParams['tagCols']] ) + 1 )
             
