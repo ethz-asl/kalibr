@@ -451,6 +451,8 @@ class RsCalibrator(object):
             print "LineDelay:"
             print shutter.lineDelay()
         print "Intrinsics:"
-        print "(",proj.fu(),", ",proj.fv(),") (",proj.cu(),", ",proj.cv(),")"
+        print proj.getParameters().flatten()
+        #print "(",proj.fu(),", ",proj.fv(),") (",proj.cu(),", ",proj.cv(),")" #in the future, not all projection models might support these parameters
         print "Distortion:"
-        print "(",dist.p1(),", ",dist.p2(),") (",dist.k1(),", ",dist.k2(),")"
+        print dist.getParameters().flatten()
+        #print "(",dist.p1(),", ",dist.p2(),") (",dist.k1(),", ",dist.k2(),")" #not all distortion models implement these parameters

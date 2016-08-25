@@ -33,6 +33,7 @@ class DistortedOmniRs(CameraModel):
     projectionType = aslam_cv.DistortedOmniProjection
     distortionType = aslam_cv.RadialTangentialDistortion
     shutterType = aslam_cv.RollingShutter
+    frameType = aslam_cv.DistortedOmniRsFrame
 
 class DistortedPinhole(CameraModel):
     geometry = aslam_cv.DistortedPinholeCameraGeometry
@@ -74,6 +75,7 @@ class EquidistantPinholeRs(CameraModel):
     projectionType = aslam_cv.EquidistantPinholeProjection
     distortionType = aslam_cv.EquidistantDistortion
     shutterType = aslam_cv.RollingShutter
+    frameType = aslam_cv.EquidistantPinholeRsFrame
 
 class FovPinhole(CameraModel):
     geometry = aslam_cv.FovDistortedPinholeCameraGeometry

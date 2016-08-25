@@ -7,6 +7,7 @@
 #include <aslam/cameras/OmniProjection.hpp>
 #include <aslam/cameras/NoDistortion.hpp>
 #include <aslam/cameras/RadialTangentialDistortion.hpp>
+#include <aslam/cameras/EquidistantDistortion.hpp>
 #include <aslam/cameras.hpp>
 #include <aslam/cameras/GlobalShutter.hpp>
 #include <aslam/cameras/RollingShutter.hpp>
