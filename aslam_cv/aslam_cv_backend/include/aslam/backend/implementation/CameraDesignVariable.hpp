@@ -80,6 +80,32 @@ namespace aslam {
 
 	}
 
+    template<typename CAMERA_T>
+    backend::ScalarExpression CameraDesignVariable<CAMERA_T>::keypointTime(
+        const aslam::Time & imageStamp,
+        const Eigen::VectorXd & y
+    ) {
+      if (_shutterDv->isActive()) {
+        boost::shared_ptr<backend::ScalarExpressionNode> root(
+        	new ScalarExpressionNodeKeypointTime<CAMERA_T>(
+        		imageStamp,
+        		y,
+        		this->shared_from_this()
+        	)
+        );
+        return backend::ScalarExpression(root);
+      } else {
+        return backend::ScalarExpression(
+            (imageStamp + _camera->temporalOffset(y)).toSec()
+        );
+      }
+    }
+
+    template<typename CAMERA_T>
+    backend::ScalarExpression CameraDesignVariable<CAMERA_T>::temporalOffset(
+        const Eigen::VectorXd & y) {
+      return keypointTime(aslam::Time(), y);
+    }
 
 
 	}	// backend

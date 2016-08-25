@@ -35,7 +35,7 @@ namespace aslam {
       void evaluateJacobians(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
-      boost::shared_ptr<HomogeneousExpressionNode> root() { return _root; }
+      boost::shared_ptr<HomogeneousExpressionNode> root() const { return _root; }
 
     private:
       friend class TransformationExpression;

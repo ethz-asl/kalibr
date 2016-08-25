@@ -380,6 +380,6 @@ class CameraGeometryTestHarness {
 
 };
 
-}  // namespace cameras  
+}  // namespace cameras
 }  // namespace asl
 

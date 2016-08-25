@@ -89,9 +89,9 @@ PinholeCameraGeometry PinholeCameraGeometry::createDistortedTestGeometry() {
   return PinholeCameraGeometry(400, 400, 320, 240, 640, 480, 0.2, 0.2, 0.2, 0.2);
 }
 
-/** 
+/**
  * \brief Apply distortion to input point (from the normalised plane)
- *  
+ *
  * \param mx_u undistorted x coordinate of point on the normalised plane
  * \param my_u undistorted y coordinate of point on the normalised plane
  * \param dx return value, to obtain the distorted point : mx_d = mx_u+dx_u
@@ -110,7 +110,7 @@ void PinholeCameraGeometry::distortion(double mx_u, double my_u, double *dx_u,
   *dy_u = my_u * rad_dist_u + 2 * _p2 * mxy_u + _p1 * (rho2_u + 2 * my2_u);
 }
 
-/** 
+/**
  * \brief Apply distortion to input point (from the normalised plane)
  *        and calculate jacobian
  *
@@ -203,6 +203,6 @@ PinholeCameraGeometry::traits_t::intrinsics_t PinholeCameraGeometry::getIntrinsi
   return intrinsics;
 }
 
-}  // namespace cameras  
+}  // namespace cameras
 
 }  // namespace aslam

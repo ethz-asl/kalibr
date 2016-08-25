@@ -50,7 +50,10 @@ namespace aslam {
         private:
             /// \brief the linear system solver.
             double _J;
+            // cost of previous successful step
             double _p_J;
+            // cost of the last successful step
+            double _last_successful_J;
             bool _isFirstIteration;
         };
 

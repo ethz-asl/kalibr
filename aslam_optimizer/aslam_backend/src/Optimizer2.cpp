@@ -56,7 +56,7 @@ namespace aslam {
         {
             _problem = problem;
         }
-        
+
         void Optimizer2::initializeTrustRegionPolicy()
         {
           if( !_options.trustRegionPolicy ) {
@@ -65,16 +65,16 @@ namespace aslam {
           } else {
             _trustRegionPolicy = _options.trustRegionPolicy;
           }
-          
-          
+
+
           // \todo remove this check when the sparse qr solver supports an augmented diagonal
           if(_solver->name() == "sparse_qr" && _trustRegionPolicy->name() == "levenberg_marquardt") {
             _options.verbose && std::cout << "The sparse_qr solver is not compatible with levenberg_marquardt. Changing to the dog_leg trust region policy\n";
             _trustRegionPolicy.reset( new DogLegTrustRegionPolicy() );
           }
-          
+
           _options.verbose && std::cout << "Using the " << _trustRegionPolicy->name() << " trust region policy\n";
-          
+
         }
 
 
@@ -147,7 +147,7 @@ namespace aslam {
 
 
             // \todo initialize the trust region stuff.
-      
+
         }
 
 
@@ -191,7 +191,7 @@ namespace aslam {
             initialize();
             SolutionReturnValue srv;
             _p_J = 0.0;
-            
+
             //std::cout << "Evaluate error for the first time\n";
             // This sets _J
             timeErr.start();
@@ -217,12 +217,11 @@ namespace aslam {
                    ((deltaX > _options.convergenceDeltaX &&
                      fabs(deltaJ) > _options.convergenceDeltaJ) ||
                     linearSolverFailure)) {
-        
+
                 timeSolve.start();
                 bool solutionSuccess = _trustRegionPolicy->solveSystem(_J, previousIterationFailed, _options.nThreads, _dx);
                 timeSolve.stop();
 
-        
                 if (!solutionSuccess) {
                     _options.verbose && std::cout << "[WARNING] System solution failed\n";
                     previousIterationFailed = true;
@@ -263,8 +262,9 @@ namespace aslam {
                     _options.verbose && std::cout << "[" << srv.iterations << "]: J: " << _J << ", dJ: " << deltaJ << ", deltaX: " << deltaX << ", ";
                     _options.verbose && _trustRegionPolicy->printState(std::cout);
                     _options.verbose && std::cout << std::endl;
-                }
-            } // if the linear solver failed / else
+                } // if the linear solver failed / else
+            }
+
             srv.JFinal = _p_J;
             srv.dXFinal = deltaX;
             srv.dJFinal = deltaJ;
@@ -387,12 +387,12 @@ namespace aslam {
 
         void Optimizer2::computeHessian(SparseBlockMatrix& outH, double lambda)
             {
-              
+
               boost::shared_ptr<BlockCholeskyLinearSystemSolver> solver_sp;
               solver_sp.reset(new BlockCholeskyLinearSystemSolver());
               // True here for creating the diagonal conditioning.
               solver_sp->initMatrixStructure(_designVariables, _errorTerms, true);
-                
+
               _options.verbose && std::cout << "Setting the diagonal conditioner to: " << lambda << ".\n";
               evaluateError(false);
               solver_sp->setConstantConditioner(lambda);
