@@ -44,6 +44,7 @@ namespace aslam {
       EuclideanExpression operator-() const;
       EuclideanExpression operator*(const ScalarExpression& s) const;
       EuclideanExpression elementwiseMultiply(const EuclideanExpression & p) const;
+      ScalarExpression dot(const EuclideanExpression & p) const;
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;
 

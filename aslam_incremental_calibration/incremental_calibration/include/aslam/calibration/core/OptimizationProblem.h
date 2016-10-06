@@ -106,11 +106,14 @@ namespace aslam {
       /// Inserts a design variable into the problem
       void addDesignVariable(const DesignVariableSP& designVariable,
         size_t groupId = 0);
+      void removeDesignVariable(const DesignVariableSP& designVariable);
       /// Checks if a design variable is in the problem
       bool isDesignVariableInProblem(const DesignVariable* designVariable)
         const;
       /// Inserts an error term into the problem
       void addErrorTerm(const ErrorTermSP& errorTerm);
+      /// Removes an error term from the problem
+      void removeErrorTerm(const ErrorTermSP& errorTerm);
       /// Checks if an error term is in the problem
       bool isErrorTermInProblem(const ErrorTerm* errorTerm) const;
       /// Permutes the error terms

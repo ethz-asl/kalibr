@@ -136,6 +136,24 @@ namespace aslam {
       _designVariables[groupId].push_back(designVariable);
     }
 
+    void OptimizationProblem::
+        removeDesignVariable(const DesignVariableSP& designVariable) {
+      if (!designVariable)
+        throw NullPointerException("designVariable", __FILE__, __LINE__,
+          __PRETTY_FUNCTION__);
+      if (!isDesignVariableInProblem(designVariable.get()))
+        throw InvalidOperationException("design variable not included",
+          __FILE__, __LINE__, __PRETTY_FUNCTION__);
+      DesignVariablesP::const_iterator it = _designVariablesLookup.find(designVariable.get());
+      if (it != _designVariablesLookup.end()) {
+		  _designVariables[it->second].erase(std::find(_designVariables[it->second].begin(),
+				  _designVariables[it->second].end(), designVariable));
+		  if (_designVariables[it->second].empty()) {
+			  _designVariables.erase(_designVariables.find(it->second));
+		  }
+		  _designVariablesLookup.erase(it);
+      }
+    }
     bool OptimizationProblem::
         isDesignVariableInProblem(const DesignVariable* designVariable) const {
       return _designVariablesLookup.count(designVariable);
@@ -158,6 +176,17 @@ namespace aslam {
       }
       _errorTermsLookup.insert(errorTerm.get());
       _errorTerms.push_back(errorTerm);
+    }
+
+    void OptimizationProblem::removeErrorTerm(const ErrorTermSP& errorTerm) {
+      if (!errorTerm)
+        throw NullPointerException("errorTerm", __FILE__, __LINE__,
+          __PRETTY_FUNCTION__);
+      if (!isErrorTermInProblem(errorTerm.get()))
+        throw InvalidOperationException("error term not included",
+          __FILE__, __LINE__, __PRETTY_FUNCTION__);
+      _errorTermsLookup.erase(_errorTermsLookup.find(errorTerm.get()));
+      _errorTerms.erase(std::find(_errorTerms.begin(), _errorTerms.end(), errorTerm));
     }
 
     bool OptimizationProblem::

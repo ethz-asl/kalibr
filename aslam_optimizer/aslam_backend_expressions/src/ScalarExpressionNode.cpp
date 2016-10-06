@@ -204,7 +204,41 @@ namespace aslam {
             _lhs->getDesignVariables(designVariables);
         }
 
-          
+///////////////////////////////////////////////////////
+        ScalarExpressionNodeDotProduct::ScalarExpressionNodeDotProduct(boost::shared_ptr<EuclideanExpressionNode> lhs,
+                                                         boost::shared_ptr<EuclideanExpressionNode> rhs) :
+            _lhs(lhs), _rhs(rhs)
+        {
+            
+        }
+
+        ScalarExpressionNodeDotProduct::~ScalarExpressionNodeDotProduct()
+        {
+
+        }
+
+        double ScalarExpressionNodeDotProduct::toScalarImplementation() const
+        {
+            return _lhs->toEuclidean().transpose() * _rhs->toEuclidean();
+        }
+
+        void ScalarExpressionNodeDotProduct::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+        {
+            _lhs->evaluateJacobians(outJacobians, _rhs->toEuclidean().transpose());
+            _rhs->evaluateJacobians(outJacobians, _lhs->toEuclidean().transpose());
+        }
+
+        void ScalarExpressionNodeDotProduct::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+        {
+            _lhs->evaluateJacobians(outJacobians, applyChainRule * _rhs->toEuclidean().transpose());
+            _rhs->evaluateJacobians(outJacobians, applyChainRule * _lhs->toEuclidean().transpose());
+        }
+
+        void ScalarExpressionNodeDotProduct::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+        {
+            _lhs->getDesignVariables(designVariables);
+            _rhs->getDesignVariables(designVariables);
+        }          
 
 
 

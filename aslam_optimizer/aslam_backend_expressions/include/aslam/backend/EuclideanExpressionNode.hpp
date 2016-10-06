@@ -14,6 +14,8 @@ namespace aslam {
   namespace backend {
     template <int D> class VectorExpression;
     template <int D> class VectorExpressionNode;
+    class ScalarExpressionNode;
+
   class HomogeneousExpressionNode;
     /**
      * \class EuclideanExpressionNode
@@ -378,7 +380,30 @@ namespace aslam {
        boost::shared_ptr<EuclideanExpressionNode> _rhs;
      };
 
-  
+    /**
+      * \class EuclideanExpressionNodeElementwiseMultiplyEuclidean
+      *
+      * \brief A class representing the product of a rotation matrix with a constant vector.
+      *
+      */
+     class EuclideanExpressionNodeMultiplyConstant : public EuclideanExpressionNode
+     {
+     public:
+       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+       EuclideanExpressionNodeMultiplyConstant(boost::shared_ptr<RotationExpressionNode> lhs,
+           const Eigen::Vector3d & rhs);
+       virtual ~EuclideanExpressionNodeMultiplyConstant();
+
+     private:
+       virtual Eigen::Vector3d toEuclideanImplementation() const;
+       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const;
+       virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+       virtual void getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const;
+
+       boost::shared_ptr<RotationExpressionNode> _lhs;
+       const Eigen::Vector3d _rhs;
+     };  
   
   } // namespace backend
 } // namespace aslam

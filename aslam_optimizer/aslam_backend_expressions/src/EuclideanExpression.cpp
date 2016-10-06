@@ -113,6 +113,11 @@ namespace aslam {
       _root->getDesignVariables(designVariables);
     }
 
+    ScalarExpression EuclideanExpression::dot(const EuclideanExpression& p) const
+    {
+      boost::shared_ptr<ScalarExpressionNode> newRoot(new ScalarExpressionNodeDotProduct(_root, p._root));
+      return ScalarExpression(newRoot);
+    }
   
   } // namespace backend
 } // namespace aslam

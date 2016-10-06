@@ -9,14 +9,24 @@ catkin_simple()
 ##################################
 cs_add_library(${PROJECT_NAME}_errorterms
   src/EuclideanError.cpp
-  src/GyroscopeError.cpp
   src/AccelerometerError.cpp
+  src/EuclideanError.cpp
+  src/GyroscopeError.cpp
+)
+
+cs_add_library(laser_errorterms
+  src/LaserError.cpp
 )
 
 add_python_export_library(${PROJECT_NAME}_errorterms_python python/${PROJECT_NAME}_errorterms/..
   src/module.cpp
 )
 target_link_libraries(${PROJECT_NAME}_errorterms_python ${PROJECT_NAME}_errorterms)
+
+add_python_export_library(laser_errorterms_python python/laser_errorterms/..
+  src/laser_module.cpp
+)
+target_link_libraries(laser_errorterms_python laser_errorterms)
 
 ##################################
 # tests

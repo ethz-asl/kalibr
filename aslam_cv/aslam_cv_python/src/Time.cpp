@@ -54,9 +54,21 @@ void exportTimeAndDuration() {
           "Convert the current time to nanoseconds").def(
           "fromNSec", &Duration::fromNSec,
           return_value_policy<copy_non_const_reference>(),
-          "Set the time from nanoseconds").def(self - self).def(self + self).def(
-          self += self).def(self -= self).def(self == self).def(self != self)
-          .def(self > self).def(self < self).def(self >= self).def(self <= self)
+          "Set the time from nanoseconds")
+          .def(self - self)
+          .def(self + self)
+          .def(self * double())
+          .def(self / double())
+          .def(self *= double())
+          .def(self /= double())
+          .def(self += self)
+          .def(self -= self)
+          .def(self == self)
+          .def(self != self)
+          .def(self > self)
+          .def(self < self)
+          .def(self >= self)
+          .def(self <= self)
           .def("isZero", &Duration::isZero, "Is this duration zero?").def_pickle(
           sm::python::pickle_suite<aslam::Duration>());
 

@@ -53,8 +53,6 @@ std::string CauchyMEstimator::name() const {
   return ss.str();
 }
 
-
-  
 HuberMEstimator::~HuberMEstimator()
 {
 }
@@ -67,6 +65,21 @@ double HuberMEstimator::getWeight(double error) const {
 std::string HuberMEstimator::name() const {
   std::stringstream ss;
   ss << "Huber(" << _k << ")";
+  return ss.str();
+}
+
+BzMEstimator::BzMEstimator(double k) :
+    _k(k), _k2(k * k) {
+}
+BzMEstimator::~BzMEstimator()
+{
+}
+double BzMEstimator::getWeight(double error) const {
+  return (error < _k2) ? 1.0 : _k2 / error;
+}
+std::string BzMEstimator::name() const {
+  std::stringstream ss;
+  ss << "Bz(" << _k << ")";
   return ss.str();
 }
 

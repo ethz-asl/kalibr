@@ -46,6 +46,8 @@ namespace aslam {
       EuclideanExpression operator*(const EuclideanExpression & p) const;
       HomogeneousExpression operator*(const HomogeneousExpression & p) const;
 
+      EuclideanExpression operator*(const Eigen::Vector3d & p) const;
+
       TransformationExpression toTransformationExpression();
 
       void getDesignVariables(DesignVariable::set_t & designVariables) const;

@@ -15,6 +15,7 @@ setup_args = generate_distutils_setup(
              'python/kalibr_calibrate_cameras',
              'python/kalibr_calibrate_rs_cameras',
              'python/kalibr_calibrate_imu_camera',
+             'python/kalibr_calibrate_imu_camera_laser',
              'python/kalibr_camera_focus',
              'python/kalibr_camera_validator',
              'python/kalibr_create_target_pdf',

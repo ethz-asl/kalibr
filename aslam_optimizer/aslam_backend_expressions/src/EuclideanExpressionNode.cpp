@@ -546,6 +546,39 @@ namespace aslam {
       _rhs->evaluateJacobians(outJacobians, applyChainRule * _lhs->toEuclidean().asDiagonal());
     }
 
+
+
+    EuclideanExpressionNodeMultiplyConstant::EuclideanExpressionNodeMultiplyConstant(boost::shared_ptr<RotationExpressionNode> lhs, const Eigen::Vector3d & rhs) :
+         _lhs(lhs), _rhs(rhs)
+       {
+       }
+
+    EuclideanExpressionNodeMultiplyConstant::~EuclideanExpressionNodeMultiplyConstant()
+    {
+    }
+
+    void EuclideanExpressionNodeMultiplyConstant::getDesignVariablesImplementation(DesignVariable::set_t & designVariables) const
+    {
+      _lhs->getDesignVariables(designVariables);
+    }
+
+
+    Eigen::Vector3d EuclideanExpressionNodeMultiplyConstant::toEuclideanImplementation() const
+    {
+      return _lhs->toRotationMatrix() * _rhs;
+    }
+
+    void EuclideanExpressionNodeMultiplyConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians) const
+    {
+      _lhs->evaluateJacobians(outJacobians, sm::kinematics::crossMx(_lhs->toRotationMatrix() * _rhs));
+    }
+
+    void EuclideanExpressionNodeMultiplyConstant::evaluateJacobiansImplementation(JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+    {
+      _lhs->evaluateJacobians(outJacobians, applyChainRule * sm::kinematics::crossMx(_lhs->toRotationMatrix() * _rhs));
+    }
+
+
   
   } // namespace backend
 } // namespace aslam

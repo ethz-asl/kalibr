@@ -29,6 +29,9 @@ void exportMEstimators()
   class_< HuberMEstimator, boost::shared_ptr<HuberMEstimator>, bases<MEstimator> >("HuberMEstimator", init<double>())
   ;
 
+  class_< BzMEstimator, boost::shared_ptr<BzMEstimator>, bases<MEstimator> >("BzMEstimator", init<double>())
+  ;
+
   class_< BlakeZissermanMEstimator, boost::shared_ptr<BlakeZissermanMEstimator>, bases<MEstimator> >("BlakeZissermanMEstimator", init<double>("BlakeZissermanMEstimator( dimensionOfErrorTerm)"))
       .def(init<double,double,double>("BlakeZissermanMEstimator(dim, pCut, wCut)\n* @param df    The dimension of your error term\n* @param pCut  The probability of error that you want to down-weight. 0.99 means\n*              that the 99% most likely squared errors will not be much down-weighted\n*              and the remaining 1% will be smoothly cut to zero weight.\n* @param wCut  The weight (between 0 and 1 not inclusive) that you want the above probability to have."))
 

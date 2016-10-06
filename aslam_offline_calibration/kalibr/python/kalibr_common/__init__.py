@@ -4,3 +4,4 @@ from ConfigReader import *
 from ImageDatasetReader import *
 from ImuDatasetReader import *
 from TargetExtractor import *
+from ScanDatasetReader import *

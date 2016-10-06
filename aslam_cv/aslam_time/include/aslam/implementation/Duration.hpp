@@ -86,6 +86,11 @@ T DurationBase<T>::operator*(double scale) const {
 }
 
 template<class T>
+T DurationBase<T>::operator/(double scale) const {
+  return T(toSec() / scale);
+}
+
+template<class T>
 T DurationBase<T>::operator-(const T &rhs) const {
   return T(sec - rhs.sec, nsec - rhs.nsec);
 }
@@ -110,6 +115,12 @@ T& DurationBase<T>::operator-=(const T &rhs) {
 template<class T>
 T& DurationBase<T>::operator*=(double scale) {
   fromSec(toSec() * scale);
+  return *static_cast<T*>(this);
+}
+
+template<class T>
+T& DurationBase<T>::operator/=(double scale) {
+  fromSec(toSec() / scale);
   return *static_cast<T*>(this);
 }
 

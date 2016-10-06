@@ -87,9 +87,11 @@ class DurationBase {
   T operator-(const T &rhs) const;
   T operator-() const;
   T operator*(double scale) const;
+  T operator/(double scale) const;
   T& operator+=(const T &rhs);
   T& operator-=(const T &rhs);
   T& operator*=(double scale);
+  T& operator/=(double scale);
   bool operator==(const T &rhs) const;
   inline bool operator!=(const T &rhs) const {
     return !(*static_cast<const T*>(this) == rhs);

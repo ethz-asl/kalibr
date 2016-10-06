@@ -91,6 +91,7 @@ void exportBackendExpressions()
     .def(self + self)
     .def("cross", &EuclideanExpression::cross)
     .def("elementwiseMultiply", &EuclideanExpression::elementwiseMultiply)
+    .def("dot", &EuclideanExpression::dot)
     // Decide later if it is useful to export the expression nodes.
     //.def("root", &EuclideanExpression::root)
     ;
@@ -122,14 +123,13 @@ void exportBackendExpressions()
     .def("toTransformationMatrix", &TransformationExpression::toTransformationMatrix)
       .def(init< Eigen::Matrix4d>())
     // These guys are not implemented yet.
-    //.def("toRotationExpression", &TransformationExpression::toRotationExpression)
     //.def("toHomogeneousExpression", &TransformationExpression::toHomogeneousExpression)
-    //.def("toEuclideanExpression", &TransformationExpression::toEuclideanExpression)
     //.def(self * euclideanExpression)
+    .def("toRotationExpression", &TransformationExpression::toRotationExpression)
+    .def("toEuclideanExpression", &TransformationExpression::toEuclideanExpression)
     .def(self * homogeneousExpression)
     .def(self * self)
     .def("inverse", &TransformationExpression::inverse)
-    
     .def("getDesignVariables", &getDesignVariables<TransformationExpression>)
     ;
 
@@ -138,6 +138,7 @@ void exportBackendExpressions()
     .def("toRotationMatrix", &RotationExpression::toRotationMatrix)
     .def(self * euclideanExpression)
     .def(self * self)
+    .def(self * Eigen::Vector3d())
     .def("inverse", &RotationExpression::inverse)
     .def("getDesignVariables", &getDesignVariables<RotationExpression>)
     ;
@@ -218,13 +219,11 @@ void exportBackendExpressions()
       .def("getDesignVariables", &getDesignVariables<ScalarExpression>)
       .def(self + self)
       .def(self * self)
+      .def(self / self)
       .def(self - self)
       .def(self + double())
       .def(self - double())
       .def(self * double())
-      //.def(self + float())
-      //.def(self - float())
-      //.def(self * float())
       ;
 
   class_<Scalar, boost::shared_ptr<Scalar>, bases<DesignVariable> >("Scalar", init<double>("Scalar(double value)") )

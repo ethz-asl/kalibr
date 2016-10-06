@@ -6,6 +6,8 @@
 #include <aslam/backend/RotationQuaternion.hpp>
 #include <aslam/backend/Scalar.hpp>
 #include <aslam/backend/RotationExpression.hpp>
+#include <aslam/backend/EuclideanExpression.hpp>
+#include <aslam/backend/EuclideanPoint.hpp>
 #include <sm/random.hpp>
 
 using namespace aslam::backend;
@@ -366,5 +368,28 @@ TEST(ScalarExpressionNodeTestSuites, testMinimalDifference)
   catch(const std::exception & e)
     {
       FAIL() << e.what();
+    }
+}
+
+// Test that the jacobian matches the finite difference jacobian
+TEST(ScalarExpressionNodeTestSuites, testDotProduct)
+{
+    try
+    {
+        EuclideanPoint p1(Eigen::Vector3d::Random());
+        p1.setActive(true);
+        p1.setBlockIndex(0);
+        EuclideanPoint p2(Eigen::Vector3d::Random());
+        p2.setActive(true);
+        p2.setBlockIndex(1);
+
+        ScalarExpression s = p1.toExpression().dot(p2.toExpression());
+
+        SCOPED_TRACE("");
+        testJacobian(s);
+    }
+    catch(std::exception const & e)
+    {
+        FAIL() << e.what();
     }
 }

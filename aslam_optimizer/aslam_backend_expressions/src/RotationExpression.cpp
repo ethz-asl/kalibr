@@ -60,8 +60,14 @@ namespace aslam {
     {
       boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeMultiply(_root, p._root));
       return EuclideanExpression(newRoot);
-      
     }
+
+    EuclideanExpression RotationExpression::operator*(const Eigen::Vector3d & p) const
+    {
+      boost::shared_ptr<EuclideanExpressionNode> newRoot( new EuclideanExpressionNodeMultiplyConstant(_root, p));
+      return EuclideanExpression(newRoot);
+    }
+
 
   HomogeneousExpression RotationExpression::operator*(const HomogeneousExpression & /* p */) const
     {
