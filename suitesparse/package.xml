@@ -1,0 +1,16 @@
+<package>
+  <name>suitesparse</name>
+  <version>4.2.1</version>
+  <description>suitesparse</description>
+  <maintainer email="davis@cise.ufl.edu">Dr. Tim Davis</maintainer>
+
+  <license>LGPLv3 or later</license>
+
+  <url type="website">http://faculty.cse.tamu.edu/davis/suitesparse.html</url>
+
+  <author>Dr. Tim Davis</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>libblas-dev</build_depend>
+  <build_depend>liblapack-dev</build_depend>
+</package>
