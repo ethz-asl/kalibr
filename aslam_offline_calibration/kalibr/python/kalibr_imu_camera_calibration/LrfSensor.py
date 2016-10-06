@@ -318,7 +318,7 @@ class IccLaser:
                     tk = self.laserOffsetDv.toExpression() + self.laserData[i].stamp.toSec()
                     T_w_b = poseSplineDv.transformationAtTime(tk, self.timeOffsetPadding, self.timeOffsetPadding)
 
-                    dir_w = np.array([np.cos(self.laserData[i].angle), np.sin(self.laserData[i].angle), 0.0])
+                    dir_l = np.array([np.cos(self.laserData[i].angle), np.sin(self.laserData[i].angle), 0.0])
                     n_w = p.n_Dv.toExpression()
                     T_w_l = T_w_b * self.T_b_l_Dv.toExpression()
                     t_w = T_w_l.toEuclideanExpression()
@@ -326,7 +326,7 @@ class IccLaser:
 #                     b = self.rangeBias_Dv.toExpression()
                     d = p.d_Dv.toExpression()
                     
-                    predictedMeasurement = (d - n_w.dot(t_w)) / (n_w.dot(C_w_l * dir_w))
+                    predictedMeasurement = (d - n_w.dot(t_w)) / (n_w.dot(C_w_l * dir_l))
 
                     if predictedMeasurement.toScalar() < 0. :
                         predictedMeasurement = predictedMeasurement * -1.0
@@ -343,7 +343,7 @@ class IccLaser:
                     lerr = let.ScalarError(self.laserData[i].distance, self.laserData[i].invR, 
                                            predictedMeasurement)
 
-                    #                     lerr = let.LaserError(self.laserData[i].distance, self.laserData[i].invR, dir_w, \
+                    #                     lerr = let.LaserError(self.laserData[i].distance, self.laserData[i].invR, dir_l, \
                     #                                           T_w_b * self.T_b_l_Dv.toExpression(), \
                     #                                           p.n_Dv.toExpression(), p.d_Dv.toExpression(), \
                     #                                           self.rangeBias_Dv.toExpression());
