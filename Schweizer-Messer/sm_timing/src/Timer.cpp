@@ -2,8 +2,36 @@
 #include <sm/assert_macros.hpp>
 #include <stdio.h>
 
+#include <boost/thread/mutex.hpp>
+
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
+#include <boost/accumulators/statistics/rolling_mean.hpp>
+
+#define BOOST_DATE_TIME_NO_LOCALE
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 namespace sm{
 namespace timing {
+  struct TimerMapValue {
+    // Initialize the window size for the rolling mean.
+    TimerMapValue() : m_acc(boost::accumulators::tag::rolling_window::window_size = 50){}
+    boost::accumulators::accumulator_set<
+        double,
+        boost::accumulators::features<
+          boost::accumulators::tag::lazy_variance,
+          boost::accumulators::tag::sum,
+          boost::accumulators::tag::min,
+          boost::accumulators::tag::max,
+          boost::accumulators::tag::rolling_mean,
+          boost::accumulators::tag::mean
+        >
+        > m_acc;
+  };
+
+
+
+  boost::mutex Timing::m_mutex;
   
   Timing & Timing::instance() {
     static Timing t;
@@ -28,6 +56,7 @@ namespace timing {
   // Static funcitons to query the timers:
   size_t Timing::getHandle(std::string const & tag){
     // Search for an existing tag.
+    boost::mutex::scoped_lock lock(m_mutex);
     map_t::iterator i = instance().m_tagMap.find(tag);
     if(i == instance().m_tagMap.end()) {
       // If it is not there, create a tag.
@@ -120,6 +149,7 @@ namespace timing {
   
   
   void Timing::addTime(size_t handle, double seconds){
+    boost::mutex::scoped_lock lock(m_mutex);
     m_timers[handle].m_acc(seconds);
   }
   
@@ -178,6 +208,7 @@ namespace timing {
   }
 
   void Timing::reset(size_t handle) {
+    boost::mutex::scoped_lock lock(m_mutex);
     SM_ASSERT_LT(TimerException, handle, instance().m_timers.size(), "Handle is out of range: " << handle << ", number of timers: " << instance().m_timers.size());
     instance().m_timers[handle] = TimerMapValue();
   }
@@ -203,40 +234,100 @@ namespace timing {
     return buffer;
   }
   
-  void Timing::print(std::ostream & out) {
-    map_t & tagMap = instance().m_tagMap;
-    //list_t & timers = instance().m_timers;
-    
+  template <typename TMap, typename Accessor>
+  void Timing::print(const TMap & tagMap, const Accessor & accessor, std::ostream & out) {
     out << "SM Timing\n";
     out << "-----------\n";
-    map_t::iterator t = tagMap.begin();
-    for( ; t != tagMap.end(); t++) {
-      size_t i = t->second;
+    for(typename TMap::const_iterator t = tagMap.begin(); t != tagMap.end(); t++) {
+      size_t i = accessor.getIndex(t);
       out.width((std::streamsize)instance().m_maxTagLength);
       out.setf(std::ios::left,std::ios::adjustfield);
-      out << t->first << "\t";
+      out << accessor.getTag(t) << "\t";
       out.width(7);
       
       out.setf(std::ios::right,std::ios::adjustfield);
       out << getNumSamples(i) << "\t";
       if(getNumSamples(i) > 0) 
-	{
-	  out << secondsToTimeString(getTotalSeconds(i)) << "\t";
-	  double meansec = getMeanSeconds(i);
-	  double stddev = sqrt(getVarianceSeconds(i));
-	  out << "(" << secondsToTimeString(meansec) << " +- ";
-	  out << secondsToTimeString(stddev) << ")\t";
-	  
-	  double minsec = getMinSeconds(i);
-	  double maxsec = getMaxSeconds(i);
-	  
-	  // The min or max are out of bounds.
-	  out << "[" << secondsToTimeString(minsec) << "," << secondsToTimeString(maxsec) << "]";
-	  
-	}
+      {
+        out << secondsToTimeString(getTotalSeconds(i)) << "\t";
+        double meansec = getMeanSeconds(i);
+        double stddev = sqrt(getVarianceSeconds(i));
+        out << "(" << secondsToTimeString(meansec) << " +- ";
+        out << secondsToTimeString(stddev) << ")\t";
+
+        double minsec = getMinSeconds(i);
+        double maxsec = getMaxSeconds(i);
+
+        // The min or max are out of bounds.
+        out << "[" << secondsToTimeString(minsec) << "," << secondsToTimeString(maxsec) << "]";
+
+      }
       out << std::endl;
     }
   }
+
+  void Timing::print(std::ostream & out) {
+    struct Accessor {
+      size_t getIndex(map_t::const_iterator t) const {
+        return t->second;
+      }
+      const std::string &  getTag(map_t::const_iterator t) const {
+        return t->first;
+      }
+    };
+
+    print(instance().m_tagMap, Accessor(), out);
+  }
+
+  void Timing::print(std::ostream & out, const SortType sort) {
+    map_t & tagMap = instance().m_tagMap;
+
+    typedef std::multimap<double, std::string, std::greater<double> > SortMap_t;
+    SortMap_t sorted;
+    for(map_t::const_iterator t = tagMap.begin(); t != tagMap.end(); t++) {
+      size_t i = t->second;
+      double sv;
+      if(getNumSamples(i) > 0)
+        switch (sort) {
+          case SORT_BY_TOTAL:
+            sv = getTotalSeconds(i);
+            break;
+          case SORT_BY_MEAN:
+            sv = getMeanSeconds(i);
+            break;
+          case SORT_BY_STD:
+            sv = sqrt(getVarianceSeconds(i));
+            break;
+          case SORT_BY_MAX:
+            sv = getMaxSeconds(i);
+            break;
+          case SORT_BY_MIN:
+            sv = getMinSeconds(i);
+            break;
+          case SORT_BY_NUM_SAMPLES:
+            sv = getNumSamples(i);
+            break;
+        }
+      else
+        sv = std::numeric_limits<double>::max();
+      sorted.insert(SortMap_t::value_type(sv, t->first));
+    }
+
+    struct Accessor {
+      map_t & tagMap;
+      Accessor(map_t & tagMap) : tagMap(tagMap) {}
+      
+      size_t getIndex(SortMap_t::const_iterator t) const {
+        return tagMap[t->second];
+      }
+      const std::string & getTag(SortMap_t::const_iterator t) const {
+        return t->second;
+      }
+    };
+
+    print(sorted, Accessor(tagMap), out);
+  }
+
   std::string Timing::print()
   {
     std::stringstream ss;
@@ -244,5 +335,12 @@ namespace timing {
     return ss.str();
   }
   
+  std::string Timing::print(const SortType sort)
+  {
+    std::stringstream ss;
+    print(ss, sort);
+    return ss.str();
+  }
+
 } // namespace timing
 } // end namespace sm

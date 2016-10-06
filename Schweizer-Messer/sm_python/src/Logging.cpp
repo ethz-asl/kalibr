@@ -8,6 +8,8 @@ void smLogNamed(const std::string & name, sm::logging::Level level,
               const std::string & message)
 {
 
+    if (!sm::logging::isNamedStreamEnabled(name)) return;
+    
     boost::shared_ptr<sm::logging::Logger> logger = sm::logging::getLogger();
     sm::logging::LoggingEvent event(name.c_str(),
                                     level,
@@ -35,6 +37,12 @@ void exportLogging()
     using namespace sm::logging;
     
     enum_<Level>("LoggingLevel")
+        .value("All",levels::All)
+        .value("Finest",levels::Finest)
+        .value("Verbose",levels::Verbose)
+        .value("Finer",levels::Finer)
+        .value("Trace",levels::Trace)
+        .value("Fine",levels::Fine)
         .value("Debug",levels::Debug)
         .value("Info",levels::Info)
         .value("Warn",levels::Warn)
@@ -46,6 +54,7 @@ void exportLogging()
     def("getLoggingLevel",&getLevel);
     // void setLevel( sm::logging::levels::Level level );        
     def("setLoggingLevel", &setLevel);
+    def("loggingLevelFromString", &levels::fromString);
     // void setLogger( boost::shared_ptr<Logger> logger );
     def("setLogger", &setLogger);
     // boost::shared_ptr<Logger> getLogger();z

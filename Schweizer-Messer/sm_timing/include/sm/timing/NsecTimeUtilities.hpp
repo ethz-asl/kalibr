@@ -31,5 +31,12 @@ double nsecToSec( const NsecTime & time );
 /// \brief Convert the time (in seconds) to integer nanoseconds
 NsecTime secToNsec( const double & time );
 
+/// \brief return a magic number representing an invalid timestamp
+constexpr NsecTime getInvalidTime();
+
+/// \brief Is the time valid? This uses a magic number
+///        std::numeric_limits<NsecTime>::min() to represent an invalid time
+bool isValid(const NsecTime & time);
+
 } // namespace timing
 } // namespace sm

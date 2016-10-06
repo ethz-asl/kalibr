@@ -20,6 +20,7 @@ namespace sm {
     virtual ~BoostPropertyTreeImplementation();
 
     void loadXml(const boost::filesystem::path & fileName);
+    void loadXmlFromString(const std::string & xml);
     void saveXml(const boost::filesystem::path & fileName) const;
  
     void loadIni(const boost::filesystem::path & fileName);
@@ -27,6 +28,9 @@ namespace sm {
 
     void loadInfo(const boost::filesystem::path & fileName);
     void saveInfo(const boost::filesystem::path & fileName) const;
+
+    void loadString(const std::string & strings);
+    std::string asInfoString() const;
 
     virtual double getDouble(const std::string & key) const;
     virtual double getDouble(const std::string & key, double defaultValue) const;
@@ -50,14 +54,18 @@ namespace sm {
     virtual void setString(const std::string & key, const std::string & value);
 
     virtual bool doesKeyExist(const std::string & key) const;
+    void update(const BoostPropertyTreeImplementation & with, bool createIfNecessary, bool ignoreEmptyUpdates);
 
     iterator begin() ;
     const_iterator begin() const;
     iterator end() ;
     const_iterator end() const;    
 
-
+    const std::vector<KeyPropertyTreePair> getChildren(const std::string & key) const;
+    std::vector<KeyPropertyTreePair> getChildren(const std::string & key);
   private:
+
+    static int getXmlReadOptions();
 
     template<typename T>
     T get(const std::string & key) const;

@@ -15,6 +15,7 @@
 #define SMCONSOLE_SEVERITY_FATAL 10
 #define SMCONSOLE_SEVERITY_NONE 11
 
+#include <string>
 
 namespace sm {
     namespace logging {
@@ -37,6 +38,9 @@ namespace sm {
 
                 Count
             };
+            
+            Level fromString(std::string level);
+
         }
 
         typedef levels::Level Level;

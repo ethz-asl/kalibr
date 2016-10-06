@@ -2,29 +2,32 @@
  * @file   PropertyTree.hpp
  * @author Paul Furgale <paul.furgale@gmail.com>
  * @date   Tue Apr  3 09:39:01 2012
- * 
+ *
  * @brief  A class that stores heirarchically orgainized properties for
  *         easy initialization of other classes.
- * 
  *
- * 
+ *
+ *
  */
 #ifndef SM_PROPERTY_TREE_HPP
 #define SM_PROPERTY_TREE_HPP
 
 #include <boost/shared_ptr.hpp>
 #include <sm/assert_macros.hpp>
+#include <vector>
 
 namespace sm {
   // Forward declaration.
   class PropertyTreeImplementation;
-  
-  
+  struct KeyPropertyTreePair;
+
+
+
   /**
    * @class PropertyTree
    * @brief  A class that stores heirarchically orgainized properties for
    *         easy initialization of other classes.
-   * 
+   *
    * This class is designed to hold properties organized heirarchically
    * and intended for the initialization of classes. In the basic use
    * case, a class would write a constructor accepting a property tree
@@ -48,7 +51,7 @@ namespace sm {
    * \endcode
    *
    * If one class has a member variable of another class that must
-   * also be initialized, the member variable may be pointed to 
+   * also be initialized, the member variable may be pointed to
    * properties lower in the property heirarchy by creating a new
    * child property tree with a child namespace:
    *
@@ -68,15 +71,15 @@ namespace sm {
    * package.
    *
    * To implement your own variant:
-   * - First, create a subclass of PropertyTreeImplementation and implement all of 
+   * - First, create a subclass of PropertyTreeImplementation and implement all of
    *    The virtual functions there. This should do the work of actually getting and
    *    setting parameter values. All values passed in to these functions will start with "/"
    *    and namespaces will be delimited by "/" such as "/namespace1/namespace2/key". If your
-   *    middlewear/parameter container uses a different delimiter, you may have to find and 
+   *    middlewear/parameter container uses a different delimiter, you may have to find and
    *    replace values.
    *
    * - Next create a subclass of PropertyTree that does two things: (1) implements a constructor
-   *   that calls the PropertyTree constructor instantiating the correct implementation class, and 
+   *   that calls the PropertyTree constructor instantiating the correct implementation class, and
    *   (2) forwards any extra functions from the implementation class that are needed on the outside,
    *   for example save/load functionality. It is important that this class stores no data because it
    *   will be stripped off when the property tree is passed in to sub-objects.
@@ -96,7 +99,7 @@ namespace sm {
     PropertyTree(const PropertyTree & parent, const std::string & childNamespace);
 
     virtual ~PropertyTree();
-    
+
     double getDouble(const std::string & key) const;
     double getDouble(const std::string & key, double defaultValue) const;
     double getDouble(const std::string & key, double defaultValue);
@@ -123,10 +126,18 @@ namespace sm {
 
 
     bool doesKeyExist(const std::string & key) const;
+
+    const std::vector<KeyPropertyTreePair> getChildren() const;
+    std::vector<KeyPropertyTreePair> getChildren();
   protected:
     std::string _namespace;
     std::string buildQualifiedKeyName(const std::string & key) const;
     boost::shared_ptr<PropertyTreeImplementation> _imp;
+  };
+
+  struct KeyPropertyTreePair {
+    std::string key;
+    PropertyTree pt;
   };
 
 } // namespace sm

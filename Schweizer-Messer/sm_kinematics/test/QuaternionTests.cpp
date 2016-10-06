@@ -101,7 +101,7 @@ TEST(QuaternionAlgebraTestSuite, testAxisAngle2QuatAndBack)
     {
       // Create a random quaternion
       Eigen::Vector4d q = quatRandom();
-      sm::eigen::assertNear(q, axisAngle2quat(quat2AxisAngle(q)), q.block<3,1>(0, 0).norm() * eps * 20, SM_SOURCE_FILE_POS, "");
+      sm::eigen::assertNear(q, axisAngle2quat(quat2AxisAngle(q)), q.block<3,1>(0, 0).norm() * eps * 40, SM_SOURCE_FILE_POS, "");
 
       // Create a random point in R3
       Eigen::Vector3d v_b; v_b.setRandom();

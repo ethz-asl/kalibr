@@ -8,6 +8,14 @@ import sys
 # http://docs.python.org/library/unittest.html#test-cases
 import unittest
 
+import generator_config
+
+typeTag2NumpyTypeObjectMap = dict()
+typeTag2NumpyTypeObjectMap['int'] = numpy.intc
+typeTag2NumpyTypeObjectMap['float'] = numpy.float32
+typeTag2NumpyTypeObjectMap['double'] = numpy.float64
+typeTag2NumpyTypeObjectMap['uchar'] = numpy.uint8
+typeTag2NumpyTypeObjectMap['long'] = numpy.int_
 
 
 class TestEigen(unittest.TestCase):
@@ -46,8 +54,12 @@ class TestEigen(unittest.TestCase):
             self.fail('%s: Unexpected number of dimensions in the numpy output matrix: %d' % (testType, eigenM.ndim))
         
     def matrixTests(self,t,i,j):
-        row_limit = 50
-        col_limit = 50
+        assert typeTag2NumpyTypeObjectMap[t]
+        
+        npType = typeTag2NumpyTypeObjectMap[t];
+        
+        row_limit = generator_config.MaximalStaticDimension + 1
+        col_limit = generator_config.MaximalStaticDimension + 1
         rows_dim_is_dynamic = (i == 'D')
         cols_dim_is_dynamic = (j == 'D')
         ii = i;
@@ -60,53 +72,42 @@ class TestEigen(unittest.TestCase):
         
         for R in range(0,row_limit):
             for C in range(0,col_limit):
-                testType = 'Testing %s with input array[%d,%d]' % (fname, R, C)
-                try:
+                for transposeFirst in range(1):
+                    testType = 'Testing %s with input array[%d,%d]%s' % (fname, R, C, ('^T' if transposeFirst else ''))
+    
                     # Create a random matrix.
-                    numpyM = numpy.random.random([R,C])
-                    # Try to pass it in to the pass-through function
-                    eigenM = npe.__dict__[fname](numpyM)
-                    # There was no error...check that this was okay.
-                    self.assertTrue(rows_dim_is_dynamic or R == ii, testType)
-                    self.assertTrue(cols_dim_is_dynamic or C == jj, testType)
-                    
-                    # Check that the matrices are the same.
-                    self.assertMatrixClose(numpyM,eigenM, testType)
-                except TypeError as inst:
-                    # There was a type error. Check that this was expected.
-                    self.assertFalse( (rows_dim_is_dynamic or R == ii) and (cols_dim_is_dynamic or C == jj), testType)
-                
-                try:
-                    # Create a random matrix and take the transpose.
-                    numpyM = numpy.random.random([C,R]).T
-                    # Try to pass it in to the pass-through function
-                    eigenM = npe.__dict__[fname](numpyM)
-                    # There was no error...check that this was okay.
-                    self.assertTrue(rows_dim_is_dynamic or R == ii, testType)
-                    self.assertTrue(cols_dim_is_dynamic or C == jj, testType)
-                    
-                    # Check that the matrices are the same.
-                    self.assertMatrixClose(numpyM,eigenM, testType)
-                except TypeError as inst:
-                    # There was a type error. Check that this was expected.
-                    self.assertFalse( (rows_dim_is_dynamic or R == ii) and (cols_dim_is_dynamic or C == jj), testType)
-                    
-                    
+                    if transposeFirst:
+                        numpyM = numpy.random.random([C,R]).astype(dtype = npType).T
+                    else:
+                        numpyM = numpy.random.random([R,C]).astype(dtype = npType)
+                        
+                    assert numpyM.dtype == npType 
+                    try:
+                        # Try to pass it in to the pass-through function
+                        eigenM = npe.__dict__[fname](numpyM)
+                        # There was no error...check that this was okay.
+                        rows_dim_is_dynamic or self.assertEqual(R, ii, testType)
+                        cols_dim_is_dynamic or self.assertEqual(C, jj, testType)
+                        
+                        # Check that the matrices are the same.
+                        self.assertMatrixClose(numpyM,eigenM, testType)
+                    except TypeError as inst:
+                        # There was a type error. Check that this was expected.
+                        self.assertFalse( (rows_dim_is_dynamic or R == ii) and (cols_dim_is_dynamic or C == jj), testType)
+
     def vectorTests(self,t,i,j):
         x = 1
         # um...
         
     def test_eigen(self):
-        T = ['double']
-        #N = ('01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','D')
-        N = ('1','2','3','4','5','6','D')
-        #N = (1,2,3,4,'dynamic')
+        if numpy_eigen.IsBroken : self.skipTest("numpy_eigen is broken (see #137)");
+
+        T = generator_config.typeTags
+        N = generator_config.dimTags
         for t in T:
             for i in N:
                 for j in N:
                     self.matrixTests(t,i,j)
-        
-
 
 
 if __name__ == '__main__':

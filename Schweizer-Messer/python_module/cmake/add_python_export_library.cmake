@@ -109,11 +109,8 @@ ${SETUP_PY_TEXT}
   # Link against boost::python
   target_link_libraries(${TARGET_NAME} ${Boost_LIBRARIES})
 
-  # On OSX and Linux, the python library must end in the extension .so. Build this
-  # filename here.
-  get_property(PYLIB_OUTPUT_FILE TARGET ${TARGET_NAME} PROPERTY LOCATION)
-  get_filename_component(PYLIB_OUTPUT_NAME ${PYLIB_OUTPUT_FILE} NAME_WE)
-  set(PYLIB_SO_NAME ${PYLIB_OUTPUT_NAME}.so)
+  # On OSX and Linux, the python library must end in the extension .so. 
+  set(PYLIB_SO_NAME lib${TARGET_NAME}.so)
 
   if(APPLE)
     SET(DIST_DIR site-packages)
@@ -122,15 +119,15 @@ ${SETUP_PY_TEXT}
   endif()
 
   install(TARGETS ${TARGET_NAME}
-    ARCHIVE DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}/python2.7/${DIST_DIR}/${TARGET_NAME}
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}/python2.7/${DIST_DIR}/${TARGET_NAME}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python2.7/${DIST_DIR}/${PYTHON_PACKAGE_NAME}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python2.7/${DIST_DIR}/${PYTHON_PACKAGE_NAME}
   )
   
     # Cause the library to be output in the correct directory.
   set(PYTHON_LIB_DIR ${CATKIN_DEVEL_PREFIX}/lib/python2.7/${DIST_DIR}/${PYTHON_PACKAGE_NAME})
   add_custom_command(TARGET ${TARGET_NAME}
     POST_BUILD
-    COMMAND mkdir -p ${PYTHON_LIB_DIR} && cp -v ${PYLIB_OUTPUT_FILE} ${PYTHON_LIB_DIR}/${PYLIB_SO_NAME}
+    COMMAND mkdir -p ${PYTHON_LIB_DIR} && cp -v $<TARGET_FILE:${TARGET_NAME}> ${PYTHON_LIB_DIR}/${PYLIB_SO_NAME}
     WORKING_DIRECTORY ${CATKIN_DEVEL_PREFIX}
     COMMENT "Copying library files to python directory" )
 

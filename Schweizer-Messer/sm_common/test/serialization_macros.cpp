@@ -11,7 +11,6 @@
 class PolyBase {
  public:
   virtual ~PolyBase(){};
- virtual bool isBinaryEqual(const PolyBase& rhs) const = 0;
 };
 
 class PolyDerived : public PolyBase {
@@ -24,7 +23,7 @@ class PolyDerived : public PolyBase {
    key_ = rand();
    value_ = static_cast<double>(rand()) / RAND_MAX;
  }
- virtual bool isBinaryEqual(const PolyDerived& rhs) const {
+ bool isBinaryEqual(const PolyDerived& rhs) const {
    bool same = true;
    same = same && SM_CHECKMEMBERSSAME(rhs, key_);
    same = same && SM_CHECKMEMBERSSAME(rhs, value_);
@@ -67,7 +66,6 @@ class ctPoly2{
     same = same && SM_CHECKMEMBERSSAME(other, value_);
     return same;
   }
-  friend std::ostream& operator<<(std::ostream &os, const ctPoly2<T>& lhs);
 };
 
 

@@ -1,37 +1,31 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(sm_matrix_archive)
 
-find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common)
-include_directories(${catkin_INCLUDE_DIRS})
+find_package(catkin_simple REQUIRED)
+catkin_simple()
+
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 
-find_package(Eigen REQUIRED)
-include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
-
-catkin_package(
-  INCLUDE_DIRS include  ${catkin_INCLUDE_DIRS}
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS sm_common
-  DEPENDS
-)
 add_definitions(-std=c++0x -D__STRICT_ANSI__)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+include_directories(include ${Boost_INCLUDE_DIRS})
 
-##############
-## Building ##
-##############
-
-add_library(${PROJECT_NAME}
+cs_add_library(${PROJECT_NAME}
   src/MatrixArchive.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} 
-                      ${catkin_LIBRARIES} ${Boost_LIBRARIES} pthread)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
-#############
-## Testing ##
-#############
+cs_add_executable(lsma 
+  src/lsma.cpp
+)
+target_link_libraries(lsma ${PROJECT_NAME})
+
+set_target_properties(lsma
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CATKIN_DEVEL_PREFIX}/bin"
+)
+
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
 add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
@@ -44,3 +38,5 @@ if(TARGET ${PROJECT_NAME}-test)
   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 endif()
 
+cs_install()
+cs_export()

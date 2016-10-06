@@ -55,6 +55,7 @@ namespace sm {
                     end = format_.end();
                     bool matched_once = false;
                     std::string last_suffix;
+                    tokens_.clear();
                     while (boost::regex_search(start, end, results, e))
                     {
 #if 0

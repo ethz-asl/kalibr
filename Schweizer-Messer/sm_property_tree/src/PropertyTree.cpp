@@ -30,26 +30,18 @@ namespace sm {
 
   PropertyTree::~PropertyTree()
   {
-
   }
 
   // \todo This function could do more name checking.
   std::string PropertyTree::buildQualifiedKeyName(const std::string & key) const
   {
-    SM_ASSERT_GT(InvalidKeyException, key.size(), 0, "The key must contain characters");
-    if(key[0] == '/')
-      {
-	// The requested key is in the global namespace
-	SM_ASSERT_GT(InvalidKeyException, key.size(), 1, "The key \"" << key << "\" is in the global namespace but does not contain a variable name");
-	return key;
-      }
-    else
-      {
-	return _namespace + key;
-      }
+    std::string qualifiedKeyName = !key.empty() && key[0] == '/' ? key : _namespace + key;
+    if(qualifiedKeyName.size() > 1 && qualifiedKeyName.back() == '/'){
+      qualifiedKeyName.resize(qualifiedKeyName.size() - 1);
+    }
+    return qualifiedKeyName;
   }
 
-    
   double PropertyTree::getDouble(const std::string & key) const
   {
       SM_ASSERT_TRUE(Exception, _imp, "The implementation is NULL");
@@ -154,5 +146,12 @@ namespace sm {
     return _imp->setString(buildQualifiedKeyName(key), value);
   }
 
+  const std::vector<KeyPropertyTreePair> PropertyTree::getChildren() const {
+    return _imp->getChildren(_namespace);
+  }
+
+  std::vector<KeyPropertyTreePair> PropertyTree::getChildren() {
+    return _imp->getChildren(_namespace);
+  }
   
 } // namespace sm

@@ -15,6 +15,14 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 //#include <iostream>
 
+#include "numpy/numpyconfig.h"
+#ifdef NPY_1_7_API_VERSION
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define NPE_PY_ARRAY_OBJECT PyArrayObject
+#else
+//TODO Remove this as soon as support for Numpy version before 1.7 is dropped
+#define NPE_PY_ARRAY_OBJECT PyObject
+#endif
 
 #define PY_ARRAY_UNIQUE_SYMBOL NP_Eigen_AS
 #include <numpy/arrayobject.h> 
@@ -93,8 +101,8 @@ struct NumpyEigenConverter
 	// Create a 1D array
 	npy_intp dimensions[1];
 	dimensions[0] = M.size();
-	P = PyArray_SimpleNew(1, dimensions, TypeToNumPy<scalar_t>::NpyType);	    	
-	numpyTypeDemuxer< CopyEigenToNumpyVector<const matrix_t> >(&M,P);	
+	P = PyArray_SimpleNew(1, dimensions, TypeToNumPy<scalar_t>::NpyType);
+	numpyTypeDemuxer< CopyEigenToNumpyVector<const matrix_t> >(&M, reinterpret_cast<NPE_PY_ARRAY_OBJECT*>(P));
       }
     else
       {
@@ -103,7 +111,7 @@ struct NumpyEigenConverter
 	dimensions[0] = M.rows();
 	dimensions[1] = M.cols();
 	P = PyArray_SimpleNew(2, dimensions, TypeToNumPy<scalar_t>::NpyType);
-	numpyTypeDemuxer< CopyEigenToNumpyMatrix<const matrix_t> >(&M,P);	
+	numpyTypeDemuxer< CopyEigenToNumpyMatrix<const matrix_t> >(&M, reinterpret_cast<NPE_PY_ARRAY_OBJECT*>(P));
       }
     
     // incrementing the reference seems to cause a memory leak.
@@ -132,7 +140,7 @@ struct NumpyEigenConverter
     return valid;
   }
       
-  static void checkMatrixSizes(PyObject * obj_ptr)
+  static void checkMatrixSizes(NPE_PY_ARRAY_OBJECT * obj_ptr)
   {
     int rows = PyArray_DIM(obj_ptr, 0);
     int cols = PyArray_DIM(obj_ptr, 1);
@@ -146,7 +154,7 @@ struct NumpyEigenConverter
       }
   }
 
-  static void checkRowVectorSizes(PyObject * obj_ptr, int cols)
+  static void checkRowVectorSizes(NPE_PY_ARRAY_OBJECT * obj_ptr, int cols)
   {
     if(!isDimensionValid(cols, ColsAtCompileTime, MaxColsAtCompileTime))
       {
@@ -155,7 +163,7 @@ struct NumpyEigenConverter
       }
   }
 
-  static void checkColumnVectorSizes(PyObject * obj_ptr, int rows)
+  static void checkColumnVectorSizes(NPE_PY_ARRAY_OBJECT * obj_ptr, int rows)
   {
     // Check if the type can accomidate one column.
     if(ColsAtCompileTime == Eigen::Dynamic || ColsAtCompileTime == 1)
@@ -174,7 +182,7 @@ struct NumpyEigenConverter
 
   }
 
-  static void checkVectorSizes(PyObject * obj_ptr)
+  static void checkVectorSizes(NPE_PY_ARRAY_OBJECT * obj_ptr)
   {
 	int size = PyArray_DIM(obj_ptr, 0);
 
@@ -207,8 +215,10 @@ struct NumpyEigenConverter
         return 0;
       }
 
+    NPE_PY_ARRAY_OBJECT * array_ptr = reinterpret_cast<NPE_PY_ARRAY_OBJECT*>(obj_ptr);
+
     // Check the type of the array.
-    int npyType = PyArray_ObjectType(obj_ptr, 0);
+    int npyType = getNpyType(array_ptr);
     
     if(!TypeToNumPy<scalar_t>::canConvert(npyType))
       {
@@ -220,7 +230,7 @@ struct NumpyEigenConverter
     
 
     // Check the array dimensions.
-    int nd = PyArray_NDIM(obj_ptr);
+    int nd = PyArray_NDIM(array_ptr);
     
     if(nd != 1 && nd != 2)
       {
@@ -229,12 +239,12 @@ struct NumpyEigenConverter
 
     if(nd == 1)
       {
-	checkVectorSizes(obj_ptr);
+	checkVectorSizes(array_ptr);
       }
     else 
       {
 	// Two-dimensional matrix type.
-	checkMatrixSizes(obj_ptr);
+	checkMatrixSizes(array_ptr);
       }
 
 
@@ -266,10 +276,17 @@ struct NumpyEigenConverter
 
     matrix_t & M = *Mp;
 
-    int nd = PyArray_NDIM(obj_ptr);
+    if (!PyArray_Check(obj_ptr))
+    {
+      THROW_TYPE_ERROR("construct is only defined for numpy array and matrix types");
+    }
+
+    NPE_PY_ARRAY_OBJECT * array_ptr = reinterpret_cast<NPE_PY_ARRAY_OBJECT*>(obj_ptr);
+
+    int nd = PyArray_NDIM(array_ptr);
     if(nd == 1)
       {
-	int size = PyArray_DIM(obj_ptr, 0);
+	int size = PyArray_DIM(array_ptr, 0);
 	// This is a vector type
 	if(RowsAtCompileTime == 1)
 	  {
@@ -281,15 +298,15 @@ struct NumpyEigenConverter
 	    // Column Vector
 	    M.resize(size,1);
 	  }
-	numpyTypeDemuxer< CopyNumpyToEigenVector<matrix_t> >(&M,obj_ptr);	
+	numpyTypeDemuxer< CopyNumpyToEigenVector<matrix_t> >(&M, array_ptr);
       }
     else
       {
-	int rows = PyArray_DIM(obj_ptr, 0);
-	int cols = PyArray_DIM(obj_ptr, 1);
+	int rows = PyArray_DIM(array_ptr, 0);
+	int cols = PyArray_DIM(array_ptr, 1);
 	
 	M.resize(rows,cols);
-	numpyTypeDemuxer< CopyNumpyToEigenMatrix<matrix_t> >(&M,obj_ptr);	
+	numpyTypeDemuxer< CopyNumpyToEigenMatrix<matrix_t> >(&M, array_ptr);
       }
 
     

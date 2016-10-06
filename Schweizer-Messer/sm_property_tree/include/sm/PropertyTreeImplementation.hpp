@@ -1,6 +1,7 @@
 #ifndef SM_PROPERTY_TREE_IMPLEMENTATION_HPP
 #define SM_PROPERTY_TREE_IMPLEMENTATION_HPP
 
+#include "PropertyTree.hpp"
 #include <string>
 
 namespace sm {
@@ -37,6 +38,8 @@ namespace sm {
 
     virtual bool doesKeyExist(const std::string & key) const = 0;
 
+    virtual const std::vector<KeyPropertyTreePair> getChildren(const std::string & key) const = 0;
+    virtual std::vector<KeyPropertyTreePair> getChildren(const std::string & key) = 0;
   };
 
 } // namespace sm

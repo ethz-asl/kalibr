@@ -274,17 +274,27 @@ namespace sm {
         {
             return g_logging_globals.getLogger();
         }
+        
+        std::string addDefaultPrefixIfMissing(const std::string & name) {
+            if(name.substr(0, 3) == SMCONSOLE_DEFAULT_NAME ".") { // starts with "sm."
+              return name;
+            }
+            else if (name != "sm") { // if name does not start with "sm." and != "sm"
+              return std::string(SMCONSOLE_DEFAULT_NAME ".") + name;
+            }
+            return name; // if name == "sm"
+        }
         bool isNamedStreamEnabled( const std::string & name )
         {
-            return g_logging_globals.isNamedStreamEnabled( name );
+            return g_logging_globals.isNamedStreamEnabled(addDefaultPrefixIfMissing(name));
         }
         void enableNamedStream( const std::string & name )
         {
-            g_logging_globals.enableNamedStream( name );
+            g_logging_globals.enableNamedStream(addDefaultPrefixIfMissing(name));
         }
         void disableNamedStream( const std::string & name )
         {
-            g_logging_globals.disableNamedStream( name );
+            g_logging_globals.disableNamedStream(addDefaultPrefixIfMissing(name));
         }
 
         

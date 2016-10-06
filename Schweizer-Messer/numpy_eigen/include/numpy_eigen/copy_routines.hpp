@@ -9,7 +9,7 @@ struct CopyNumpyToEigenMatrix
   typedef typename matrix_t::Scalar scalar_t;
   
   template<typename T>
-  void exec(EIGEN_T * M_, PyObject * P_)
+  void exec(EIGEN_T * M_, NPE_PY_ARRAY_OBJECT * P_)
   {
     // Assumes M is already initialized.
     for(int r = 0; r < M_->rows(); r++)
@@ -31,7 +31,7 @@ struct CopyEigenToNumpyMatrix
   typedef typename matrix_t::Scalar scalar_t;
   
   template<typename T>
-  void exec(EIGEN_T * M_, PyObject * P_)
+  void exec(EIGEN_T * M_, NPE_PY_ARRAY_OBJECT * P_)
   {
     // Assumes M is already initialized.
     for(int r = 0; r < M_->rows(); r++)
@@ -53,7 +53,7 @@ struct CopyEigenToNumpyVector
   typedef typename matrix_t::Scalar scalar_t;
   
   template<typename T>
-  void exec(EIGEN_T * M_, PyObject * P_)
+  void exec(EIGEN_T * M_, NPE_PY_ARRAY_OBJECT * P_)
   {
     // Assumes M is already initialized.
     for(int i = 0; i < M_->size(); i++)
@@ -73,7 +73,7 @@ struct CopyNumpyToEigenVector
   typedef typename matrix_t::Scalar scalar_t;
   
   template<typename T>
-  void exec(EIGEN_T * M_, PyObject * P_)
+  void exec(EIGEN_T * M_, NPE_PY_ARRAY_OBJECT * P_)
   {
     // Assumes M is already initialized.
     for(int i = 0; i < M_->size(); i++)
@@ -91,10 +91,11 @@ struct CopyNumpyToEigenVector
 // Crazy syntax in this function was found here:
 // http://stackoverflow.com/questions/1840253/c-template-member-function-of-template-class-called-from-template-function/1840318#1840318
 template< typename FUNCTOR_T>
-inline void numpyTypeDemuxer(typename FUNCTOR_T::matrix_t * M, PyObject * P)
+inline void numpyTypeDemuxer(typename FUNCTOR_T::matrix_t * M, NPE_PY_ARRAY_OBJECT * P)
 {
   FUNCTOR_T f;
-  int npyType = PyArray_ObjectType(P, 0);
+
+  int npyType = getNpyType(P);
   switch(npyType)
     {
     case NPY_BOOL:

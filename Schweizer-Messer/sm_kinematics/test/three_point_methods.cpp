@@ -11,7 +11,6 @@ TEST(SmKinematicsTests, testThreePoint)
   typedef Eigen::Matrix3d matrix3;
   typedef Eigen::Matrix4d matrix4;
   typedef Eigen::Vector3d vector3;
-  typedef Eigen::Vector4d vector4;
   using namespace sm;
   // Build a bunch of random points.
   const int N = 200;
@@ -86,9 +85,6 @@ TEST(SmKinematicsTests, testQMethod)
 {
   typedef Eigen::MatrixXd matrix_type;
   typedef Eigen::Matrix3d matrix3;
-  typedef Eigen::Matrix4d matrix4;
-  typedef Eigen::Vector3d vector3;
-  typedef Eigen::Vector4d vector4;
   using namespace sm;
   // Build a bunch of random points.
   const int N = 200;

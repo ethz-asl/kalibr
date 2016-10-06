@@ -8,9 +8,6 @@ using namespace sm::kinematics;
 void exportHomogeneousPoint()
 {
 
-  typedef Eigen::Matrix3d euclidean_jacobian_t;
-  typedef Eigen::Matrix<double,4,3> homogeneous_jacobian_t;
-
   class_<HomogeneousPoint, boost::shared_ptr<HomogeneousPoint> >("HomogeneousPoint", init<>())
     .def(init<const Eigen::Vector3d &>())
     .def(init<const Eigen::Vector4d &>())

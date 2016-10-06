@@ -39,6 +39,20 @@ template<> struct TypeToNumPy<boost::int64_t>
   }
 };
 
+template<> struct TypeToNumPy<boost::uint64_t>
+{
+  enum { NpyType = NPY_UINT64 };
+  static const char * npyString() { return "NPY_UINT64"; }
+  static const char * typeString() { return "uint64"; }
+  static bool canConvert(int type)
+  {
+    return type == NPY_UINT8 || type == NPY_USHORT ||
+           type == NPY_UINT16 || type == NPY_UINT32 || 
+           type == NPY_ULONG || type == NPY_ULONGLONG || 
+           type == NPY_UINT64;
+  }
+};
+
 template<> struct TypeToNumPy<unsigned char>
 {
   enum { NpyType = NPY_UBYTE };
@@ -85,6 +99,19 @@ template<> struct TypeToNumPy<double>
 };
 
 
+inline int getNpyType(PyObject * obj_ptr){
+  return PyArray_ObjectType(obj_ptr, 0);
+}
+
+#ifdef NPY_1_7_API_VERSION
+inline int getNpyType(PyArrayObject * obj_ptr){
+  PyArray_Descr * descr = PyArray_MinScalarType(obj_ptr);
+  if (descr == NULL){
+    THROW_TYPE_ERROR("Unsupported type: PyArray_MinScalarType returned null!");
+  }
+  return descr->type_num;
+}
+#endif
 
 inline const char * npyTypeToString(int npyType)
 {
@@ -143,11 +170,11 @@ inline const char * npyTypeToString(int npyType)
     }
 }
 
-inline std::string npyArrayTypeString(PyObject * obj_ptr)
+inline std::string npyArrayTypeString(NPE_PY_ARRAY_OBJECT * obj_ptr)
 {
   std::stringstream ss;
   int nd = PyArray_NDIM(obj_ptr);
-  ss << "numpy.array<" << npyTypeToString(PyArray_ObjectType(obj_ptr, 0)) << ">[";
+  ss << "numpy.array<" << npyTypeToString(getNpyType(obj_ptr)) << ">[";
   if(nd > 0)
     {
       ss << PyArray_DIM(obj_ptr, 0);

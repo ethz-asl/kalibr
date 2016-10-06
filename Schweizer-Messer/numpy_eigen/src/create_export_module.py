@@ -5,19 +5,8 @@ import os
 module_path = 'autogen_module'
 if not os.path.isdir(module_path):
     os.makedirs(module_path)
- 
-#dims = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','Eigen::Dynamic']
-#dimTags = ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','D']
 
-dims =  ['1','2','3','4','5','6','Eigen::Dynamic']
-dimTags = ['1','2','3','4','5','6','D']
-
-#types =    ['char','short','int','long','unsigned char', 'unsigned short', 'unsigned int', 'unsigned long', 'float', 'double', 'std::complex<float>','std::complex<double>']
-#typeTags = ['char','short','int','long','uchar', 'ushort', 'uint', 'ulong', 'float', 'double', 'cfloat','cdouble']
-types = ['int', 'float', 'double', 'boost::uint8_t', 'boost::int64_t']
-typeTags = ['int', 'float', 'double', 'uchar', 'long']
-
-
+from generator_config import *
 
 # Write a file for each type. This takes a long time to compile but
 # it avoids using piles of memory during the compilation process.

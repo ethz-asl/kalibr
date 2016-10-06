@@ -34,6 +34,7 @@
 #include <boost/archive/shared_ptr_helper.hpp>
 #endif
 #include <boost/archive/detail/register_archive.hpp>
+
 #include "portable_binary_archive.hpp"
 
 namespace boost {

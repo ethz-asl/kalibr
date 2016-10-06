@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <gtest/gtest.h>
 #include <sm/timing/NsecTimeUtilities.hpp>
 
@@ -17,6 +18,6 @@ TEST( NsetTimeTestSuite, testSecConversion ) {
   double s2 = sm::timing::nsecToSec(ns1);
   sm::timing::NsecTime ns2 = sm::timing::secToNsec(s2);
   
-  ASSERT_LT(abs(ns1-ns2), 1000000);
+  ASSERT_LT(std::abs(ns1-ns2), 1000000);
   
 }

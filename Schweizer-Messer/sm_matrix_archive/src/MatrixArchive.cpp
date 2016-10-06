@@ -74,7 +74,7 @@ namespace sm
     }
 
     Eigen::MatrixXd & val = m_values[matrixName];
-    m_values[matrixName].resize(rows, cols);
+    val.resize(rows, cols);
     return val;
   }
 
@@ -175,7 +175,7 @@ namespace sm
   }
   size_t MatrixArchive::sizeMatrices() const
   {
-    return m_strings.size();
+    return m_values.size();
   }
 
   MatrixArchive::matrix_map_t::const_iterator MatrixArchive::begin() const
