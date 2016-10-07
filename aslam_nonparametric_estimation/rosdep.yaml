@@ -1,0 +1,12 @@
+suitesparse:  
+  ubuntu: 
+    libsuitesparse-dev
+  osxbrew:
+    homebrew:
+      packages: [suite-sparse]
+tbb:  
+  ubuntu: 
+    libtbb-dev
+  osxbrew:
+    homebrew:
+      packages: [tbb]
