@@ -1,0 +1,730 @@
+\documentclass[11pt,a4,oneside]{article}
+% Packages
+%\usepackage{caption}
+\usepackage{times}
+\usepackage{amssymb,amsfonts,amsmath,amscd}
+\usepackage[usenames]{color}
+\usepackage[pdftex,
+            breaklinks=true,
+            colorlinks=true,
+            citecolor=Gray,
+            linkcolor=Gray,
+            urlcolor=Gray
+           ]{hyperref}
+\definecolor{Gray}{rgb}{0.1,0.1,0.35}
+\usepackage{url}
+\usepackage[pdftex]{graphicx}
+\usepackage[loose]{subfigure}
+\usepackage{fancyhdr}
+\usepackage{natbib}
+\usepackage[printonlyused]{acronym}
+% Set the page geometry
+\usepackage[headheight=1cm,
+            headsep=0.6cm,
+            hmargin={2cm,2cm},
+            vmargin={2cm,2cm},
+            includeheadfoot%
+           ]{geometry}
+%\usepackage{geometry}
+\usepackage[usenames,dvipsnames]{xcolor}
+\newcommand{\ignore}[1]{}
+% Set the caption labeling font
+%\renewcommand{\captionlabelfont}{\sf\bfseries}
+\usepackage{listings}
+\definecolor{LstBg}{rgb}{0.99,0.99,1.0}
+\lstset{% general command to set parameter(s)
+  language=,
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=8,
+  basicstyle=\ttfamily\footnotesize, % print whole listing small
+  frame=single,
+  frameround=tttt,
+  keywordstyle=,
+  % none%\color{black}\bfseries\underbar,
+  % underlined bold black keywords
+  identifierstyle=, % nothing happens
+  commentstyle=,%\color{white}, % white comments
+  backgroundcolor=\color{LstBg},
+  stringstyle=\ttfamily, % typewriter type for strings
+  showstringspaces=false} % no special string spaces
+\newenvironment{vb}{\footnotesize\begin{alltt}}{\end{alltt}\normalfont}
+%\newenvironment{vb}{\begin{lstlisting}}{\end{lstlisting}}
+\newcommand{\bs}[0]{\textbackslash}
+\newcommand{\txt}[1]{{\footnotesize\texttt{#1}}}
+
+\definecolor{Gray}{rgb}{0.1,0.1,0.35}
+
+
+\DeclareFixedFont{\rosfont}{OT1}{cmvtt}{m}{n}{11pt}
+%\DeclareFixedFont{\rosfont}{OT1}{cmvtt}{b}{n}{11pt}
+\newcommand{\rospack}[1]{\href{http://www.ros.org/wiki/#1}{{\rosfont{#1}}}}
+\DeclareTextFontCommand{\normaltt}{\footnotesize\ttshape}
+
+\newcommand{\surl}[1]{{\footnotesize\url{#1}}}
+
+
+\newcommand{\listpython}[2]{\lstinputlisting[
+  language=Python,
+  title=#1,
+  numbers=left,
+  numberstyle=\tiny,
+  identifierstyle=\color{Blue}, % nothing happens
+  commentstyle=\color{OliveGreen}]{#2}}
+
+
+\newcommand{\listcpp}[2]{\lstinputlisting[
+  language=C++,
+  title=#1,
+  numbers=left,
+  numberstyle=\tiny,
+  identifierstyle=\color{Blue}, % nothing happens
+  commentstyle=\color{OliveGreen}]{#2}}
+
+\newcommand{\listcpprange}[4]{\lstinputlisting[
+  language=C++,
+  numbers=left,
+  title=#1,
+  firstnumber={#3},
+  firstline={#3},
+  lastline={#4},
+  numberstyle=\tiny,
+  identifierstyle=\color{Blue}, % nothing happens
+  commentstyle=\color{OliveGreen}]{#2}}
+
+\newcommand{\listxmlrange}[4]{\lstinputlisting[
+  language=XML,
+  numbers=left,
+  title=#1,
+  firstnumber={#3},
+  firstline={#3},
+  lastline={#4},
+  numberstyle=\tiny,
+  identifierstyle=\color{Blue}, % nothing happens
+  commentstyle=\color{OliveGreen}]{#2}}
+\newcommand{\listxml}[2]{\lstinputlisting[
+  language=XML,
+  title=#1,
+  numbers=left,
+  numberstyle=\tiny,
+  identifierstyle=\color{Blue}, % nothing happens
+  commentstyle=\color{OliveGreen}]{#2}}
+
+
+
+\input{notation-math-defs}
+
+% Include the common figures path.
+\graphicspath{{figs/}{../common/figs/}}
+
+
+% - User Input --------------------------------------------------
+%
+% Insert the program, document title, author, 
+\newcommand{\ASLprogram}{N/A}
+\newcommand{\ASLtitle}{ An introduction to the ASLam Backend }
+\newcommand{\ASLdocument}{Doc NT-2012-PTF001}
+\newcommand{\ASLrevision}{Rev: 0.1}
+\newcommand{\ASLauthor}{Paul Furgale}
+\newcommand{\ASLreviewer}{}
+
+% PDF setup
+\hypersetup{%
+    pdftitle={\ASLdocument: \ASLtitle},
+    pdfauthor={\ASLauthor},
+    pdfkeywords={},
+    pdfsubject={\ASLprogram},
+    pdfstartview={},
+    urlcolor=black,
+    linkcolor=black,
+}%
+
+% ---------------------------------------------------------------
+\title{\sf\bfseries \ASLtitle }
+
+\author{ Paul Furgale \\
+        \small ETH Z\"{u}rich\\
+        \small Autonomous Systems Lab\\
+       \small \texttt{<paul.furgale@mavt.ethz.ch>}
+       }
+\date{}
+% --------------------------------------------------------------
+\begin{document}
+
+% Define the basic page style
+\fancypagestyle{plain}{%
+    \fancyhf{}%
+    \fancyfoot[C]{}%
+    \fancyhead[R]{\begin{tabular}[b]{r}\small\sf \ASLdocument\\
+        \small\sf\today \end{tabular}}%
+    \fancyhead[L]{\includegraphics[height=1.2cm]%
+        {asl_black_logo.pdf} \begin{tabular}[b]{l}\small\sf{ETH Z\"{u}rich} \\ \small\sf{Autonomous Systems Lab} \end{tabular}}%
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}}
+% Set the page style for the document
+\pagestyle{fancy}
+% Set the page headers and footers.
+\lhead{ \includegraphics[height=1cm]%
+        {asl_black.pdf} \begin{tabular}[b]{l}\small\sf{ETH Z\"{u}rich} \\ \small\sf{Autonomous Systems Lab} \end{tabular}}
+\rhead{ \begin{tabular}[b]{r}\small\sf \ASLdocument\\
+        \small\sf\today \end{tabular}}
+\chead{}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+
+
+% ---------------------------------------------------------------
+  \begin{titlepage}
+    \vspace*{\fill}
+    \begin{center}
+      {\LARGE\sf\bfseries\ASLtitle}\\[0.5cm]
+      {\large Paul Furgale \\
+        \small ETH Z\"{u}rich\\
+        \small Autonomous Systems Lab\\
+        \small \texttt{<paul.furgale@mavt.ethz.ch>}}\\[0.4cm]
+      \abstract { In this note, we introduce the ASLam backend and provide an example of how to use it. The introduction to this document was adapted from \citet{FurgaleThesis} because, well, that is how I roll. }
+    \end{center}
+    \vspace*{\fill}
+  \end{titlepage}
+\vspace*{2cm}
+\tableofcontents
+\clearpage
+\section{A Brief Sketch of Batch Nonlinear Least-Squares \label{s:nllsq}}%
+Many state estimation tasks in robotics reduce to the problem of finding the parameter vector, $\mbf x$, that minimizes a scalar squared-error function, $J(\cdot)$, of the form
+\begin{equation}
+  \label{eq:errorFunction}
+  J(\mbf x) := \frac{1}{2}\sum_{n=1}^N \mbf e_n(\mbf x)^T \mbf W_{n} \mbf e_n(\mbf x),
+\end{equation}
+where $\mbf e_n(\cdot)$ is one of $N$ individual error terms weighted by the matrix $\mbf W_n$. 
+For many problems in robotics, the error terms are based on observation models of the form,
+\begin{equation}
+  \label{eq:generic-observation}
+  \mbf z_n = \mbf g_n( \mbf x ) + \mbf v_n  ,
+\end{equation}
+where $\mbf z_n$ is an individual observation, $\mbf g_n( \mbf x )$ is the (possibly nonlinear) observation model---our model of how some subset of parameters produced the observation---and $\mbf v_n$ is a random variable representing observation noise.
+%When we assume that the noise on each observation is statistically independent and $\mbf v_n$ is a zero-mean, Gaussian-distributed random variable with covariance $\mbf R_n$, 
+When we assume that $\mbf v_n$ is independent, zero-mean, and  Gaussian,
+\begin{equation}
+  \label{eq:zm-gn}
+  \mbf v_n \sim \mathcal{N}(\mbf 0, \mbf R_n), \quad E[\mbf v_m \mbf v_n] = \mbf 0,
+\end{equation}
+setting 
+\begin{equation}
+  \label{eq:generic-errorTerm}
+  \underbrace{\mbf e_n(\mbf x)}_{\text{error}} := \underbrace{\mbf z_n}_{\text{observation}} - \underbrace{\mbf g_n( \mbf x )}_{\substack{\text{predicted}\\\text{observation}}} ~~\text{and}~~ \mbf W_n := E\left[ \mbf e_n {\mbf e}_n^T \right]^{-1} = \mbf R^{-1}_n
+\end{equation}
+makes
+\begin{equation}
+  \label{eq:minError}
+  \mbf x^\star = \underset{\mbf x}{\operatorname{argmin}}\left(J\left(\mbf x \right)\right)
+\end{equation}
+equivalent to the maximum-likelihood estimate of the parameters given the measurements \citep[p.~156]{Jazwinski7000}. Defining
+\begin{equation}
+  \label{eq:stack-intermediates}
+  \mbf e(\mbf x) := 
+    \bbm
+      \mbf e_1(\mbf x)\\
+      \vdots\\
+      \mbf e_N(\mbf x)
+    \ebm,
+    \quad
+    \mbf R := \textup{diag}\left\{\mbf R_1, \dots, \mbf R_N \right\},
+\end{equation}
+we may express \eqref{eq:errorFunction} in matrix form,
+\begin{equation}
+  \label{eq:errorFunctionMatrix}
+   J(\mbf x) = \frac{1}{2}\mbf e(\mbf x)^T \mbf R^{-1} \mbf e(\mbf x).
+\end{equation}
+If $\mbf e(\cdot)$ is a linear function of $\mbf x$, $J(\cdot)$ is exactly quadratic in $\mbf x$ and we may find its minimum by setting $\pd{J(\mbf x)}{\mbf x}^T$ to zero and solving the resulting system of equations. When $\mbf e(\cdot)$ is a nonlinear function, the minimum of $J(\cdot)$ must be found iteratively, using a nonlinear optimization technique \citep{nocedal06}. In robotics, gradient-based optimization techniques, such as Conjugate Gradient, Gauss-Newton, or Levenberg-Marquardt are commonly used. The ASLam backend is based on the Gauss-Newton algorithm and so a basic sketch is provided here.
+
+Starting with an initial guess for the parameters, $\mbfbar x$---arrived at using a lower-fidelity linear method or through a solution using only a portion of the data available---we make the approximation that 
+\begin{equation}
+  \label{eq:small-update-step}
+   \mbf x = \mbfbar x + \mbfDel x,
+\end{equation}
+for some small update step, $\mbfDel x$. 
+We then substitute \eqref{eq:small-update-step} into \eqref{eq:errorFunctionMatrix} and use a first-order Taylor-series approximation to linearize $\mbf e(\cdot)$ about $\mbfbar x$. The result approximates $J(\cdot)$ as quadratic in $\mbfDel x$,
+\begin{subequations}
+\begin{flalign}
+  \label{eq:linearized-errorFunctionMatrix}
+  J(\mbfbar x + \mbfDel x) & =  \frac{1}{2}\mbf e(\mbfbar x + \mbfDel x)^T \mbf R^{-1} \mbf e(\mbfbar x + \mbfDel x) \\
+  & \approx \frac{1}{2}\left(\mbf e(\mbfbar x) + \left.\pd{\mbf e(\mbf x)}{\mbf x}\right|_{\mbfbar x}\mbfDel x \right)^T \mbf R^{-1} \left(\mbf e(\mbfbar x) + \left.\pd{\mbf e(\mbf x)}{\mbf x}\right|_{\mbfbar x}\mbfDel x \right),
+\end{flalign}
+\end{subequations}
+which we write as
+\begin{equation}
+  \label{eq:linearized-errorFunctionPerturbation}
+  J(\mbfDel x) = \frac{1}{2} \mbf e(\mbfDel x)^T \mbf R^{-1} \mbf e( \mbfDel x ),
+\end{equation}
+where
+\begin{equation}
+  \label{eq:linearized-function}
+\mbfbar e := \mbf e(\mbfbar x), \quad \mbf E := \left.\pd{\mbf e(\mbf x)}{\mbf x}\right|_{\mbfbar x}, \quad \mbf e(\mbfDel x) := \mbfbar e + \mbf E \mbfDel x.
+\end{equation}
+Now we may find the minimum of \eqref{eq:linearized-errorFunctionPerturbation},
+\begin{equation}
+  \label{eq:minErrorLinearized}
+  \mbfDel x^\star = \underset{\mbfDel x}{\operatorname{argmin}}\left(J\left(\mbfDel x \right)\right),
+\end{equation}
+by expanding $\pd{J(\mbfDel x)}{\mbfDel x}^T$,
+\begin{subequations}
+  \begin{flalign}
+    \pd{J(\mbfDel x)}{\mbfDel x}^T & = \left(\pd{J(\mbfDel x)}{\mbf e(\mbfDel x)}\pd{\mbf e(\mbfDel x)}{\mbfDel x} \right)^T\\
+                                                & = \pd{\mbf e(\mbfDel x)}{\mbfDel x}^T \pd{J(\mbfDel x)}{\mbf e(\mbfDel x)}^T\\
+                                                & = \mbf E^T \mbf R^{-1}\mbf e(\mbfDel x)\\
+                                                & = \mbf E^T \mbf R^{-1}\left(\mbfbar e + \mbf E \mbfDel x \right),
+  \end{flalign}
+\end{subequations}
+setting it to zero, and solving the resulting linear system of equations for $\mbfDel x^\star$,
+\begin{subequations}
+  \begin{flalign}
+  \mbf E^T \mbf R^{-1}\left(\mbfbar e + \mbf E \mbfDel x^\star \right) &= 0 \\
+  \mbf E^T \mbf R^{-1} \mbf E \mbfDel x^\star &= -\mbf E^T \mbf R^{-1}\mbfbar e \label{eq:perturbation-linear-system}\\
+  \mbfDel x^\star &= -\left(\mbf E^T \mbf R^{-1} \mbf E\right)^{-1} \mbf E^T \mbf R^{-1}\mbfbar e \label{eq:perturbation-solved}.
+  \end{flalign}
+\end{subequations}
+Generally you would not compute the inverse in \eqref{eq:perturbation-solved}, but rather solve the linear system in \eqref{eq:perturbation-linear-system}\footnote{Often the specific sparsity of the system of equations is exploited to speed up this step as in \citet[Appendix~6]{Hartley0001}. For general sparse solution techniques, please see \citet{Davis0600}.}. For shorthand, we label the components of this linear system
+\begin{equation}
+  \label{eq:linear-system}
+  \underbrace{\mbf H}_{ \mbf E^T \mbf R^{-1} \mbf E}  \mbfDel x^\star = \underbrace{ \mbs \epsilon }_{-\mbf E^T \mbf R^{-1}\mbfbar e} .
+\end{equation}
+The optimal update is then applied to our current guess,
+\begin{equation}
+  \label{eq:apply-update}
+  \mbfbar x \leftarrow \mbfbar x + \mbfDel x^\star,
+\end{equation}
+to result in a new (hopefully better) estimate of the parameters. This process is iterated until $J(\mbf x)$ converges to a minimum\footnote{This is the barest sketch of batch nonlinear optimization. For more details on this and other related algorithms, please see \citet{nocedal06} and the excellent Appendix~6 of \citet{Hartley0001}.}.
+The resulting parameter estimate, $\mbf x^\star$, has covariance \citep{Bell9300}
+\begin{equation}
+  \label{eq:cov-ml}
+  \mbf P := \mbf H^{-1},
+\end{equation}
+which we may think of as
+\begin{equation}
+  \label{eq:cov-ml-del}
+  \mbf x = \mbf x^\star + \mbfDel x, \quad \mbfDel x \sim \mathcal{N}\left(\mbf 0, \mbf P \right). 
+\end{equation}
+
+The matrix $\mbf H$ has many names in the literature. It is often called {\em the Hessian} as it is an approximation of the Hessian of the objective function \citep{Triggs0000}:
+\begin{equation}
+  \mbf H \approx \left.\frac{\partial J^2}{\partial\mbf x \partial \mbf x^T}\right|_{\mbfbar x}
+\end{equation}
+ Sometimes $\mbf H$ is referred to as the {\em information matrix} or the {\em Fischer Information Matrix} \citep{Jauffret0700}. The vector, $\mbs \epsilon$, is called the {\em information vector}. Note also that $\mbs \epsilon$ is the negative of the gradient of the objective function:
+\begin{equation}
+  \mbs \epsilon = -\left.\pd{J}{\mbf x}\right|_{\mbfbar x}^T
+\end{equation}
+
+\subsection{Upgrade: Minimal Perturbations \label{ss:minimal-perturbations}}
+One assumption we made in the derivation above was that there were no constraints on the values that $\mbf x$ could assume. 
+%The classic results of multivariate state estimation are rooted in both probability theory and vector calculus.  
+ This presents challenges for many practical estimation problems in robotics where a particular choice of parameters to represent a state variable may have singularities or constraints. For example, 
+% %involving rotational state variables, which are not members of a vector space.   Rather, 
+ the set of rotations constitutes a {\em non-commutative group}, called $SO(3)$.  Regardless of the choice of representation (e.g., rotation matrix, unit-length quaternion, Euler angles), a rotation has exactly three degrees of freedom.  %All rotational representations involving exactly three parameters have singularities \citep{stuelpnagel64} and all representations having more than three parameters have constraints.  The question of how best to parameterize and handle rotations in state estimation is by no means new.   There are many rotational parameterizations available, each with its unique advantages and disadvantages \citep{shuster93}.  In spacecraft attitude and robotics estimation, the $4 \times 1$ unit-length quaternion (a.k.a., Euler-Rodrigues symmetric parameters), the standard $3 \times 3$ rotation matrix, and Euler angles are all common \citep{crassidis07}. 
+
+To deal with this, we may decide to use a local minimal parameterization of the perturbation. In the Kalman filtering literature, the local minimal perturbations are often called {\em error states} (c.f. \citet{Mirzaei0800}), but we will just call them {\em minimal perturbations}. Given a state variable, $\mbf x$, that has constraints that must be satisfied, we may follow this general strategy for linearization:
+\begin{enumerate}
+  \item Choose an update equation, which we will write $\mbf x \leftarrow \mbf x \oplus \mbfDel x$, where $\oplus$ represents some (possibly nonlinear) update equation with the following properties:
+    \begin{itemize}
+      \item it is {\em minimal}: the update parameter column, $\mbfDel x$, is a $D\times 1$ column where $D$ corresponds to the number of underlying degrees of freedom in the state, $\mbf x$, 
+      \item it is {\em constraint sensitive}: after the update is applied, the new value of $\mbf x$ still satisfies any constraints, and
+      \item it is {\em unconstrained}: there are no restrictions on the values $\mbfDel x$ can take and when it is small, it is far away from any singularities in the update equation.
+    \end{itemize}
+  \item Linearize the update equation about the operating point $\mbfDel x = \mbf 0$. This will usually result in greatly simplified, closed-form Jacobian matrices.
+  \item Wherever $\mbf x$ appears in an error term, substitute in the linearized update equation. Continue to linearize the expression using Taylor-series expansions of nonlinear functions.
+  \item Use the linearized error terms in the Gauss-Newton algorithm, solving for the optimal update step, $\mbfDel x^\star$. Because the update equation does not impose constraints on $\mbfDel x$, there is no need to enforce constraints in the optimization algorithm.
+  \item Update the state, $\mbf x$, using $\mbfDel x^\star$ in the full nonlinear update equation chosen in Step~1. Because the update equation was chosen to be constraint-sensitive, the new value of $\mbf x$ should still satisfy any constraints.
+\end{enumerate}
+For some concrete examples of linearizations for rotations, transformations, and homogeneous points, please see \citet[Chapter~3]{FurgaleThesis}
+\subsection{Upgrade: The Schur Complement Trick \label{ss:Schur}}
+For many problems, the linear system of equations in \eqref{eq:linear-system} is very sparse. For the specific problem of a mobile platform observing a set of landmarks, it is possible to exploit the primary sparsity of the $\mbf H$ matrix to greatly increase the computational efficiency of each iteration. The original algorithm was published in \citet{brown58}, but there is an excellent introduction in \citet[Appendix 6]{Hartley0001}. Here we will present the barest sketch.
+
+For some problems it is possible to identify a subset of the design variables such that, within the subset, no two design variables appear together in an error term. Let us then split the vector of design variables as
+\begin{equation}
+  \mbf x := \bbm \mbf x_a\\\hline \mbf x_b \ebm  = \bbm \mbf x_{a1} \\ \vdots \\ \mbf x_{aN} \\\hline \mbf x_{b1} \\ \vdots \\ \mbf x_{bM} \ebm,
+\end{equation}
+where the $M$ elements in $\mbf x_b$ are the members of this subset of variables. Ordering the variables like this allows us to partition the \eqref{eq:linear-system} as
+\begin{equation}
+  \label{eq:partitionA}
+  \underbrace{
+  \bbm 
+    \mbf U   & \mbf W \\
+    \mbf W^T & \mbf V 
+  \ebm
+  }_{\mbf H}
+  \underbrace{
+  \bbm
+    \mbfdel x_a\\
+    \mbfdel x_b
+  \ebm
+  }_{\mbfdel x}
+  =
+  \underbrace{
+  \bbm
+    \mbs \epsilon_a\\
+    \mbs \epsilon_b
+  \ebm
+  }_{\mbs \epsilon}.
+\end{equation}
+When the components in $\mbf x_b$ do not appear in any error terms together, the $\mbf V$ matrix is block diagonal. We can exploit this fact to speed up the system solution by rearranging the block matrix to decouple the solution for $\mbfdel x_a$ from the solution for $\mbfdel x_b$\footnote{To derive this, I give myself the following problem: What choice of $\mbf X$ would result in a zero in the top-right place after this matrix multiplication:
+\begin{equation*}
+  \bbm
+    \mbf 1 & \mbf X \\
+    \mbf 0 & \mbf 1
+  \ebm
+  \bbm 
+    \mbf U   & \mbf W \\
+    \mbf W^T & \mbf V 
+  \ebm
+\end{equation*}
+}:
+\begin{subequations}
+\begin{flalign}
+  \bbm
+    \mbf 1 & -\mbf W \mbf V^{-1}\\
+    \mbf 0 & \mbf 1
+  \ebm
+  \bbm 
+    \mbf U   & \mbf W \\
+    \mbf W^T & \mbf V 
+  \ebm
+  \bbm
+    \mbfdel x_a\\
+    \mbfdel x_b
+  \ebm
+  &=
+  \bbm
+    \mbf U & -\mbf W \mbf V^{-1}  \\
+    \mbf 0 & \mbf 1
+  \ebm
+  \bbm
+    \mbs \epsilon_a\\
+    \mbs \epsilon_b
+  \ebm\\
+  \bbm 
+    \mbf U - \mbf W \mbf V^{-1} \mbf W^T  & \mbf 0 \\
+    \mbf W^T & \mbf V 
+  \ebm
+  \bbm
+    \mbfdel x_a\\
+    \mbfdel x_b
+  \ebm
+  &=
+  \bbm
+    \mbs \epsilon_a - \mbf W \mbf V^{-1} \mbs \epsilon_b \\
+    \mbs \epsilon_b
+  \ebm
+\end{flalign}
+\end{subequations}
+According to \citet{Triggs0000}, $\mbf U - \mbf W \mbf V^{-1} \mbf W^T$ is called the {\em Schur complement of $\mbf U$ in $\mbf H$}. We also say that {\em $\mbfdel x_b$ is  marginalized on to $\mbfdel x_a$} as this operation is algebraically equivalent to the process of marginalizing out state variables during Kalman filtering \citep{Sibley0800}. 
+
+After rearranging the system of equations, we may then solve the reduced system,
+  \begin{equation}
+    \label{eq:reduced-system}
+    \mbf U - \mbf W \mbf V^{-1} \mbf W^T   \mbfdel x_{a} = \mbs \epsilon_a - \mbf W \mbf V^{-1} \mbs \epsilon_b,
+  \end{equation}
+for $\mbfdel x_a$. In some situations, this system of equations is also large and sparse, and so sparse matrix methods are used to solve this subproblem \citep{Davis0600}. Finally, back substitution is used to recover the components of $\mbf x_b$,
+\begin{equation}
+  \label{eq:back-substitute}
+   \mbfdel x_b = \mbf V^{-1}\left(\mbs \epsilon_b - \mbf W^T \mbfdel x_{a} \right).
+\end{equation}
+This whole process can be very fast because $\mbf V^{-1}$ is cheap to compute. When $M \gg N$ (so $\mbf x_a$ is much smaller than $\mbf x_b$) the result is that the computational complexity of solving the linear system drops from $O((M + K)^{3})$ to $O(M)$.
+
+This is implemented in the ASLam system. When a design variable is marked as ``\txt{isMarginalized}'', it will be added to the partition of $\mbf x_b$ and the Schur complement trick will be used to solve the system of equations.
+\subsection{Upgrade: Levenberg-Marquardt \label{ss:LM}}
+{\em to do...}
+\subsection{Upgrade: Robust Estimation using M-Estimators \label{ss:M-Estimators}}
+{\em to do...} For theory, see the review by \citet{Zhang9700}. 
+
+\section{The ASLam Backend}
+The ASLam backend provides facilities (classes and algorithms) to solve nonlinear least squares problems of the form in \eqref{eq:errorFunction} (restated here):
+\begin{equation*}
+  J(\mbf x) := \frac{1}{2}\sum_{n=1}^N \mbf e_n(\mbf x)^T \mbf W_{n} \mbf e_n(\mbf x)
+\end{equation*}
+ At the highest level of abstraction, such a system can be defined by a set of {\em design variables} (the $\mbf x$ variables in \eqref{eq:errorFunction}), and a set of {\em error terms} (the $\mbf e$ functions in \eqref{eq:errorFunction}). In the ASLam backend, design variables are implemented as children of the class \txt{DesignVariable}, and error terms are implemented as children of \txt{ErrorTerm}. The objective function, $J(\cdot)$, is completely specified by a set of error terms and the associated design variables. We call this an {\em optimization problem} and it is represented by the class \txt{OptimizationProblemBase} with a simple implementation in the class \txt{OptimizationProblem}. The optimizer, implemented as the class \txt{Optimizer}, takes an optimization problem and attempts to find values of the design variables that minimize the objective function. 
+
+While there are other packages that provide this functionality with roughly the same abstraction boundaries listed above, this code was written from the ground up with a couple of principles in mind:
+\begin{itemize}
+\item {\bf Keep it Simple} : The core code is designed to be simple, minimal, and minimally invasive.
+\item {\bf Do Research} : This was a big motivation. We are paid to do research and the faster we can prototype our ideas, the faster we will converge to good solutions to the research problems we are working on. The optimizer is designed to expose the inner workings of the optimization problem---the large sparse matrices involved---to enable plotting, and hand examination. By making it easy to inspect the internal state, we make it easy to do our work.
+\item {\bf Code in C++, Script in Python} : This goal is related to the previous. C++ code is fast but it can be arduous to have a compiler in the loop when parsing datasets or designing simulation experiments. By coding in C++ and exporting this code to Python, we attempt to get the best of both worlds: a fast, well-tested set of C++ classes and functions {\em and} a handy scripting language for prototyping, simulation, and plotting.
+\item {\bf Continuous Time State Estimation} : One of my current research focuses is continuous-time state estimation using B-splines or Gaussian Processes \citep{Furgale1200,Tong1200}. For state estimation in continuous time, the motion model (parametric estimation) or GP prior (Gaussian Processes) results in a large matrix that is literally just added to the matrix on the right-hand side of Gauss-Newton. No existing optimization codebase was able to support this operation.
+\end{itemize}
+
+The rest of this section will introduce each of the classes in turn and give you an idea of what it takes to implement and solve an optimization problem.
+\subsection{Design Variables \label{ss:DesignVariable}}
+Design variables represent parameters that we want to estimate. To implement a design variable, you must make a new class derived from the \txt{DesignVariable} class.
+
+\listcpp{DesignVariable.hpp}{../../aslam_backend/include/aslam/backend/DesignVariable.hpp}
+\subsubsection{What is Important in the Design Variable Interface?}
+\begin{itemize}
+\item {\bf Active: true or false} : If the \txt{isActive} flag is set to true, the design variable will be estimated in the optimization problem. Otherwise, its value will be used to compute error terms, but the value will remain unchanged during optimization.
+\end{itemize}
+\subsubsection{How Do I Implement a Design Variable?}
+To implement a design variable, you must create a class that derives from \txt{DesignVariable} and implement three functions:
+\begin{itemize}
+\item \txt{int minimalDimensionsImplementation()} : This returns the number of dimensions of the minimal perturbation.
+\item \txt{void updateImplementation(const double * dp, int size)} : This function changes the value of the design variable by converting a minimal perturbation into an update (see \eqref{eq:apply-update}). The argument, \txt{dp}, is a pointer to a double array of length \txt{size} (the size of the minimal perturbation).
+\item \txt{void revertUpdateImplementation()} : Revert the last update applied. The optimizer has no idea how the actual value of the design variable is stored so this is the responsibility of the implementer\footnote{It is possible this will change in the future but it would be replaced by something else like \txt{getValue()}/\txt{setValue()}.}.
+\end{itemize}
+\subsection{Error Terms \label{ss:ErrorTerm}}
+Error terms appear as the $\mbf e(\cdot)$ terms in our objective function. Each error term is a function of some subset of the state---some number of design variables---corresponding to a single term $\mbf e_{n}(\mbf x)^T \mbf W_n \mbf e_n(\mbf x)$ in our objective function. Error terms have a few requirements:
+\begin{itemize}
+\item they should know which design variables they are connected to,
+\item they should be able to produce and error vector, $\mbf e_n(\mbf x)$, 
+\item they should know the weighting matrix, $\mbf W_n$, and
+\item they should be able to produce Jacobian matrices that encode, to first order, how small changes in the design variables become small changes in the error vector.  
+\end{itemize}
+\listcpp{ErrorTerm.hpp}{../../aslam_backend/include/aslam/backend/ErrorTerm.hpp}
+
+Please note that the above file listing has two class definitions, \txt{ErrorTerm} and \txt{ErrorTermFs<D>}. The \txt{ErrorTerm} class is meant as a very abstract base class suitable for the representation of both vector-valued error terms (as described above) and quadratic integral terms that show up in continuous-time estimation problems (c.f. \citet{Tong1200,Furgale1200}). For most practical problems, one should derive from the class \txt{ErrorTermFs<D>}. The ``Fs'' stands for ``Fixed size'' and indicates that the error term evaluates to a vector of dimension $D$. At the time of writing, the interface for the quadratic integral terms has not been flushed out any further so the rest of this description will deal exclusively with the \txt{ErrorTermFs<D>} class. 
+
+\subsubsection{What is Important in the Error Term Interface?}
+\begin{itemize}
+\item {\bf The M-Estimator policy} : setting the M-Estimator policy causes the error term to use a robust error function instead of the normal squared error term. The implemented error terms are in the file {MEstimatorPolicies.hpp} and the M-Estimation interface is described in \ref{ss:M-Estimators}. For a review of M-Estimators, please see \citet{Zhang9700}.
+\item {\bf The Jacobian Container} : The Jacobian Container abstraction is explained in Section~\ref{ss:JacobianContainer}.
+\end{itemize}
+
+\subsubsection{How Do I Implement a Error Term?}
+To implement an error term representing an $\mbf e_n(\mbf x)$ of dimension $D$, create a class deriving from \txt{ErrorTermFs<D>} and implement the following functions:
+\begin{itemize}
+\item \txt{double evaluateErrorImplementation()} : This function must evaluate the error vector and fill in \txt{\_error}, \txt{\_invR}. It should return the weighted squared error $\mbf e_n(\mbf x)^T \mbf R^{-1} \mbf e_n(\mbf x)$.
+\item \txt{void evaluateJacobiansImplementation()} : This function must fill in the Jacobian Container to hold the Jacobian matrices associated with each error term.
+\end{itemize}
+
+\subsection{Jacobian Container \label{ss:JacobianContainer}}
+The Jacobian container holds a set of Jacobians associated with an error term. Each individual Jacobian matrix $\mbf E_{n,k}$ encodes, to first order, how small changes in the parameter, $\mbf x_k$, become small changes in $\mbf e_n(\mbf x)$,
+\begin{equation}
+  \label{eq:jacobian-container}
+  \mbf e_n(\mbf x) \approx \mbf e_n(\mbfbar x) + \mbf E_{n,1}\mbfdel x_{1} + \dots + \mbf E_{n,K} \mbfdel x_{K},
+\end{equation}
+where
+\begin{equation}
+  \label{eq:jacobian-container-mx-definition}
+  \mbf E_{n,k} := \left.\pd{\mbf e_n(\mbf x)}{\mbf x_k}\right|_{\mbfbar x}.
+\end{equation}
+Note that all of the $\mbf E_{n,k}$ matrices will have the same number of rows (the dimension of $\mbf e_n(\mbf x)$) and each will have the number of columns equal to the dimension of minimal perturbation of $\mbf x_k$. 
+\listcpp{JacobianContainer.hpp}{../../aslam_backend/include/aslam/backend/JacobianContainer.hpp}
+
+\subsubsection{What is Important in the Jacobian Container Interface?}
+The interface of the Jacobian container was built with three things in mind:
+\begin{enumerate}
+\item Easy access to the Jacobians stored in the container. This is mostly for debugging and producing plots of sparsity for papers.
+\item A reference implementation of how to add weighted Jacobians to the Hessian matrix, $\mbf H$. This is implemented in the recursive function \txt{buildHessianBlock()}.
+\item Support for {\em expressions}---an abstraction of a linearized function of a set of design variables. Due to time constraints, the first version of this manual won't contain an introduction to expressions.
+\end{enumerate}
+To use the Jacobian Container in an Error Term (A child of \txt{ErrorTermFs<D>} as described in Section~\ref{ss:ErrorTerm}), simply compute all of the Jacobians with respect to small changes in design variables and call \txt{\_jacobians.add( designVariable, Jacobian )} for each. Note that if the design variable is not active (See Section~\ref{ss:DesignVariable}), the Jacobian will ignore the added value.
+
+\subsection{Optimization Problems \label{ss:OptimizationProblem}}
+An optimization problem is a container to store all of the basic components of a nonlinear least squares optimization problem: error terms and design variables. The class \txt{OptimizationProblemBase} defines an abstract interface that describes an optimization problem. When using the ASLam backend, it is completely sufficient to implement this interface without giving ownership of design variables to the backend.
+
+\listcpp{OptimizationProblemBase.hpp}{../../aslam_backend/include/aslam/backend/OptimizationProblemBase.hpp}
+
+There is also a simple implementation of the optimization problem that completely fills in the interface (albeit not very efficiently). This class is called \txt{OptimizationProblem} and it allows a user to pass in design variables and error terms that specify an optimization problem.
+
+\listcpp{OptimizationProblem.hpp}{../../aslam_backend/include/aslam/backend/OptimizationProblem.hpp}
+
+\subsubsection{What is Important in the Optimization Problem Interface?}
+Design variables and error terms that define an optimization problem are referenced {\em by pointer}. Therefore, these objects must exist for the duration of an optimization solution. There are several ways to accomplish this, but the easiest is to allocate the objects on the heap (using {\em new}) and store the memory in a \txt{boost::shared\_ptr}. The shared pointer can then be passed to the optimization problem where it will surely stay in scope as long as needed.
+
+\subsubsection{How Do I Implement a Optimization Problem?}
+To implement an optimization problem, derive a class from \txt{OptimizationProblemBase} and implement the following functions\footnote{Warning: this interface may change in the future. Currently it uses indexing and I think it would be a lot easier if it used iterators. It's not currently clear to me how to do this generically. If you are reading this and you think the answer is simple, let's have a chat and implement your idea.}:
+\begin{itemize}
+      \item \txt{size\_t numDesignVariablesImplementation() const} : The number of design variables involved in this optimization problem. Let this value be $K$.
+      \item \txt{DesignVariable * designVariableImplementation(size\_t k)} : Get design variable $k$ such that $0 \le k < K$.
+      \item \txt{const DesignVariable * designVariableImplementation(size\_t k) const} : Get design variable $k$ such that $0 \le k < K$.
+      \item \txt{size\_t numErrorTermsImplementation() const} : The number of error terms in this optimization problem. Let this value be $N$.
+      \item \txt{ErrorTerm * errorTermImplementation(size\_t n)} : Get error term $n$ such that $0 \le n < N$.
+      \item \txt{const ErrorTerm * errorTermImplementation(size\_t n) const} : Get error term $n$ such that $0 \le n < N$.
+      \item \txt{void getErrorsImplementation(const DesignVariable * dv, std::set<ErrorTerm *> \& outErrorSet)} : Add all of the error terms associated with the design variable \txt{dv} to the set \txt{outErrorSet}
+\end{itemize}
+
+\subsection{The Optimizer \label{ss:Optimizer}}
+Once you have defined some design variables and error terms and build up an optimization problem, it is is very straightforward to use the optimizer. The optimizer can be initialized with some options that are used to guide the optimization process. There are two versions of the optimizer. We currently reccomend using the Optimizer2
+\listcpp{Optimizer2Options.hpp}{../../aslam_backend/include/aslam/backend/Optimizer2Options.hpp}
+
+The basic optimizer interface is very simple but it includes functionality to get the internal matrices and compute covariances after optimization is completed.
+\listcpp{Optimizer2.hpp}{../../aslam_backend/include/aslam/backend/Optimizer2.hpp}
+
+\subsubsection{How Do I Use the Optimizer?}
+This is easy:
+\begin{enumerate}
+\item build an optimization problem from some design variables and error terms
+\item create an optimizer initialized with some optimizer options
+\item pass the optimization problem to the optimizer
+\item call \txt{optimizer.optimize()}
+\end{enumerate}
+The next section provides a full example of how to do this.
+\section{A Tutorial}
+This section will provide a tutorial to help you get started using the ASLam backend. Here we will implement a very simple nonlinear optimization problem. Imagine a cart is traveling along the x-axis taking range measurements to a wall. Our range sensor has a strange nonlinear measurement model,
+\begin{equation}
+  \label{eq:range-nonlinear}
+  y_k = \frac{1}{w - x_k} + n_k,\;\;\;\;n_k \sim \mathcal{N}(0, \sigma_{n}^2),
+\end{equation}
+where $y_k$ is the measurement at time $k$, $w$ is the position of the wall, $x_k$ is the true position of the cart at time $k$, and $n_k$ is zero-mean, Gaussian noise. Assume we have access to the cart's control signal, $u_k$, at each time $k$. The motion model of the cart is
+\begin{equation}
+  \label{eq:motion-model}
+  x_{k+1} = x_k + u_k + w_k,\;\;\;\; w_k \sim \mathcal{N}(0, \sigma_{w}^2),
+\end{equation}
+where $w_k$ is zero-mean, Gaussian noise. Finally, we assume we have some initial belief for the position of the cart,
+\begin{equation}
+  \label{eq:cart-belief}
+  x_0 \sim \mathcal{N}(\hat x_0, \sigma_{x_0}^2).
+\end{equation}
+Given a set of measurements, $\mbf y = \bbm y_1 & \dots & y_K \ebm^T$, a set of control inputs, $\mbf u = \bbm u_1 & \dots & u_K \ebm^T$, an initial state $\hat x_0$, and the variances, $\sigma_w$, $\sigma_n$, and $\sigma_{x_0}$, our goal is to estimate the states at all times, $\mbf x = \bbm x_0 & \dots & x_K \ebm$, and the wall position, $w$.
+\subsection{Installation}
+The current version of ASLam is not dependent on ROS packages, but it does use the ROS build system and the Schweizer Messer library. Instructions for installing ROS electric are available here: \surl{http://www.ros.org/wiki/electric/Installation/Ubuntu}. Once that is installed, please install the Schweizer Messer stack from \surl{https://github.com/furgalep/Schweizer-Messer} and the aslam stack from \surl{svn+ssh://svn.aslforge.ethz.ch/svnroot/vi-slam-sensor/A-SLAM/stacks/aslam}.
+
+In this tutorial we will implement an optimization problem from start to finish. The complete code of this implementation is available in the ASLam stack in the package \txt{aslam\_backend\_tutorial}.
+
+Throughout this tutorial, we will provide example commands that must be typed in a terminal. We will use this format:
+\begin{lstlisting}
+> type this at a terminal \
+  the command continues on this line
+these lines are expected output
+from the command
+\end{lstlisting}
+The \txt{\textgreater} character represents the command prompt and should not be typed. Command lines too long for one line end in a \txt{ \textbackslash } and are continued on the next line. Lines that are not wrapped and do not start with a \txt{\textgreater} represent output.
+
+\subsection{Create a Package}
+The first step is to create a new ROS package to hold our code\footnote{We don't actually depend on ROS packages but the ROS build system is simple and elegant and handles dependencies and helps easily get code into Python.}. 
+\begin{lstlisting}
+ > roscreate-pkg aslam_backend_tutorial
+Created package directory /home/username/ros/aslam/aslam_backend_tutorial
+Created package file /home/username/ros/aslam/aslam_backend_tutorial/Makefile
+Created package file /home/username/ros/aslam/aslam_backend_tutorial/manifest.xml
+Created package file /home/username/ros/aslam/aslam_backend_tutorial/CMakeLists.txt
+Created package file /home/username/ros/aslam/aslam_backend_tutorial/mainpage.dox
+
+Please edit aslam_backend_tutorial/manifest.xml and mainpage.dox to finish creating your package
+> mkdir -p aslam_backend_tutorial/include/aslam/backend
+> mkdir aslam_backend_tutorial/src
+> mkdir aslam_backend_tutorial/test
+\end{lstlisting}
+Now open the file \txt{aslam\_backend\_tutorial/manifest.xml} for editing. The ROS \rospack{Manifest} stores dependencies and some other good things for this package. Here we add a dependency on the backend:
+\listxmlrange{package.xml}{../../aslam_backend_tutorial/package.xml}{12}{13}
+The ROS build system now pulls in all dependencies of the backend.
+\subsection{Create Design Variables}
+Here we have two types of variable that we are estimating: cart positions and wall positions. However, in this example, they are both simple unconstrained scalar variables so it should suffice to implement a single design variable type. The header is simple:
+\listcpp{include/aslam/backend/ScalarDesignVariable.hpp}{../../aslam_backend_tutorial/include/aslam/backend/ScalarDesignVariable.hpp}
+The implementation is equally simple:
+\listcpp{src/ScalarDesignVariable.cpp}{../../aslam_backend_tutorial/src/ScalarDesignVariable.cpp}
+\subsection{Create Error Terms}
+The problem defined in this section requires three error terms:
+\begin{enumerate}
+\item an observation model,
+\item a motion model, and
+\item a prior
+\end{enumerate}
+The observation model implements an error based on \eqref{eq:range-nonlinear},
+\begin{flalign}
+  \label{eq:obs-error}
+  e_{y,k} &:= y_k - \frac{1}{w - x_k},\\
+  \label{eq:lin-obs-error}
+  &\approx y_k - \frac{1}{\bar w - \bar x_k} + \bbm -1/(\bar w - \bar x_k)^2 & 1/(\bar w - \bar x_k)^2 \ebm \bbm \delta x_k\\\delta w \ebm,
+\end{flalign}
+where \eqref{eq:obs-error} is the error term and \eqref{eq:lin-obs-error} is the error linearized about the current guess.
+\listcpp{include/aslam/backend/ErrorTermObservation.hpp}{../../aslam_backend_tutorial/include/aslam/backend/ErrorTermObservation.hpp}
+The cpp file implements the error function and linearized error:
+\listcpp{src/ErrorTermObservation.cpp}{../../aslam_backend_tutorial/src/ErrorTermObservation.cpp}
+
+The motion model error is similarly defined from \eqref{eq:motion-model},
+\begin{flalign}
+  \label{eq:motion-error}
+  e_{u,k} &:= x_{k+1} - x_{k} - u_k\\
+  \label{eq:linearized-motion-error}
+  & \approx \bar x_{k+1} - \bar x_{k} - u_k + \bbm -1 & 1 \ebm \bbm \delta x_k \\ \delta x_{k+1}\ebm
+\end{flalign}
+\listcpp{include/aslam/backend/ErrorTermMotion.hpp}{../../aslam_backend_tutorial/include/aslam/backend/ErrorTermMotion.hpp}
+The cpp file implements the error function and linearized error:
+\listcpp{src/ErrorTermMotion.cpp}{../../aslam_backend_tutorial/src/ErrorTermMotion.cpp}
+
+The prior error is also straightforward,
+\begin{flalign}
+  \label{eq:prior-error}
+  e_{x_0} & := x_0 - \hat x_0\\
+  & \approx \bar x_0 - \hat x_0 + \bbm 1 \ebm \bbm \delta x_0 \ebm
+\end{flalign}
+\listcpp{include/aslam/backend/ErrorTermPrior.hpp}{../../aslam_backend_tutorial/include/aslam/backend/ErrorTermPrior.hpp}
+The cpp file implements the error function and linearized error:
+\listcpp{src/ErrorTermPrior.cpp}{../../aslam_backend_tutorial/src/ErrorTermPrior.cpp}
+\subsection{Edit the CMakeLists.txt File}
+Once the error terms are implemented we have to tell the ROS build system to build them. To do this, we edit the \txt{CMakeLists.txt} file:
+\listcpprange{CMakeLists.txt}{../../aslam_backend_tutorial/CMakeLists.txt}{32}{38}
+Now we can go to the package directory and build the package:
+\begin{lstlisting}
+> roscd aslam_backend_tutorial
+> rosmake
+\end{lstlisting}
+Rosmake should build all of the dependencies of this package. Hopefully everything works. Warning: the \txt{numpy\_eigen} library can take over an hour to build. Go get a coffee. Stare out the window. Think about what it means to lead a good life.
+\subsection{Create Some Test Cases}
+It is easy to get error terms or Jacobians wrong so it is useful to test them against finite differences. First, create a test-case folder
+\begin{lstlisting}
+> roscd aslam_backend_tutorial
+> mkdir test
+\end{lstlisting}
+and add a gtest module file.
+\listcpp{test/test\_main.cpp}{../../aslam_backend_tutorial/test/test_main.cpp}
+Now create a test file and add some unit tests (using the handy ErrorTermTestHarness).
+\listcpp{test/ErrorTests.cpp}{../../aslam_backend_tutorial/test/ErrorTests.cpp}
+To build and run the test, add some lines to the build script
+\listcpprange{CMakeLists.txt}{../../aslam_backend_tutorial/CMakeLists.txt}{61}{67}
+then type the following at a terminal:
+\begin{lstlisting}
+> roscd aslam_backend_tutorial
+> make test
+\end{lstlisting}
+\subsection{Create a Python Wrapper}
+Here we show how to export the error terms and design variables to Python. First, add a dependency on the \txt{numpy\_eigen} package from the Schweizer Messer library and the \txt{aslam\_python} library:
+\listxmlrange{package.xml}{../../aslam_backend_tutorial/package.xml}{14}{16}
+Create a python directory in the tutorial package
+\begin{lstlisting}
+> roscd aslam_backend_tutorial
+> mkdir -p python/aslam_backend_tutorial
+\end{lstlisting}
+Now add a file called \txt{python/aslam\_backend\_tutorial/\_\_init\_\_.py} and add the following contents:
+\listcpp{python/aslam\_backend\_tutorial/\_\_init\_\_.py}{../../aslam_backend_tutorial/python/aslam_backend_tutorial/__init__.py}
+This is the file that tells python what to do when this module is imported. For more information of python modules, read \href{http://docs.python.org/tutorial/modules.html}{the manual}.
+Adding an ``export'' tag for python in the manifest file will let us use \rospack{roslib} to find and import the python library.
+\listxmlrange{package.xml}{../../aslam_backend_tutorial/package.xml}{17}{21}
+Add some lines to the \txt{CMakeLists.txt} file to compile the python module. The \txt{numpy\_eigen} library has a nice cmake macro to make this easy:
+\listcpprange{CMakeLists.txt}{../../aslam_backend_tutorial/CMakeLists.txt}{40}{49}
+And finally, we can edit the \txt{src/python\_module.cpp} file to build the export module:
+\listcpp{src/python\_module.cpp}{../../aslam_backend_tutorial/src/python_module.cpp}
+\subsection{Build an Optimization Problem and Go!}
+In this section, we provide a C++ and a python implementation to build and solve this optimization problem.
+\subsubsection{C++}
+First, add an example file to the cmake build script.
+\listcpprange{CMakeLists.txt}{../../aslam_backend_tutorial/CMakeLists.txt}{52}{59}
+Next, implement the example.
+\listcpp{src/example.cpp}{../../aslam_backend_tutorial/src/example.cpp}
+Now you can run the example
+\begin{lstlisting}
+> roscd aslam_backend_tutorial
+> ./bin/example 1000
+\end{lstlisting}
+\subsubsection{Python}
+The Python example is a direct port of the C++ example. Please compare them to get a sense of the difference in syntax
+\listpython{python\_example/example.py}{../../aslam_backend_tutorial/python_example/example.py}
+I like to run these things within ipython as it has nice facilities for code completion:
+\begin{lstlisting}
+> roscd aslam_backend_tutorial/python_example
+> ipython --pylab
+Python 2.7.1 (r271:86832, Jul 31 2011, 19:30:53) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 0.11 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+Welcome to pylab, a matplotlib-based Python environment [backend: MacOSX].
+For more information, type 'help(pylab)'.
+
+In [1]: run example.py
+\end{lstlisting}
+\bibliographystyle{apalike}
+\bibliography{refs}
+
+\end{document}
