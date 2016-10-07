@@ -1,0 +1,22 @@
+<package>
+<name>bsplines</name>
+  <description>
+     bsplines
+  </description>
+  <maintainer email="paul.furgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <version>0.0.1</version>
+  <license>BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+
+  <build_depend>sm_common</build_depend>
+  <build_depend>sm_timing</build_depend>
+  <build_depend>sm_eigen</build_depend>
+  <build_depend>sm_kinematics</build_depend>
+  <build_depend>sparse_block_matrix</build_depend>
+  <build_depend>eigen_catkin</build_depend>
+  <build_depend>suitesparse</build_depend>
+
+</package>
+
+
