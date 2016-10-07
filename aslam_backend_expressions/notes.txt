@@ -1,0 +1,9 @@
+
+PTF, April 27, 2012: As far as I can see, the only way to get templated functions for 
+
+template<typename Derived>
+void ExpressionNode::evaluateJacobian(JacobianContainer J, const Eigen::MatrixBase<Derived> & applyChainRule) 
+
+is to implement all expression nodes in one class and use a switch statement in "evaluate()" and in "evaluateJacobian()"
+
+The switch is equivalent to the virtual function call but it will allow us to have templated functions. Not ideal but it should allow fixed-sized matrices.

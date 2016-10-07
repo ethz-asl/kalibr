@@ -1,0 +1,950 @@
+\documentclass[11pt,a4,oneside]{article}
+% Packages
+%\usepackage{caption}
+\usepackage{times}
+\usepackage{amssymb,amsfonts,amsmath,amscd}
+\usepackage[usenames]{color}
+\usepackage[pdftex,
+            breaklinks=true,
+            colorlinks=true,
+            citecolor=Gray,
+            linkcolor=Gray,
+            urlcolor=Gray
+           ]{hyperref}
+\definecolor{Gray}{rgb}{0.1,0.1,0.35}
+\usepackage{url}
+\usepackage[pdftex]{graphicx}
+\usepackage[loose]{subfigure}
+\usepackage{fancyhdr}
+\usepackage{natbib}
+\usepackage[printonlyused]{acronym}
+% Set the page geometry
+\usepackage[headheight=1cm,
+            headsep=0.6cm,
+            hmargin={2cm,2cm},
+            vmargin={2cm,2cm},
+            includeheadfoot%
+           ]{geometry}
+%\usepackage{geometry}
+
+\newcommand{\ignore}[1]{}
+% Set the caption labeling font
+%\renewcommand{\captionlabelfont}{\sf\bfseries}
+
+\input{notation-math-defs}
+
+% Include the common figures path.
+\graphicspath{{figs/}{../common/figs/}}
+
+
+% - User Input --------------------------------------------------
+%
+% Insert the program, document title, author, 
+\newcommand{\ASLprogram}{N/A}
+\newcommand{\ASLtitle}{ Transformations, Points, and Uncertainty }
+\newcommand{\ASLdocument}{Doc NT-2012-PTF001}
+\newcommand{\ASLrevision}{Rev: 0.1}
+\newcommand{\ASLauthor}{Paul Furgale}
+\newcommand{\ASLreviewer}{}
+
+% PDF setup
+\hypersetup{%
+    pdftitle={\ASLdocument: \ASLtitle},
+    pdfauthor={\ASLauthor},
+    pdfkeywords={},
+    pdfsubject={\ASLprogram},
+    pdfstartview={},
+    urlcolor=black,
+    linkcolor=black,
+}%
+
+% ---------------------------------------------------------------
+\title{\sf\bfseries \ASLtitle }
+
+\author{ Paul Furgale \\
+        \small ETH Z\"{u}rich\\
+        \small Autonomous Systems Lab\\
+       \small \texttt{<paul.furgale@mavt.ethz.ch>}
+       }
+\date{}
+% --------------------------------------------------------------
+\begin{document}
+
+% Define the basic page style
+\fancypagestyle{plain}{%
+    \fancyhf{}%
+    \fancyfoot[C]{}%
+    \fancyhead[R]{\begin{tabular}[b]{r}\small\sf \ASLdocument\\
+        \small\sf\today \end{tabular}}%
+    \fancyhead[L]{\includegraphics[height=1.2cm]%
+        {asl_black_logo.pdf} \begin{tabular}[b]{l}\small\sf{ETH Z\"{u}rich} \\ \small\sf{Autonomous Systems Lab} \end{tabular}}%
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}}
+% Set the page style for the document
+\pagestyle{fancy}
+% Set the page headers and footers.
+\lhead{ \includegraphics[height=1cm]%
+        {asl_black.pdf} \begin{tabular}[b]{l}\small\sf{ETH Z\"{u}rich} \\ \small\sf{Autonomous Systems Lab} \end{tabular}}
+\rhead{ \begin{tabular}[b]{r}\small\sf \ASLdocument\\
+        \small\sf\today \end{tabular}}
+\chead{}
+\lfoot{}
+\cfoot{\thepage}
+\rfoot{}
+
+
+% ---------------------------------------------------------------
+  \begin{titlepage}
+    \vspace*{\fill}
+    \begin{center}
+      {\LARGE\sf\bfseries\ASLtitle}\\[0.5cm]
+      {\large Paul Furgale \\
+        \small ETH Z\"{u}rich\\
+        \small Autonomous Systems Lab\\
+        \small \texttt{<paul.furgale@mavt.ethz.ch>}}\\[0.4cm]
+      \abstract { In this note, we derive some results regarging
+        rotations, transformation matrices, and homogeneous points
+        needed for estimation. Some of this is copied directly from
+        \citet{FurgaleThesis}. Most of it will be stated without
+        derivation or proof. Detailed derivations for 90\% of the
+        results in this note are available in \citet{FurgaleThesis}
+        and \citet{Barfoot1100}. Eventually this note should include
+        and appendix with a cheat sheet and references to the aslam
+        code.  }
+    \end{center}
+    \vspace*{\fill}
+  \end{titlepage}
+\vspace*{2cm}
+
+\tableofcontents
+\clearpage
+\input{notation}
+\clearpage
+\section{Linearizing Expressions}
+In this section we present some results for linearizing expressions involving quantities of interest in robotics.
+\subsection{Linearizing Expressions Involving Rotation Matrices \label{s:Rot}}
+The main results from \citet{FurgaleThesis} regarding rotation matrices will be restated here.
+
+Given a $3 \time 1$ representation of rotation with parameters, $\mbs \theta$, and a method of building a rotation matrix, $\mbf C = \mbc C(\mbs \theta)$, perturbations to $\mbs \theta$ may be written, to first order as
+\begin{equation}
+  \label{eq:perturb-rotation}
+  \mbc C(\mbsbar \theta + \mbsdel \theta) \approx \left(\mbf 1 - (\mbf S(\mbsbar \theta) \mbsdel \theta )^\times \right) \mbc C( \mbsbar \theta ),
+\end{equation}
+where $\mbf S(\cdot)$ is the well-known matrix relating parameter rates to angular velocity\footnote{Please see \citet{Hughes8600}, Table 2.3 for the equations for $\mbf S(\cdot)$ and $\mbf S(\cdot)^{-1}$ for many popular rotation parameterizations}. For convenience, we make the definitions
+\begin{equation}
+  \label{eq:defn-cbar}
+  \mbfbar C := \mbc C(\mbsbar \theta),
+\end{equation}
+\begin{equation}
+  \label{eq:defn-dphi-eq-Sdt}
+  \mbsdel \phi := \mbf S(\mbsbar \theta) \mbsdel \theta,
+\end{equation}
+and
+\begin{equation}
+  \label{eq:defn-rot-av-form}
+  \mbf C \approx \left(\mbf 1 - \mbsdel \phi^\times \right)\mbfbar C
+\end{equation}
+I like to call \eqref{eq:defn-rot-av-form} the {\em angular-velocity form} of the perturbation. Note that
+\begin{equation}
+  \label{eq:defn-rot-av-form}
+  \mbf C^{-1} \approx \mbfbar C^{-1}\left(\mbf 1 - \mbsdel \phi^\times \right).
+\end{equation}
+
+
+If we use \eqref{eq:perturb-rotation} to linearize expressions for Gauss-Newton, it is usual to store the parameters, $\mbsbar \theta$, and update them each iteration using
+\begin{equation}
+  \label{eq:update-theta}
+  \mbsbar \theta \leftarrow \mbsbar \theta + \mbsdel \theta.
+\end{equation}
+If we use \eqref{eq:defn-rot-av-form} to linearize expressions for Gauss-Newton, it is usual to store the rotation matrix, $\mbfbar C$, and update it each iteration using
+\begin{equation}
+  \label{eq:update-C}
+  \mbfbar C \leftarrow \mbc C(\mbsdel \phi) \mbfbar C.
+\end{equation}
+After convergence of Gauss-Newton, we may derive a $3 \times 3$ covariance representing the uncertainty of our estimate \citep{Bell9300}. The uncertainty may be thought of as defining a zero-mean Gaussian about the perturbation. In the parameterized case, this means that
+\begin{equation}
+  \label{eq:gaussian-rot-parameters}
+  \mbs \theta = \mbsbar \theta + \mbsdel \theta, \;\;\;\;\mbsdel \theta \sim \mathcal{N}(\mbf 0, \mbf P_{\theta}),
+\end{equation}
+where $\mbf P_{\theta}$ is the covariance taken from the estimator. In angular-velocity form, this becomes
+\begin{equation}
+  \label{eq:gaussian-av-form}
+  \mbf C = \mbc C(\mbsdel \phi) \mbfbar C \approx \left( \mbf 1 - \mbsdel \phi^\times\right) \mbfbar C, \;\;\;\;\mbsdel \phi \sim \mathcal{N}(\mbf 0, \mbf P_{\phi}),
+\end{equation}
+where $\mbf P_{\phi}$ is the covariance taken from the estimator. These equations become important when using linearized error propagation to transform the uncertainty through nonlinear equations. We will see examples later in this note.
+
+Please note that we have not specified the parameterization used for $\mbs \theta$. The statements above are true for any $3 \times 1$ parameterization of a rotation, provided we know the formulas for $\mbc C(\cdot)$ and $\mbf S(\cdot)$.
+
+
+
+\subsection{Linearizing Expressions Involving Quaternions\label{s:quat}}
+
+In what is to follow, a {\em quaternion} will be a $4 \times 1$
+column that may be written as
+\begin{equation}
+\mbf{q} := \bbm \mbs{\ep} \\ \eta \ebm,
+\end{equation}
+where $\mbs{\ep}$ is a $3 \times 1$ and $\eta$ is a scalar.  The
+quaternion {\em left-hand compound} operator, $+$, and the {\em right-hand
+compound} operator, $\oplus$, will be defined as
+\begin{equation}
+  \label{eq:quatplus}
+\qc{\mbf{q}} := \bbm \eta\mbf{1} - \mbs{\ep}^\times & \mbs{\ep} \\
+-\mbs{\ep}^T & \eta \ebm \mbox{~~and~~} \qo{\mbf{q}}
+:= \bbm \eta\mbf{1} + \mbs{\ep}^\times & \mbs{\ep} \\
+-\mbs{\ep}^T & \eta \ebm.
+\end{equation}
+Under these definitions, the {\em multiplication} of quaternions, $\mbf{q}$ and $\mbf{r}$, which is typically written as $\mbf{q} \otimes \mbf{r}$ \citep{shuster93}, may be written equivalently as either
+\begin{equation}
+  \label{eq:quat-plusoplus}
+\qc{\mbf{q}} \mbf{r} \mbox{~~or~~} \qo{\mbf{r}}\mbf{q},
+\end{equation}
+which are both products of a $4 \times 4$ matrix with a $4 \times 1$ column. 
+The {\em conjugate} operator for quaternions, $-1$, will be defined by
+\begin{equation}
+\qi{\mbf{q}} := \bbm -\mbs{\ep} \\ \eta \ebm.
+\end{equation}
+The set of quaternions forms a {\em non-commutative group} under both the $+$ and $\oplus$ operations \citep{shuster93}.  
+%Many of the identities above are prerequisites to showing this fact.  
+The {\em identity element} of this group,
+$\mbs{\iota} := \bbm 0 & 0 & 0 & 1 \ebm^T$, is such that
+\begin{equation}
+\qc{\mbs{\iota}} = \qo{\mbs{\iota}} = \mbf{1},
+\end{equation}
+where $\mbf{1}$ is the $4 \times 4$ identity matrix. None of the preceding definitions require the quaternions to be of unit length.
+However, given two unit-length quaternions, $\mbf q$ and $\mbf r$, 
+\begin{equation}
+  \label{eq:unit-len}
+  \mbf q^T \mbf q = 1, \quad \mbf r^T \mbf r = 1,
+\end{equation}
+both the $+$ and $\oplus$ operators preserve the unit length:
+\begin{equation}
+  \label{eq:unit-length}
+  \left(\qc{\mbf q}\mbf r \right)^T\left(\qc{\mbf q}\mbf r\right) = 1, \quad   \left(\qo{\mbf q}\mbf r \right)^T\left(\qo{\mbf q}\mbf r\right) = 1
+\end{equation}
+To build a rotation matrix from a unit-length quaternion, we use
+\begin{equation}
+  \label{eq:quat2r}
+  \bbm \mbc C(\mbf q) & \mbf 0 \\
+       \mbf 0^T       &   1 \ebm
+ = \mbf q^{+}\mbf {q^{-1}}^{\oplus} = {\mbf q^{-1}}^{\oplus}\mbf q^{+} = {\mbf q^\oplus}^T \mbf q^{+}.
+\end{equation}
+We may build a unit-length quaternion from a $3\times 1$ column of parameters using
+\begin{equation}
+  \label{eq:quat-build}
+  \mbs \rho(\mbs \vartheta) := 
+    \bbm 
+      \sin\tfrac{\varphi}{2} \mbf a \\
+      \cos\tfrac{\varphi}{2}
+    \ebm.  
+\end{equation}
+This function has no singularity at $\mbs \vartheta = \mbf 0$ as ${\displaystyle \lim_{\varphi\rightarrow 0}} \frac{1}{\varphi}\sin\left( \tfrac{\varphi}{2} \right) = \tfrac{1}{2}$. \citet{Grassia9800} provides a method of computing this term that is accurate to machine precision. Let $\epsilon$ be the smallest increment represented by your floating point type, then
+\begin{equation}
+  \frac{1}{\varphi}\sin\left( \tfrac{\varphi}{2} \right) = 
+    \begin{cases}
+       \tfrac{1}{2} + \tfrac{\varphi^2}{48}    & \text{if $\varphi \le \sqrt[4]{\epsilon}$},\\
+       \frac{1}{\varphi}\sin\left(\tfrac{\varphi}{2}\right) & \text{otherwise}.
+    \end{cases}
+\end{equation}
+
+Unit-length quaternions also have an $\mbf S(\cdot)$ matrix and an angular velocity form. About the nominal value, $\mbfbar q = \bbm \mbsbar \epsilon^T & \bar \eta \ebm^T$, 
+\begin{equation}
+  \label{eq:quat-S-matrix}
+  \mbf S(\mbfbar q) := 
+    2\bbm
+       \bar \eta \mbf 1 - \mbsbar \epsilon^\times & -\mbsbar \epsilon
+    \ebm,
+\end{equation}
+which is a $3 \times 4$ matrix. In this case, the $\mbf S(\cdot)$ matrix relates changes expressed in all four components of the quaternion, $\mbfdel q = \bbm \mbsdel \epsilon^T & \delta \eta \ebm^T$, to the angular velocity form such that the equivalent of \eqref{eq:defn-dphi-eq-Sdt} still holds: 
+\begin{equation}
+  \label{eq:quat-S}
+  \mbsdel \phi = \mbf S(\mbfbar q) \mbfdel q
+\end{equation}
+This will become important later. In angular velocity form, perturbations may be written as
+\begin{equation}
+  \label{eq:quat-av-form}
+  \mbf q = \mbs \rho(\mbsdel\phi)^{+}\mbfbar q \approx \left(\mbs \iota + \mbf V \mbsdel \phi \right)^{+}\mbfbar q,
+\end{equation}
+where
+\begin{equation}
+  \label{eq:def-V}
+  \mbf V = \bbm \tfrac{1}{2} \mbf 1\\\mbf 0^T\ebm
+\end{equation}
+is a $4 \times 3$ matrix. Note also that
+\begin{equation}
+  \label{eq:inv-quat-av-form}
+  \mbf q^{-1} = \left(\mbs \rho(\mbsdel\phi)^{+}\mbfbar q\right)^{-1} \approx \left(\mbs \iota - \mbf V \mbsdel \phi \right)^{\oplus}\mbfbar q^{-1}.
+\end{equation}
+
+When estimating rotations represented as unit-length quaternions using Gauss-Newton, we linearize functions using the angular velocity form, \eqref{eq:quat-av-form}. In this equation, $\mbsdel \phi$, is the usual $3 \times 1$ perturbation. During optimization, we store the current guess as a unit-length quaternion, $\mbfbar q$, and update it each iteration using
+\begin{equation}
+  \label{eq:update-quat}
+  \mbfbar q \leftarrow \mbs \rho(\mbsdel \phi) \mbfbar q.
+\end{equation}
+After convergence of Gauss-Newton, the uncertainty of our estimate may be thought of as defining a zero-mean Gaussian about $\mbsdel \phi$,
+\begin{equation}
+  \label{eq:gaussian-av-form}
+  \mbf q = \mbs \rho(\mbsdel \phi)^{+} \mbfbar q \approx \left(\mbs \iota + \mbf V \mbsdel \phi\right)^{+}\mbfbar q,\;\;\;\;\mbsdel \phi \sim \mathcal{N}(\mbf 0, \mbf P_{\phi}),
+\end{equation}
+where $\mbf P_{\phi}$ is the covariance taken from the estimator. 
+
+\subsection{Linearlizing Expressions Involving Transformation Matrices\label{s:Tx}}
+The main results from \citet{FurgaleThesis} regarding transformation matrices will be restated here.
+
+%\subsection{Homogeneous Coordinates \label{ss:homogeneous}}
+The projective space, $\mathbb{P}^3$, is the set of equivalence classes of vectors in $\mathbb{R}^4 - \{\mbf 0\}$, under the equivalence relationship $\mbfh v \equiv s \mbfh v$, for a nonzero scalar, $s$, and a $4 \times 1$ column, $\mbfh v$ \citep{Hartley0001,Faugeras0100}. Informally, $\mathbb{P}^3$ can be thought of as the set of lines through the origin of $\mathbb{R}^4$; each element of $\mathbb{P}^3$ is an infinite subset of $\mathbb{R}^4$, and given any point in $\mathbb{R}^4 - \{\mbf 0\}$, it maps to a specific element in $\mathbb{P}^3$.
+
+Given the coordinates of a point in three-dimensional Euclidean space, $\mbf v  =: \bbm x & y & z\ebm^T\in \mathbb{R}^3$, any vector $\mbfh v  =: \bbm v_1 & v_2 & v_3 & v_4\ebm^T \in \mathbb{P}^3$ which satisfies $\mbfh v = s \left[ \mbf v^T \; 1 \right]^T$,
+for some real, nonzero scalar, $s$, is considered the {\em homogeneous representation}
+of $\mbf v$. Hence, we define a pair of functions for moving between homogeneous (bold italic symbol) and nonhomogeneous (bold symbol) coordinates,
+\begin{equation}
+	 \mbfh v = \mbfh h(\mbf v) := \bbm x \\ y \\ z \\ 1 \ebm,  \quad\quad
+ \mbf v  = \mbf h(\mbfh v ) := \frac{1}{v_4}\bbm v_1 \\ v_2 \\ v_3 \ebm \label{eq:fromHomo}.
+\end{equation}
+Both $\mbf v$ and $\mbfh v$ encode the coordinates of the same point expressed in some coordinate frame. When $v_4 = 0$, the conversion back to $\mathbb{R}^3$ is not possible, as the corresponding point in $\mathbb{R}^3$ is infinitely far away from the coordinate frame origin. However, there is no singularity when keeping these points in homogeneous coordinates. The Jacobian matrices for $\mbfh h(\cdot)$ and $\mbf h(\cdot)$ (needed later when linearizing error terms for batch estimation) are
+\begin{subequations}
+\begin{gather}
+	\pd{\mbfh h(\mbf v)}{\mbf v} = \bbm \mbf 1 \\ \mbf 0^T \ebm, \label{eq:toHomoJac}\\
+	\pd{\mbf h(\mbfh v)}{\mbfh v} = \frac{1}{v_4}\bbm \mbf 1 & -\mbf h(\mbfh v) \ebm .\label{eq:fromHomoJac}
+\end{gather}
+\end{subequations}
+In homogeneous coordinates, coordinate-frame transformations may be applied to points using a $4 \times 4$ transformation matrix, $\mbfh T$,
+\begin{flalign}
+	\mbfh T_{1,0} = 
+		\bbm
+			\mbf C_{1,0} & \mbf r_1^{0,1} \\
+			\mbf 0^T    &       1
+		\ebm,\;\;\;\;
+	\mbfh p_1^{j,1} = \mbfh T_{1,0} \mbfh p_0^{j,0},\;\;\;\;
+	\mbfh T_{1,0}^{-1} = 
+		\bbm
+			\mbf C_{1,0}^T & - \mbf C_{1,0}^T \mbf r_1^{0,1} \\
+			\mbf 0^T    &       1
+		\ebm,\;\;\;\;
+	\mbfh p_1^{j1} = \mbfh T_{0,1}^{-1} \mbfh p_0^{j,0},\label{eq:Tx}
+\end{flalign}
+where $\mbfh p_{0}^{j,0}$ encodes the coordinates of a vector from the origin of $\cframe{0}$ to a point $j$ (represented by the superscript $j,0$), and expressed in $\cframe{0}$ (represented by the subscript $0$), $\mbf C_{1,0}$ is the rotation matrix that takes vectors from $\cframe{0}$ to $\cframe{1}$, and $\mbfh T_{1,0}$ is the transformation matrix that takes points from $\cframe{0}$ to $\cframe{1}$.
+%\subsection{Linearizing Transformation Matrices}
+The full complement of subscripts and superscripts is provided in \eqref{eq:Tx} for reference. For ease of notation, in the remainder of section we will drop all subscripts and superscripts. 
+
+We may define a column of parameters,
+\begin{equation}
+ \mbf x := \bbm 
+              \mbf r \\ 
+              \mbs \theta 
+           \ebm,
+\end{equation}
+and write the transformation matrix, $\mbfh T$, as
+\begin{equation}
+  \mbc T(\mbf x) = 
+    \bbm
+      \mbf C(\mbs \theta) & \mbf r \\
+      \mbf 0^T            &   1
+    \ebm.
+\end{equation}
+Using the machinery developed in \citet{FurgaleThesis}, we perturb $\mbf x$ about the nominal value, 
+\begin{equation}
+ \mbfbar x := \bbm 
+              \mbfbar r \\ 
+              \mbsbar \theta 
+           \ebm,
+\end{equation}
+by a perturbation
+\begin{equation}
+ \mbfdel x := \bbm 
+              \mbfdel r \\ 
+              \mbsdel \theta 
+           \ebm,
+\end{equation}
+to get
+\begin{equation}
+ \mbc T(\mbfbar x + \mbfdel x) \approx 
+    \bbm
+      (\mbf 1 - (\mbf S(\mbsbar \theta)\mbsdel \theta)^\times) \mbf C(\mbsbar \theta) & \mbfbar r + \mbfdel r \\
+      \mbf 0^T            &   1
+    \ebm,
+\end{equation}
+which we rearrange into the form of a multiplicative update,
+\begin{equation}
+  \mbc T(\mbfbar x + \mbfdel x) \approx 
+    \bbm
+      \mbf 1 - (\mbf S(\mbsbar \theta)\mbsdel \theta)^\times &  \mbfdel r + (\mbf S(\mbsbar \theta)\mbsdel \theta)^\times \mbfbar r \\
+          \mbf 0^T                  & 1 
+    \ebm
+    \underbrace{
+    \bbm
+      \mbf C(\mbsbar \theta) & \mbfbar r \\
+      \mbf 0^T            &   1
+    \ebm}_{\mbc T(\mbfbar x)}.
+\end{equation}
+This expression may be simplified by substituting in $\mbsdel \phi = \mbf S(\mbsbar \theta) \mbsdel \theta$ and defining 
+\begin{equation}
+  \label{eq:rho2p}
+  \mbsdel \varrho := \mbfdel r + \mbsdel \phi^\times \mbfbar r,
+\end{equation}
+to get
+\begin{subequations}
+\begin{flalign}
+  \mbc T(\mbfbar x + \mbfdel x) &\approx 
+    \bbm
+      (\mbf 1 - \mbsdel \phi^\times) &  \mbsdel \varrho \\
+          \mbf 0^T                  & 1 
+    \ebm
+    \mbc T(\mbfbar x), \label{eq:small-tx}\\
+&= 
+   %\underbrace{
+      \left (
+        \mbf 1 - 
+        \bbm
+          \mbsdel \phi^\times &  -\mbsdel \varrho \\
+          \mbf 0^T            & 0 
+        \ebm
+      \right)
+   %   }_{\mbox{infinitesimal trans.}}
+      \mbc T(\mbfbar x).
+\end{flalign}
+\end{subequations}
+We further simplify the notation by defining the terms
+\begin{equation}
+  \mbfhbar T := \mbc T(\mbfbar x),\;\;\mbfdel t := \bbm \mbsdel \varrho \\ \mbsdel \phi \ebm,
+\end{equation}
+and the operator $(\cdot)^\boxplus$,
+\begin{equation}
+	\bbm
+          \mbf r\\
+          \mbf s
+        \ebm^\boxplus
+        := 
+        \bbm 
+          \mbf s^\times & -\mbf r\\
+          \mbf 0^T     &     0
+        \ebm,
+\end{equation}
+for $3 \times 1$ columns $\mbf r$ and $\mbf s$. This allows us to write
+\begin{equation}
+  \label{eq:lin-txmatrix}
+  \mbc T(\mbfbar x + \mbfdel x) \approx 
+     \left (\mbf 1 - \mbfdel t^\boxplus \right)
+   \mbfhbar T.
+\end{equation}
+A similar derivation gives
+\begin{equation}
+  \label{eq:lin-txinvmatrix}
+  {\mbc T(\mbfbar x + \mbfdel x)^{-1}} \approx 
+  {\mbfhbar T^{-1} \left(\mbf 1 + \mbfdel t^\boxplus \right)}
+.
+\end{equation}
+Note that, just as in the rotation matrix and quaternion cases (~\eqref{eq:defn-dphi-eq-Sdt} and ), we have
+\begin{equation}
+  \label{eq:def-T-S}
+  \mbfdel t = \mbfh S(\mbfbar x) \mbfdel x
+\end{equation}
+where
+\begin{equation}
+  \label{eq:T-S-matrix}
+  \mbfh S(\mbfbar x) := \bbm \mbf 1 & - \mbfbar r^\times \mbf S(\mbfbar \theta) \\
+                            \mbf 0 & \mbf S(\mbfbar \theta)
+                       \ebm.
+\end{equation}
+Working in the other direction, suppose we have a perturbation in the form of $\mbfdel t$, 
+and we wish to apply this to a prior value of the transformation, $\mbc T(\mbfbar x)$.  Rearranging \eqref{eq:rho2p} to get
+\begin{equation}
+  \mbfdel r = \mbsdel \varrho + \mbfbar r^\times \mbsdel \phi,
+\end{equation}
+we may write the update to $\mbf x$ as
+\begin{equation}
+\label{eq:tx-eulerangleupdate}
+\mbf x = \mbfbar x + \mbfh S(\mbfbar x)^{-1}\mbfdel t,
+\end{equation}
+where
+\begin{equation}
+  \label{eq:T-invS}
+  \mbfh S(\mbfbar x)^{-1} =  \bbm
+                                \mbf 1 & \mbfbar r^\times \\
+                                \mbf 0 & \mbf S(\mbsbar \theta)^{-1}
+                             \ebm.
+\end{equation}
+However, we have again run into the situation that we would prefer not to use the Euler angles, because $\mbf{S}(\mbsbar \theta)^{-1}$ does not exist precisely at the associated singularities.  Instead, we would like to simply store and update the transformation as a transformation matrix.  To do this, we use the following update step,
+\begin{equation}
+\label{eq:update-transformation}
+  \mbfhbar T  \leftarrow \mbc T(\mbfdel t) \mbfhbar T
+\end{equation}
+This update approach allows us to store and update the transformation as a transformation matrix, thereby avoiding singularities and the need to restore the constraint afterwards.
+
+When dealing with infinitesimal transformation matrices, the $(\cdot)^\boxplus$ operator takes on a role similar to that played by the skew-symmetric operator, $(\cdot)^\times$, when dealing with infinitesimal rotation matrices.
+Now we examine how the perturbation, $\mbfdel t$, affects the transformation of a point, $\mbf p$, represented in homogeneous coordinates by $\mbfh p$,
+\begin{equation}
+	\mbfh p := 
+		\bbm 
+			\mbf u \\ 
+                        s 
+		\ebm,\;\;\;\;
+	\mbfh T \mbfh p = 
+		\bbm
+			\,\mbf C \mbf u + s \mbf r\,\\
+			s
+		\ebm,
+\end{equation}
+where $s$ is a nonzero scalar and $\mbf u = s \mbf p$, so that $\mbf p = \mbf h(\mbfh p)$. Applying the perturbation, \eqref{eq:lin-txmatrix}, gives us
+\begin{subequations}
+  \begin{flalign}
+    \mbfh T \mbfh p & \approx 
+	\left ( 
+		\mbf 1
+		-
+		\mbfdel t^\boxplus
+	\right) 
+	\mbfhbar T 
+	\mbfh p \\
+        &= \mbfhbar T \mbfh p  - \mbfdel t^\boxplus \mbfhbar T\mbfh p,
+  \end{flalign}
+\end{subequations}
+with
+\begin{equation}
+- \mbfdel t^\boxplus \mbfhbar T \mbfh p =  (\mbfhbar T \mbfh p)^\boxminus \mbfdel t \label{eq:proveSwap} 
+\end{equation}
+where we have defined the operator, $(\cdot)^\boxminus$, to be
+\begin{equation}
+	 \bbm \mbf s\\ t \ebm^\boxminus = 
+		\bbm
+			  t\mbf 1   & \mbf s^\times\\
+			  \mbf 0^T & \mbf 0^T    
+		\ebm,
+\end{equation}
+for any $3 \times 1$ column $\mbf s$ and scalar $t$. This demonstrates a useful identity,
+\begin{equation}
+  \label{eq:lintran-plusminus}
+  {-\mbf c^\boxplus \mbfh v \equiv \mbfh v^\boxminus \mbf c},
+\end{equation}
+for any $4 \times 1$ column $\mbfh v$ and $6 \times 1$ column $\mbf c$.
+Using this identity we may write a first-order approximation of how a perturbation, $\mbfdel t$, produces small changes in the transformed point:
+\begin{subequations}
+\begin{flalign}
+	\mbfh T \mbfh p & \approx (\mbf 1 - \mbfdel t^\boxplus) \mbfhbar T \mbfh p\\
+        &= \mbfhbar T \mbfh p +
+			(\mbfhbar T \mbfh p)^\boxminus
+			\mbfdel t \label{eq:linTx}
+\end{flalign}
+\end{subequations}
+Similar results hold for perturbations involving $\mbfh T^{-1}$:
+\begin{subequations}
+	\begin{flalign}
+		\mbfhbar T^{-1} \mbfh p & \approx \mbfhbar T^{-1}(\mbf 1 + \mbfdel t^\boxplus)\mbfh p\\
+   		&= \mbfhbar T^{-1}\mbfh p - \mbfhbar T^{-1}\mbfh p^\boxminus\mbfdel t
+	\end{flalign}
+\end{subequations}
+Note: by using \eqref{eq:def-T-S}, we can write perturbations from {\em any} transformation matrix parameterization in the form of \eqref{eq:linTx}. This allows us to linearize any error equation using perturbations of the form of \eqref{eq:linTx} and substitute in \eqref{eq:def-T-S} when we are done to get the perturbation in the form of the parameterization we have chosen.
+
+When estimating transformations using a perturbation of the form in \eqref{eq:linTx}, the covariance coming out of Gauss-Newton, $\mbf P_t$, may be interpreted as
+\begin{equation}
+  \label{eq:uncertainty-T}
+  \mbfh T = \mbc T(\mbfdel t) \mbfhbar T \approx \left(\mbf 1 - \mbfdel t^\boxplus \right)\mbfbar T, \;\;\;\;\mbfdel t \sim \mathcal{N}(\mbf 0, \mbf P_t)
+\end{equation}
+
+Finally, we derive some other useful identities for manipulating expressions involving transformation matrices. First we see that we can push a transformation matrix onto the other side of a perturbation:
+\begin{equation}
+  \label{eq:derive-boxtimes}
+  \mbfh T \mbfdel t^\boxplus =
+  \left(\mbfh T^\boxtimes \mbfdel t \right)^\boxplus \mbfh T
+\end{equation}
+Stating this result, we have the identity
+\begin{equation}
+  \label{eq:push-T-through}
+  {\mbfh T \mbf c^\boxplus \equiv \left(\mbfh T^\boxtimes \mbf c\right)^\boxplus \mbfh T},
+\end{equation}
+which holds for any transformation matrix $\mbfh T$ and $6 \times 1$ column $\mbf c$. This identity may alternately be written as 
+\begin{equation}
+  {\mbfh T \mbf c^\boxplus \mbfh T^{-1} \equiv \left(\mbfh T^\boxtimes \mbf c\right)^\boxplus},\label{eq:F-matrix}
+\end{equation}
+for comparison with the identity, $\mbf C \mbf s^\times \mbf C^T \equiv \left( \mbf C \mbf s \right)^\times$, which is valid for any rotation matrix $\mbf C$ and $3 \times 1$ column $\mbf s$.
+The operator, $(\cdot)^{\boxtimes}$, defined as
+\begin{equation}
+  \mbfh T^{\boxtimes} :=
+  \bbm
+    \mbf C   & \mbf r \\
+    \mbf 0^T & 1
+  \ebm^\boxtimes
+  =
+  \bbm
+    \mbf C & -\mbf r^\times \mbf C \\
+    \mbf 0    & \mbf C
+  \ebm.
+\end{equation}
+produces an invertible matrix with the property
+\begin{equation}
+  \mbfh T^{-\boxtimes}:=\left(\mbfh T^\boxtimes \right)^{-1} = \left( \mbfh T^{-1}\right)^\boxtimes.
+\end{equation}
+This allows us to write \eqref{eq:push-T-through} as
+\begin{equation}
+  \label{eq:push-T-through2}
+  \mbfdel t^\boxplus \mbfh T \equiv \mbfh T \left( \mbfh T^{-\boxtimes} \mbfdel t\right)^\boxplus.
+\end{equation}
+Another useful identity is
+\begin{equation}
+  \mbfh T \mbfh p^\boxminus = \left( \mbfh T \mbfh p \right)^\boxminus \mbfh T^\boxtimes .
+\end{equation}
+This identity
+may also be written as
+% \begin{equation}
+%   \label{eq:push-T-through-p-2}
+% \mbfh p^\boxminus \mbfh T^\boxtimes \equiv \mbfh T \left( \mbfh T^{-1} \mbfh p \right)^\boxminus,
+% \end{equation}
+% or
+\begin{equation}
+  \label{eq:push-T-through-p-2}
+\mbfh T \mbfh p^\boxminus \mbfh T^{-\boxtimes} \equiv \left( \mbfh T \mbfh p \right)^\boxminus,
+\end{equation}
+which is again similar to $\mbf C \mbf s^\times \mbf C^T \equiv (\mbf C \mbf s)^\times$ and $\mbfh T \mbf c^\boxplus \mbfh T^{-1} \equiv (\mbfh T \mbf c)^\boxplus$.
+\subsection{Using Quaternions with Transformation Matrices \label{s:quat-Tx}}
+Quaternions have nice properties that make them desireable as a representation of rotation. In this section we use results from Sections~\ref{s:quat} and~\ref{s:quat-Tx} to show how to use a $4 \times 1$ unit length quaternion, $\mbf q$, and a $3 \times 1$ translation vector, $\mbf r$, to represent a transformation matrix.
+
+First, we choose to use the angular velocity form of quaternion perturbation. This means that the $\mbsdel \phi$ in \eqref{eq:quat-av-form} is the same one as in \eqref{eq:small-tx}. Next we perturb $\mbf r$ as $\mbf r = \mbfbar r + \mbfdel r$. If we define
+\begin{equation}
+  \label{eq:quat-T-dtheta}
+  \mbsdel \theta := \bbm \mbfdel r \\ \mbsdel \phi \ebm,
+\end{equation}
+ and use \eqref{eq:rho2p}, and we get the result that
+\begin{subequations}
+\label{eq:quat-T-perturbation}
+\begin{flalign}
+  \mbfdel t & = \mbfh S(\mbfbar r) \mbsdel \theta \\ 
+    &=   \bbm
+      \mbf 1 & -\mbfbar r^\times \\ 
+      \mbf 0 & \mbf 1
+    \ebm
+    \bbm
+      \mbfdel r \\
+      \mbsdel \phi
+    \ebm.
+\end{flalign}
+\end{subequations}
+This equation may be substituted into \eqref{eq:linTx} to linearize any equation involving a transformation matrix. Any equation involving a rotation matrix may be perturbed using $\mbf C \approx \left(\mbf 1 - \mbsdel \phi^\times\right)\mbc C(\mbfbar q)$. After a Gauss-Newton iteration, the quaternion may be updated using \eqref{eq:update-quat}, and the translation may be updated using $\mbfbar r \leftarrow \mbfbar r + \mbfdel r$. 
+
+After convergence, the uncertainty returned by Gauss-Newton, $\mbf P_{\theta}$, may be put into transformation matrix form (Equation \eqref{eq:uncertainty-T}) using \eqref{eq:quat-T-perturbation}:
+\begin{subequations}
+  \label{eq:quat-to-T-uncertainty}
+  \begin{flalign}
+    \mbfdel t & = \mbfh S(\mbfbar r) \mbsdel \theta, \;\;\;\; E\left[\mbfdel t \right] = \mbf 0, \;\;\;\; \mbf P_{t} :=E\left[\mbfdel t \mbfdel t^T \right] = \mbfh S(\mbfbar r) \mbf P_{\theta} \mbfh S(\mbfbar r)^T
+  \end{flalign}
+\end{subequations}
+\subsection{Linearizing Expressions Involving Homogeneous Points\label{s:homo}}
+One of the main benefits of using transformation matrices to represent coordinate-frame transformations is that it allows us to use homogeneous coordinates to represent points. 
+When estimating a distant point location in Euclidean coordinates, a Gauss-Newton estimator will often attempt to push the Euclidean point out towards infinity. This causes numerical issues in the linear system of equations, and can cause the estimator to diverge.
+Homogeneous coordinates have the benefit of representing both near and distant landmarks with no singularities or scaling issues \citep{Triggs0000}.
+Equation, \eqref{eq:linTx}, gives some great intuition about this. If we define the components of $\mbfh p$ to be $\mbfh p =: \bbm \mbf u^T & s \ebm^T$, we may restate \eqref{eq:linTx} as
+\begin{subequations}
+\begin{flalign}
+	\mbfh T \mbfh p & \approx \mbfhbar T \mbfh p +
+			(\mbfhbar T \mbfh p)^\boxminus
+			\mbfdel t \\
+                        & = 
+                        \bbm
+                          \mbfbar C \mbf u + s \mbf r\\
+                          s
+                        \ebm
+                        + 
+                        \bbm
+  			  s\mbf 1  & (\mbfbar C \mbf u + s\mbf r)^\times\\
+                          \mbf 0^T & \mbf 0^T
+                        \ebm
+                        \bbm
+			  \mbsdel \varrho\\
+                          \mbsdel \phi
+                        \ebm
+                      \label{eq:linTx2}.
+\end{flalign}
+\end{subequations}
+As the Euclidean point, $\mbf p$, represented in homogeneous coordinates, $\mbfh p$, moves away from the coordinate frame origin, $s$ approaches zero. In the limit, we have
+\begin{subequations}
+\begin{flalign}
+	\lim_{s \rightarrow 0} 
+	\left (
+		 \mbfhbar T \mbfh p +
+			(\mbfhbar T \mbfh p)^\boxminus
+			\mbfdel t
+	\right)
+	&\approx 
+	\lim_{s \rightarrow 0}
+	\left(
+                \bbm
+                  \mbfbar C \mbf u + s \mbf r\\
+                  s
+                \ebm
+	        + 
+		\bbm
+			s\mbf 1  & (\mbfbar C \mbf u + s\mbf r)^\times\\
+			\mbf 0^T & \mbf 0^T
+		\ebm
+		\bbm
+			\mbsdel \varrho\\
+			\mbsdel \phi
+		\ebm
+	\right)\\
+		&=
+		\bbm
+			\mbfbar C \mbf u\\
+			0
+		\ebm
+		 +
+		\bbm
+			(\mbfbar C \mbf u)^\times\\
+			\mbf 0^T
+		\ebm
+		\mbsdel \phi.
+\end{flalign}
+\end{subequations}
+This is a mathematical statement of what we suspect by intuition---distant landmarks only provide information about a camera's orientation, $\mbsdel \phi$, not its position; %In the context of batch optimization, this means that as $s \rightarrow 0$, the terms in the objective function involving $\mbfh p$ continue to provide information about $\mbf C$, but they no longer constrain $\mbf r$; 
+the homogeneous representation automatically encapsulates the different information that can be discerned from near and distant points.
+%Hence, by using homogeneous coordinates, may represent near and distant landmarks in the same format without special cases. 
+%we have already gained the ability to use points distant from the camera to solve for pose alone (i.e., even if we are not estimating the point locations). 
+%For example, in Chapter~\ref{ch:tnr}, we utilize observations with a disparity of zero (perceived by the stereo camera to be infinitely far away) by using the inverse measurement model, \eqref{eq:inv-obs}, to triangulate those points for storage in a map in homogeneous coordinates. 
+
+Therefore, when estimating landmark locations, we would like to use a parameterization for landmarks that allows $s \rightarrow 0$. This is also advocated by \citet{Triggs0000}. However, a landmark stored in homogeneous coordinates has four parameters representing three fundamental degrees of freedom. Unlike the rotation matrix case, the homogeneous representation is not subject to a constraint. Rather, it has an extra degree of freedom. 
+
+\citet{Hartley0001} provide a possible solution based on a minimal parameterization of the unit sphere in $\mathbb R^4$. They let $\mbs \vartheta$ be a $3 \times 1$ column of point parameters. Using $\varphi := \norm{\mbs \vartheta}$ and $\mbf a := \mbs \vartheta / \varphi$, they define a map from the parameters, $\mbs \vartheta$,  onto a homogeneous point\footnote{This representation has no singularity at $\mbs \vartheta = \mbf 0$ as ${\displaystyle \lim_{\varphi\rightarrow 0}} \frac{1}{\varphi}\sin\left( \tfrac{\varphi}{2} \right) = \tfrac{1}{2}$. \citet{Grassia9800} provides a method of computing this term that is accurate to machine precision. Let $\epsilon$ be the smallest increment represented by your floating point type, then
+\begin{equation*}
+  \frac{1}{\varphi}\sin\left( \tfrac{\varphi}{2} \right) = 
+    \begin{cases}
+       \tfrac{1}{2} + \tfrac{\varphi^2}{48}    & \text{if $\varphi \le \sqrt[4]{\epsilon}$},\\
+       \frac{1}{\varphi}\sin\left(\tfrac{\varphi}{2}\right) & \text{otherwise}.
+    \end{cases}
+\end{equation*}}
+\begin{equation}
+  \label{eq:hartley-map}
+  \mbs \rho(\mbs \vartheta) := 
+    \bbm 
+      \sin\tfrac{\varphi}{2} \mbf a \\
+      \cos\tfrac{\varphi}{2}
+    \ebm.
+\end{equation}
+Essentially they are trading the degree of freedom inherent in the homogeneous representation for the constraint $\mbs \rho(\mbs \vartheta)^T \mbs \rho( \mbs \vartheta) = 1$. This constraint has a hidden benefit in that it keeps the entries of $\mbfh p$ finite as $\mbf p$ approaches infinity \citep{Triggs0000}. This parameterization may still represent all points, but it has a singularity in that every $\mbs \vartheta$ with $\norm{\mbs \vartheta} = 2 \pi$ maps to the same point, $\bbm 0 & 0 & 0 & -1 \ebm^T$. This is similar to parameterizing a rotation using Euler angles; it is minimal but has a singularity. 
+
+In \citet{FurgaleThesis}, homogeneous points are represented as points on the unit sphere in $\mathbb R^{4}$. This is precicely the parameterization we proposed for unit-length quaternions in Section~\ref{s:quat}. Consequently, we may use \eqref{eq:quatplus} and \eqref{eq:hartley-map} to define a minimal, constraint-sensitive, update equation for unit-length homogeneous points,
+\begin{equation}
+  \label{eq:homo-update}
+  \mbfhbar p \leftarrow \qc{\mbs \rho(\mbs \vartheta)} \mbfhbar p,
+\end{equation}
+where $\mbfhbar p$ is the $4 \times 1$, unit-length homogeneous point being updated, and $\mbs \vartheta$ is a $3 \times 1$ column of update parameters. Again, we have
+\begin{subequations}
+  \label{eq:homo-lin-update}
+  \begin{flalign}
+    \qc{\mbs \rho(\mbs \vartheta)} \mbfhbar p & \approx \qc{ \left( \mbs \iota +  \mbfh V \mbsdel \vartheta \right) }\mbfhbar p \\
+                                         & =  \qo{\mbfhbar p} \left( \mbs \iota +  \mbfh V \mbsdel \vartheta \right)\\
+                                         & =  \mbfhbar p   + \qo{\mbfhbar p} \mbfh V \mbsdel \vartheta,
+  \end{flalign}
+\end{subequations}
+three equivalent forms of the linearized update equation. Now, to linearize an error term involving a homogeneous point, $\mbfh p$, we may substitute in any of the linearized forms on the right-hand side of \eqref{eq:homo-lin-update}. When Gauss-Newton returns the optimal update step, $\mbsdel \vartheta^\star$, we may update the current value of the point, $\mbfhbar p$ using \eqref{eq:homo-update}.
+The updated value will still be of unit length. 
+
+When this parameterization for a point has been used to estimate the point location with Gauss-Newton, a $3 \times 3$ covariance matrix associated with this estimate may be extracted from the estimator \citep{Bell9300}. This covariance, $\mbf P_{\vartheta}$, represents the uncertainty in $\mbsdel \vartheta$ and may be interpreted using \eqref{eq:homo-lin-update}:
+\begin{equation}
+  \label{eq:homo-uncertainty}
+  \mbsdel \vartheta \sim \mathcal{N}\left(\mbf 0, \mbf P_{\vartheta} \right), \hspace{1cm}\mbfh p = \qc{\mbs \rho(\mbs \vartheta)} \mbfhbar p \approx \qc{ \left( \mbs \iota +  \mbfh V \mbsdel \vartheta \right) }\mbfhbar p
+\end{equation}
+%Note also that
+%\begin{subequations}
+%  \label{eq:homo-lin-update}
+%  \begin{flalign}
+%    \left(\qc{\mbs \rho(\mbs \vartheta)} \mbfhbar p\right)^{-1} & \approx \qo{ \left( \mbs \iota -  \mbfh V \mbsdel \vartheta \right) }\mbfhbar p^{-1} \\
+%                                         & =  \qc{{\mbfhbar p^{-1}}} \left( \mbs \iota -  \mbfh V \mbsdel \vartheta \right)\\
+%                                         & =  \mbfhbar p^{-1}   - \qc{\mbfhbar p^{-1}} \mbfh V \mbsdel \vartheta.
+%  \end{flalign}
+%\end{subequations}
+
+% \section{Estimating the Above Using Finite Differences}
+% When implementing these equations, it is highly recommended to test your implementation using finite differences to see if you are correct. In my experience, the incorrect implementation analytical Jacobains is one of the most common pitfalls when writing estimation routines. However, with matrix-valued design variables, like rotation and transformation matrices, it is not clear, for example, how to test an implementation of $\mbf S(\mbfbar \theta)$. This section will provide some strategies for testing these implementations.
+
+% To compute finite differences of a Jacobian, we typically use central differences:
+% \subsection{Testing Rotation Matrix $\mbf S$ Matrix Implementations}
+% \paragraph{Strategy 1: Test the rotation of a vector} While the perturbation equation for a rotation matrix is a matrix equation, we can always multiply it by a $3 \times 1$ column to get a value that is easy to test using finite differences. So, 
+
+\section{Uncertainty}
+Here we use the algebraic machinery above to derive some results about composing different uncertain quantities.
+\subsection{Composing Uncertain Transformation Matrices \label{ss:compose-tx}}
+In this section, we consider how to compose uncertain transformation matrices. This situation is similar to the ones described in \citet{Smith8700} and \citet{Su9200} but here we use the notation and identities described above.
+We will assume that the uncertain transformations considered in this section are uncorrelated. In general, this will not be true as any two states that view the same landmark are correlated. However, dropping these correlations results in greater uncertainty and so it may be seen as a conservative (underconfident) strategy. An uncertain transformation, $\mbfh T_{a,b}$, has a mean transformation, $\mbfhbar T_{a,b}$, an associated uncertainty, $\mbfdel t_{a,b}\sim\mathcal{N}(\mbf 0, \mbf P_{a,b})$. Hence, each transformation may be thought of as the composition of a large average transformation $\mbfhbar T_{a,b}$ and a small uncertain transformation, $\mbfhdel T$, which may be approximated to first order as
+\begin{subequations}
+	\begin{flalign}	
+		\mbfh T_{a,b} &= \mbfhdel T \mbfhbar T_{a,b}\;,\\
+		              &\approx \left( \mbf 1 - \mbfdel t_{a,b}^\boxplus \right) \mbfhbar T_{a,b}\;.
+	\end{flalign}
+\end{subequations}
+So, given a graph three coordinate frames, $\cframe 0$, $\cframe 1$, and $\cframe 2$, connected by two uncertain transformations, $\mbfh T_{0,1}$ and $\mbfh T_{1,2}$, what is the uncertain transformation between pose $0$ and pose $2$, $\mbfh T_{0,2}$? To find this uncertainty (to first order), we may compose the two transformations along the path through the graph from pose $0$ to pose $2$:
+\begin{subequations}
+	\begin{flalign}
+		\mbfh T_{0,2}                                       &= \mbfh T_{0,1} \mbfh T_{1,2}\\
+		(\mbf 1 - \mbfdel t_{0,2}^\boxplus)\mbfhbar T_{0,2} &\approx (\mbf 1 - \mbfdel t_{0,1}^\boxplus) \mbfhbar T_{0,1} (\mbf 1 - \mbfdel t_{1,2}^\boxplus) \mbfhbar T_{1,2}\label{eq:T0,2-first-order}\\
+		                                                    &= \mbfhbar T_{0,1} \mbfhbar T_{1,2} - \mbfdel t_{0,1}^\boxplus  \mbfhbar T_{0,1} \mbfhbar T_{1,2} -  \mbfhbar T_{0,1} \mbfdel t_{1,2}^\boxplus \mbfhbar T_{1,2}\label{eq:T0,2-first-order-expanded}
+	\end{flalign}
+\end{subequations}
+Consistent with the first-order approximation, we have dropped the products of small terms. Using the identity $\mbfh T \mbf c^\boxplus \equiv \left(\mbfh T^\boxtimes \mbf c\right)^\boxplus \mbfh T$ \eqref{eq:push-T-through}, allows us to complete the simplification of $\mbfh T_{0,2}$:
+\begin{subequations}
+	\begin{flalign}
+			(\mbf 1 - \mbfdel t_{0,2}^\boxplus)\mbfhbar T_{0,2} &\approx \mbfhbar T_{0,1} \mbfhbar T_{1,2} - \mbfdel t_{0,1}^\boxplus  \mbfhbar T_{0,1} \mbfhbar T_{1,2} -  \mbfhbar T_{0,1} \mbfdel t_{1,2}^\boxplus \mbfhbar T_{1,2}\\
+			&= \mbfhbar T_{0,1} \mbfhbar T_{1,2} - \mbfdel t_{0,1}^\boxplus  \mbfhbar T_{0,1} \mbfhbar T_{1,2} -  \left(\mbfhbar T_{0,1}^\boxtimes \mbfdel t_{1,2}\right)^\boxplus \mbfhbar T_{0,1} \mbfhbar T_{1,2}\\
+			&= \left(\mbf 1 - \left(\mbfdel t_{0,1} + \mbfhbar T_{0,1}^\boxtimes \mbfdel t_{1,2}\right)^\boxplus \right) \mbfhbar T_{0,1} \mbfhbar T_{1,2}
+	\end{flalign}
+\end{subequations}
+Equating components of the lefthand and righthand sides gives us
+\begin{subequations}
+	\begin{flalign}
+		\mbfbar T_{0,2} &= \mbfbar T_{0,1} \mbfbar T_{1,2}\;,\\
+		\mbfdel t_{0,2} &= \mbfdel t_{0,1} + \mbfhbar T_{0,1}^\boxtimes \mbfdel t_{1,2} \;.
+	\end{flalign}
+\end{subequations}
+Using the expectation operator, $E[\cdot]$, we see that the mean of $\mbfdel t_{0,2}$ is
+\begin{equation}
+	E[\mbfdel t_{0,2}] = E[\mbfdel t_{0,1} + \mbfhbar T_{0,1}^\boxtimes \mbfdel t_{1,2} ] = 0\;,
+\end{equation}
+and its covariance is
+\begin{subequations}
+	\begin{flalign}
+		E[\mbfdel t_{0,2}\mbfdel t_{0,2}^T] &= E\left[(\mbfdel t_{0,1} + \mbfhbar T_{0,1}^\boxtimes \mbfdel t_{1,2} )(\mbfdel t_{0,1} + \mbfhbar T_{0,1}^\boxtimes \mbfdel t_{1,2} )^T\right]\;,\\
+		&=E[\mbfdel t_{0,1}\mbfdel t_{0,1}^T] + \mbfhbar T_{0,1}^\boxtimes E[ \mbfdel t_{1,2} \mbfdel t_{1,2}^T ] {\mbfhbar T_{0,1}^\boxtimes}^T\;,\\
+		&=\mbf P_{0,1} + \mbfhbar T_{0,1}^\boxtimes \mbf P_{1,2} {\mbfhbar T_{0,1}^\boxtimes}^T\;, \label{eq:compound-covariance}
+	\end{flalign}
+\end{subequations}
+where we have made the conservative assumption that the transformations are uncorrelated so that $E(\mbfdel t_{0,1} \mbfdel t_{1,2}^T) = 0$.
+
+Finally we derive the uncertainty of $\mbfh T^{-1}$ given an uncertain transformation $\mbfh T$:
+\begin{subequations}
+	\begin{flalign}
+		\mbfh T^{-1} &\approx \mbfhbar T^{-1}(\mbf 1 + \mbfdel t^\boxplus)\\
+		&= \mbfhbar T^{-1}  + \mbfhbar T^{-1}\mbfdel t^\boxplus\\
+		&= \mbfhbar T^{-1}  + \left({\mbfhbar T^{-1}}^\boxtimes \mbfdel t\right)^\boxplus \mbfhbar T^{-1}\\
+		&= \left(\mbf 1  + \left( {\mbfhbar T^{-1}}^{\boxtimes} \mbfdel t\right)^\boxplus \right)\mbfhbar T^{-1}
+	\end{flalign}
+\end{subequations}
+So, given a transformation, $\mbfh T_{0,1}$ with mean $\mbfhbar T_{0,1}$ and uncertainty $\mbf P_{0,1}$, the uncertainty of $\mbfh T_{1,0} = \mbfh T_{0,1}^{-1}$, is 
+\begin{equation}
+  \label{eq:transformation-uinverse}
+  \mbf P_{1,0} = \mbfhbar T_{1,0}^\boxtimes \mbf P_{0,1} {\mbfhbar T_{1,0}^\boxtimes}^T.
+\end{equation}
+\subsection{Composing Uncertain Transformations---Quaternion Edition \label{ss:Tquat-uncertainty}}
+If we use the parameterization for transformations from Section~\ref{s:quat-Tx} (a unit length quaternion and a translation vector), we could transform the uncertainty $\mbf P_{\theta}$ into $\mbf P_t$ as described in \eqref{eq:quat-to-T-uncertainty}, then use the composition equations from Section~\ref{ss:compose-tx}. Alternately, we can work out the equations for propagating the uncertainty directly.
+First, we examine the rotation part,
+\begin{subequations}
+  \label{eq:q-T-uncertainty}
+  \begin{flalign}
+    \mbf C_{0,2} & = \mbf C_{0,1} \mbf C_{1,2}\\
+    \left(\mbf 1 - \mbsdel \phi_{0,2}^{\times}\right) \mbfbar C_{0,2} 
+    & \approx  
+    \left( \mbf 1 - \mbsdel \phi_{0,1}^\times \right) \mbc C(\mbfbar q_{0,1}) \left( \mbf 1 - \mbsdel \phi_{1,2}^\times \right) \mbc C(\mbfbar q_{1,2}) \\
+& \approx 
+    \left( \mbf 1 - \left(\mbsdel \phi_{0,1} + \mbc C(\mbfbar q_{0,1}) \mbsdel \phi_{1,2})\right)^\times \right) \mbc C(\mbfbar q_{0,1})\mbc C(\mbfbar q_{1,2}),
+  \end{flalign}
+\end{subequations}
+where we have dropped the products of small terms as is consistent with a first-order approximation. Equating components, we have
+\begin{equation}
+  \label{eq:quat-rot-uncertainty}
+  \mbsdel \phi_{0,2} \approx \mbsdel \phi_{0,1} + \mbc C(\mbfbar q_{0,1}) \mbsdel \phi_{1,2}.
+\end{equation}
+For the translation part, we have
+\begin{subequations}
+  \label{eq:eq-quat-tran-uncertainty}
+  \begin{flalign}
+    \mbf r_{0}^{2,0} &= \mbf C_{0,1} \mbf r_{1}^{2,1} + \mbf r_{0}^{1,0}\\
+    \mbfbar r_{0}^{2,0} + \mbfdel r_{0}^{2,0} & \approx \left( \mbf 1 - \mbsdel \phi_{0,1}^\times \right) \mbc C(\mbfbar q_{0,1}) \left(\mbfbar r_{1}^{2,1} + \mbfdel r_{1}^{2,1}\right) + \mbfdel r_{0}^{1,0} + \mbfdel r_{0}^{1,0}\\
+    & \approx \mbc C(\mbfbar q_{0,1}) \mbfbar r_{1}^{2,1} + \mbfbar r_{0}^{1,0} + \left(\mbc C(\mbfbar q_{0,1}) \mbfbar r_{1}^{2,1}\right)^\times \mbfdel \phi_{0,1} + \mbfdel r_{0}^{1,0} + \mbc C(\mbfbar q_{0,1}) \mbfdel r_{1}^{2,1}\\
+& = \mbfbar r_{0}^{2,0}     +
+    \bbm
+      \mbf 1 & \left( \mbc C(\mbfbar q_{0,1}) \mbfbar r_{1}^{2,1} \right)^\times
+    \ebm
+    \mbsdel \theta_{0,1}
+    +
+    \bbm 
+       \mbc C(\mbfbar q_{0,1}) & \mbf 0
+    \ebm
+    \mbsdel \theta_{1,2},
+  \end{flalign}
+\end{subequations}
+where, again, we have dropped the products of small terms. 
+Hence, putting it all together, we get
+\begin{equation}
+  \label{eq:t02}
+  \mbsdel \theta_{0,2} \approx
+  \underbrace{
+     \bbm
+       \mbf 1 & \left( \mbc C(\mbfbar q_{0,1}) \mbfbar r_{1}^{2,1} \right)^\times\\
+       \mbf 0 & \mbf 1
+     \ebm
+   }_{=: \mbf A}
+     \mbsdel \theta_{0,1}
+     +
+     \underbrace {
+     \bbm
+       \mbc C(\mbfbar q_{0,1}) & \mbf 0\\
+       \mbf 0                 & \mbc C(\mbfbar q_{0,1})
+     \ebm
+   }_{=: \mbf B}
+     \mbsdel \theta_{1,2},
+\end{equation}
+and
+\begin{equation}
+  \label{eq:uncertain-composed}
+  \mbf P_{0,2} = \mbf A \mbf P_{0,1} \mbf A^T + \mbf B \mbf P_{1,2} \mbf B^T.
+\end{equation}
+\subsection{Transforming an Uncertain Homogeneous Point}
+Here goes,
+\begin{subequations}
+  \begin{flalign}
+    \mbfh p_{0} &= \mbfh T_{0,1} \mbfh p_{1}\\
+    %\left( \mbs \iota + \mbf V \mbsdel \vartheta_{0}\right)^{+} \mbfhbar p_0 
+    \mbfhbar p_0 + \mbfhdel p_0
+    &\approx \left(\mbf 1 - \mbfdel t_{0,1}^\boxplus  \right) \mbfhbar T_{0,1} \left( \mbs \iota + \mbf V \mbsdel \vartheta_1 \right)^{+} \mbfhbar p_1\\
+ &= \mbfhbar T_{0,1} \mbfhbar p_1  +  \left(\mbfhbar T_{0,1} \mbfhbar p_1\right)^\boxminus \mbfdel t_{0,1} + \mbfhbar T_{0,1}\mbfhbar p_1^\oplus \mbf V \mbfdel \vartheta_1,
+  \end{flalign}
+\end{subequations}
+Equating components we have
+\begin{equation}
+  \label{eq:homo-transformed}
+  \mbfhdel p_0 \approx \left(\mbfhbar T_{0,1} \mbfhbar p_1\right)^\boxminus \mbfdel t_{0,1} + \mbfhbar T_{0,1}\mbfhbar p_1^\oplus \mbf V \mbfdel \vartheta_1.
+\end{equation}
+This equation is {\em not} in angular velocity form.
+%
+%
+%
+
+NOTE: The "angular velocity" form of covariance is only valid for points on the unit spere in R4. Defer the rest of the note until I figure this out.
+
+
+% This equation is {\em not} in angular velocity form. If we desire uniform handling of points in the system, we must recover this form of uncertainty. The relationship between this form of uncertainty and the angular velocity form is given in \eqref{eq:quat-S}. This gives us
+% \begin{equation}
+%   \label{eq:eq-homo-angular}
+%   \mbsdel \vartheta_{0} = \mbf S(\mbfbar p_{0}) \mbfhdel p_0.
+% \end{equation}
+% Putting this all together, we have
+% \begin{equation}
+%   \label{eq:homo-p0-bar}
+%   \mbfhbar p_0 = 
+%     \bbm 
+%       \mbsbar \epsilon_0 \\ 
+%       \bar \eta_0 
+%     \ebm 
+%     = 
+%     \bbm 
+%        \mbfbar C_{0,1} \mbsbar \epsilon_1 + \bar \eta_1 \mbfbar r_0^{1,0} \\ 
+%        \bar \eta_1 
+%     \ebm
+%     =
+%     \bbm
+%       \mbfbar C_{0,1} & \mbfbar r_0^{1,0}\\
+%       \mbf 0^T & 1
+%     \ebm
+%     \bbm
+%       \mbsbar \epsilon_1\\
+%       \bar \eta_1
+%     \ebm
+%     = \mbfhbar T_{0,1} \mbfhbar p_1
+% \end{equation}
+
+
+% \begin{flalign}
+%   \label{eq:homo-tx-point-uncertainty}
+%   \mbsdel \vartheta_0 &\approx \mbf S(\mbfbar p_0) \left(\mbfhbar T_{0,1} \mbfhbar p_1\right)^\boxminus \mbfdel t_{0,1} + \mbf S(\mbfbar p_0) \mbfhbar T_{0,1}\mbfhbar p_1^\oplus \mbf V \mbfdel \vartheta_1\\
+%   & = 2 \bbm \bar \eta_0 \mbf 1 - 
+% \end{flalign}
+\bibliographystyle{apalike}
+\bibliography{refs}
+
+\end{document}
