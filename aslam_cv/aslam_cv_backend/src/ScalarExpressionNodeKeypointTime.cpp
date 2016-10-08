@@ -15,10 +15,9 @@ ScalarExpressionNodeKeypointTime::ScalarExpressionNodeKeypointTime(
 }
 
 ScalarExpressionNodeKeypointTime::~ScalarExpressionNodeKeypointTime() {
-
 }
 
-double ScalarExpressionNodeKeypointTime::toScalarImplementation() const {
+double ScalarExpressionNodeKeypointTime::evaluateImplementation() const {
   return (_stamp + _dv->value().camera()->temporalOffset(_y)).toSec();
 }
 
@@ -28,15 +27,6 @@ void ScalarExpressionNodeKeypointTime::evaluateJacobiansImplementation(
 
   _dv->value().temporalOffsetIntrinsicsJacobian(_y, Ji);
   outJacobians.add(_dv.get(), Ji);
-}
-
-void ScalarExpressionNodeKeypointTime::evaluateJacobiansImplementation(
-    backend::JacobianContainer & outJacobians,
-    const Eigen::MatrixXd & applyChainRule) const {
-  Eigen::MatrixXd Ji;
-
-  _dv->value().temporalOffsetIntrinsicsJacobian(_y, Ji);
-  outJacobians.add(_dv.get(), applyChainRule * Ji);
 }
 
 void ScalarExpressionNodeKeypointTime::getDesignVariablesImplementation(

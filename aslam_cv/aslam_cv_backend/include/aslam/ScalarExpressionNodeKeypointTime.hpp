@@ -15,14 +15,11 @@ class ScalarExpressionNodeKeypointTime :
           backend::DesignVariableAdapter<CameraGeometryDesignVariableContainer> > dv);
   virtual ~ScalarExpressionNodeKeypointTime();
 
-  virtual double toScalarImplementation() const;
+  virtual double evaluateImplementation() const override;
   virtual void evaluateJacobiansImplementation(
-      backend::JacobianContainer & outJacobians) const;
-  virtual void evaluateJacobiansImplementation(
-      backend::JacobianContainer & outJacobians,
-      const Eigen::MatrixXd & applyChainRule) const;
+      backend::JacobianContainer & outJacobians) const override;
   virtual void getDesignVariablesImplementation(
-      backend::DesignVariable::set_t & designVariables) const;
+      backend::DesignVariable::set_t & designVariables) const override;
 
  private:
   aslam::Time _stamp;
