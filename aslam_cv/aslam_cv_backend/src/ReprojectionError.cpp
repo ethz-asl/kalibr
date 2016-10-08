@@ -26,7 +26,7 @@ ReprojectionError::ReprojectionError(const Eigen::VectorXd & y,
       "The measurement uncertainty size must match the keypoint dimension");
   setInvR(invR);
   setError(Eigen::VectorXd::Zero(_cam->keypointDimension()));
-  backend::JacobianContainer::set_t dvs;
+  backend::DesignVariable::set_t dvs;
   p_c.getDesignVariables(dvs);
   setDesignVariablesIterator(dvs.begin(), dvs.end());
 }
@@ -56,7 +56,7 @@ ReprojectionError::ReprojectionError(
       "The measurement uncertainty size must match the keypoint dimension");
   setInvR(invR);
   setError(Eigen::VectorXd::Zero(_cam->keypointDimension()));
-  backend::JacobianContainer::set_t dvs;
+  backend::DesignVariable::set_t dvs;
   p_c.getDesignVariables(dvs);
   _camDvc->getDesignVariables(dvs);
   setDesignVariablesIterator(dvs.begin(), dvs.end());

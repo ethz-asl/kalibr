@@ -15,7 +15,7 @@ SimpleReprojectionError<F>::SimpleReprojectionError(const frame_t * frame,
   _y = frame->keypoint(keypointIndex).y();
   _geometry = &frame->geometry();
   parent_t::setInvR(frame->keypoint(keypointIndex).invR());
-  JacobianContainer::set_t dvs;
+  DesignVariable::set_t dvs;
   point.getDesignVariables(dvs);
   parent_t::setDesignVariablesIterator(dvs.begin(), dvs.end());
 
@@ -29,7 +29,7 @@ SimpleReprojectionError<F>::SimpleReprojectionError(
       _point(point) {
   parent_t::setInvR(invR);
   _geometry = &geometry;
-  JacobianContainer::set_t dvs;
+  DesignVariable::set_t dvs;
   point.getDesignVariables(dvs);
   parent_t::setDesignVariablesIterator(dvs.begin(), dvs.end());
 }

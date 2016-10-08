@@ -15,7 +15,7 @@ ReprojectionError<F>::ReprojectionError(
   SM_ASSERT_TRUE(Exception, frame != NULL, "The frame must not be null");
   _y = frame->keypoint(keypointIndex).y();
   parent_t::setInvR(frame->keypoint(keypointIndex).invR());
-  JacobianContainer::set_t dvs;
+  DesignVariable::set_t dvs;
   point.getDesignVariables(dvs);	// point dv's
   camera.getDesignVariables(dvs);  // camera dv's
 
@@ -33,7 +33,7 @@ ReprojectionError<F>::ReprojectionError(
       _point(point),
       _camera(camera) {
   parent_t::setInvR(inverseCovariance);
-  JacobianContainer::set_t dvs;
+  DesignVariable::set_t dvs;
   point.getDesignVariables(dvs);	// point dv's
   camera.getDesignVariables(dvs);  // camera dv's
 
