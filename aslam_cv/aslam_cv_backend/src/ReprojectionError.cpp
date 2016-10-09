@@ -115,13 +115,7 @@ void ReprojectionError::evaluateJacobiansImplementation(
     if (_camDvc) {
       _camDvc->evaluateJacobians(_jacobians, p);
     }
-  } else {
-    // HACK
-    //Eigen::MatrixXd J = Eigen::MatrixXd::Zero(_cam->keypointDimension(), 4);
-    //_p_c.evaluateJacobians(_jacobians, J);
-    _jacobians.clear();
   }
-
 }
 
 /// \brief get the keypoint measurement
