@@ -11,7 +11,6 @@ import aslam_cv_backend as acvb
 import kalibr_common as kc
 import kalibr_camera_calibration as kcc
 
-import cv
 import cv2
 import os
 import numpy as np
