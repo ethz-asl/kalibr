@@ -99,7 +99,7 @@ class TargetDetector(object):
             options.showExtractionVideo = showCorners
             options.useAsymmetricCirclegrid = targetParams['asymmetricGrid']
             
-            selfgrid = acv.GridCalibrationTargetCirclegrid(targetParams['targetRows'],
+            self.grid = acv.GridCalibrationTargetCirclegrid(targetParams['targetRows'],
                                                            targetParams['targetCols'], 
                                                            targetParams['spacingMeters'], 
                                                            options)

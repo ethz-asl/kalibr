@@ -8,7 +8,7 @@ catkin_simple()
 add_python_export_library(${PROJECT_NAME} python/aslam_cv_backend
   src/module.cpp  
   src/GridCalibration.cpp
-  src/CameraGeometryDesignVariableContainer.cpp
+  # src/CameraGeometryDesignVariableContainer.cpp
 #  src/NCameraSystemDesignVariableContainer.cpp
 )
 

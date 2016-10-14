@@ -265,8 +265,9 @@ namespace aslam {
                     _options.verbose && std::cout << "[" << srv.iterations << "]: J: " << _J << ", dJ: " << deltaJ << ", deltaX: " << deltaX << ", ";
                     _options.verbose && _trustRegionPolicy->printState(std::cout);
                     _options.verbose && std::cout << std::endl;
-                }
-            } // if the linear solver failed / else
+                } // if the linear solver failed / else
+            }
+
             srv.JFinal = _p_J;
             srv.dXFinal = deltaX;
             srv.dJFinal = deltaJ;

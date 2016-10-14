@@ -14,7 +14,7 @@ include_directories(${EIGEN_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system program_options)
 
 cs_add_library(${PROJECT_NAME}
-  src/RotationExpression.cpp 
+  src/RotationExpression.cpp
   src/RotationExpressionNode.cpp
   src/RotationQuaternion.cpp
   src/MappedRotationQuaternion.cpp
@@ -25,16 +25,16 @@ cs_add_library(${PROJECT_NAME}
   src/MatrixBasic.cpp
   src/RotationScalarExpressionNode.cpp
 
-  src/TransformationExpression.cpp 
+  src/TransformationExpression.cpp
   src/TransformationExpressionNode.cpp
   src/TransformationBasic.cpp
 
-  src/EuclideanExpression.cpp 
+  src/EuclideanExpression.cpp
   src/EuclideanExpressionNode.cpp
   src/EuclideanPoint.cpp
   src/MappedEuclideanPoint.cpp
 
-  src/HomogeneousExpression.cpp 
+  src/HomogeneousExpression.cpp
   src/HomogeneousExpressionNode.cpp
   src/HomogeneousPoint.cpp
   src/MappedHomogeneousPoint.cpp
