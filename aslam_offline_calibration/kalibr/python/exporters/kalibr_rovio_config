@@ -11,7 +11,7 @@ import rospkg
 from matplotlib.colors import LogNorm
 np.set_printoptions(suppress=True)
 
-def printCameraBlock(camConfig, T_SC, q_SC_jpl):
+def printCameraBlock(camConfig, T_SC, q_SC):
     #example topic= /cam0/image_raw
     topic = camConfig.getRosTopic()
 
@@ -30,10 +30,10 @@ def printCameraBlock(camConfig, T_SC, q_SC_jpl):
     STRING_OUT+= "{\n"
     STRING_OUT+= "  CalibrationFile  ;            Camera-Calibration file for intrinsics\n"
 
-    STRING_OUT+= "  qCM_x  {0}                               X-entry of IMU to Camera quaterion (JPL)\n".format(q_SC_jpl[0])
-    STRING_OUT+= "  qCM_y  {0}                               Y-entry of IMU to Camera quaterion (JPL)\n".format(q_SC_jpl[1])
-    STRING_OUT+= "  qCM_z  {0}                               Z-entry of IMU to Camera quaterion (JPL)\n".format(q_SC_jpl[2])
-    STRING_OUT+= "  qCM_w  {0}                               W-entry of IMU to Camera quaterion (JPL)\n".format(q_SC_jpl[3])
+    STRING_OUT+= "  qCM_x  {0}                               X-entry of IMU to Camera quaterion (Hamilton)\n".format(q_SC[0])
+    STRING_OUT+= "  qCM_y  {0}                               Y-entry of IMU to Camera quaterion (Hamilton)\n".format(q_SC[1])
+    STRING_OUT+= "  qCM_z  {0}                               Z-entry of IMU to Camera quaterion (Hamilton)\n".format(q_SC[2])
+    STRING_OUT+= "  qCM_w  {0}                               W-entry of IMU to Camera quaterion (Hamilton)\n".format(q_SC[3])
     STRING_OUT+= "  MrMC_x {0}                               X-entry of IMU to Camera vector (expressed in IMU CF) [m]\n".format(T_SC[0,3])
     STRING_OUT+= "  MrMC_y {0}                               Y-entry of IMU to Camera vector (expressed in IMU CF) [m]\n".format(T_SC[1,3])
     STRING_OUT+= "  MrMC_z {0}                               Z-entry of IMU to Camera vector (expressed in IMU CF) [m]\n".format(T_SC[2,3])
@@ -110,8 +110,8 @@ if __name__ == "__main__":
         camConfig = camchain.getCameraParameters(cidx)
 
         T_SC = camchain.getExtrinsicsImuToCam(cidx).inverse().T()
-        q_SC_jpl = camchain.getExtrinsicsImuToCam(cidx).q()
-        CONFIG += printCameraBlock(camConfig, T_SC, q_SC_jpl)
+        q_SC = camchain.getExtrinsicsImuToCam(cidx).inverse().q()
+        CONFIG += printCameraBlock(camConfig, T_SC, q_SC)
 
     with open(kalibr_path + '/python/exporters/auxiliary_files/rovio_footer.txt', 'r') as file_:
         CONFIG += file_.read()
