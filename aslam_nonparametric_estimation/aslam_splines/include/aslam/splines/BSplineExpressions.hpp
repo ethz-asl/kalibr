@@ -325,6 +325,30 @@ namespace aslam {
 
         };
 
+////////////////////////////////////////////////
+        class LinearAccelerationTimeOffsetExpressionNode : public aslam::backend::EuclideanExpressionNode
+        {
+        public:
+
+            LinearAccelerationTimeOffsetExpressionNode(BSplinePoseDesignVariable * bspline, const aslam::backend::ScalarExpression & time,
+                    double bufferTmin = 0.0, double bufferTmax = 0.0);
+            virtual ~LinearAccelerationTimeOffsetExpressionNode();
+
+        protected:
+            virtual Eigen::Vector3d toEuclideanImplementation() const;
+            virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJacobians) const;
+            virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const;
+            virtual void getDesignVariablesImplementation(aslam::backend::DesignVariable::set_t & designVariables) const;
+
+            BSplinePoseDesignVariable * _spline;
+            aslam::backend::ScalarExpression  _time;
+
+            int _bufferLeft;
+            int _bufferRight;
+            double _bufferTmin;
+            double _bufferTmax;
+            Eigen::VectorXi _localCoefficientIndices;
+        };
 
     } // namespace splines
 } // namespace aslam

@@ -53,6 +53,11 @@ namespace aslam {
             aslam::backend::EuclideanExpression angularVelocityBodyFrameAtTime(const aslam::backend::ScalarExpression & time);
             aslam::backend::RotationExpression orientationAtTime(const aslam::backend::ScalarExpression & time, double leftBuffer, double rightBuffer);
             aslam::backend::RotationExpression orientationAtTime(const aslam::backend::ScalarExpression & time);
+            aslam::backend::EuclideanExpression linearAccelerationAtTime(const aslam::backend::ScalarExpression & time, double leftBuffer, double rightBuffer);
+            aslam::backend::EuclideanExpression linearAccelerationAtTime(const aslam::backend::ScalarExpression & time);
+	    //TODO still to be implemented
+            //aslam::backend::EuclideanExpression angularAccelerationBodyFrameAtTime(const aslam::backend::ScalarExpression & time, double leftBuffer, double rightBuffer);
+            //aslam::backend::EuclideanExpression angularAccelerationBodyFrameAtTime(const aslam::backend::ScalarExpression & time);
 
             size_t numDesignVariables();
             aslam::backend::DesignVariableMappedVector<6> * designVariable(size_t i);

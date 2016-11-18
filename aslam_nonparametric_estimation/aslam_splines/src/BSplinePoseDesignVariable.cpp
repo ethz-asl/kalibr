@@ -246,5 +246,17 @@ aslam::backend::RotationExpression BSplinePoseDesignVariable::orientationAtTime(
 
 	return aslam::backend::RotationExpression(root);
 }
+
+aslam::backend::EuclideanExpression BSplinePoseDesignVariable::linearAccelerationAtTime(const aslam::backend::ScalarExpression & time)
+{
+    return linearAccelerationAtTime(time, 0.0,0.0);
+}
+
+aslam::backend::EuclideanExpression BSplinePoseDesignVariable::linearAccelerationAtTime(const aslam::backend::ScalarExpression & time, double leftBuffer, double rightBuffer)
+{
+    boost::shared_ptr<LinearAccelerationTimeOffsetExpressionNode> root( new LinearAccelerationTimeOffsetExpressionNode( this, time, leftBuffer, rightBuffer) );
+    return aslam::backend::EuclideanExpression(root);
+}
+
     } // namespace splines
 } // namespace aslam

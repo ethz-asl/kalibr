@@ -796,7 +796,6 @@ void AngularVelocityTimeOffsetExpressionNode::getDesignVariablesImplementation(a
 	_time.getDesignVariables(designVariables);
 }
 
-
 ///////////////////////////////////
 // EuclideanExpression offset
 
@@ -1036,6 +1035,96 @@ void RotationTimeOffsetExpressionNode::getDesignVariablesImplementation(aslam::b
 		designVariables.insert( _spline->designVariable(_localCoefficientIndices[i]) );
 	}
         _time.getDesignVariables(designVariables);
+}
+
+
+
+///////////////////////////////////
+// Linear acceleration time offset
+LinearAccelerationTimeOffsetExpressionNode::LinearAccelerationTimeOffsetExpressionNode(BSplinePoseDesignVariable * bspline, const aslam::backend::ScalarExpression & time, double bufferTmin, double bufferTmax) :
+                            _spline(bspline), _time(time)
+{
+    double initTime = time.toScalar();
+
+    if(bufferTmax + initTime > _spline->spline().t_max())
+        _bufferRight = _spline->spline().numValidTimeSegments()-1;
+    else
+        _bufferRight = _spline->spline().segmentIndex(initTime + bufferTmax);
+
+    if(initTime - bufferTmin < _spline->spline().t_min())
+        _bufferLeft = 0;
+    else
+        _bufferLeft = _spline->spline().segmentIndex(initTime - bufferTmin);
+
+    // take the full time span of the time segments
+    _bufferTmax = _spline->spline().timeInterval(_bufferRight).second;
+    _bufferTmin = _spline->spline().timeInterval(_bufferLeft).first;
+    // store the local design variable indices over all segments:
+    // the time in the center of the segment is taken to avoid numerical issues. maybe this is redundant
+    Eigen::VectorXi leftCoeff = _spline->spline().localVvCoefficientVectorIndices( (_spline->spline().timeInterval(_bufferLeft).first + _spline->spline().timeInterval(_bufferLeft).second)/2.0 );
+    Eigen::VectorXi rightCoeff = _spline->spline().localVvCoefficientVectorIndices( (_spline->spline().timeInterval(_bufferRight).first + _spline->spline().timeInterval(_bufferRight).second)/2.0 );
+
+    // fill the vector with all the indices
+    int l = leftCoeff(0);
+    int r = rightCoeff(rightCoeff.size() -1);
+    _localCoefficientIndices = Eigen::VectorXi(r - l + 1);
+    for(int i = l; i <= r; i++)
+        _localCoefficientIndices(i-l) = i;
+}
+
+LinearAccelerationTimeOffsetExpressionNode::~LinearAccelerationTimeOffsetExpressionNode()
+{
+}
+
+Eigen::Vector3d LinearAccelerationTimeOffsetExpressionNode::toEuclideanImplementation() const
+{
+    SM_ASSERT_GE_LT(aslam::Exception, _time.toScalar(), _bufferTmin, _bufferTmax, "Spline Coefficient Buffer Exceeded. Set larger buffer margins!");
+    return _spline->spline().evalD(_time.toScalar(), 2).head<3>();
+}
+
+void LinearAccelerationTimeOffsetExpressionNode::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJacobians)  const
+{
+    evaluateJacobiansImplementation(outJacobians, Eigen::Matrix3d::Identity());
+}
+
+void LinearAccelerationTimeOffsetExpressionNode::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJacobians, const Eigen::MatrixXd & applyChainRule) const
+{
+    Eigen::MatrixXd J;
+
+    double observationTime = _time.toScalar();
+    SM_ASSERT_GE_LT(aslam::Exception, observationTime, _bufferTmin, _bufferTmax, "Spline Coefficient Buffer Exceeded. Set larger buffer margins!");
+
+    Eigen::VectorXi dvidxs = _spline->spline().localVvCoefficientVectorIndices(observationTime);
+    _spline->spline().evalDAndJacobian(observationTime, 2, &J, NULL);
+
+    int minIdx = dvidxs(0);
+    int maxIdx = dvidxs(dvidxs.size() - 1);
+    int j = 0;
+
+    for(int i = 0; i < _localCoefficientIndices.size(); i ++)
+    {
+        // nonzero Jacobian
+        if(_localCoefficientIndices[i] >= minIdx && _localCoefficientIndices[i] <= maxIdx ) {
+            outJacobians.add(_spline->designVariable(_localCoefficientIndices[i]), applyChainRule * J.block<3,6>(0,j*6) );
+            j++;
+        }
+        // zero Jacobian:
+        else {
+            outJacobians.add(_spline->designVariable(_localCoefficientIndices[i]), applyChainRule * Eigen::Matrix<double, 3,6>::Zero());
+        }
+    }
+
+    Eigen::Vector3d alpha_dot = _spline->spline().evalD(observationTime, 3).head<3>();
+    _time.evaluateJacobians(outJacobians, applyChainRule * alpha_dot);
+}
+
+void LinearAccelerationTimeOffsetExpressionNode::getDesignVariablesImplementation(aslam::backend::JacobianContainer::set_t & designVariables) const
+{
+    for(int i = 0; i < _localCoefficientIndices.size(); ++i)
+    {
+        designVariables.insert( _spline->designVariable(_localCoefficientIndices[i]) );
+    }
+    _time.getDesignVariables(designVariables);
 }
 
     } // namespace splines

@@ -83,6 +83,7 @@ def parseArgs():
     groupImu.add_argument('--imu-delay-by-correlation', action='store_true', dest='estimate_imu_delay', \
                           help='Estimate the delay between multiple IMUs by correlation. By default, no temporal calibration between IMUs will be performed.', required=False)      
     groupImu.add_argument('--imu-models', nargs='+', dest='imu_models', help='The IMU models to estimate. Currently supported are \'calibrated\', \'scale-misalignment\' and \'scale-misalignment-size-effect\'.', action=Once)
+    groupImu.add_argument('--estimate-gyroscope-delay', action='store_true', dest='gyro_delay', help='Enable the estimation of a separate time delay for gyroscope measurements.', required=False)      
     
     groupTarget = parser.add_argument_group('Calibration target')
     groupTarget.add_argument('--target', dest='target_yaml', help='Calibration target configuration as yaml file', required=True, action=Once)
@@ -149,15 +150,15 @@ def main():
         if imu_model == 'calibrated':
             imus.append( sens.IccImu(imuConfig, parsed, isReferenceImu=(not imus), \
                          estimateTimedelay=parsed.estimate_imu_delay, \
-                         estimateGyroscopeTimeDelay=not parsed.no_time) )
+                         estimateGyroscopeTimeDelay=(not parsed.no_time) and parsed.gyro_delay) )
         elif imu_model == 'scale-misalignment':
             imus.append( sens.IccScaledMisalignedImu(imuConfig, parsed, isReferenceImu=(not imus), \
                          estimateTimedelay=parsed.estimate_imu_delay, \
-                         estimateGyroscopeTimeDelay=not parsed.no_time) )
+                         estimateGyroscopeTimeDelay=(not parsed.no_time) and parsed.gyro_delay) )
         elif imu_model == 'scale-misalignment-size-effect':
             imus.append( sens.IccScaledMisalignedSizeEffectImu(imuConfig, parsed, isReferenceImu=(not imus), \
                          estimateTimedelay=parsed.estimate_imu_delay, \
-                         estimateGyroscopeTimeDelay=not parsed.no_time) )
+                         estimateGyroscopeTimeDelay=(not parsed.no_time) and parsed.gyro_delay) )
         else:
             sm.logError("Model {0} is currently unsupported.".format(imu_model))
             sys.exit(2)
@@ -186,7 +187,7 @@ def main():
     print
     print "Building the problem"
     iCal.buildProblem(splineOrder=6, 
-                      poseKnotsPerSecond=200, 
+                      poseKnotsPerSecond=150, 
                       biasKnotsPerSecond=50, 
                       doPoseMotionError=False,
                       doBiasMotionError=True,
@@ -206,6 +207,7 @@ def main():
     
     print
     print "Optimizing..."
+
     iCal.optimize(maxIterations=parsed.max_iter, recoverCov=parsed.recover_cov)
 
     print

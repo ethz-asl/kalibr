@@ -331,7 +331,7 @@ class IccCamera():
         
         print
         print "Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, poseKnotsPerSecond, seconds)
-        pose.initPoseSplineSparse(times, curve, knots, 1e-4)
+        pose.initPoseSplineSparse(times, curve, knots, 1e-8)
         return pose
     
     def addDesignVariables(self, problem, noExtrinsics=True, noTimeCalibration=True, baselinedv_group_id=ic.HELPER_GROUP_ID):
@@ -613,7 +613,7 @@ class IccImu(object):
         self.imuConfig.setGyroscopeTimeOffset(self.gyroTimeDv.toScalar())
 
     def __init__(self, imuConfig, parsed, isReferenceImu=True, estimateTimedelay=True, \
-                 estimateGyroscopeTimeDelay=True):
+                 estimateGyroscopeTimeDelay=False):
 
         #determine whether IMU coincides with body frame (for multi-IMU setups)
         self.isReferenceImu = isReferenceImu
@@ -751,7 +751,7 @@ class IccImu(object):
 
         self.gyroTimeDv = aopt.Scalar(0.0)
         problem.addDesignVariable(self.gyroTimeDv, ic.HELPER_GROUP_ID)
-        self.gyroTimeDv.setActive(self.estimateGyroscopeTimeDelay)
+        self.gyroTimeDv.setActive(self.estimateGyroscopeTimeDelay) #False)
 
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
                                    accelNoiseScale=1.0):
@@ -1141,14 +1141,13 @@ class IccScaledMisalignedImu(IccImu):
                 C_b_w = poseSplineDv.orientationAtTime(self.gyroTimeDv.toExpression() + tk,\
                                                        self.gyroDelayOffsetPadding, \
                                                        self.gyroDelayOffsetPadding).inverse()
+                a_w = poseSplineDv.linearAccelerationAtTime(self.gyroTimeDv.toExpression() + tk,\
+                                                            self.gyroDelayOffsetPadding, \
+                                                            self.gyroDelayOffsetPadding)
                 
-                ##TODO(jrn) add timedelayed versions of the other quantities as well!
-#                 w_b = poseSplineDv.angularVelocityBodyFrame(tk)
+                #TODO implement a time delayed version for angular acceleration as well
                 w_dot_b = poseSplineDv.angularAccelerationBodyFrame(tk)
-#                 b_i = self.gyroBiasDv.toEuclideanExpression(tk,0)
-#                 C_b_w = poseSplineDv.orientation(tk).inverse()
 
-                a_w = poseSplineDv.linearAcceleration(tk)
                 r_b = self.r_b_Dv.toExpression()
                 a_b = C_b_w * (a_w - g_w) + w_dot_b.cross(r_b) + w_b.cross(w_b.cross(r_b))
 

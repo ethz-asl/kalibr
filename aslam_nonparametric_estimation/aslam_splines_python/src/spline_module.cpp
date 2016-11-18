@@ -58,6 +58,8 @@ BOOST_PYTHON_MODULE(libaslam_splines_python)
     aslam::backend::RotationExpression (BSplinePoseDesignVariable::*orientationAtTime1)(const aslam::backend::ScalarExpression &) = &BSplinePoseDesignVariable::orientationAtTime;
     aslam::backend::RotationExpression (BSplinePoseDesignVariable::*orientationAtTime2)(const aslam::backend::ScalarExpression &, double, double) = &BSplinePoseDesignVariable::orientationAtTime;
 
+    aslam::backend::EuclideanExpression (BSplinePoseDesignVariable::*linearAccelerationAtTime1)(const aslam::backend::ScalarExpression &) = &BSplinePoseDesignVariable::linearAccelerationAtTime;
+    aslam::backend::EuclideanExpression (BSplinePoseDesignVariable::*linearAccelerationAtTime2)(const aslam::backend::ScalarExpression &, double, double) = &BSplinePoseDesignVariable::linearAccelerationAtTime;
   
     class_< BSplinePoseDesignVariable, boost::shared_ptr< BSplinePoseDesignVariable > >("BSplinePoseDesignVariable", init<const BSplinePose &>() )
         .def("spline", &BSplinePoseDesignVariable::spline, return_value_policy<copy_const_reference>())
@@ -75,7 +77,9 @@ BOOST_PYTHON_MODULE(libaslam_splines_python)
         .def("angularVelocityBodyFrameAtTime", angularVelocityBodyFrameAtTime1)
         .def("angularVelocityBodyFrameAtTime", angularVelocityBodyFrameAtTime2)
         .def("orientationAtTime", orientationAtTime1)
-        .def("orientationAtTime", orientationAtTime2);
+        .def("orientationAtTime", orientationAtTime2)
+        .def("linearAccelerationAtTime", linearAccelerationAtTime1)
+        .def("linearAccelerationAtTime", linearAccelerationAtTime2);
 
     class_<EuclideanBSplineDesignVariable, boost::shared_ptr< EuclideanBSplineDesignVariable>, bases<BSplineDesignVariable<3> > >("EuclideanBSplineDesignVariable", init<const BSpline &>())
         .def("toEuclideanExpression", &EuclideanBSplineDesignVariable::toEuclideanExpression)

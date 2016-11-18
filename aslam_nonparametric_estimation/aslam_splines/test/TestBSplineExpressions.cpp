@@ -96,7 +96,7 @@ BSplinePoseDesignVariable generateRandomSpline()
     K.setRandom();
 
 
-    bsplinePose.initPoseSpline3(times, K, 6, 1e-4);
+    bsplinePose.initPoseSpline3(times, K, 7, 1e-4);
   
     BSplinePoseDesignVariable bdv(bsplinePose);
     for(size_t i = 0; i < bdv.numDesignVariables(); ++i)
@@ -365,7 +365,6 @@ TEST(BSplineExpressionTestSuite, testAngularVelocityAtTimeExpression)
   
 }
 
-
 TEST(BSplineExpressionTestSuite, testBSplineEuclideanAtTimeExpression)
 {
     try {
@@ -415,4 +414,27 @@ TEST(BSplineExpressionTestSuite, testOrientationAtTimeExpression)
         FAIL() << e.what();
     }
   
+}
+
+TEST(BSplineExpressionTestSuite, testLinearAccelerationAtTimeExpression)
+{
+    try {
+        BSplinePoseDesignVariable bdv = generateRandomSpline();
+
+        Scalar s(3.0);
+        s.setActive(true);
+        s.setBlockIndex(bdv.numDesignVariables());
+
+        ScalarExpression se = s.toExpression();
+        EuclideanExpression e = bdv.linearAccelerationAtTime(se, 1.0, 1.0);
+
+        ExpressionNodeFunctor<EuclideanExpression> functor(e);
+
+        SCOPED_TRACE("");
+        functor.testJacobian();
+    }
+    catch(const std::exception & e)
+    {
+        FAIL() << e.what();
+    }
 }
