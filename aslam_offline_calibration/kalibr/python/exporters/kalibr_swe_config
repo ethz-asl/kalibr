@@ -15,6 +15,7 @@ def printCameraBlock(camConfig, T_SC):
     #example topic= /cam0/image_raw
     topic = camConfig.getRosTopic()
 
+    #the label conversion does not apply to us
     #extract image name
     tokens=topic.split("/")
     image_topic=tokens[-1] #=image_raw
@@ -23,10 +24,10 @@ def printCameraBlock(camConfig, T_SC):
     tokens=topic.split(image_topic)
     image_base_topic=tokens[0].replace("/", "", -1) #=cam0/
 
-    cam0_id = md5.new(str(T_SC)).hexdigest()
+    cam0_id = md5.new(str(T_SC)).hexdigest() #TODO pick a different identifier here!
     STRING_OUT=""
     STRING_OUT+="- camera:\n"
-    STRING_OUT+="    label: {0}\n".format(image_base_topic)
+    STRING_OUT+="    label: {0}\n".format(topic) #.format(image_base_topic)
     STRING_OUT+="    id: {0}\n".format(cam0_id)
     STRING_OUT+="    line-delay-nanoseconds: 0\n"
 
@@ -71,9 +72,99 @@ def printCameraBlock(camConfig, T_SC):
 
     return STRING_OUT
 
+def printImuBlock(imuConfig, time_offset=0.):
+
+    gyro = imuConfig["gyroscopes"]
+    accel = imuConfig["accelerometers"]
+    T_BS = np.vstack(imuConfig["T_i_b"])
+
+    imu_id = md5.new(str(T_BS)).hexdigest()
+
+    STRING_OUT  = "- imu:\n"
+    STRING_OUT += "    label: {0}\n".format(imuConfig["rostopic"])
+    STRING_OUT += "    id: {0}\n".format(imu_id)
+    STRING_OUT += "    gyroscopes:\n"
+    STRING_OUT += "      label: {0}\n".format(imuConfig["gyroscope_rostopic"])
+    STRING_OUT += "      noise_model:\n"
+    STRING_OUT += "        type: {0}\n".format("white-brownian")
+    STRING_OUT += "        noise_density: {0}\n".format(imuConfig["gyroscope_noise_density"])
+    STRING_OUT += "        bandwidth: {0}\n".format(-1.)
+    STRING_OUT += "        bias_noise_density: {0}\n".format(imuConfig["gyroscope_random_walk"])
+    STRING_OUT += "      intrinsic_model:\n"
+    STRING_OUT += "        type: {0}\n".format(imuConfig["model"] \
+                                               if imuConfig["model"] == "calibrated" else "scale-misalignment-gsensitivity")
+    if imuConfig["model"] != "calibrated":
+        STRING_OUT += "        b:\n"
+        STRING_OUT += "          cols: 1\n"
+        STRING_OUT += "          rows: 3\n"
+        STRING_OUT += "          data: [ {0},\n".format(0.)
+        STRING_OUT += "                  {0},\n".format(0.)
+        STRING_OUT += "                  {0} ]\n".format(0.)
+        #here, we fold in the rotation between th crf of the accels and the crf of the gyros 
+        M = np.dot(np.array(gyro["M"]), np.array(gyro["C_gyro_i"]))
+        STRING_OUT += "        M:\n"
+        STRING_OUT += "          cols: 3\n"
+        STRING_OUT += "          rows: 3\n"
+        STRING_OUT += "          data: [ {0}, {1}, {2},\n".format( M[0][0], M[0][1], M[0][2])
+        STRING_OUT += "                  {0}, {1}, {2},\n".format( M[1][0], M[1][1], M[1][2])
+        STRING_OUT += "                  {0}, {1}, {2} ]\n".format(M[2][0], M[2][1], M[2][2])
+        #here, we fold in the rotation between th crf of the accels and the crf of the gyros 
+        Ma = np.dot(np.array(gyro["A"]), np.array(gyro["C_gyro_i"]))
+        STRING_OUT += "        Ma:\n"
+        STRING_OUT += "          cols: 3\n"
+        STRING_OUT += "          rows: 3\n"
+        STRING_OUT += "          data: [ {0}, {1}, {2},\n".format( Ma[0][0], Ma[0][1], Ma[0][2])
+        STRING_OUT += "                  {0}, {1}, {2},\n".format( Ma[1][0], Ma[1][1], Ma[1][2])
+        STRING_OUT += "                  {0}, {1}, {2} ]\n".format(Ma[2][0], Ma[2][1], Ma[2][2])
+    STRING_OUT += "        delay: {0}\n".format(imuConfig["time_offset"] + imuConfig["gyroscope_time_offset"] + time_offset)
+    STRING_OUT += "        range: {0}\n".format(1000.)
+    STRING_OUT += "    accelerometers:\n"
+    STRING_OUT += "      label: {0}\n".format(imuConfig["accelerometer_rostopic"])
+    STRING_OUT += "      noise_model:\n"
+    STRING_OUT += "        type: {0}\n".format("white-brownian")
+    STRING_OUT += "        noise_density: {0}\n".format(imuConfig["accelerometer_noise_density"])
+    STRING_OUT += "        bandwidth: {0}\n".format(-1.)
+    STRING_OUT += "        bias_noise_density: {0}\n".format(imuConfig["accelerometer_random_walk"])
+    STRING_OUT += "      intrinsic_model:\n"
+    STRING_OUT += "        type: {0}\n".format(imuConfig["model"])
+    if imuConfig["model"] != "calibrated":
+        STRING_OUT += "        b:\n"
+        STRING_OUT += "          cols: 1\n"
+        STRING_OUT += "          rows: 3\n"
+        STRING_OUT += "          data: [ {0},\n".format(0.)
+        STRING_OUT += "                  {0},\n".format(0.)
+        STRING_OUT += "                  {0} ]\n".format(0.)
+        M = accel["M"]
+        STRING_OUT += "        M:\n"
+        STRING_OUT += "          cols: 3\n"
+        STRING_OUT += "          rows: 3\n"
+        STRING_OUT += "          data: [ {0}, {1}, {2},\n".format( M[0][0], M[0][1], M[0][2])
+        STRING_OUT += "                  {0}, {1}, {2},\n".format( M[1][0], M[1][1], M[1][2])
+        STRING_OUT += "                  {0}, {1}, {2} ]\n".format(M[2][0], M[2][1], M[2][2])
+    if imuConfig["model"] == "scale-misalignment-size-effect":
+        R = np.vstack([accel["rx_i"], accel["ry_i"], accel["rz_i"]]).T
+        STRING_OUT += "        R:\n"
+        STRING_OUT += "          cols: 3\n"
+        STRING_OUT += "          rows: 3\n"
+        STRING_OUT += "          data: [ {0}, {1}, {2},\n".format( R[0,0], R[0,1], R[0,2])
+        STRING_OUT += "                  {0}, {1}, {2},\n".format( R[1,0], R[1,1], R[1,2])
+        STRING_OUT += "                  {0}, {1}, {2} ]\n".format(R[2,0], R[2,1], R[2,2])
+    STRING_OUT += "        delay: {0}\n".format(imuConfig["time_offset"] + time_offset)
+    STRING_OUT += "        range: {0}\n".format(-1.)
+    STRING_OUT += "  T_B_S:\n"
+    STRING_OUT += "    cols: 4\n"
+    STRING_OUT += "    rows: 4\n"
+    STRING_OUT += "    data: [ {0}, {1}, {2}, {3},\n".format(T_BS[0,0], T_BS[0,1], T_BS[0,2], T_BS[0,3])
+    STRING_OUT += "            {0}, {1}, {2}, {3},\n".format(T_BS[1,0], T_BS[1,1], T_BS[1,2], T_BS[1,3])
+    STRING_OUT += "            {0}, {1}, {2}, {3},\n".format(T_BS[2,0], T_BS[2,1], T_BS[2,2], T_BS[2,3])
+    STRING_OUT += "            0.0, 0.0, 0.0, 1.0 ]\n"
+
+    return STRING_OUT
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert a camchain_imu.yaml to an aslam camera configuration block.')
     parser.add_argument('--cam', dest='chainYaml', help='Camera configuration as yaml file', required=True)
+    parser.add_argument('--imu', dest='imuYaml', help='IMU configuration as yaml file', required=False)
     parser.add_argument('--mav', dest='mavName', help='Name of mav', required=True)
     parser.add_argument('--out', dest='outLoc', help='Path to output parameters to', required=False)
     parsed = parser.parse_args()
@@ -89,12 +180,25 @@ if __name__ == "__main__":
     CONFIG+="id: {0}\n".format(ncam_id)
     CONFIG+= "cameras:\n"
 
+    time_offset = 0.
     #export each camera
     for cidx in range(0, camchain.numCameras()):
         camConfig = camchain.getCameraParameters(cidx)
 
         T_SC = camchain.getExtrinsicsImuToCam(cidx).inverse().T()
         CONFIG += printCameraBlock(camConfig, T_SC)
+        #the timeoffset has to be negated since it is added for the cameras
+        time_offset -= camchain.getTimeshiftCamImu(cidx)
+
+    #get mean time offset with respect to cameras
+    time_offset /= camchain.numCameras()
+
+    if parsed.imuYaml:
+        imuset = kc.ConfigReader.ImuSetParameters(parsed.imuYaml)
+        CONFIG += "imus:\n"
+        for imu in imuset.data.keys():
+            imuConfig = imuset.data[imu]
+            CONFIG += printImuBlock(imuConfig, time_offset=time_offset)
 
     #output the stuff
     if(parsed.outLoc):
