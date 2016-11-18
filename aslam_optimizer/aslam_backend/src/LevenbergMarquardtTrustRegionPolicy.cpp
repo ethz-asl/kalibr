@@ -23,6 +23,16 @@ namespace aslam {
 
     }
 
+    LevenbergMarquardtTrustRegionPolicy::LevenbergMarquardtTrustRegionPolicy(double lambdaInit, double gammaInit) :
+        _lambdaInit(lambdaInit),
+        _gammaInit(gammaInit),
+        _betaInit(2),
+        _pInit(3),
+        _muInit(2)
+    {
+
+    }
+
     LevenbergMarquardtTrustRegionPolicy::LevenbergMarquardtTrustRegionPolicy(const sm::PropertyTree & config) {
       _lambdaInit = config.getDouble("lambdaInit", 1e-3);
       _gammaInit  = config.getDouble("gammaInit", 3.0);
@@ -93,7 +103,7 @@ namespace aslam {
         /// \brief print the current state to a stream (no newlines).
         std::ostream & LevenbergMarquardtTrustRegionPolicy::printState(std::ostream & out) const
         {
-            out << "LM - lambda:" << _lambda << " mu:" << _mu;
+            out << "LM - lambda:" << _lambda << " mu:" << _mu << " gamma:" << _gamma;
             return out;
         }
 

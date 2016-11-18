@@ -155,12 +155,12 @@ class IccCalibrator(object):
             options = aopt.Optimizer2Options()
             options.verbose = True
             options.doLevenbergMarquardt = True
-            options.levenbergMarquardtLambdaInit = 10.0
+            options.levenbergMarquardtLambdaInit = 50.0
             options.nThreads = max(1,multiprocessing.cpu_count()-1)
             options.convergenceDeltaX = 1e-4
             options.convergenceDeltaJ = 1e-2
             options.maxIterations = maxIterations
-            options.trustRegionPolicy = aopt.LevenbergMarquardtTrustRegionPolicy(options.levenbergMarquardtLambdaInit)
+            options.trustRegionPolicy = aopt.LevenbergMarquardtTrustRegionPolicy(options.levenbergMarquardtLambdaInit, 2.)
             options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()
 
         #run the optimization

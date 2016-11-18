@@ -23,7 +23,7 @@ void exportTrustRegionPolicies() {
   // LM
   class_<LevenbergMarquardtTrustRegionPolicy, boost::shared_ptr<LevenbergMarquardtTrustRegionPolicy>, bases< TrustRegionPolicy >, boost::noncopyable >("LevenbergMarquardtTrustRegionPolicy", init<>() )
       .def(init<double>("LevenbergMarquardtTrustRegionPolicy( double initalLambda )"))
-      ;
+      .def(init<double, double>("LevenbergMarquardtTrustRegionPolicy( double initalLambda, double gammaInit )"));
 
   // DL
   class_<DogLegTrustRegionPolicy, boost::shared_ptr<DogLegTrustRegionPolicy>, bases< TrustRegionPolicy >, boost::noncopyable >("DogLegTrustRegionPolicy", init<>() )

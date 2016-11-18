@@ -17,7 +17,8 @@ namespace aslam {
         public:
             LevenbergMarquardtTrustRegionPolicy();
           LevenbergMarquardtTrustRegionPolicy(const sm::PropertyTree & config);
-            LevenbergMarquardtTrustRegionPolicy(double lambdaInit);
+          LevenbergMarquardtTrustRegionPolicy(double lambdaInit);
+          LevenbergMarquardtTrustRegionPolicy(double lambdaInit, double gammaInit);
             virtual ~LevenbergMarquardtTrustRegionPolicy();
             
             /// \brief called by the optimizer when an optimization is starting
