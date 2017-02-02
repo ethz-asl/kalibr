@@ -115,13 +115,17 @@ class CameraChainValidator(object):
         if (timeNow-self.timeLast < 1.0/rate) and self.timeLast!=0:
             return
         self.timeLast = timeNow
-        
+         
         #process the images of all cameras
         self.observations=[]; 
         for cam_nr, msg in enumerate(cam_msgs):
+          
             #convert image to numpy
             try:
-                cv_image = self.bridge.imgmsg_to_cv2(msg)
+                if (msg.encoding == "rgb8"):
+                  cv_image = np.squeeze(np.array(self.bridge.imgmsg_to_cv2(msg, "mono8")))
+                else:
+                  cv_image = self.bridge.imgmsg_to_cv2(msg)
                 np_image = np.array(cv_image)
             except CvBridgeError, e:
                 print e
