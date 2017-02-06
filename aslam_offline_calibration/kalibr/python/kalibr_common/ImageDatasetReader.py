@@ -1,4 +1,3 @@
-import cv
 import cv_bridge
 import cv2
 import rosbag
