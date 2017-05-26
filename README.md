@@ -1,6 +1,6 @@
 ![Kalibr](https://raw.githubusercontent.com/wiki/ethz-asl/kalibr/images/kalibr_small.png)
 
-##Introduction
+## Introduction
 Kalibr is a toolbox that solves the following calibration problems:
 
 1. **Multiple camera calibration**: 
@@ -15,7 +15,7 @@ Kalibr is a toolbox that solves the following calibration problems:
 
 **For questions or comments, please use the [user forum](https://groups.google.com/forum/#!forum/kalibr-users).**
 
-##Authors
+## Authors
 * Paul Furgale ([email](paul.furgale@mavt.ethz.ch))
 * Jérôme Maye ([email](jerome.maye@mavt.ethz.ch))
 * Jörn Rehder ([email](joern.rehder@mavt.ethz.ch))
@@ -33,7 +33,7 @@ The calibration approaches used in Kalibr are based on the following papers. Ple
 ## Acknowledgments
 This work is supported in part by the European Community's Seventh Framework Programme (FP7/2007-2013) under grants #269916 (V-Charge), and #610603 (EUROPA2).
 
-##License (BSD)
+## License (BSD)
 Copyright (c) 2014, Paul Furgale, Jérôme Maye and Jörn Rehder, Autonomous Systems Lab, ETH Zurich, Switzerland<br>
 Copyright (c) 2014, Thomas Schneider, Skybotix AG, Switzerland<br>
 All rights reserved.<br>
