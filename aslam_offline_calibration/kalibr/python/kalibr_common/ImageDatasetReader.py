@@ -123,6 +123,8 @@ class BagImageDatasetReader(object):
             
         else:
             img_data = np.array(self.CVB.imgmsg_to_cv2(data))
+            if data.encoding is "bayer_rggb8":
+                img_data = cv2.cvtColor(img_data, cv2.cv.CV_BayerBG2BGR,3)
 
         if img_data.ndim == 3:
             img_data = cv2.cvtColor(img_data, cv2.COLOR_BGR2GRAY)
