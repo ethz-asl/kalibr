@@ -1,7 +1,7 @@
 <package>
-  <name>suitesparse</name>
+  <name>suitesparse_catkin</name>
   <version>4.2.1</version>
-  <description>suitesparse</description>
+  <description>suitesparse_catkin</description>
   <maintainer email="davis@cise.ufl.edu">Dr. Tim Davis</maintainer>
 
   <license>LGPLv3 or later</license>
