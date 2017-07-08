@@ -303,7 +303,7 @@ class IccCamera():
                 if dist < best_dist:
                     best_r = aa
                     best_dist = dist
-            curve[3:6,i] = best_r;
+            curve[3:6,i] = best_r
             
         seconds = times[-1] - times[0]
         knots = int(round(seconds * poseKnotsPerSecond))

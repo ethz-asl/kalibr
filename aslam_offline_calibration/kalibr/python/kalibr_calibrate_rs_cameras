@@ -167,7 +167,7 @@ def main():
     config.maxNumberOfIterations = parsed.max_iter
     config.framerate = parsed.framerate
     config.timeOffsetConstantSparsityPattern = 0.08
-    config.timeOffsetPadding = 0.5
+    config.timeOffsetPadding = 0.5 #0.5
 
     ######
     ## Calibrate
