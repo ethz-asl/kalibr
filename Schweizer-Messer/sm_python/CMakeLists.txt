@@ -3,7 +3,7 @@ project(sm_python)
 
 #catkin_python_setup()
 
-find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common numpy_eigen sm_kinematics 
+find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common numpy_eigen sm_kinematics
                                         sm_timing sm_logging sm_matrix_archive
                                         sm_property_tree python_module)
 include_directories(${catkin_INCLUDE_DIRS})
@@ -54,3 +54,18 @@ add_python_export_library(${PY_PROJECT_NAME} ${PY_PACKAGE_DIR}
 )
 
 target_link_libraries(${PY_PROJECT_NAME} ${Boost_LIBRARIES})
+
+##################
+## Installation ##
+##################
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/sm/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../sm
+)

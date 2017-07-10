@@ -7,7 +7,7 @@ find_package(Boost REQUIRED COMPONENTS system thread regex)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS 
+  CATKIN_DEPENDS
   DEPENDS
 )
 
@@ -19,7 +19,7 @@ add_definitions(-std=c++0x)
 ## Building ##
 ##############
 
-add_library(${PROJECT_NAME} 
+add_library(${PROJECT_NAME}
   src/Logger.cpp
   src/StdOutLogger.cpp
   src/LoggingEvent.cpp
@@ -28,7 +28,7 @@ add_library(${PROJECT_NAME}
   src/Tokens.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
                       ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 ##################
@@ -42,10 +42,8 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 ## Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.hpp"
-  PATTERN ".svn" EXCLUDE
+install(DIRECTORY include/sm/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../sm
 )
 
 #############
@@ -54,7 +52,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
 add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
-catkin_add_gtest(${PROJECT_NAME}-test 
+catkin_add_gtest(${PROJECT_NAME}-test
   test/test_main.cpp
   test/logTest.cpp)
 if(TARGET ${PROJECT_NAME}-test)

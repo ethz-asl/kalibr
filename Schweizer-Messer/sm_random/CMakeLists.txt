@@ -7,7 +7,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS 
+  CATKIN_DEPENDS
   DEPENDS
 )
 
@@ -32,8 +32,6 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 ## Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.hpp"
-  PATTERN ".svn" EXCLUDE
+install(DIRECTORY include/sm/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../sm
 )
