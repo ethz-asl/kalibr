@@ -25,8 +25,12 @@ add_python_export_library(${PROJECT_NAME} python/aslam_backend
   src/SparseBlockMatrix.cpp
 )
 
-find_package(Boost REQUIRED COMPONENTS thread) 
+find_package(Boost REQUIRED COMPONENTS thread)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+
+install(DIRECTORY include/aslam/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../aslam
+)
 
 cs_install()
 cs_export()

@@ -32,4 +32,17 @@ if(NOT APPLE)
   target_link_libraries(apriltags_demo ${PROJECT_NAME} v4l2)
 endif()
 
+##################
+## Installation ##
+##################
 
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/apriltags/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../apriltags
+)
