@@ -11,6 +11,8 @@
   <author>Dr. Tim Davis</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+
   <build_depend>lapack</build_depend>
   <build_depend>blas</build_depend>
   <build_depend>gfortran</build_depend>
