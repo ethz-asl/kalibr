@@ -27,7 +27,6 @@ namespace aslam {
   class_< DesignVariableAdapter<dv_t>, boost::shared_ptr<DesignVariableAdapter<dv_t> >, bases<DesignVariable> >( name.c_str(), init<boost::shared_ptr< dv_t> >() )
 	.def("value", &DesignVariableAdapter<dv_t>::valuePtr)
   ;
-
   sm::python::unique_register_ptr_to_python<boost::shared_ptr<DesignVariableAdapter<dv_t> > >();
   //boost::python::implicitly_convertible<boost::shared_ptr<DesignVariableAdapter<dv_t> >, boost::shared_ptr<DesignVariable> >();
   
