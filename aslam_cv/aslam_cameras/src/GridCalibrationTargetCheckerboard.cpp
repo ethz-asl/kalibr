@@ -115,6 +115,7 @@ bool GridCalibrationTargetCheckerboard::computeObservation(const cv::Mat & image
                   CV_RGB(255,0,0), 3, 8, false);
 
     cv::imshow("Checkerboard corners", imageCopy1);  // OpenCV call
+    cv::waitKey(1);
   }
 
   //exit here if there is an error
