@@ -204,8 +204,11 @@ bool GridDetector::findTarget(const cv::Mat & image, const aslam::Time & stamp,
     }
 
     cv::imshow("Corner reprojection", imageCopy1);  // OpenCV call
-    if (_options.imageStepping)
-      cv::waitKey();
+    if (_options.imageStepping) {
+      cv::waitKey(0);
+    } else {
+      cv::waitKey(1);
+    }
   }
 
   return success;

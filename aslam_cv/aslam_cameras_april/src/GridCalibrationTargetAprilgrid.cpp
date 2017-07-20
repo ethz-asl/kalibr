@@ -243,6 +243,7 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
       }
 
     cv::imshow("Aprilgrid: Tag corners", imageCopy1);  // OpenCV call
+    cv::waitKey(1);
 
     /* copy image for modification */
     cv::Mat imageCopy2 = image.clone();
@@ -258,6 +259,7 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
     }
 
     cv::imshow("Aprilgrid: Tag detection", imageCopy2);  // OpenCV call
+    cv::waitKey(1);
 
     //if success is false exit here (delayed exit if _options.showExtractionVideo=true for debugging)
     if (!success)
