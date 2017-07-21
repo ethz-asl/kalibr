@@ -28,7 +28,9 @@ public:
 
 	}
 	double getBi(int i){
-		return biVector_.coeff(i);
+		// Note this is normally a VectorXd
+		// So dynamic rows and 1 column
+		return biVector_.coeff(i,0);
 	}
 };
 
