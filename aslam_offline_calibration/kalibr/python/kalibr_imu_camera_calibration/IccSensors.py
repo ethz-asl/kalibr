@@ -246,7 +246,7 @@ class IccCamera():
         discrete_shift = corr.argmax() - (np.size(omega_measured_norm) - 1)
         
         #get cont. time shift
-        times = [im.stamp.toSec() for im in imu.imuData]
+        times = [im.stamp.toSec() for im in imu.imuData if im.stamp.toSec() > 1.4e9]
         dT = np.mean(np.diff( times ))
         shift = -discrete_shift*dT
         
@@ -310,6 +310,7 @@ class IccCamera():
         
         print
         print "Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, poseKnotsPerSecond, seconds)
+        print times
         pose.initPoseSplineSparse(times, curve, knots, 1e-4)
         return pose
     

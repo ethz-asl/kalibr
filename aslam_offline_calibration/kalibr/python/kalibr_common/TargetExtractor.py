@@ -85,8 +85,8 @@ def extractCornersFromDataset(dataset, detector, multithreading=False, numProces
     #single threaded implementation
     else:
         for timestamp, image in dataset.readDataset():
+            image = image.reshape(filter(lambda dim: dim != 1, image.shape))
             if noTransformation:
-                image = image.reshape(filter(lambda dim: dim != 1, image.shape))
                 success, observation = detector.findTargetNoTransformation(timestamp, np.array(image))
             else:
                 success, observation = detector.findTarget(timestamp, np.array(image))
