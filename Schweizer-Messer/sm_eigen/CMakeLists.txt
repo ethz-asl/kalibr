@@ -11,7 +11,7 @@ include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS 
+  CATKIN_DEPENDS
   DEPENDS
 )
 
@@ -21,11 +21,11 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 ## Building ##
 ##############
 
-add_library(${PROJECT_NAME}  
+add_library(${PROJECT_NAME}
   src/random.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
                       ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 ##################
@@ -39,10 +39,8 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 ## Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.hpp"
-  PATTERN ".svn" EXCLUDE
+install(DIRECTORY include/sm/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../sm
 )
 
 #############
@@ -52,7 +50,7 @@ install(DIRECTORY include/${PROJECT_NAME}/
 add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
 ## Add gtest based cpp test target and link libraries
-catkin_add_gtest(${PROJECT_NAME}-test 
+catkin_add_gtest(${PROJECT_NAME}-test
   test/test_main.cpp
   test/EigenSerializationTests.cpp
   test/MatrixSqrtTest.cpp

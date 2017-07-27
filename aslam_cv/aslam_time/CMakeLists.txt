@@ -17,6 +17,9 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${OTHER_LIBS})
 
-cs_install()
+install(DIRECTORY include/aslam/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../aslam
+)
 
+cs_install()
 cs_export()

@@ -6,12 +6,15 @@ find_package(catkin_simple REQUIRED)
 catkin_simple()
 
 add_python_export_library(${PROJECT_NAME} python/aslam_cv_backend
-  src/module.cpp  
+  src/module.cpp
   src/GridCalibration.cpp
   # src/CameraGeometryDesignVariableContainer.cpp
 #  src/NCameraSystemDesignVariableContainer.cpp
 )
 
-cs_install()
+install(DIRECTORY include/aslam/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../aslam
+)
 
+cs_install()
 cs_export()

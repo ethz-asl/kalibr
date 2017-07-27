@@ -13,5 +13,9 @@ cs_add_library(${PROJECT_NAME} src/UndistorterBase.cpp)
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
+install(DIRECTORY include/aslam/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../aslam
+)
+
 cs_install()
 cs_export()
