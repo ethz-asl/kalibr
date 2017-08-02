@@ -43,7 +43,7 @@ namespace aslam {
 
         /// \brief evaluate the jacobians
         template<class SPLINE_T>
-        void SimpleSplineError<SPLINE_T>::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & _jacobians)
+        void SimpleSplineError<SPLINE_T>::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & _jacobians) const
         {
             
             _splineExpression->evaluateJacobians(_jacobians);

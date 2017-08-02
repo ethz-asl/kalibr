@@ -28,7 +28,7 @@ public:
 
 	}
 	double getBi(int i){
-		return biVector_.coeff(i);
+		return biVector_.coeff(i, 0);
 	}
 };
 

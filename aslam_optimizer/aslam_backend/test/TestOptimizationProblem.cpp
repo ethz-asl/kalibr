@@ -49,7 +49,7 @@ protected:
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(JacobianContainer & /* J */) {
+  virtual void evaluateJacobiansImplementation(JacobianContainer & /* J */) const {
   }
 
 };
@@ -68,7 +68,7 @@ protected:
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(JacobianContainer & /* J */) {
+  virtual void evaluateJacobiansImplementation(JacobianContainer & /* J */) const {
   }
 
 };

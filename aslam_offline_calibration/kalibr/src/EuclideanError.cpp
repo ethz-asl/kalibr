@@ -22,7 +22,7 @@ double EuclideanError::evaluateErrorImplementation() {
 
 /// \brief evaluate the jacobian
 void EuclideanError::evaluateJacobiansImplementation(
-		aslam::backend::JacobianContainer & _jacobians) {
+		aslam::backend::JacobianContainer & _jacobians) const {
 	_predictedMeasurement.evaluateJacobians(_jacobians);
 }
 

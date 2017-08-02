@@ -40,7 +40,7 @@ class SimpleReprojectionError : public ErrorTermFs<FRAME_T::KeypointDimension> {
 
   /// \brief evaluate the jacobian
   virtual void evaluateJacobiansImplementation(
-      aslam::backend::JacobianContainer & _jacobians);
+      aslam::backend::JacobianContainer & _jacobians) const;
 
   /// \brief the frame that this measurement comes from.
   measurement_t _y;

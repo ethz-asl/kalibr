@@ -79,7 +79,7 @@ namespace aslam {
 
         /// \brief evaluate the jacobians
         template<class SPLINE_T>
-        void BSplineMotionError<SPLINE_T>::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & /* _jacobians */)
+        void BSplineMotionError<SPLINE_T>::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & /* _jacobians */) const
         {
                       
           // this is an error...

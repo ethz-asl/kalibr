@@ -46,7 +46,7 @@ double GyroscopeNoBiasError::evaluateErrorImplementation() {
 }
 
 void GyroscopeNoBiasError::evaluateJacobiansImplementation(
-		aslam::backend::JacobianContainer & _jacobians) {
+		aslam::backend::JacobianContainer & _jacobians) const {
 	_angularVelocity.evaluateJacobians(_jacobians);
 }
 

@@ -48,7 +48,7 @@ class ReprojectionError : public ErrorTermFs<
 
   /// \brief evaluate the jacobian
   virtual void evaluateJacobiansImplementation(
-      aslam::backend::JacobianContainer & J);
+      aslam::backend::JacobianContainer & J) const;
 
   measurement_t _y;
 

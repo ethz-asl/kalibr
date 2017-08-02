@@ -29,7 +29,7 @@ class EuclideanError : public aslam::backend::ErrorTermFs<3> {
 
   /// \brief evaluate the jacobian
   virtual void evaluateJacobiansImplementation(
-      aslam::backend::JacobianContainer & _jacobians);
+      aslam::backend::JacobianContainer & _jacobians) const;
 
   Eigen::Vector3d _measurement;
   aslam::backend::EuclideanExpression _predictedMeasurement;
