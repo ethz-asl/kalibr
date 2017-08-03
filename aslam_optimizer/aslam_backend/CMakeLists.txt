@@ -48,22 +48,26 @@ cs_add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
-# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
-add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
-catkin_add_gtest(${PROJECT_NAME}_test
-  test/test_main.cpp
-  test/JacobianContainer.cpp
-  test/test_sparse_matrix_functions.cpp
-  test/TestOptimizer.cpp
-  test/TestOptimizationProblem.cpp
-  test/CompressedColumnMatrixTest.cpp
-  test/MatrixTestHarness.cpp
-  test/DenseMatrixTest.cpp
-  test/SparseMatrixTest.cpp
-  test/LinearSolverTests.cpp
-  test/ErrorTermTests.cpp
-)
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+if(CATKIN_ENABLE_TESTING)
+
+  # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
+  add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
+  catkin_add_gtest(${PROJECT_NAME}_test
+    test/test_main.cpp
+    test/JacobianContainer.cpp
+    test/test_sparse_matrix_functions.cpp
+    test/TestOptimizer.cpp
+    test/TestOptimizationProblem.cpp
+    test/CompressedColumnMatrixTest.cpp
+    test/MatrixTestHarness.cpp
+    test/DenseMatrixTest.cpp
+    test/SparseMatrixTest.cpp
+    test/LinearSolverTests.cpp
+    test/ErrorTermTests.cpp
+    )
+  target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+
+endif()
 
 cs_install()
 cs_export()
