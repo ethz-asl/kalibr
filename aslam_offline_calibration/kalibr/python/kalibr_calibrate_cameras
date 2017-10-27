@@ -76,12 +76,14 @@ def parseArgs():
             
     parser = KalibrArgParser(description='Calibrate the intrinsics and extrinsics of a camera system with non-shared overlapping field of view.', usage=usage)
     parser.add_argument('--models', nargs='+', dest='models', help='The camera model {0} to estimate'.format(cameraModels.keys()), required=True)
-    
+    #Cam File with initial Intrinsics
+    parser.add_argument('--cam', dest='chainYaml', help='Camera configuration as yaml file', required=False)
+
     groupSource = parser.add_argument_group('Data source')
     groupSource.add_argument('--bag', dest='bagfile', help='The bag file with the data')
     groupSource.add_argument('--topics', nargs='+', dest='topics', help='The list of image topics', required=True)
     groupSource.add_argument('--bag-from-to', metavar='bag_from_to', type=float, nargs=2, help='Use the bag data starting from up to this time [s]')
-    
+
     groupTarget = parser.add_argument_group('Calibration target configuration')
     groupTarget.add_argument('--target', dest='targetYaml', help='Calibration target configuration as yaml file', required=True)
     
@@ -105,7 +107,9 @@ def parseArgs():
     outputSettings.add_argument('--show-extraction', action='store_true', dest='showextraction', help='Show the calibration target extraction. (disables plots)')
     outputSettings.add_argument('--plot', action='store_true', dest='plot', help='Plot during calibration (this could be slow).')
     outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
-       
+    
+
+
     #print help if no argument is specified
     if len(sys.argv)==1:
         parser.print_help()
@@ -153,27 +157,29 @@ def main():
     numCams = len(parsed.topics)
 
     obsdb = kcc.ObservationDatabase(parsed.max_delta_approxsync)
-        
+
+
     for cam_id in range(0, numCams):
         topic = parsed.topics[cam_id]
         modelName = parsed.models[cam_id]
         print "Initializing cam{0}:".format(cam_id)
         print "\tCamera model:\t  {0}".format(modelName)
-
+        
         if modelName in cameraModels:
             #open dataset 
             dataset = initBagDataset(parsed.bagfile, topic, parsed.bag_from_to)
         
             #create camera
             cameraModel = cameraModels[modelName]
-            cam = kcc.CameraGeometry(cameraModel, targetConfig, dataset, verbose=(parsed.verbose or parsed.showextraction))
+
+            cam = kcc.CameraGeometry(cameraModel, targetConfig, dataset,verbose=(parsed.verbose or parsed.showextraction))
                 
             #extract the targets
             multithreading = not (parsed.verbose or parsed.showextraction)
             observations = kc.extractCornersFromDataset(cam.dataset, cam.ctarget.detector, 
                                                         multithreading=multithreading, clearImages=False,
                                                         noTransformation=True)
-            
+
             #populate the database
             for obs in observations:
                 obsdb.addObservation(cam_id, obs)
@@ -219,8 +225,7 @@ def main():
 
             for baseline_idx, baseline in enumerate(baseline_guesses):
                 print "initialized baseline between cam{0} and cam{1} to:".format(baseline_idx, baseline_idx+1)
-                print baseline.T()
-                
+               
             for cam_idx, cam in enumerate(cameraList):
                 print "initialized cam{0} to:".format(cam_idx)
                 print "\t projection cam{0}: {1}".format(cam_idx, cam.geometry.projection().getParameters().flatten())
@@ -228,6 +233,7 @@ def main():
                 
 
             print "initializing calibrator"
+
             calibrator = kcc.CameraCalibration(cameraList, baseline_guesses, verbose=parsed.verbose, useBlakeZissermanMest=parsed.doBlakeZisserman)
             options = calibrator.estimator.getOptions()
             options.infoGainDelta = parsed.miTol
@@ -246,6 +252,7 @@ def main():
             verbose = parsed.verbose
         
             doPlot = parsed.plot
+
             if doPlot:
                 print "Plotting during calibration. Things may be very slow (but you might learn something)."
 
@@ -258,17 +265,17 @@ def main():
             print "starting calibration..."
             numViews = len(timestamps)
             progress = sm.Progress2(numViews); progress.sample()
+
             for view_id, timestamp in enumerate(timestamps):
-                
                 #add new batch problem
-                obs_tuple = obsdb.getAllObsAtTimestamp(timestamp)    
+                obs_tuple = obsdb.getAllObsAtTimestamp(timestamp)
                 est_baselines = list()
+
                 for bidx, baseline in enumerate(calibrator.baselines):
                     est_baselines.append( sm.Transformation(baseline.T()) )
                 T_tc_guess = graph.getTargetPoseGuess(timestamp, cameraList, est_baselines)
-                               
+
                 success = calibrator.addTargetView(obs_tuple, T_tc_guess)
-                
                 #display process
                 if (verbose or (view_id % 25) == 0) and calibrator.estimator.getNumBatches()>0 and view_id>1:
                     print
@@ -334,6 +341,7 @@ def main():
                             #select corners to remove
                             cornerRemovalList=list()
                             for pidx, reproj in enumerate(rerrs[batch_id]):
+
                                 if (not np.all(reproj==np.array([None,None]))) and (abs(reproj[0]) > se_threshold[0] or abs(reproj[1]) > se_threshold[1]):
                                     cornerRemovalList.append(pidx)
                                     
@@ -395,9 +403,9 @@ def main():
             kcc.printParameters(calibrator)
             
             if parsed.verbose and len(calibrator.baselines)>1:
-		        f=pl.figure(100006)
-		        kcc.plotCameraRig(calibrator.baselines, fno=f.number, clearFigure=False)
-		        pl.show()
+                f=pl.figure(100006)
+                kcc.plotCameraRig(calibrator.baselines, fno=f.number, clearFigure=False)
+                pl.show()
             
             #write to file
             bagtag = parsed.bagfile.translate(None, "<>:/\|?*").replace('.bag', '', 1)
@@ -431,6 +439,7 @@ def main():
                 for cam_id, cam in enumerate(cameraList):
                     print "Reinitialize the intrinsics for camera {0}".format(cam_id)
                     observations = obsdb.getAllObsCam(cam_id)
+                    
                     if not cam.initGeometryFromObservations(observations):
                         raise RuntimeError("Could not re-initialize the intrinsics for camera with topic: {0}".format(topic))
                     
@@ -447,3 +456,4 @@ if __name__ == "__main__":
 #     except Exception,e:
 #         sm.logError("Exception: {0}".format(e))
 #         sys.exit(-1)
+

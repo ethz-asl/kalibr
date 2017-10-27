@@ -92,7 +92,7 @@ class GridDetector {
   bool initCameraGeometryFromObservations(boost::shared_ptr<std::vector<cv::Mat> > images_ptr);
 
   /// \brief get the underlying geometry
-  boost::shared_ptr<CameraGeometryBase> geometry() const {
+  boost::shared_ptr<CameraGeometryBase> geometry( ) const {
     return _geometry;
   };
 

@@ -11,8 +11,8 @@
 #include <aslam/cameras/GridCalibrationTargetObservation.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/core/eigen.hpp>
-#include <sm/logging.hpp>
 
+#define ASSYMETRICGRID true
 namespace aslam {
 namespace cameras {
 
@@ -209,7 +209,7 @@ class PinholeProjection {
   int height() const {
     return _rv;
   }
-
+  
   int keypointDimension() const {
     return KeypointDimension;
   }

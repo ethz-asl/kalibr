@@ -129,6 +129,7 @@ boost::python::tuple imageGridPoint(
   Eigen::Vector2d p = Eigen::Vector2d::Zero();
   bool success = frame->imageGridPoint(r, c, p);
   return boost::python::make_tuple(success, p);
+
 }
 
 /// \brief get all corners in target coordinates (order matches getCornersImageFrame)
@@ -200,7 +201,7 @@ Eigen::VectorXi getCornersIdx(
 
   return imageCornersEigen;
 }
-
+ 
 
 void exportGridCalibration() {
   using namespace boost::python;

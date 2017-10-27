@@ -12,6 +12,7 @@ include_directories(${Eigen_INCLUDE_DIRS})
 
 cs_add_library(${PROJECT_NAME} 
   src/GridCalibrationTargetAprilgrid.cpp
+  src/GridCalibrationTargetAssymetricAprilgrid.cpp
   )
 
 find_package(Boost REQUIRED COMPONENTS serialization system) 
