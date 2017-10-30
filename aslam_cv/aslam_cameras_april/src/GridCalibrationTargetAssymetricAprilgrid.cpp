@@ -35,7 +35,7 @@ GridCalibrationTargetAssymetricAprilgrid::GridCalibrationTargetAssymetricAprilgr
      targetPoints2Grid();
     
         
-    _points.resize(size(), 3);
+    _points.setConstant(size(), 3,-1);
     
     //initialize a normal grid (checkerboard and circlegrids)
     createGridPoints();
@@ -61,7 +61,7 @@ GridCalibrationTargetAssymetricAprilgrid::GridCalibrationTargetAssymetricAprilgr
     
     targetPoints2Grid();
 
-    _points.resize(size(), 3);
+    _points.setConstant(size(), 3,-1);
     
     //initialize a normal grid (checkerboard and circlegrids)
     createGridPoints();

@@ -444,7 +444,7 @@ namespace aslam {
         
         Eigen::Matrix4d TransformationTimeOffsetExpressionNode::toTransformationMatrixImplementation()
         {
-        	SM_ASSERT_GE_LT(aslam::Exception, _time.toScalar(), _bufferTmin, _bufferTmax, "Spline Coefficient Buffer Exceeded. Set larger buffer margins!");
+            SM_ASSERT_GE_LT(aslam::Exception, _time.toScalar(), _bufferTmin, _bufferTmax, "Spline Coefficient Buffer Exceeded. Set larger buffer margins!");
             return _spline->spline().transformation(_time.toScalar());
         }
       

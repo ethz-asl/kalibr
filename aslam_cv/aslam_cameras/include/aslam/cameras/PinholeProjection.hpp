@@ -12,7 +12,6 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/core/eigen.hpp>
 
-#define ASSYMETRICGRID true
 namespace aslam {
 namespace cameras {
 

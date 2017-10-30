@@ -1,6 +1,5 @@
 #include <opencv2/core/eigen.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
+
 #include <Eigen/StdVector>
 
 namespace aslam {
@@ -753,33 +752,38 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
 
     std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> center(target.rows());
     double radius[target.rows()];
-    std::vector<std::vector<size_t>> validPoints;
- 
+
+    int count=0;
+    int MIN_TAGS = 3; 
     //If the grid is assymetric we never see all grid Points. Initialization can't be the same as for the symmetric case.
-    bool skipImage=ASSYMETRICGRID; 
+    bool skipImage=false;
+    bool assymetric=false;
     for (size_t r=0; r<target.rows(); ++r) {
       std::vector<cv::Point2d> circle;
-      int count =0;
 
       for (size_t c=0; c<target.cols(); ++c) {
         Eigen::Vector2d imagePoint;
         Eigen::Vector3d gridPoint;
-
+        //For low resolution can fail -> change method to allow less observations or initialize with constant value
+        if (target.gridPoint(r,c)(0)==-1){
+          assymetric = true;
+          continue;
+        }
         if (obs.imageGridPoint(r, c, imagePoint)){
           circle.push_back(cv::Point2f(imagePoint[0], imagePoint[1]));
-          validPoints.push_back({r,c});
           count ++;  
         }
-        else if(!ASSYMETRICGRID)
+        else if(!assymetric)
           //skip this image if the board view is not complete
           skipImage=true;
 
       }
-      //If we see two points of the same tag we have at least one horizontal line
-      if(count > 0 && count%2==0 && ASSYMETRICGRID)
-        skipImage=false;
+      
       PinholeHelpers::fitCircle(circle, center[r](0), center[r](1), radius[r]);
     }
+    //If we see two points of the same tag we have at least one horizontal line. See at least 3 tags? 2 tags?
+      if(count >= MIN_TAGS*4 && assymetric)
+        skipImage=false;
 
     if(skipImage){
       continue;
@@ -851,7 +855,6 @@ bool PinholeProjection<DISTORTION_T>::estimateTransformation(
     const GridCalibrationTargetObservation & obs,
     sm::kinematics::Transformation & out_T_t_c) const {
   
-  //SM_INFO_STREAM("estimate transformation pinhle");
   std::vector<cv::Point2f> Ms;
   std::vector<cv::Point3f> Ps;
 

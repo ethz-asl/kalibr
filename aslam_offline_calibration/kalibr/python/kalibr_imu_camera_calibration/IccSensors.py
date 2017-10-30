@@ -108,7 +108,7 @@ class IccCamera():
             options.minTagsForValidObs  = 1
             options.showExtractionVideo = showExtraction
             #options.maxSubpixDisplacement2 = 2
-            #options.doSubpixRefinement = False
+            options.doSubpixRefinement = False
             vectorTags =[]
             for tag in targetParams['tags']:
                 structTag = acv_april.TargetPoint()
