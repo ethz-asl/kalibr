@@ -23,7 +23,7 @@ def printLine():
     print("------------------------")
 
 
-def axis_equal_3d(ax):
+def axisEqual3D(ax):
     extents = np.array(
         [getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
     sz = extents[:, 1] - extents[:, 0]
@@ -33,12 +33,17 @@ def axis_equal_3d(ax):
     for ctr, dim in zip(centers, 'xyz'):
         getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
 
-def plot_points_3d(points):
+def plotPoints3D(points):
     fig = pl.figure()
     ax = fig.gca(projection='3d')
     ax.scatter(points[0,:], points[1,:], points[2,:])
-    axis_equal_3d(ax)
+    axisEqual3D(ax)
     pl.show()
+
+
+def getDistance(point, other_point):
+    difference_vector = other_point - point
+    return np.linalg.norm(difference_vector)
 
 
 def main():
@@ -48,18 +53,22 @@ def main():
     num_cameras = camchain.numCameras()
     print("Configuration has " + str(num_cameras) + " cameras .")
     printLine()
-    focal_centers = np.empty([3, 0])
+    focal_centers = np.zeros([3, 1])
     for cam_index in range(num_cameras):
         print("Configuration for camera " + str(cam_index) + ":")
         T_I_C = camchain.getExtrinsicsImuToCam(cam_index).inverse().T()
-        print(np.linalg.det(T_I_C[0:3, 0:3]))
+        R_I_C = T_I_C[0:3, 0:3]
         focal_point = T_I_C[0:3, 3].reshape(3, 1)
         focal_centers = np.concatenate((focal_centers, focal_point), axis=1)
         intrinsics = camchain.getCameraParameters(cam_index)
+        if cam_index > 0:
+            distance = getDistance(focal_centers[:,-1], focal_centers[:,-2])
+            if distance < 0.1:
+                print(distance)
         printLine()
 
     print(focal_centers.shape)
-    plot_points_3d(focal_centers)
+    plotPoints3D(focal_centers)
 
 
 if __name__ == "__main__":
