@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+import kalibr_common as kc
+
+import argparse
+import numpy as np
+import pylab as pl
+from mpl_toolkits.mplot3d import Axes3D
+
+
+def parseArguments():
+    parser = argparse.ArgumentParser(
+        description='Visualizes a camchain.yaml or camchain_imu.yaml file.')
+    parser.add_argument(
+        '--cam',
+        dest='chainYaml',
+        help='Camera configuration as yaml file.',
+        required=True)
+    parsed_args = parser.parse_args()
+    return parsed_args
+
+
+def printLine():
+    print("------------------------")
+
+
+def axis_equal_3d(ax):
+    extents = np.array(
+        [getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
+    sz = extents[:, 1] - extents[:, 0]
+    centers = np.mean(extents, axis=1)
+    maxsize = max(abs(sz))
+    r = maxsize / 2
+    for ctr, dim in zip(centers, 'xyz'):
+        getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
+
+def plot_points_3d(points):
+    fig = pl.figure()
+    ax = fig.gca(projection='3d')
+    ax.scatter(points[0,:], points[1,:], points[2,:])
+    axis_equal_3d(ax)
+    pl.show()
+
+
+def main():
+    print("Loading camera configuration...")
+    parsed_args = parseArguments()
+    camchain = kc.ConfigReader.CameraChainParameters(parsed_args.chainYaml)
+    num_cameras = camchain.numCameras()
+    print("Configuration has " + str(num_cameras) + " cameras .")
+    printLine()
+    focal_centers = np.empty([3, 0])
+    for cam_index in range(num_cameras):
+        print("Configuration for camera " + str(cam_index) + ":")
+        T_I_C = camchain.getExtrinsicsImuToCam(cam_index).inverse().T()
+        print(np.linalg.det(T_I_C[0:3, 0:3]))
+        focal_point = T_I_C[0:3, 3].reshape(3, 1)
+        focal_centers = np.concatenate((focal_centers, focal_point), axis=1)
+        intrinsics = camchain.getCameraParameters(cam_index)
+        printLine()
+
+    print(focal_centers.shape)
+    plot_points_3d(focal_centers)
+
+
+if __name__ == "__main__":
+    main()
