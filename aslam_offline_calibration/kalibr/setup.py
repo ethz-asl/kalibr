@@ -18,10 +18,10 @@ setup_args = generate_distutils_setup(
              'python/kalibr_camera_focus',
              'python/kalibr_camera_validator',
              'python/kalibr_create_target_pdf',
-             'python/exporters/kalibr_aslam_config',
+             'python/exporters/kalibr_aslam_maplab_config',
              'python/exporters/kalibr_msf_config',
-             'python/exporters/kalibr_rovio_config',
-             'python/exporters/kalibr_swe_config']
+             'python/exporters/kalibr_okvis_config',
+             'python/exporters/kalibr_rovio_config']
 )
 
 setup(**setup_args)

@@ -21,7 +21,7 @@ def printCameraBlock(camConfig, T_SC):
 
     #extract base topic
     tokens=topic.split(image_topic)
-    image_base_topic=tokens[0].replace("/", "", -1) #=cam0/
+    image_base_topic=tokens[0].rstrip("/") #=/cam0
 
     cam0_id = md5.new(str(T_SC)).hexdigest()
     STRING_OUT=""
@@ -74,7 +74,7 @@ def printCameraBlock(camConfig, T_SC):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert a camchain_imu.yaml to an aslam camera configuration block.')
     parser.add_argument('--cam', dest='chainYaml', help='Camera configuration as yaml file', required=True)
-    parser.add_argument('--mav', dest='mavName', help='Name of mav', required=True)
+    parser.add_argument('--label', dest='labelName', help='Name of camera chain', required=False, default='kalibr_camera_chain')
     parser.add_argument('--out', dest='outLoc', help='Path to output parameters to', required=False)
     parsed = parser.parse_args()
 
@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     #create camera config block
     CONFIG=""
-    CONFIG+="label: \"{0}\"\n".format(parsed.mavName)
+    CONFIG+="label: \"{0}\"\n".format(parsed.labelName)
     CONFIG+="id: {0}\n".format(ncam_id)
     CONFIG+= "cameras:\n"
 
@@ -102,8 +102,8 @@ if __name__ == "__main__":
           file_.write(CONFIG)
     else:
         print
-        print "Copy the following block to your swe configuration:"
-        print "---------------------------------------------------"
+        print "Copy the following block to your aslam/maplab configuration:"
+        print "------------------------------------------------------------"
         print
         print CONFIG
 
