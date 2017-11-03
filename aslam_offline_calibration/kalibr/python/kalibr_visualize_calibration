@@ -1,16 +1,15 @@
-#!/usr/bin/env python3
-import kalibr_common as kc
-
+#!/usr/bin/env python
 import argparse
+import kalibr_common as kc
+from mpl_toolkits.mplot3d import art3d, Axes3D, proj3d
 import numpy as np
 import pylab as pl
-from mpl_toolkits.mplot3d import Axes3D, proj3d
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
+import sm
 
 
 def parseArguments():
     parser = argparse.ArgumentParser(
-        description='Visualizes a camchain.yaml or camchain_imu.yaml file.')
+        description='Visualizes a camchain.yaml or camchain-imu.yaml file.')
     parser.add_argument(
         '--cam',
         dest='chainYaml',
@@ -22,21 +21,17 @@ def parseArguments():
         dest='azimView',
         help='Azimuth angle of the view.',
         type=float,
-        default=0,
+        default=90,
         required=False)
     parser.add_argument(
         '--elev',
         dest='elevView',
         help='Elevation angle of the view.',
         type=float,
-        default=90,
+        default=0,
         required=False)
     parsed_args = parser.parse_args()
     return parsed_args
-
-
-def printLine():
-    print("------------------------")
 
 
 def axisEqual3D(ax):
@@ -59,14 +54,10 @@ def orthogonalProjection(zfront, zback):
 
 
 def transformPointcloud(transform, points):
-    assert transform.shape == (4, 4)
-    R = transform[0:3, 0:3].reshape(3, 3)
-    t = transform[0:3, 3].reshape(3, 1)
     assert points.shape[1] == 3
     points_transformed = points.copy()
     for index in range(points.shape[0]):
-        point = points[index, :].reshape(3, 1)
-        point_transformed = R.dot(point) + t
+        point_transformed = transform * points[index, :].reshape(3, 1)
         points_transformed[index, :] = point_transformed.reshape(1, 3)
     return points_transformed
 
@@ -79,12 +70,10 @@ class CalibrationVisualization:
         self.ax = self.fig.gca(projection='3d')
         self.color_list = pl.cm.Pastel1(np.linspace(0, 1, 12))
 
-    def addCameraPlot(self, T_imu_cam, intrinsics, resolution):
-        R_I_C = T_imu_cam[0:3, 0:3].reshape(3, 3)
-        t_I_C = T_imu_cam[0:3, 3].reshape(3, 1)
+    def addCameraPlot(self, transform, intrinsics, resolution):
         focal_lengths = intrinsics[0:2]
         principal_point = intrinsics[2:4]
-        self.__drawCameraOutline(T_imu_cam, focal_lengths, principal_point,
+        self.__drawCameraOutline(transform, focal_lengths, principal_point,
                                  resolution)
 
     def showPlot(self, azim, elev):
@@ -119,10 +108,23 @@ class CalibrationVisualization:
                         camera_corners[3]
                     ]]
         fill_color = self.color_list[self.color_counter % 12]
-        self.ax.scatter3D(camera_corners[:, 0], camera_corners[:, 1],
-                          camera_corners[:, 2])
+        # Focal point.
+        self.ax.scatter3D(
+            camera_corners[4, 0],
+            camera_corners[4, 1],
+            camera_corners[4, 2],
+            c=fill_color,
+            s=3e5 * scaling_factor)
+        # Image plane corners.
+        self.ax.scatter3D(
+            camera_corners[1:4, 0],
+            camera_corners[1:4, 1],
+            camera_corners[1:4, 2],
+            c=fill_color,
+            s=1e5 * scaling_factor)
+        # Planes of camera models.
         self.ax.add_collection3d(
-            Poly3DCollection(
+            art3d.Poly3DCollection(
                 vertices,
                 facecolors=fill_color,
                 linewidths=1,
@@ -137,19 +139,21 @@ def getDistance(point, other_point):
 
 
 def main():
-    print("Loading camera configuration...")
     parsed_args = parseArguments()
     calibration_visualization = CalibrationVisualization()
     for camchain_yaml in parsed_args.chainYaml:
         camchain = kc.ConfigReader.CameraChainParameters(camchain_yaml)
         num_cameras = camchain.numCameras()
-        print("Configuration has " + str(num_cameras) + " cameras .")
-        focal_centers = np.zeros([3, 1])
-        for cam_index, (cam, value) in enumerate(camchain.data.iteritems()):
-            T_imu_cam = camchain.getExtrinsicsImuToCam(cam_index).inverse().T()
-            intrinsics = np.asarray(value['intrinsics'])
-            resolution = np.asarray(value['resolution'])
-            calibration_visualization.addCameraPlot(T_imu_cam, intrinsics,
+        print("Plotting configuration with " + str(num_cameras) + " cameras.")
+        T_current = sm.Transformation()
+        for cam_index in range(num_cameras):
+            cam = 'cam{0}'.format(cam_index)
+            if cam != 'cam0':
+                T_current = T_current * camchain.getExtrinsicsLastCamToHere(
+                    cam_index)
+            intrinsics = np.asarray(camchain.data[cam]['intrinsics'])
+            resolution = np.asarray(camchain.data[cam]['resolution'])
+            calibration_visualization.addCameraPlot(T_current, intrinsics,
                                                     resolution)
         calibration_visualization.incrementColor()
     calibration_visualization.showPlot(parsed_args.azimView,
