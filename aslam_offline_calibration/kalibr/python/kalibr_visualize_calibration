@@ -5,6 +5,7 @@ import argparse
 import numpy as np
 import pylab as pl
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 
 
 def parseArguments():
@@ -33,10 +34,27 @@ def axisEqual3D(ax):
     for ctr, dim in zip(centers, 'xyz'):
         getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
 
+
 def plotPoints3D(points):
     fig = pl.figure()
     ax = fig.gca(projection='3d')
-    ax.scatter(points[0,:], points[1,:], points[2,:])
+    ax.scatter(points[0, :], points[1, :], points[2, :])
+    v = np.array([[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
+                  [0, 0, 1]])
+    ax.scatter3D(v[:, 0], v[:, 1], v[:, 2])
+
+    # generate list of sides' polygons of our pyramid
+    verts = [[v[0], v[1], v[4]], [v[0], v[3], v[4]], [v[2], v[1], v[4]],
+             [v[2], v[3], v[4]], [v[0], v[1], v[2], v[3]]]
+
+    # plot sides
+    ax.add_collection3d(
+        Poly3DCollection(
+            verts,
+            facecolors='cyan',
+            linewidths=1,
+            edgecolors='r',
+            alpha=.25))
     axisEqual3D(ax)
     pl.show()
 
@@ -47,25 +65,49 @@ def getDistance(point, other_point):
 
 
 def main():
-    print("Loading camera configuration...")
-    parsed_args = parseArguments()
-    camchain = kc.ConfigReader.CameraChainParameters(parsed_args.chainYaml)
-    num_cameras = camchain.numCameras()
-    print("Configuration has " + str(num_cameras) + " cameras .")
-    printLine()
-    focal_centers = np.zeros([3, 1])
-    for cam_index in range(num_cameras):
-        print("Configuration for camera " + str(cam_index) + ":")
-        T_I_C = camchain.getExtrinsicsImuToCam(cam_index).inverse().T()
-        R_I_C = T_I_C[0:3, 0:3]
-        t_I_C = T_I_C[0:3, 3].reshape(3, 1)
-        focal_centers = np.concatenate((focal_centers, t_I_C), axis=1)
-        intrinsics = camchain.getCameraParameters(cam_index)
-        intrinsics.printDetails()
+    if True:
+        print("Loading camera configuration...")
+        parsed_args = parseArguments()
+        camchain = kc.ConfigReader.CameraChainParameters(parsed_args.chainYaml)
+        num_cameras = camchain.numCameras()
+        print("Configuration has " + str(num_cameras) + " cameras .")
         printLine()
+        focal_centers = np.zeros([3, 1])
+        for cam_index in range(num_cameras):
+            print("Configuration for camera " + str(cam_index) + ":")
+            T_I_C = camchain.getExtrinsicsImuToCam(cam_index).inverse().T()
+            R_I_C = T_I_C[0:3, 0:3]
+            t_I_C = T_I_C[0:3, 3].reshape(3, 1)
+            focal_centers = np.concatenate((focal_centers, t_I_C), axis=1)
+            intrinsics = camchain.getCameraParameters(cam_index)
+            intrinsics.printDetails()
+            printLine()
 
-    print(focal_centers.shape)
-    plotPoints3D(focal_centers)
+        print(focal_centers.shape)
+        plotPoints3D(focal_centers)
+    else:
+        fig = pl.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        # vertices of a pyramid
+        v = np.array([[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
+                      [0, 0, 1]])
+        ax.scatter3D(v[:, 0], v[:, 1], v[:, 2])
+
+        # generate list of sides' polygons of our pyramid
+        verts = [[v[0], v[1], v[4]], [v[0], v[3], v[4]], [v[2], v[1], v[4]],
+                 [v[2], v[3], v[4]], [v[0], v[1], v[2], v[3]]]
+
+        # plot sides
+        ax.add_collection3d(
+            Poly3DCollection(
+                verts,
+                facecolors='cyan',
+                linewidths=1,
+                edgecolors='r',
+                alpha=.25))
+
+        pl.show()
 
 
 if __name__ == "__main__":
