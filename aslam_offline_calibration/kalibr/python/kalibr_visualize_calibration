@@ -4,7 +4,7 @@ import kalibr_common as kc
 import argparse
 import numpy as np
 import pylab as pl
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D, proj3d
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 
 
@@ -16,6 +16,18 @@ def parseArguments():
         dest='chainYaml',
         help='Camera configuration as yaml file.',
         required=True)
+    parser.add_argument(
+        '--azim',
+        dest='azimView',
+        help='Azimuth angle of the view.',
+        default=0,
+        required=False)
+    parser.add_argument(
+        '--elev',
+        dest='elevView',
+        help='Elevation angle of the view.',
+        default=90,
+        required=False)
     parsed_args = parser.parse_args()
     return parsed_args
 
@@ -35,28 +47,57 @@ def axisEqual3D(ax):
         getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
 
 
-def plotPoints3D(points):
-    fig = pl.figure()
-    ax = fig.gca(projection='3d')
-    ax.scatter(points[0, :], points[1, :], points[2, :])
-    v = np.array([[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
-                  [0, 0, 1]])
-    ax.scatter3D(v[:, 0], v[:, 1], v[:, 2])
+def transformPointcloud(transform, points):
+    assert transform.shape == (4, 4)
+    R = transform[0:3, 0:3].reshape(3, 3)
+    t = transform[0:3, 3].reshape(3, 1)
+    assert points.shape[1] == 3
+    points_transformed = points.copy()
+    for index in range(points.shape[0]):
+        point = points[index, :].reshape(3, 1)
+        point_transformed = R.dot(point) + t
+        points_transformed[index, :] = point_transformed.reshape(1, 3)
+    return points_transformed
 
-    # generate list of sides' polygons of our pyramid
-    verts = [[v[0], v[1], v[4]], [v[0], v[3], v[4]], [v[2], v[1], v[4]],
-             [v[2], v[3], v[4]], [v[0], v[1], v[2], v[3]]]
 
-    # plot sides
+def plotPoints3D(ax, transform, focal_lengths, principal_point, resolution):
+    scaling_factor = 1e-4
+    pixel_ratio = focal_lengths[0] / focal_lengths[1]
+    scaled_focal_length = scaling_factor * focal_lengths[0]
+    x_range = scaling_factor * np.array(
+        [-principal_point[0], resolution[0] - principal_point[0]])
+    y_range = pixel_ratio * scaling_factor * np.array(
+        [-principal_point[1], resolution[1] - principal_point[1]])
+    raw_camera_corners = np.array(
+        [[x_range[0], y_range[0],
+          scaled_focal_length], [x_range[1], y_range[0], scaled_focal_length],
+         [x_range[1], y_range[1], scaled_focal_length],
+         [x_range[0], y_range[1], scaled_focal_length], [0, 0, 0]])
+    camera_corners = transformPointcloud(transform, raw_camera_corners)
+    vertices = [[camera_corners[0], camera_corners[1], camera_corners[4]], [
+        camera_corners[0], camera_corners[3], camera_corners[4]
+    ], [camera_corners[2], camera_corners[1], camera_corners[4]],
+                [camera_corners[2], camera_corners[3], camera_corners[4]], [
+                    camera_corners[0], camera_corners[1], camera_corners[2],
+                    camera_corners[3]
+                ]]
+    ax.scatter3D(camera_corners[:, 0], camera_corners[:, 1],
+                 camera_corners[:, 2])
     ax.add_collection3d(
         Poly3DCollection(
-            verts,
+            vertices,
             facecolors='cyan',
             linewidths=1,
             edgecolors='r',
             alpha=.25))
-    axisEqual3D(ax)
-    pl.show()
+
+
+def addCameraPlot(ax, T_imu_cam, intrinsics, resolution):
+    R_I_C = T_imu_cam[0:3, 0:3].reshape(3, 3)
+    t_I_C = T_imu_cam[0:3, 3].reshape(3, 1)
+    focal_lengths = intrinsics[0:2]
+    principal_point = intrinsics[2:4]
+    plotPoints3D(ax, T_imu_cam, focal_lengths, principal_point, resolution)
 
 
 def getDistance(point, other_point):
@@ -64,50 +105,31 @@ def getDistance(point, other_point):
     return np.linalg.norm(difference_vector)
 
 
+def orthogonalProjection(zfront, zback):
+    a = (zfront + zback) / (zfront - zback)
+    b = -2 * (zfront * zback) / (zfront - zback)
+    return np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, a, b],
+                     [0, 0, -0.00001, zback]])
+
+
 def main():
-    if True:
-        print("Loading camera configuration...")
-        parsed_args = parseArguments()
-        camchain = kc.ConfigReader.CameraChainParameters(parsed_args.chainYaml)
-        num_cameras = camchain.numCameras()
-        print("Configuration has " + str(num_cameras) + " cameras .")
-        printLine()
-        focal_centers = np.zeros([3, 1])
-        for cam_index in range(num_cameras):
-            print("Configuration for camera " + str(cam_index) + ":")
-            T_I_C = camchain.getExtrinsicsImuToCam(cam_index).inverse().T()
-            R_I_C = T_I_C[0:3, 0:3]
-            t_I_C = T_I_C[0:3, 3].reshape(3, 1)
-            focal_centers = np.concatenate((focal_centers, t_I_C), axis=1)
-            intrinsics = camchain.getCameraParameters(cam_index)
-            intrinsics.printDetails()
-            printLine()
-
-        print(focal_centers.shape)
-        plotPoints3D(focal_centers)
-    else:
-        fig = pl.figure()
-        ax = fig.add_subplot(111, projection='3d')
-
-        # vertices of a pyramid
-        v = np.array([[-1, -1, -1], [1, -1, -1], [1, 1, -1], [-1, 1, -1],
-                      [0, 0, 1]])
-        ax.scatter3D(v[:, 0], v[:, 1], v[:, 2])
-
-        # generate list of sides' polygons of our pyramid
-        verts = [[v[0], v[1], v[4]], [v[0], v[3], v[4]], [v[2], v[1], v[4]],
-                 [v[2], v[3], v[4]], [v[0], v[1], v[2], v[3]]]
-
-        # plot sides
-        ax.add_collection3d(
-            Poly3DCollection(
-                verts,
-                facecolors='cyan',
-                linewidths=1,
-                edgecolors='r',
-                alpha=.25))
-
-        pl.show()
+    print("Loading camera configuration...")
+    parsed_args = parseArguments()
+    camchain = kc.ConfigReader.CameraChainParameters(parsed_args.chainYaml)
+    num_cameras = camchain.numCameras()
+    print("Configuration has " + str(num_cameras) + " cameras .")
+    focal_centers = np.zeros([3, 1])
+    fig = pl.figure()
+    ax = fig.gca(projection='3d')
+    for cam_index, (cam, value) in enumerate(camchain.data.iteritems()):
+        T_imu_cam = camchain.getExtrinsicsImuToCam(cam_index).inverse().T()
+        intrinsics = np.asarray(value['intrinsics'])
+        resolution = np.asarray(value['resolution'])
+        addCameraPlot(ax, T_imu_cam, intrinsics, resolution)
+    axisEqual3D(ax)
+    ax.view_init(azim=parsed_args.azimView, elev=parsed_args.elevView)
+    proj3d.persp_transformation = orthogonalProjection
+    pl.show()
 
 
 if __name__ == "__main__":
