@@ -58,13 +58,10 @@ def main():
         print("Configuration for camera " + str(cam_index) + ":")
         T_I_C = camchain.getExtrinsicsImuToCam(cam_index).inverse().T()
         R_I_C = T_I_C[0:3, 0:3]
-        focal_point = T_I_C[0:3, 3].reshape(3, 1)
-        focal_centers = np.concatenate((focal_centers, focal_point), axis=1)
+        t_I_C = T_I_C[0:3, 3].reshape(3, 1)
+        focal_centers = np.concatenate((focal_centers, t_I_C), axis=1)
         intrinsics = camchain.getCameraParameters(cam_index)
-        if cam_index > 0:
-            distance = getDistance(focal_centers[:,-1], focal_centers[:,-2])
-            if distance < 0.1:
-                print(distance)
+        intrinsics.printDetails()
         printLine()
 
     print(focal_centers.shape)
