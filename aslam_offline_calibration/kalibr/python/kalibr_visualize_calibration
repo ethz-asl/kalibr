@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import kalibr_common as kc
 
 import argparse
@@ -15,18 +15,20 @@ def parseArguments():
         '--cam',
         dest='chainYaml',
         help='Camera configuration as yaml file.',
-        action='append',
+        nargs='+',
         required=True)
     parser.add_argument(
         '--azim',
         dest='azimView',
         help='Azimuth angle of the view.',
+        type=float,
         default=0,
         required=False)
     parser.add_argument(
         '--elev',
         dest='elevView',
         help='Elevation angle of the view.',
+        type=float,
         default=90,
         required=False)
     parsed_args = parser.parse_args()
@@ -49,6 +51,13 @@ def axisEqual3D(ax):
     ax.set_aspect('equal')
 
 
+def orthogonalProjection(zfront, zback):
+    a = (zfront + zback) / (zfront - zback)
+    b = -2 * (zfront * zback) / (zfront - zback)
+    return np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, a, b],
+                     [0, 0, -0.00001, zback]])
+
+
 def transformPointcloud(transform, points):
     assert transform.shape == (4, 4)
     R = transform[0:3, 0:3].reshape(3, 3)
@@ -66,17 +75,29 @@ class CalibrationVisualization:
 
     def __init__(self):
         self.color_counter = 0
+        self.fig = pl.figure()
+        self.ax = self.fig.gca(projection='3d')
+        self.color_list = pl.cm.Pastel1(np.linspace(0, 1, 12))
 
-    def addCameraPlot(self, ax, T_imu_cam, intrinsics, resolution):
+    def addCameraPlot(self, T_imu_cam, intrinsics, resolution):
         R_I_C = T_imu_cam[0:3, 0:3].reshape(3, 3)
         t_I_C = T_imu_cam[0:3, 3].reshape(3, 1)
         focal_lengths = intrinsics[0:2]
         principal_point = intrinsics[2:4]
-        self.__drawCameraOutline(ax, T_imu_cam, focal_lengths, principal_point,
-                               resolution)
+        self.__drawCameraOutline(T_imu_cam, focal_lengths, principal_point,
+                                 resolution)
 
-    def __drawCameraOutline(self, ax, transform, focal_lengths, principal_point,
-                          resolution):
+    def showPlot(self, azim, elev):
+        self.ax.view_init(azim=azim, elev=elev)
+        proj3d.persp_transformation = orthogonalProjection
+        axisEqual3D(self.ax)
+        pl.show()
+
+    def incrementColor(self):
+        self.color_counter = self.color_counter + 1
+
+    def __drawCameraOutline(self, transform, focal_lengths, principal_point,
+                            resolution):
         scaling_factor = 1e-4
         pixel_ratio = focal_lengths[0] / focal_lengths[1]
         scaled_focal_length = scaling_factor * focal_lengths[0]
@@ -97,18 +118,17 @@ class CalibrationVisualization:
                         camera_corners[0], camera_corners[1], camera_corners[2],
                         camera_corners[3]
                     ]]
-        cmap_fill = pl.get_cmap('Pastel1')
-        fill_color = cmap_fill(self.color_counter)
-        self.color_counter = self.color_counter + 1
-        ax.scatter3D(camera_corners[:, 0], camera_corners[:, 1],
-                     camera_corners[:, 2])
-        ax.add_collection3d(
+        fill_color = self.color_list[self.color_counter % 12]
+        self.ax.scatter3D(camera_corners[:, 0], camera_corners[:, 1],
+                          camera_corners[:, 2])
+        self.ax.add_collection3d(
             Poly3DCollection(
                 vertices,
                 facecolors=fill_color,
                 linewidths=1,
-                edgecolors='r',
-                alpha=.25))
+                edgecolors='k',
+                alpha=.5,
+                antialiased=True))
 
 
 def getDistance(point, other_point):
@@ -116,18 +136,9 @@ def getDistance(point, other_point):
     return np.linalg.norm(difference_vector)
 
 
-def orthogonalProjection(zfront, zback):
-    a = (zfront + zback) / (zfront - zback)
-    b = -2 * (zfront * zback) / (zfront - zback)
-    return np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, a, b],
-                     [0, 0, -0.00001, zback]])
-
-
 def main():
     print("Loading camera configuration...")
     parsed_args = parseArguments()
-    fig = pl.figure()
-    ax = fig.gca(projection='3d')
     calibration_visualization = CalibrationVisualization()
     for camchain_yaml in parsed_args.chainYaml:
         camchain = kc.ConfigReader.CameraChainParameters(camchain_yaml)
@@ -138,12 +149,11 @@ def main():
             T_imu_cam = camchain.getExtrinsicsImuToCam(cam_index).inverse().T()
             intrinsics = np.asarray(value['intrinsics'])
             resolution = np.asarray(value['resolution'])
-            calibration_visualization.addCameraPlot(ax, T_imu_cam, intrinsics,
+            calibration_visualization.addCameraPlot(T_imu_cam, intrinsics,
                                                     resolution)
-    ax.view_init(azim=parsed_args.azimView, elev=parsed_args.elevView)
-    proj3d.persp_transformation = orthogonalProjection
-    axisEqual3D(ax)
-    pl.show()
+        calibration_visualization.incrementColor()
+    calibration_visualization.showPlot(parsed_args.azimView,
+                                       parsed_args.elevView)
 
 
 if __name__ == "__main__":
