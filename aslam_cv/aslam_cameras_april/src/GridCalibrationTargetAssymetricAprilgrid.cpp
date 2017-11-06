@@ -178,12 +178,7 @@ void GridCalibrationTargetAssymetricAprilgrid::createGridPoints() {
     std::vector<bool> &outCornerObserved ) const  {
 
   bool success = true;
-
-   //Invert image if depth camera
-
-   //if(depth)
-     //  cv::bitwise_not ( image, image );
-
+    
   // detect the tags
   std::vector<AprilTags::TagDetection> detections = _tagDetector->extractTags(image);
 

@@ -610,10 +610,13 @@ def printParameters(cself, dest=sys.stdout):
         
         #reproj error statistics
         corners, reprojs, rerrs = getReprojectionErrors(cself, cidx) 
-
-        if len(rerrs)>0:
+        
+        if len(rerrs)>0 and rerrs.count(None)!= len(rerrs):
             me, se = getReprojectionErrorStatistics(rerrs)
             print >> dest, "\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1])
+        else:
+            print "No error data for cam{0}".format(cidx)
+
         print >> dest
 
     #print baselines

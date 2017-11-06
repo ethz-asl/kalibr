@@ -3,7 +3,7 @@
 
 #include <aslam/cameras/GridCalibrationTargetAprilgrid.hpp>
 #include <aslam/cameras/GridCalibrationTargetBase.hpp>
-#include "apriltags/AllTags.h" //make script for including auto when generating library?????
+#include "apriltags/AllTags.h" 
 #include "apriltags/TagDetector.h"
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/vector.hpp>
@@ -68,7 +68,7 @@ class GridCalibrationTargetAssymetricAprilgrid : public GridCalibrationTargetBas
     const GridCalibrationTargetAprilgrid::AprilgridOptions &options = GridCalibrationTargetAprilgrid::AprilgridOptions());
   
  GridCalibrationTargetAssymetricAprilgrid(const boost::python::list& vector_list,
-    const GridCalibrationTargetAprilgrid::AprilgridOptions &options);
+    const GridCalibrationTargetAprilgrid::AprilgridOptions &options= GridCalibrationTargetAprilgrid::AprilgridOptions());
   
   virtual ~GridCalibrationTargetAssymetricAprilgrid() {};
 

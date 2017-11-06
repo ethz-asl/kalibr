@@ -50,6 +50,8 @@ BOOST_PYTHON_MODULE(libaslam_cameras_april_python)
           "GridCalibrationTargetAssymetricAprilgrid(std::vector<TargetPoint> targetPoints)"))
       .def(init<boost::python::list,GridCalibrationTargetAprilgrid::AprilgridOptions>(
           "GridCalibrationTargetAssymetricAprilgrid(boost::python::list vector_list, GridCalibrationTargetAprilgrid::AprilgridOptions options)"))
+      .def(init<boost::python::list>(
+          "GridCalibrationTargetAssymetricAprilgrid(boost::python::list vector_list)"))
       .def(init<>("Do not use the default constructor. It is only necessary for the pickle interface"))
       .def_pickle(sm::python::pickle_suite<GridCalibrationTargetAssymetricAprilgrid>());
 }
