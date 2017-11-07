@@ -200,7 +200,6 @@ class CameraChainValidator(object):
         #prepare the window
         windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
         cv2.namedWindow(windowName, 1)
-        cv2.waitKey(1)
         #get the mono validators for each cam
         camA = self.monovalidators[camAnr]
         camB = self.monovalidators[camBnr]
@@ -302,8 +301,6 @@ class CameraChainValidator(object):
             cv2.putText(np_image_rect, "Detection failed...", (np_image_rect.shape[0]/2,np_image_rect.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
             
         cv2.imshow(windowName, np_image_rect)
-        cv2.waitKey(0)
-        cv2.destroyWindow(windowName)
         cv2.waitKey(1)
     
     
@@ -388,9 +385,8 @@ class MonoCameraValidator(object):
         
         self.topic = camConfig.getRosTopic()
         self.windowName = "Camera: {0}".format(self.topic)
-        cv2.namedWindow(self.windowName, 1)
-        cv2.waitKey(1)
-    
+        #cv2.namedWindow(self.windowName, 1)
+   
         #register the cam topic to the message synchronizer
         self.image_sub = message_filters.Subscriber(self.topic, Image)
         
@@ -465,8 +461,6 @@ class MonoCameraValidator(object):
             cv2.putText(np_image, "Detection failed...", (np_image.shape[0]/2,np_image.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.5, color=(0, 0, 255), thickness=2)
 
         cv2.imshow(self.windowName, np_image)
-        cv2.waitKey(0)
-        cv2.destroyWindow(self.windowName)
         cv2.waitKey(1)
 
 
@@ -496,8 +490,10 @@ if __name__ == "__main__":
     
     #ros message loops
     rospy.init_node('kalibr_validator', anonymous=True)
+    rate = rospy.Rate(10) # 10hz
     try:
         rospy.spin()
+        rate.sleep()
     except KeyboardInterrupt:
         print "Shutting down"
     
