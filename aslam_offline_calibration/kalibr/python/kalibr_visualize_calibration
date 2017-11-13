@@ -12,23 +12,30 @@ def parseArguments():
         description='Visualizes a camchain.yaml or camchain-imu.yaml file.')
     parser.add_argument(
         '--cam',
-        dest='chainYaml',
+        dest='chain_yaml',
         help='Camera configuration as yaml file.',
         nargs='+',
         required=True)
     parser.add_argument(
         '--azim',
-        dest='azimView',
+        dest='azim_view',
         help='Azimuth angle of the view.',
         type=float,
-        default=90,
+        default=0.0,
         required=False)
     parser.add_argument(
         '--elev',
-        dest='elevView',
+        dest='elev_view',
         help='Elevation angle of the view.',
         type=float,
-        default=0,
+        default=90.0,
+        required=False)
+    parser.add_argument(
+        '--scaling',
+        dest='scaling_factor',
+        help='Scaling factor of the visualization (pixel size in meters).',
+        type=float,
+        default=1e-4,
         required=False)
     parsed_args = parser.parse_args()
     return parsed_args
@@ -64,20 +71,25 @@ def transformPointcloud(transform, points):
 
 class CalibrationVisualization:
 
-    def __init__(self):
+    def __init__(self, scaling_factor):
         self.color_counter = 0
         self.fig = pl.figure()
         self.ax = self.fig.add_subplot(111, projection='3d')
         self.color_list = pl.cm.Pastel1(np.linspace(0, 1, 12))
+        self.scaling_factor = scaling_factor
+        #  self.ax.text(9, 0, 0, "red", color='red')
+        self.ax.text2D(1, 1, "2D Text")
 
     def addCameraPlot(self, transform, intrinsics, resolution):
         focal_lengths = intrinsics[0:2]
         principal_point = intrinsics[2:4]
         self.__drawCameraOutline(transform, focal_lengths, principal_point,
                                  resolution)
+        self.addCoordinateFramePlot(transform)
 
     def addCoordinateFramePlot(self, transform):
-        sm.plotCoordinateFrame(self.ax, transform.T(), size=0.05)
+        sm.plotCoordinateFrame(
+            self.ax, transform.T(), size=3e2 * self.scaling_factor)
 
     def showPlot(self, azim, elev):
         self.ax.view_init(azim=azim, elev=elev)
@@ -90,12 +102,11 @@ class CalibrationVisualization:
 
     def __drawCameraOutline(self, transform, focal_lengths, principal_point,
                             resolution):
-        scaling_factor = 1e-4
         pixel_ratio = focal_lengths[0] / focal_lengths[1]
-        scaled_focal_length = scaling_factor * focal_lengths[0]
-        x_range = scaling_factor * np.array(
+        scaled_focal_length = self.scaling_factor * focal_lengths[0]
+        x_range = self.scaling_factor * np.array(
             [-principal_point[0], resolution[0] - principal_point[0]])
-        y_range = pixel_ratio * scaling_factor * np.array(
+        y_range = pixel_ratio * self.scaling_factor * np.array(
             [-principal_point[1], resolution[1] - principal_point[1]])
         raw_camera_corners = np.array(
             [[x_range[0], y_range[0], scaled_focal_length], [
@@ -117,14 +128,14 @@ class CalibrationVisualization:
             camera_corners[4, 1],
             camera_corners[4, 2],
             c=fill_color,
-            s=3e5 * scaling_factor)
+            s=3e5 * self.scaling_factor)
         # Image plane corners.
         self.ax.scatter3D(
             camera_corners[1:4, 0],
             camera_corners[1:4, 1],
             camera_corners[1:4, 2],
             c=fill_color,
-            s=1e5 * scaling_factor)
+            s=1e5 * self.scaling_factor)
         # Planes of camera models.
         self.ax.add_collection3d(
             art3d.Poly3DCollection(
@@ -143,18 +154,18 @@ def getDistance(point, other_point):
 
 def main():
     parsed_args = parseArguments()
-    calibration_visualization = CalibrationVisualization()
-    for camchain_yaml in parsed_args.chainYaml:
+    calibration_visualization = CalibrationVisualization(
+        parsed_args.scaling_factor)
+    for camchain_yaml in parsed_args.chain_yaml:
         camchain = kc.ConfigReader.CameraChainParameters(camchain_yaml)
         num_cameras = camchain.numCameras()
         print("Plotting configuration with " + str(num_cameras) + " cameras.")
-        a = np.array([[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,1]])
-        print(type(a))
-        T_c0_cn = sm.Transformation()
+        base_transform = np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, -1, 0, 0],
+                                   [0, 0, 0, 1]])
+        T_c0_cn = sm.Transformation(base_transform)
         T_c0_cnm1 = sm.Transformation()
         for cam_index in range(num_cameras):
             cam = 'cam{0}'.format(cam_index)
-            print(cam)
             if cam != 'cam0':
                 T_cnm1_cn = camchain.getExtrinsicsLastCamToHere(
                     cam_index).inverse()
@@ -170,8 +181,8 @@ def main():
                                                     resolution)
             T_c0_cnm1 = T_c0_cn
         calibration_visualization.incrementColor()
-    calibration_visualization.showPlot(parsed_args.azimView,
-                                       parsed_args.elevView)
+    calibration_visualization.showPlot(parsed_args.azim_view,
+                                       parsed_args.elev_view)
 
 
 if __name__ == "__main__":
