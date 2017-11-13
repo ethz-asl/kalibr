@@ -76,8 +76,8 @@ class CalibrationVisualization:
         self.__drawCameraOutline(transform, focal_lengths, principal_point,
                                  resolution)
 
-    def addImuPlot(self, transform):
-        sm.plotCoordinateFrame(self.ax, transform.T(), size=0.1)
+    def addCoordinateFramePlot(self, transform):
+        sm.plotCoordinateFrame(self.ax, transform.T(), size=0.05)
 
     def showPlot(self, azim, elev):
         self.ax.view_init(azim=azim, elev=elev)
@@ -148,19 +148,27 @@ def main():
         camchain = kc.ConfigReader.CameraChainParameters(camchain_yaml)
         num_cameras = camchain.numCameras()
         print("Plotting configuration with " + str(num_cameras) + " cameras.")
-        T_current = sm.Transformation()
+        a = np.array([[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,1]])
+        print(type(a))
+        T_c0_cn = sm.Transformation()
+        T_c0_cnm1 = sm.Transformation()
         for cam_index in range(num_cameras):
             cam = 'cam{0}'.format(cam_index)
+            print(cam)
             if cam != 'cam0':
-                T_current = T_current * camchain.getExtrinsicsLastCamToHere(
-                    cam_index)
+                T_cnm1_cn = camchain.getExtrinsicsLastCamToHere(
+                    cam_index).inverse()
+                T_c0_cn = T_c0_cnm1 * T_cnm1_cn
             elif 'T_cam_imu' in camchain.data[cam]:
-                print('yes')
-                #  calibration_visualization.addImuPlot(T_imu)
+                T_c0_i = T_c0_cn * camchain.getExtrinsicsImuToCam(cam_index)
+                calibration_visualization.addCoordinateFramePlot(T_c0_i)
             intrinsics = np.asarray(camchain.data[cam]['intrinsics'])
             resolution = np.asarray(camchain.data[cam]['resolution'])
-            calibration_visualization.addCameraPlot(T_current, intrinsics,
+            if cam == 'cam0':
+                calibration_visualization.addCoordinateFramePlot(T_c0_cn)
+            calibration_visualization.addCameraPlot(T_c0_cn, intrinsics,
                                                     resolution)
+            T_c0_cnm1 = T_c0_cn
         calibration_visualization.incrementColor()
     calibration_visualization.showPlot(parsed_args.azimView,
                                        parsed_args.elevView)
