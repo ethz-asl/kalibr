@@ -67,7 +67,7 @@ class CalibrationVisualization:
     def __init__(self):
         self.color_counter = 0
         self.fig = pl.figure()
-        self.ax = self.fig.gca(projection='3d')
+        self.ax = self.fig.add_subplot(111, projection='3d')
         self.color_list = pl.cm.Pastel1(np.linspace(0, 1, 12))
 
     def addCameraPlot(self, transform, intrinsics, resolution):
@@ -75,6 +75,9 @@ class CalibrationVisualization:
         principal_point = intrinsics[2:4]
         self.__drawCameraOutline(transform, focal_lengths, principal_point,
                                  resolution)
+
+    def addImuPlot(self, transform):
+        sm.plotCoordinateFrame(self.ax, transform.T(), size=0.1)
 
     def showPlot(self, azim, elev):
         self.ax.view_init(azim=azim, elev=elev)
@@ -151,6 +154,9 @@ def main():
             if cam != 'cam0':
                 T_current = T_current * camchain.getExtrinsicsLastCamToHere(
                     cam_index)
+            elif 'T_cam_imu' in camchain.data[cam]:
+                print('yes')
+                #  calibration_visualization.addImuPlot(T_imu)
             intrinsics = np.asarray(camchain.data[cam]['intrinsics'])
             resolution = np.asarray(camchain.data[cam]['resolution'])
             calibration_visualization.addCameraPlot(T_current, intrinsics,
