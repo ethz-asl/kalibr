@@ -57,7 +57,7 @@ def orthogonalProjection(zfront, zback):
     a = (zfront + zback) / (zfront - zback)
     b = -2 * (zfront * zback) / (zfront - zback)
     return np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, a, b],
-                     [0, 0, -0.00001, zback]])
+                     [0, 0, -1e-5, zback]])
 
 
 def transformPointcloud(transform, points):
@@ -77,8 +77,6 @@ class CalibrationVisualization:
         self.ax = self.fig.add_subplot(111, projection='3d')
         self.color_list = pl.cm.Pastel1(np.linspace(0, 1, 12))
         self.scaling_factor = scaling_factor
-        #  self.ax.text(9, 0, 0, "red", color='red')
-        self.ax.text2D(1, 1, "2D Text")
 
     def addCameraPlot(self, transform, intrinsics, resolution):
         focal_lengths = intrinsics[0:2]
@@ -170,6 +168,7 @@ def main():
                 T_cnm1_cn = camchain.getExtrinsicsLastCamToHere(
                     cam_index).inverse()
                 T_c0_cn = T_c0_cnm1 * T_cnm1_cn
+                print(T_c0_cn.T())
             elif 'T_cam_imu' in camchain.data[cam]:
                 T_c0_i = T_c0_cn * camchain.getExtrinsicsImuToCam(cam_index)
                 calibration_visualization.addCoordinateFramePlot(T_c0_i)
