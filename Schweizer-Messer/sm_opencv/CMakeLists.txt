@@ -13,3 +13,12 @@ catkin_package(
 add_definitions(-std=c++0x -D__STRICT_ANSI__)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+
+##################
+## Installation ##
+##################
+
+## Mark cpp header files for installation
+install(DIRECTORY include/sm/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../sm
+)

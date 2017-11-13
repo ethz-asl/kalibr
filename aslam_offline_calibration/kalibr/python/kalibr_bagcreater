@@ -39,7 +39,7 @@ def getImageFilesFromDir(dir):
             for f in files:
                 if os.path.splitext(f)[1] in ['.bmp', '.png', '.jpg']:
                     image_files.append( os.path.join( path, f ) )
-                    timestamps.append(os.path.splitext(f)[0]) 
+                    timestamps.append(os.path.splitext(f)[0])
     #sort by timestamp
     sort_list = sorted(zip(timestamps, image_files))
     image_files = [file[1] for file in sort_list]
@@ -50,7 +50,7 @@ def getCamFoldersFromDir(dir):
     cam_folders = list()
     if os.path.exists(dir):
         for path, folders, files in os.walk(dir):
-            for folder in folders:                
+            for folder in folders:
                 if folder[0:3] == "cam":
                     cam_folders.append(folder)
     return cam_folders
@@ -63,12 +63,12 @@ def getImuCsvFiles(dir):
             for file in files:
                 if file[0:3] == 'imu' and os.path.splitext(file)[1] == ".csv":
                     imu_files.append( os.path.join( path, file ) )
-    
+
     return imu_files
 
 def loadImageToRosMsg(filename):
     image_np = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-    
+
     timestamp_nsecs = os.path.splitext(os.path.basename(filename))[0]
     timestamp = rospy.Time( secs=int(timestamp_nsecs[0:-9]), nsecs=int(timestamp_nsecs[-9:]) )
 
@@ -79,13 +79,13 @@ def loadImageToRosMsg(filename):
     rosimage.step = rosimage.width  #only with mono8! (step = width * byteperpixel * numChannels)
     rosimage.encoding = "mono8"
     rosimage.data = image_np.tostring()
-    
+
     return rosimage, timestamp
 
 def createImuMessge(timestamp_int, omega, alpha):
     timestamp_nsecs = str(timestamp_int)
     timestamp = rospy.Time( int(timestamp_nsecs[0:-9]), int(timestamp_nsecs[-9:]) )
-    
+
     rosimu = Imu()
     rosimu.header.stamp = timestamp
     rosimu.angular_velocity.x = float(omega[0])
@@ -94,13 +94,13 @@ def createImuMessge(timestamp_int, omega, alpha):
     rosimu.linear_acceleration.x = float(alpha[0])
     rosimu.linear_acceleration.y = float(alpha[1])
     rosimu.linear_acceleration.z = float(alpha[2])
-    
+
     return rosimu, timestamp
-    
+
 #create the bag
 try:
     bag = rosbag.Bag(parsed.output_bag, 'w')
-    
+
     #write images
     camfolders = getCamFoldersFromDir(parsed.folder)
     for camfolder in camfolders:

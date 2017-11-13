@@ -18,7 +18,7 @@
   <build_depend>sm_common</build_depend>
   <build_depend>sm_kinematics</build_depend>
   <build_depend>sm_timing</build_depend>
-  <build_depend>suitesparse</build_depend>
+  <build_depend>suitesparse_catkin</build_depend>
 
 
 </package>

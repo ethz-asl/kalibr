@@ -23,6 +23,9 @@ find_package(Boost REQUIRED COMPONENTS system)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
-cs_install()
+install(DIRECTORY include/aslam/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../aslam
+)
 
+cs_install()
 cs_export()

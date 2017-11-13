@@ -9,7 +9,7 @@ find_package(Eigen REQUIRED)
 include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 catkin_package(
-  INCLUDE_DIRS include  ${catkin_INCLUDE_DIRS}
+  INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS sm_common
   DEPENDS
@@ -26,8 +26,23 @@ add_library(${PROJECT_NAME}
   src/MatrixArchive.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
                       ${catkin_LIBRARIES} ${Boost_LIBRARIES} pthread)
+
+##################
+## Installation ##
+##################
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/sm/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../sm
+)
 
 #############
 ## Testing ##
@@ -36,7 +51,7 @@ target_link_libraries(${PROJECT_NAME}
 add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
 ## Add gtest based cpp test target and link libraries
-catkin_add_gtest(${PROJECT_NAME}-test 
+catkin_add_gtest(${PROJECT_NAME}-test
   test/test_main.cpp
   test/TestMatrixArchive.cpp
 )

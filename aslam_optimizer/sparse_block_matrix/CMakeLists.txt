@@ -10,22 +10,28 @@ catkin_simple()
 find_package(Eigen3)
 include_directories(${Eigen_INCLUDE_DIRS})
 
-cs_add_library(${PROJECT_NAME} 
+cs_add_library(${PROJECT_NAME}
   src/matrix_structure.cpp
   src/sparse_helper.cpp
   src/marginal_covariance_cholesky.cpp
 )
 
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
 add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
-catkin_add_gtest( ${PROJECT_NAME}_tests 
+catkin_add_gtest( ${PROJECT_NAME}_tests
   test/test_main.cpp
   test/solver_tests.cpp
   test/sparse_block_matrix_tests.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${TBB_LIBRARIES})
+
+install(DIRECTORY include/sparse_block_matrix/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
 cs_install()
 cs_export()

@@ -57,5 +57,9 @@ catkin_add_gtest(${PROJECT_NAME}_test
 )
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
+install(DIRECTORY include/aslam/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../aslam
+)
+
 cs_install()
 cs_export()

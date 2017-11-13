@@ -34,4 +34,12 @@ target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME}_errorterms)
 ##################################
 catkin_python_setup()
 cs_install()
+cs_install_scripts( python/kalibr_bagcreater
+                    python/kalibr_bagextractor
+                    python/kalibr_calibrate_cameras
+                    python/kalibr_calibrate_imu_camera
+                    python/kalibr_calibrate_rs_cameras
+                    python/kalibr_camera_focus
+                    python/kalibr_camera_validator
+                    python/kalibr_create_target_pdf)
 cs_export()

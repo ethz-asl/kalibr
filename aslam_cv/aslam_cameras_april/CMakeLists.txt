@@ -10,11 +10,11 @@ ADD_DEFINITIONS(-DASLAM_USE_ROS )
 include_directories(${Eigen_INCLUDE_DIRS})
 
 
-cs_add_library(${PROJECT_NAME} 
+cs_add_library(${PROJECT_NAME}
   src/GridCalibrationTargetAprilgrid.cpp
   )
 
-find_package(Boost REQUIRED COMPONENTS serialization system) 
+find_package(Boost REQUIRED COMPONENTS serialization system)
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
@@ -22,6 +22,10 @@ add_python_export_library(${PROJECT_NAME}_python python/aslam_cameras_april
   src/module.cpp
 )
 target_link_libraries(${PROJECT_NAME}_python ${PROJECT_NAME})
+
+install(DIRECTORY include/aslam/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../aslam
+)
 
 cs_install()
 cs_export()

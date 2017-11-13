@@ -10,7 +10,7 @@ ADD_DEFINITIONS(-DASLAM_USE_ROS )
 find_package(Boost REQUIRED COMPONENTS system serialization filesystem)
 
 #common commands for building c++ executables and libraries
-cs_add_library(${PROJECT_NAME} 
+cs_add_library(${PROJECT_NAME}
   src/CameraGeometryBase.cpp
   src/GlobalShutter.cpp
   src/RollingShutter.cpp
@@ -57,6 +57,9 @@ SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} 
 
 target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${Boost_LIBRARIES})
 
+install(DIRECTORY include/aslam/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../aslam
+)
 
 cs_install()
 cs_export()

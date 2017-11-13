@@ -30,17 +30,36 @@ ENDIF(APPLE)
 ##############
 
 INCLUDE(src/autogen_files.cmake)
-add_python_export_library(${PROJECT_NAME} 
+add_python_export_library(${PROJECT_NAME}
   ${PROJECT_SOURCE_DIR}/python/${PROJECT_NAME} ${AUTOGEN_FILES}
 )
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
                       ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-                      
+
 INCLUDE(src/autogen_test_files.cmake)
-add_python_export_library(${PROJECT_NAME}_test 
+add_python_export_library(${PROJECT_NAME}_test
       ${PROJECT_SOURCE_DIR}/python/${PROJECT_NAME} ${AUTOGEN_TEST_FILES}
   )
+
+##################
+## Installation ##
+##################
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_PYTHON_DESTINATION}
+)
+
+install(DIRECTORY include/numpy_eigen/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
 #############
 ## Testing ##

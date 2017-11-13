@@ -18,5 +18,9 @@ target_link_libraries(${PROJECT_NAME}_test ${catkin_LIBRARIES})
 
 target_link_libraries(${PROJECT_NAME}_test ${Boost_LIBRARIES})
 
+install(DIRECTORY include/aslam/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}/../aslam
+)
+
 cs_install()
 cs_export()
