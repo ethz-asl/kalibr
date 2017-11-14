@@ -106,19 +106,20 @@ class CalibrationVisualization:
             [-principal_point[0], resolution[0] - principal_point[0]])
         y_range = pixel_ratio * self.scaling_factor * np.array(
             [-principal_point[1], resolution[1] - principal_point[1]])
-        raw_camera_corners = np.array(
-            [[x_range[0], y_range[0], scaled_focal_length], [
-                x_range[1], y_range[0], scaled_focal_length
-            ], [x_range[1], y_range[1], scaled_focal_length],
-             [x_range[0], y_range[1], scaled_focal_length], [0, 0, 0]])
+        raw_camera_corners = np.array( \
+                [[x_range[0], y_range[0], scaled_focal_length], \
+                [x_range[1], y_range[0], scaled_focal_length], \
+                [x_range[1], y_range[1], scaled_focal_length], \
+                [x_range[0], y_range[1], scaled_focal_length], \
+                [0.0, 0.0, 0.0]])
+        print(raw_camera_corners)
         camera_corners = transformPointcloud(transform, raw_camera_corners)
-        vertices = [[camera_corners[0], camera_corners[1], camera_corners[4]], [
-            camera_corners[0], camera_corners[3], camera_corners[4]
-        ], [camera_corners[2], camera_corners[1], camera_corners[4]],
-                    [camera_corners[2], camera_corners[3], camera_corners[4]], [
-                        camera_corners[0], camera_corners[1], camera_corners[2],
-                        camera_corners[3]
-                    ]]
+        vertices = [[camera_corners[0], camera_corners[1], camera_corners[4]], \
+                [camera_corners[0], camera_corners[3], camera_corners[4]], \
+                [camera_corners[2], camera_corners[1], camera_corners[4]], \
+                [camera_corners[2], camera_corners[3], camera_corners[4]], \
+                [camera_corners[0], camera_corners[1], camera_corners[2], \
+                    camera_corners[3] ]]
         fill_color = self.color_list[self.color_counter % 12]
         # Focal point.
         self.ax.scatter3D(
@@ -129,9 +130,9 @@ class CalibrationVisualization:
             s=3e5 * self.scaling_factor)
         # Image plane corners.
         self.ax.scatter3D(
-            camera_corners[1:4, 0],
-            camera_corners[1:4, 1],
-            camera_corners[1:4, 2],
+            camera_corners[:, 0],
+            camera_corners[:, 1],
+            camera_corners[:, 2],
             c=fill_color,
             s=1e5 * self.scaling_factor)
         # Planes of camera models.
