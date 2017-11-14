@@ -168,7 +168,6 @@ def main():
                 T_cnm1_cn = camchain.getExtrinsicsLastCamToHere(
                     cam_index).inverse()
                 T_c0_cn = T_c0_cnm1 * T_cnm1_cn
-                print(T_c0_cn.T())
             elif 'T_cam_imu' in camchain.data[cam]:
                 T_c0_i = T_c0_cn * camchain.getExtrinsicsImuToCam(cam_index)
                 calibration_visualization.addCoordinateFramePlot(T_c0_i)
