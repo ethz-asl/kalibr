@@ -112,7 +112,6 @@ class CalibrationVisualization:
                 [x_range[1], y_range[1], scaled_focal_length], \
                 [x_range[0], y_range[1], scaled_focal_length], \
                 [0.0, 0.0, 0.0]])
-        print(raw_camera_corners)
         camera_corners = transformPointcloud(transform, raw_camera_corners)
         vertices = [[camera_corners[0], camera_corners[1], camera_corners[4]], \
                 [camera_corners[0], camera_corners[3], camera_corners[4]], \
