@@ -7,13 +7,15 @@ import pylab as pl
 import sm
 
 
-def parseArguments():
+def parse_arguments():
     parser = argparse.ArgumentParser(
-        description='Visualizes a camchain.yaml or camchain-imu.yaml file.')
+        description=
+        'Visualizes a camchain-cam.yaml or camchain-imucam.yaml file.')
     parser.add_argument(
         '--cam',
         dest='chain_yaml',
-        help='Camera configuration as yaml file.',
+        help=
+        'Camera configuration as yaml file (can take multiple configurations).',
         nargs='+',
         required=True)
     parser.add_argument(
@@ -41,7 +43,7 @@ def parseArguments():
     return parsed_args
 
 
-def axisEqual3D(ax):
+def set_axis_equal_3d(ax):
     extents = np.array(
         [getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
     sz = extents[:, 1] - extents[:, 0]
@@ -53,14 +55,14 @@ def axisEqual3D(ax):
     ax.set_aspect('equal')
 
 
-def orthogonalProjection(zfront, zback):
+def set_orthogonal_projection(zfront, zback):
     a = (zfront + zback) / (zfront - zback)
     b = -2 * (zfront * zback) / (zfront - zback)
     return np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, a, b],
                      [0, 0, -1e-5, zback]])
 
 
-def transformPointcloud(transform, points):
+def transform_point_cloud(transform, points):
     assert points.shape[1] == 3
     points_transformed = points.copy()
     for index in range(points.shape[0]):
@@ -78,27 +80,27 @@ class CalibrationVisualization:
         self.color_list = pl.cm.Pastel1(np.linspace(0, 1, 12))
         self.scaling_factor = scaling_factor
 
-    def addCameraPlot(self, transform, intrinsics, resolution):
+    def add_camera_plot(self, transform, intrinsics, resolution):
         focal_lengths = intrinsics[0:2]
         principal_point = intrinsics[2:4]
-        self.__drawCameraOutline(transform, focal_lengths, principal_point,
+        self.draw_camera_outline(transform, focal_lengths, principal_point,
                                  resolution)
-        self.addCoordinateFramePlot(transform)
+        self.add_coordinate_frame_plot(transform)
 
-    def addCoordinateFramePlot(self, transform):
+    def add_coordinate_frame_plot(self, transform):
         sm.plotCoordinateFrame(
             self.ax, transform.T(), size=3e2 * self.scaling_factor)
 
-    def showPlot(self, azim, elev):
+    def show_plot(self, azim, elev):
         self.ax.view_init(azim=azim, elev=elev)
-        proj3d.persp_transformation = orthogonalProjection
-        axisEqual3D(self.ax)
+        proj3d.persp_transformation = set_orthogonal_projection
+        set_axis_equal_3d(self.ax)
         pl.show()
 
-    def incrementColor(self):
+    def increment_color(self):
         self.color_counter = self.color_counter + 1
 
-    def __drawCameraOutline(self, transform, focal_lengths, principal_point,
+    def draw_camera_outline(self, transform, focal_lengths, principal_point,
                             resolution):
         pixel_ratio = focal_lengths[0] / focal_lengths[1]
         scaled_focal_length = self.scaling_factor * focal_lengths[0]
@@ -112,7 +114,7 @@ class CalibrationVisualization:
                 [x_range[1], y_range[1], scaled_focal_length], \
                 [x_range[0], y_range[1], scaled_focal_length], \
                 [0.0, 0.0, 0.0]])
-        camera_corners = transformPointcloud(transform, raw_camera_corners)
+        camera_corners = transform_point_cloud(transform, raw_camera_corners)
         vertices = [[camera_corners[0], camera_corners[1], camera_corners[4]], \
                 [camera_corners[0], camera_corners[3], camera_corners[4]], \
                 [camera_corners[2], camera_corners[1], camera_corners[4]], \
@@ -145,13 +147,8 @@ class CalibrationVisualization:
                 antialiased=True))
 
 
-def getDistance(point, other_point):
-    difference_vector = other_point - point
-    return np.linalg.norm(difference_vector)
-
-
 def main():
-    parsed_args = parseArguments()
+    parsed_args = parse_arguments()
     calibration_visualization = CalibrationVisualization(
         parsed_args.scaling_factor)
     for camchain_yaml in parsed_args.chain_yaml:
@@ -170,17 +167,17 @@ def main():
                 T_c0_cn = T_c0_cnm1 * T_cnm1_cn
             elif 'T_cam_imu' in camchain.data[cam]:
                 T_c0_i = T_c0_cn * camchain.getExtrinsicsImuToCam(cam_index)
-                calibration_visualization.addCoordinateFramePlot(T_c0_i)
+                calibration_visualization.add_coordinate_frame_plot(T_c0_i)
             intrinsics = np.asarray(camchain.data[cam]['intrinsics'])
             resolution = np.asarray(camchain.data[cam]['resolution'])
             if cam == 'cam0':
-                calibration_visualization.addCoordinateFramePlot(T_c0_cn)
-            calibration_visualization.addCameraPlot(T_c0_cn, intrinsics,
-                                                    resolution)
+                calibration_visualization.add_coordinate_frame_plot(T_c0_cn)
+            calibration_visualization.add_camera_plot(T_c0_cn, intrinsics,
+                                                      resolution)
             T_c0_cnm1 = T_c0_cn
-        calibration_visualization.incrementColor()
-    calibration_visualization.showPlot(parsed_args.azim_view,
-                                       parsed_args.elev_view)
+        calibration_visualization.increment_color()
+    calibration_visualization.show_plot(parsed_args.azim_view,
+                                        parsed_args.elev_view)
 
 
 if __name__ == "__main__":
