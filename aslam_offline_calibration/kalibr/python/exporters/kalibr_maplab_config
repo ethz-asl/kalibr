@@ -45,7 +45,13 @@ class ArgParse:
 
 
 def list_to_ordered_dict(input_list):
-    output_dict = OrderedDict()
+    np_array = np.array(input_list)
+    shape = np_array.shape
+    assert len(shape) < 3
+    if len(shape) == 1:
+        shape = np_array.reshape((shape[0], 1)).shape
+    output_dict = OrderedDict([('rows', shape[0]), ('cols', shape[1]),
+                               ('data', input_list)])
     return output_dict
 
 
@@ -94,7 +100,11 @@ class CameraConfig:
         cam_dict['camera']['image_width'] = self.resolution[0]
         cam_dict['camera']['type'] = self.camera_model
         cam_dict['camera']['intrinsics'] = list_to_ordered_dict(self.intrinsics)
-        #  cam_dict['camera']['x'] = y
+        cam_dict['camera']['distortion'] = OrderedDict(
+            [('type', self.distortion_model),
+             ('parameters', list_to_ordered_dict(self.distortion_coeffs))])
+        cam_dict['T_B_C'] = list_to_ordered_dict(
+            self.T_cn_i.inverse().T().tolist())
         return cam_dict
 
 
