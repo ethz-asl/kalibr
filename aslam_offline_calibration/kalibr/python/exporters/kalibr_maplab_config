@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+from collections import OrderedDict
 import numpy as np
 import md5
 import sm
@@ -19,8 +20,16 @@ class ArgParse:
             "camchain-imucam.yaml).",
             required=True)
         parser.add_argument(
+            '--label',
+            dest='ncamera_label',
+            help=
+            "Name of the NCamera label (only used for conversion from kalibr "
+            "format)",
+            default='ncamera',
+            required=False)
+        parser.add_argument(
             '--out',
-            dest='out_file_name',
+            dest='output_file_name',
             help="Name of the output file.",
             default='converted.yaml')
         self.parsed_args = parser.parse_args()
@@ -28,22 +37,34 @@ class ArgParse:
     def cam_yaml(self):
         return self.parsed_args.cam_yaml
 
-    def out_file_name(self):
-        return self.parsed_args.out_file_name
+    def output_file_name(self):
+        return self.parsed_args.output_file_name
+
+    def ncamera_label(self):
+        return self.parsed_args.ncamera_label
+
+
+def list_to_ordered_dict(input_list):
+    output_dict = OrderedDict()
+    return output_dict
 
 
 class CameraConfig:
 
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.__is_initialized = False
+        self.id = md5.new(name).hexdigest()
+        self.line_delay_nanoseconds = 0
+        self.cam_overlaps = list()
+        self.timeshift_cam_imu = 0.0
 
-    def get_from_camchain(self, cam_dict):
+    def parse_from_camchain_format(self, cam_dict):
         assert all(
             keys in cam_dict
             for keys in ('T_cam_imu', 'cam_overlaps', 'camera_model',
                          'distortion_coeffs', 'distortion_model', 'intrinsics',
                          'resolution', 'rostopic', 'timeshift_cam_imu'))
-        # TODO(fabianbl): Remove unused ones.
         self.T_cn_i = sm.Transformation(np.array(cam_dict['T_cam_imu']))
         self.cam_overlaps = cam_dict['cam_overlaps']
         self.camera_model = cam_dict['camera_model']
@@ -51,18 +72,48 @@ class CameraConfig:
         self.distortion_model = cam_dict['distortion_model']
         self.intrinsics = cam_dict['intrinsics']
         self.resolution = cam_dict['resolution']
-        self.rostopic = cam_dict['rostopic']
+        self.rostopic = cam_dict['rostopic'].replace('/image_raw', '')
         self.timeshift_cam_imu = cam_dict['timeshift_cam_imu']
         self.__is_initialized = True
 
-    def get_from_sensors(self):
+    def parse_from_sensors_format(self, cam_dict):
         pass
+
+    def get_camchain_format(self):
+        assert self.__is_initialized
+
+    def get_sensors_format(self):
+        assert self.__is_initialized
+        cam_dict = OrderedDict()
+        cam_dict['camera'] = OrderedDict()
+        cam_dict['camera']['label'] = self.rostopic
+        cam_dict['camera']['id'] = self.id
+        cam_dict['camera'][
+            'line-delay-nanoseconds'] = self.line_delay_nanoseconds
+        cam_dict['camera']['image_height'] = self.resolution[1]
+        cam_dict['camera']['image_width'] = self.resolution[0]
+        cam_dict['camera']['type'] = self.camera_model
+        cam_dict['camera']['intrinsics'] = list_to_ordered_dict(self.intrinsics)
+        #  cam_dict['camera']['x'] = y
+        return cam_dict
 
 
 class ImuConfig:
 
     def __init__(self):
         pass
+
+
+def setup_yaml():
+    ''' Allows to use OrderedDict() within yaml dumping.'''
+    represent_dict_order = lambda self, data:  self.represent_mapping('tag:yaml.org,2002:map', data.items())
+    yaml.add_representer(OrderedDict, represent_dict_order)
+
+
+class IndentDumper(yaml.Dumper):
+
+    def increase_indent(self, flow=False, indentless=False):
+        return super(IndentDumper, self).increase_indent(flow, False)
 
 
 def read_yaml(file_name):
@@ -73,31 +124,44 @@ def read_yaml(file_name):
         print(exception)
 
 
-def write_yaml(file_name, yaml_file):
-    yaml_file = open(file_name, 'w')
+def write_yaml(file_name, output_dict):
+    output_file = open(file_name, 'w')
     try:
-        yaml.dump(yaml_file, out_file)
+        yaml.dump(
+            output_dict,
+            output_file,
+            Dumper=IndentDumper,
+            default_flow_style=False)
     except yaml.YAMLError as exception:
         print(exception)
 
 
 class CalibrationConfig:
 
-    def __init__(self, cam_yaml):
+    def __init__(self, arg_parse):
+        self.__arg_parse = arg_parse
+        self.ncamera_label = self.__arg_parse.ncamera_label()
+        self.id = md5.new(self.ncamera_label).hexdigest()
         self.cameras = dict()
-        data = read_yaml(cam_yaml)
+        data = read_yaml(arg_parse.cam_yaml())
         self.__extract_data(data)
+
+    def write_converted_yaml(self):
+        if self.__is_kalibr_format:
+            self.__write_sensors_data()
 
     def __extract_data(self, data):
         if 'cam0' in data:
+            self.__is_kalibr_format = True
             self.num_cameras = len(data)
             print(
                 "Got a calibration file in kalibr format ({0} cameras).".format(
                     self.num_cameras))
             for cam_index in range(self.num_cameras):
                 cam_name = 'cam{0}'.format(cam_index)
-                self.cameras[cam_name] = CameraConfig()
-                self.cameras[cam_name].get_from_camchain(data[cam_name])
+                self.cameras[cam_name] = CameraConfig(cam_name)
+                self.cameras[cam_name].parse_from_camchain_format(
+                    data[cam_name])
         else:
             sys.exit("Unknown calibration format. Exiting.")
 
@@ -105,9 +169,26 @@ class CalibrationConfig:
         pass
 
     def __extract_sensors_data(self):
-        sys.exit('Not implemented')
+        sys.exit("Not implemented.")
+
+    def __write_camchain_data(self):
+        sys.exit("Not implemented.")
+
+    def __write_sensors_data(self):
+        sensors_dict = OrderedDict()
+        sensors_dict['ncameras'] = [
+            OrderedDict([('label', self.ncamera_label), ('id', self.id),
+                         ('cameras', list())])
+        ]
+        for cam_index in range(self.num_cameras):
+            cam_name = 'cam{0}'.format(cam_index)
+            sensors_dict['ncameras'][0]['cameras'].append(
+                self.cameras[cam_name].get_sensors_format())
+        write_yaml(self.__arg_parse.output_file_name(), sensors_dict)
 
 
 if __name__ == "__main__":
+    setup_yaml()
     arg_parse = ArgParse()
-    calib_config = CalibrationConfig(arg_parse.cam_yaml())
+    calib_config = CalibrationConfig(arg_parse)
+    calib_config.write_converted_yaml()
