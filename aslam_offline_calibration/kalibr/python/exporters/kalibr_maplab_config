@@ -1,0 +1,113 @@
+#!/usr/bin/env python
+
+import argparse
+import numpy as np
+import md5
+import sm
+import sys
+import yaml
+
+
+class ArgParse:
+
+    def __init__(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            '--cam',
+            dest='cam_yaml',
+            help="Camera configuration as yaml file (sensors.yaml or "
+            "camchain-imucam.yaml).",
+            required=True)
+        parser.add_argument(
+            '--out',
+            dest='out_file_name',
+            help="Name of the output file.",
+            default='converted.yaml')
+        self.parsed_args = parser.parse_args()
+
+    def cam_yaml(self):
+        return self.parsed_args.cam_yaml
+
+    def out_file_name(self):
+        return self.parsed_args.out_file_name
+
+
+class CameraConfig:
+
+    def __init__(self):
+        self.__is_initialized = False
+
+    def get_from_camchain(self, cam_dict):
+        assert all(
+            keys in cam_dict
+            for keys in ('T_cam_imu', 'cam_overlaps', 'camera_model',
+                         'distortion_coeffs', 'distortion_model', 'intrinsics',
+                         'resolution', 'rostopic', 'timeshift_cam_imu'))
+        # TODO(fabianbl): Remove unused ones.
+        self.T_cn_i = sm.Transformation(np.array(cam_dict['T_cam_imu']))
+        self.cam_overlaps = cam_dict['cam_overlaps']
+        self.camera_model = cam_dict['camera_model']
+        self.distortion_coeffs = cam_dict['distortion_coeffs']
+        self.distortion_model = cam_dict['distortion_model']
+        self.intrinsics = cam_dict['intrinsics']
+        self.resolution = cam_dict['resolution']
+        self.rostopic = cam_dict['rostopic']
+        self.timeshift_cam_imu = cam_dict['timeshift_cam_imu']
+        self.__is_initialized = True
+
+    def get_from_sensors(self):
+        pass
+
+
+class ImuConfig:
+
+    def __init__(self):
+        pass
+
+
+def read_yaml(file_name):
+    yaml_file = open(file_name, 'r')
+    try:
+        return yaml.load(yaml_file)
+    except yaml.YAMLError as exception:
+        print(exception)
+
+
+def write_yaml(file_name, yaml_file):
+    yaml_file = open(file_name, 'w')
+    try:
+        yaml.dump(yaml_file, out_file)
+    except yaml.YAMLError as exception:
+        print(exception)
+
+
+class CalibrationConfig:
+
+    def __init__(self, cam_yaml):
+        self.cameras = dict()
+        data = read_yaml(cam_yaml)
+        self.__extract_data(data)
+
+    def __extract_data(self, data):
+        if 'cam0' in data:
+            self.num_cameras = len(data)
+            print(
+                "Got a calibration file in kalibr format ({0} cameras).".format(
+                    self.num_cameras))
+            for cam_index in range(self.num_cameras):
+                cam_name = 'cam{0}'.format(cam_index)
+                self.cameras[cam_name] = CameraConfig()
+                self.cameras[cam_name].get_from_camchain(data[cam_name])
+        else:
+            sys.exit("Unknown calibration format. Exiting.")
+
+    def __extract_camchain_data(self):
+        pass
+
+    def __extract_sensors_data(self):
+        sys.exit('Not implemented')
+
+
+if __name__ == "__main__":
+    arg_parse = ArgParse()
+    calib_config = CalibrationConfig(arg_parse.cam_yaml())
