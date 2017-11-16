@@ -64,6 +64,11 @@ def list_to_ordered_dict(input_list):
     return output_dict
 
 
+def dict_to_list(input_dict):
+    shape = [input_dict['cols'], input_dict['rows']]
+    return np.squeeze(np.array(input_dict['data']).reshape(shape)).tolist()
+
+
 class ImuConfig:
 
     def __init__(self):
@@ -71,7 +76,8 @@ class ImuConfig:
 
     def parse_from_kalibr_format(self, imu_dict):
         self.rostopic = imu_dict['rostopic']
-        self.id = md5.new(imu_dict['rostopic']).hexdigest()
+        self.id = md5.new(self.rostopic).hexdigest()
+        self.update_rate = imu_dict['update_rate']
 
         # Gyro noise density. [rad/s*1/sqrt(Hz)]
         self.gyro_noise_density = imu_dict['gyroscope_noise_density']
@@ -86,6 +92,38 @@ class ImuConfig:
         self.saturation_gyro_max_radps = 7.5
         self.gravity_magnitude_mps2 = 9.808083883386614
         self.__is_initialized = True
+
+    def parse_from_maplab_format(self, imu_dict):
+        self.rostopic = imu_dict['hardware_id']
+        self.id = imu_dict['id']
+        self.update_rate = 200.0
+
+        # Gyro noise density. [rad/s*1/sqrt(Hz)]
+        self.gyro_noise_density = imu_dict['sigmas']['gyro_noise_density']
+        # Accelerometer noise density. [m/s^2*1/sqrt(Hz)]
+        self.acc_noise_density = imu_dict['sigmas']['acc_noise_density']
+        # Gyro bias random walk. [rad/s^2*1/sqrt(Hz)]
+        self.gyro_random_walk = imu_dict['sigmas'][
+            'gyro_bias_random_walk_noise_density']
+        # Accelerometer bias random walk. [m/s^3*1/sqrt(Hz)]
+        self.acc_random_walk = imu_dict['sigmas'][
+            'acc_bias_random_walk_noise_density']
+
+        self.saturation_accel_max_mps2 = imu_dict['saturation_accel_max_mps2']
+        self.saturation_gyro_max_radps = imu_dict['saturation_gyro_max_radps']
+        self.gravity_magnitude_mps2 = imu_dict['gravity_magnitude_mps2']
+        self.__is_initialized = True
+
+    def get_kalibr_format(self):
+        assert self.__is_initialized
+        imu_dict = OrderedDict()
+        imu_dict['rostopic'] = self.rostopic
+        imu_dict['update_rate'] = self.update_rate
+        imu_dict['accelerometer_noise_density'] = self.acc_noise_density
+        imu_dict['accelerometer_random_walk'] = self.acc_random_walk
+        imu_dict['gyroscope_noise_density'] = self.gyro_noise_density
+        imu_dict['gyroscope_random_walk'] = self.gyro_random_walk
+        return imu_dict
 
     def get_maplab_format(self):
         assert self.__is_initialized
@@ -133,10 +171,44 @@ class CameraConfig:
         self.__is_initialized = True
 
     def parse_from_maplab_format(self, cam_dict):
-        pass
+        assert all(keys in cam_dict for keys in ('camera', 'T_B_C'))
+        assert all(keys in cam_dict['camera']
+                   for keys in
+                   ('label', 'id', 'line-delay-nanoseconds', 'image_height',
+                    'image_width', 'type', 'intrinsics', 'distortion'))
+        self.T_cn_i = sm.Transformation(
+            np.array(dict_to_list(cam_dict['T_B_C']))).inverse()
+        self.rostopic = cam_dict['camera']['label']
+        self.id = cam_dict['camera']['id']
+        self.line_delay_nanoseconds = cam_dict['camera'][
+            'line-delay-nanoseconds']
+        self.resolution = [
+            cam_dict['camera']['image_width'],
+            cam_dict['camera']['image_height']
+        ]
+        self.camera_model = cam_dict['camera']['type']
+        self.intrinsics = dict_to_list(cam_dict['camera']['intrinsics'])
+        self.distortion_model = cam_dict['camera']['distortion']['type']
+        self.distortion_coeffs = dict_to_list(
+            cam_dict['camera']['distortion']['parameters'])
+        self.__is_initialized = True
 
-    def get_kalibr_format(self):
+    def get_kalibr_format(self, T_cnm1_i=None):
         assert self.__is_initialized
+        cam_dict = OrderedDict()
+        cam_dict['camera_model'] = self.camera_model
+        cam_dict['intrinsics'] = self.intrinsics
+        cam_dict['distortion_model'] = self.distortion_model
+        cam_dict['distortion_coeffs'] = self.distortion_coeffs
+        if not T_cnm1_i is None:
+            T_cn_cnm1 = self.T_cn_i * T_cnm1_i.inverse()
+            cam_dict['T_cn_cnm1'] = T_cn_cnm1.T().tolist()
+        cam_dict['T_cam_imu'] = self.T_cn_i.T().tolist()
+        cam_dict['cam_overlaps'] = self.cam_overlaps
+        cam_dict['timeshift_cam_imu'] = self.timeshift_cam_imu
+        cam_dict['rostopic'] = self.rostopic
+        cam_dict['resolution'] = self.resolution
+        return cam_dict
 
     def get_maplab_format(self):
         assert self.__is_initialized
@@ -178,14 +250,21 @@ def read_yaml(file_name):
         print(exception)
 
 
-def write_yaml(file_name, output_dict):
+def write_yaml(file_name,
+               output_dict,
+               default_flow_style=None,
+               use_indent_dumper=False):
     output_file = open(file_name, 'w')
     try:
-        yaml.dump(
-            output_dict,
-            output_file,
-            Dumper=IndentDumper,
-            default_flow_style=False)
+        if not use_indent_dumper:
+            yaml.dump(
+                output_dict, output_file, default_flow_style=default_flow_style)
+        else:
+            yaml.dump(
+                output_dict,
+                output_file,
+                Dumper=IndentDumper,
+                default_flow_style=default_flow_style)
     except yaml.YAMLError as exception:
         print(exception)
 
@@ -193,6 +272,7 @@ def write_yaml(file_name, output_dict):
 class CalibrationConfig:
 
     def __init__(self, arg_parse):
+        self.imu = ImuConfig()
         self.ncamera_label = arg_parse.ncamera_label()
         self.id = md5.new(self.ncamera_label).hexdigest()
         self.cameras = dict()
@@ -204,36 +284,60 @@ class CalibrationConfig:
                 sys.exit("No IMU yaml file given, exiting.")
             else:
                 imu_data = read_yaml(arg_parse.imu_yaml())
-                self.imu = ImuConfig()
                 self.imu.parse_from_kalibr_format(imu_data)
         self.output_file_name = arg_parse.output_file_name
 
     def write_converted_yaml(self):
         if self.__is_kalibr_format:
             self.__write_maplab_data()
+        else:
+            self.__write_kalibr_data()
 
     def __extract_data(self, data):
         if 'cam0' in data:
             self.__is_kalibr_format = True
-            self.num_cameras = len(data)
-            print(
-                "Got a calibration file in kalibr format ({0} cameras).".format(
-                    self.num_cameras))
-            for cam_index in range(self.num_cameras):
-                cam_name = 'cam{0}'.format(cam_index)
-                self.cameras[cam_name] = CameraConfig(cam_name)
-                self.cameras[cam_name].parse_from_kalibr_format(data[cam_name])
+            self.__extract_kalibr_data(data)
+        elif 'ncameras' in data:
+            self.__is_kalibr_format = False
+            self.__extract_maplab_data(data)
         else:
             sys.exit("Unknown calibration format. Exiting.")
 
-    def __extract_kalibr_data(self):
-        pass
+    def __extract_kalibr_data(self, data):
+        self.num_cameras = len(data)
+        for cam_index in range(self.num_cameras):
+            cam_name = 'cam{0}'.format(cam_index)
+            self.cameras[cam_name] = CameraConfig(cam_name)
+            self.cameras[cam_name].parse_from_kalibr_format(data[cam_name])
+        print("Got a calibration file in kalibr format ({0} cameras).".format(
+            self.num_cameras))
 
-    def __extract_maplab_data(self):
-        sys.exit("Not implemented.")
+    def __extract_maplab_data(self, data):
+        self.ncamera_label = data['ncameras'][0]['label']
+        self.id = data['ncameras'][0]['id']
+        cameras_dict = data['ncameras'][0]['cameras']
+        self.num_cameras = len(cameras_dict)
+        for cam_index in range(self.num_cameras):
+            cam_name = 'cam{0}'.format(cam_index)
+            self.cameras[cam_name] = CameraConfig(cam_name)
+            self.cameras[cam_name].parse_from_maplab_format(
+                cameras_dict[cam_index])
+        imu_data = data['sensors'][0]
+        self.imu.parse_from_maplab_format(imu_data)
+        print("Got a calibration file in maplab format ({0} cameras).".format(
+            self.num_cameras))
 
     def __write_kalibr_data(self):
-        sys.exit("Not implemented.")
+        camchain_dict = OrderedDict()
+        T_cnm1_i = None
+        for cam_index in range(self.num_cameras):
+            cam_name = 'cam{0}'.format(cam_index)
+            camchain_dict[cam_name] = self.cameras[cam_name].get_kalibr_format(
+                T_cnm1_i)
+            T_cnm1_i = self.cameras[cam_name].T_cn_i
+        camchain_dict['imu'] = self.imu.get_kalibr_format()
+        write_yaml(self.__get_output_file_name(), camchain_dict)
+        print("Wrote " + str(self.__get_output_file_name()) + ".")
 
     def __write_maplab_data(self):
         sensors_dict = OrderedDict()
@@ -246,9 +350,8 @@ class CalibrationConfig:
             cam_name = 'cam{0}'.format(cam_index)
             sensors_dict['ncameras'][0]['cameras'].append(
                 self.cameras[cam_name].get_maplab_format())
-        write_yaml(self.__get_output_file_name(), sensors_dict)
-        print("Wrote " + str(self.__get_output_file_name()) +
-              " (kalibr to maplab format).")
+        write_yaml(self.__get_output_file_name(), sensors_dict, False, True)
+        print("Wrote " + str(self.__get_output_file_name()) + ".")
 
     def __get_output_file_name(self):
         if self.__is_kalibr_format and 'camchain-imucam' in self.input_file_name:
