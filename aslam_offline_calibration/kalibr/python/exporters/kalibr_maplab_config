@@ -35,8 +35,7 @@ class ArgParse:
         parser.add_argument(
             '--out',
             dest='output_file_name',
-            help=
-            "Name of the output file (only used if input file is not named "
+            help="Name of the output file (only used if input file is not named "
             "camchain-imucam-* or sensors-*).",
             default='converted.yaml')
         self.parsed_args = parser.parse_args()
@@ -194,20 +193,20 @@ def write_yaml(file_name, output_dict):
 class CalibrationConfig:
 
     def __init__(self, arg_parse):
-        # TODO(fabianbl): Remove arg_parse form other parts of the class.
-        self.__arg_parse = arg_parse
-        self.ncamera_label = self.__arg_parse.ncamera_label()
+        self.ncamera_label = arg_parse.ncamera_label()
         self.id = md5.new(self.ncamera_label).hexdigest()
         self.cameras = dict()
-        data = read_yaml(self.__arg_parse.cam_yaml())
+        self.input_file_name = arg_parse.cam_yaml()
+        data = read_yaml(self.input_file_name)
         self.__extract_data(data)
         if self.__is_kalibr_format:
-            if self.__arg_parse.imu_yaml() is None:
+            if arg_parse.imu_yaml() is None:
                 sys.exit("No IMU yaml file given, exiting.")
             else:
-                imu_data = read_yaml(self.__arg_parse.imu_yaml())
+                imu_data = read_yaml(arg_parse.imu_yaml())
                 self.imu = ImuConfig()
                 self.imu.parse_from_kalibr_format(imu_data)
+        self.output_file_name = arg_parse.output_file_name
 
     def write_converted_yaml(self):
         if self.__is_kalibr_format:
@@ -223,7 +222,7 @@ class CalibrationConfig:
             for cam_index in range(self.num_cameras):
                 cam_name = 'cam{0}'.format(cam_index)
                 self.cameras[cam_name] = CameraConfig(cam_name)
-                self.cameras[cam_name].parse_from_kalibr_format( data[cam_name])
+                self.cameras[cam_name].parse_from_kalibr_format(data[cam_name])
         else:
             sys.exit("Unknown calibration format. Exiting.")
 
@@ -252,16 +251,12 @@ class CalibrationConfig:
               " (kalibr to maplab format).")
 
     def __get_output_file_name(self):
-        if self.__is_kalibr_format and 'camchain-imucam' in self.__arg_parse.cam_yaml(
-        ):
-            return self.__arg_parse.cam_yaml().replace('camchain-imucam',
-                                                       'sensors')
-        elif not self.__is_kalibr_format and 'sensors' in self.__arg_parse.cam_yaml(
-        ):
-            return self.__arg_parse.cam_yaml().replace('sensors',
-                                                       'camchain-imucam')
+        if self.__is_kalibr_format and 'camchain-imucam' in self.input_file_name:
+            return self.input_file_name.replace('camchain-imucam', 'sensors')
+        elif not self.__is_kalibr_format and 'sensors' in self.input_file_name:
+            return self.input_file_name.replace('sensors', 'camchain-imucam')
         else:
-            return self.__arg_parse.output_file_name()
+            return self.output_file_name
 
 
 if __name__ == "__main__":
