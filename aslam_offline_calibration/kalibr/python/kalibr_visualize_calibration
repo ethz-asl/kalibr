@@ -96,7 +96,7 @@ class CalibrationVisualization:
         pl.show()
 
     def incrementColor(self):
-        self.color_counter = self.color_counter + 1
+        self.color_counter += 1
 
     def __drawCameraOutline(self, transform, focal_lengths, principal_point,
                             resolution):
