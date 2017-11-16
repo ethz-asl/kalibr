@@ -335,7 +335,6 @@ class CalibrationConfig:
             camchain_dict[cam_name] = self.cameras[cam_name].get_kalibr_format(
                 T_cnm1_i)
             T_cnm1_i = self.cameras[cam_name].T_cn_i
-        camchain_dict['imu'] = self.imu.get_kalibr_format()
         write_yaml(self.__get_output_file_name(), camchain_dict)
         print("Wrote " + str(self.__get_output_file_name()) + ".")
 
