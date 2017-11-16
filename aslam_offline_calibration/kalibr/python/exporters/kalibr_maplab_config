@@ -60,7 +60,7 @@ def list_to_ordered_dict(input_list):
     if len(shape) == 1:
         shape = np_array.reshape((shape[0], 1)).shape
     output_dict = OrderedDict([('rows', shape[0]), ('cols', shape[1]),
-                               ('data', input_list)])
+                               ('data', np_array.flatten().tolist())])
     return output_dict
 
 
