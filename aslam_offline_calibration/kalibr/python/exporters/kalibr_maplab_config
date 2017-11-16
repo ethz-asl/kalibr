@@ -20,6 +20,12 @@ class ArgParse:
             "camchain-imucam.yaml).",
             required=True)
         parser.add_argument(
+            '--imu',
+            dest='imu_yaml',
+            help=
+            "IMU configuration (only used for conversion from kalibr format).",
+            required=False)
+        parser.add_argument(
             '--label',
             dest='ncamera_label',
             help=
@@ -37,6 +43,9 @@ class ArgParse:
     def cam_yaml(self):
         return self.parsed_args.cam_yaml
 
+    def imu_yaml(self):
+        return self.parsed_args.imu_yaml
+
     def output_file_name(self):
         return self.parsed_args.output_file_name
 
@@ -53,6 +62,41 @@ def list_to_ordered_dict(input_list):
     output_dict = OrderedDict([('rows', shape[0]), ('cols', shape[1]),
                                ('data', input_list)])
     return output_dict
+
+
+class ImuConfig:
+
+    def __init__(self):
+        self.__is_initialized = False
+
+    def parse_from_kalibr_format(self, imu_dict):
+        self.rostopic = imu_dict['rostopic']
+        self.id = md5.new(imu_dict['rostopic']).hexdigest()
+        self.acc_random_walk = imu_dict['accelerometer_random_walk']
+        self.acc_noise_density = imu_dict['accelerometer_noise_density']
+        self.gyr_random_walk = imu_dict['gyroscope_random_walk']
+        self.gyr_noise_density = imu_dict['gyroscope_noise_density']
+        self.saturation_accel_max_mps2 = 150.0
+        self.saturation_gyro_max_radps = 7.5
+        self.gravity_magnitude_mps2 = 9.808083883386614
+        self.__is_initialized = True
+
+    def get_maplab_format(self):
+        assert self.__is_initialized
+        imu_dict = OrderedDict()
+        imu_dict['sensor_type'] = 'IMU'
+        imu_dict['hardware_id'] = self.rostopic
+        imu_dict['id'] = self.id
+        imu_dict['sigmas'] = OrderedDict(
+            [('gyro_noise_density', self.gyr_noise_density),
+             ('gyro_bias_random_walk_noise_density', self.gyr_random_walk),
+             ('acc_noise_density',
+              self.acc_noise_density), ('acc_bias_random_walk_noise_density',
+                                        self.acc_random_walk)])
+        imu_dict['saturation_accel_max_mps2'] = self.saturation_accel_max_mps2
+        imu_dict['saturation_gyro_max_radps'] = self.saturation_gyro_max_radps
+        imu_dict['gravity_magnitude_mps2'] = self.gravity_magnitude_mps2
+        return imu_dict
 
 
 class CameraConfig:
@@ -108,12 +152,6 @@ class CameraConfig:
         return cam_dict
 
 
-class ImuConfig:
-
-    def __init__(self):
-        pass
-
-
 def setup_yaml():
     ''' Allows to use OrderedDict() within yaml dumping.'''
     represent_dict_order = lambda self, data:  self.represent_mapping('tag:yaml.org,2002:map', data.items())
@@ -149,12 +187,20 @@ def write_yaml(file_name, output_dict):
 class CalibrationConfig:
 
     def __init__(self, arg_parse):
+        # TODO(fabianbl): Remove arg_parse form other parts of the class.
         self.__arg_parse = arg_parse
         self.ncamera_label = self.__arg_parse.ncamera_label()
         self.id = md5.new(self.ncamera_label).hexdigest()
         self.cameras = dict()
-        data = read_yaml(arg_parse.cam_yaml())
+        data = read_yaml(self.__arg_parse.cam_yaml())
         self.__extract_data(data)
+        if self.__is_kalibr_format:
+            if self.__arg_parse.imu_yaml() is None:
+                sys.exit("No IMU yaml file given, exiting.")
+            else:
+                imu_data = read_yaml(self.__arg_parse.imu_yaml())
+                self.imu = ImuConfig()
+                self.imu.parse_from_kalibr_format(imu_data)
 
     def write_converted_yaml(self):
         if self.__is_kalibr_format:
@@ -186,6 +232,7 @@ class CalibrationConfig:
 
     def __write_sensors_data(self):
         sensors_dict = OrderedDict()
+        sensors_dict['sensors'] = [self.imu.get_maplab_format()]
         sensors_dict['ncameras'] = [
             OrderedDict([('label', self.ncamera_label), ('id', self.id),
                          ('cameras', list())])
@@ -194,7 +241,21 @@ class CalibrationConfig:
             cam_name = 'cam{0}'.format(cam_index)
             sensors_dict['ncameras'][0]['cameras'].append(
                 self.cameras[cam_name].get_sensors_format())
-        write_yaml(self.__arg_parse.output_file_name(), sensors_dict)
+        write_yaml(self.__get_output_file_name(), sensors_dict)
+        print("Wrote " + str(self.__get_output_file_name()) +
+              " (kalibr to maplab format).")
+
+    def __get_output_file_name(self):
+        if self.__is_kalibr_format and 'camchain-imucam' in self.__arg_parse.cam_yaml(
+        ):
+            return self.__arg_parse.cam_yaml().replace('camchain-imucam',
+                                                       'sensors')
+        elif not self.__is_kalibr_format and 'sensors' in self.__arg_parse.cam_yaml(
+        ):
+            return self.__arg_parse.cam_yaml().replace('sensors',
+                                                       'camchain-imucam')
+        else:
+            return self.__arg_parse.output_file_name()
 
 
 if __name__ == "__main__":
