@@ -35,9 +35,8 @@ class ArgParse:
         parser.add_argument(
             '--out',
             dest='output_file_name',
-            help="Name of the output file (only used if input file is not named "
-            "camchain-imucam-* or sensors-*).",
-            default='converted.yaml')
+            help="Name of the output file (optional if input file is named "
+            "camchain-imucam-* or sensors-*).")
         self.parsed_args = parser.parse_args()
 
     def cam_yaml(self):
@@ -285,7 +284,7 @@ class CalibrationConfig:
             else:
                 imu_data = read_yaml(arg_parse.imu_yaml())
                 self.imu.parse_from_kalibr_format(imu_data)
-        self.output_file_name = arg_parse.output_file_name
+        self.output_file_name = arg_parse.output_file_name()
 
     def write_converted_yaml(self):
         if self.__is_kalibr_format:
@@ -353,12 +352,22 @@ class CalibrationConfig:
         print("Wrote " + str(self.__get_output_file_name()) + ".")
 
     def __get_output_file_name(self):
-        if self.__is_kalibr_format and 'camchain-imucam' in self.input_file_name:
-            return self.input_file_name.replace('camchain-imucam', 'sensors')
-        elif not self.__is_kalibr_format and 'sensors' in self.input_file_name:
-            return self.input_file_name.replace('sensors', 'camchain-imucam')
-        else:
+        if not self.output_file_name is None:
             return self.output_file_name
+        elif self.__is_kalibr_format:
+            if 'camchain-imucam' in self.input_file_name:
+                return self.input_file_name.replace('camchain-imucam',
+                                                    'sensors')
+            else:
+                return 'sensors.yaml'
+        elif not self.__is_kalibr_format:
+            if 'sensors' in self.input_file_name:
+                return self.input_file_name.replace('sensors',
+                                                    'camchain-imucam')
+            else:
+                return 'camchain-imucam.yaml'
+        else:
+            sys.exit("Could not determine a valid file name. Exiting.")
 
 
 if __name__ == "__main__":
