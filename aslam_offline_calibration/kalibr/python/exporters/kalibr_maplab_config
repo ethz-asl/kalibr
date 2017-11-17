@@ -37,6 +37,11 @@ class ArgParse:
             dest='output_file_name',
             help="Name of the output file (optional if input file is named "
             "camchain-imucam-* or sensors-*).")
+        parser.add_argument(
+            '--imu-out',
+            dest='imu_output_file_name',
+            help="Name of the IMU output file (only for conversions from "
+            "maplab to kalibr.")
         self.parsed_args = parser.parse_args()
 
     def cam_yaml(self):
@@ -45,11 +50,14 @@ class ArgParse:
     def imu_yaml(self):
         return self.parsed_args.imu_yaml
 
+    def ncamera_label(self):
+        return self.parsed_args.ncamera_label
+
     def output_file_name(self):
         return self.parsed_args.output_file_name
 
-    def ncamera_label(self):
-        return self.parsed_args.ncamera_label
+    def imu_output_file_name(self):
+        return self.parsed_args.imu_output_file_name
 
 
 def list_to_ordered_dict(input_list):
@@ -288,6 +296,7 @@ class CalibrationConfig:
                 imu_data = read_yaml(arg_parse.imu_yaml())
                 self.imu.parse_from_kalibr_format(imu_data)
         self.output_file_name = arg_parse.output_file_name()
+        self.imu_output_file_name = arg_parse.imu_output_file_name()
 
     def write_converted_yaml(self):
         if self.__is_kalibr_format:
@@ -339,6 +348,12 @@ class CalibrationConfig:
             T_cnm1_i = self.cameras[cam_name].T_cn_i
         write_yaml(self.__get_output_file_name(), camchain_dict)
         print("Wrote " + str(self.__get_output_file_name()) + ".")
+        if not self.imu_output_file_name is None:
+            imu_dict = self.imu.get_kalibr_format()
+            use_default_flow_style = False
+            write_yaml(self.imu_output_file_name, imu_dict,
+                       use_default_flow_style)
+            print("Wrote " + str(self.imu_output_file_name) + ".")
 
     def __write_maplab_data(self):
         sensors_dict = OrderedDict()
@@ -351,7 +366,10 @@ class CalibrationConfig:
             cam_name = 'cam{0}'.format(cam_index)
             sensors_dict['ncameras'][0]['cameras'].append(
                 self.cameras[cam_name].get_maplab_format())
-        write_yaml(self.__get_output_file_name(), sensors_dict, False, True)
+        use_default_flow_style = False
+        use_indent_dumper = True
+        write_yaml(self.__get_output_file_name(), sensors_dict,
+                   use_default_flow_style, use_indent_dumper)
         print("Wrote " + str(self.__get_output_file_name()) + ".")
 
     def __get_output_file_name(self):
