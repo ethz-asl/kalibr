@@ -360,14 +360,12 @@ class CalibrationConfig:
                                                     'sensors')
             else:
                 return 'sensors.yaml'
-        elif not self.__is_kalibr_format:
+        else:
             if 'sensors' in self.input_file_name:
                 return self.input_file_name.replace('sensors',
                                                     'camchain-imucam')
             else:
                 return 'camchain-imucam.yaml'
-        else:
-            sys.exit("Could not determine a valid file name. Exiting.")
 
 
 if __name__ == "__main__":
