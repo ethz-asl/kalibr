@@ -45,8 +45,8 @@ namespace aslam {
       virtual double evaluateErrorImplementation();
 
       /// \brief evaluate the jacobian
-      virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J);
-        
+      virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) const;
+
         virtual void buildHessianImplementation(SparseBlockMatrix & outHessian, Eigen::VectorXd & outRhs,bool useMEstimator);
               
     private:

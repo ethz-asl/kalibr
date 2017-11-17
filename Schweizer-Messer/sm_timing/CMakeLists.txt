@@ -29,16 +29,19 @@ target_link_libraries(${PROJECT_NAME}
 #############
 ## Testing ##
 #############
-# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
-add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
+if(CATKIN_ENABLE_TESTING)
 
-## Add gtest based cpp test target and link libraries
-catkin_add_gtest(${PROJECT_NAME}-test 
-  test/test_main.cpp
-  test/TestTimestampCorrector.cpp
-  test/TestNsecTimeUtilities.cpp
-)
-if(TARGET ${PROJECT_NAME}-test)
-  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME} pthread)
+  # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
+  add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
+
+  ## Add gtest based cpp test target and link libraries
+  catkin_add_gtest(${PROJECT_NAME}-test
+    test/test_main.cpp
+    test/TestTimestampCorrector.cpp
+    test/TestNsecTimeUtilities.cpp
+    )
+  if(TARGET ${PROJECT_NAME}-test)
+    target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME} pthread)
+  endif()
+
 endif()
-

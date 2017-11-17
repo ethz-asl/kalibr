@@ -84,7 +84,7 @@ double BSplineMotionError<SPLINE_T>::evaluateErrorImplementation() {
 
 /// \brief evaluate the jacobians
 template<class SPLINE_T>
-void BSplineMotionError<SPLINE_T>::evaluateJacobiansImplementation() {
+void BSplineMotionError<SPLINE_T>::evaluateJacobiansImplementation() const {
 
 }
 

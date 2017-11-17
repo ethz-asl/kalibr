@@ -43,19 +43,23 @@ cs_add_library(${PROJECT_NAME}
 find_package(Boost REQUIRED COMPONENTS system thread)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
-# Avoid clash with tr1::tuple:
-# https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
-add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
+if(CATKIN_ENABLE_TESTING)
 
-catkin_add_gtest(${PROJECT_NAME}_test
-  test/test_main.cpp
-  test/VectorDesignVariableTest.cpp
-  test/AlgorithmsTest.cpp
-  test/OptimizationProblemTest.cpp
-  test/IncrementalOptimizationProblemTest.cpp
-  test/LinearSolverTest.cpp
-)
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+  # Avoid clash with tr1::tuple:
+  # https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
+  add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
+
+  catkin_add_gtest(${PROJECT_NAME}_test
+    test/test_main.cpp
+    test/VectorDesignVariableTest.cpp
+    test/AlgorithmsTest.cpp
+    test/OptimizationProblemTest.cpp
+    test/IncrementalOptimizationProblemTest.cpp
+    test/LinearSolverTest.cpp
+    )
+  target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+
+endif()
 
 cs_install()
 cs_export()

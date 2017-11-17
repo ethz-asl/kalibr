@@ -75,7 +75,7 @@ public:
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJ) {
+  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & outJ) const {
     outJ.add(_p2d, -_J);
   }
 
@@ -114,7 +114,7 @@ public:
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) {
+  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) const {
     J.add(_p2d1, -_J1);
     J.add(_p2d2, -_J2);
   }
@@ -160,7 +160,7 @@ public:
   }
 
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) {
+  virtual void evaluateJacobiansImplementation(aslam::backend::JacobianContainer & J) const {
     J.add(_p2d1, -_J1);
     J.add(_p2d2, -_J2);
     J.add(_p3, -_J3);

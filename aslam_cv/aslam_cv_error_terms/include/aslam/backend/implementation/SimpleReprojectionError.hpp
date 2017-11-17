@@ -53,7 +53,7 @@ double SimpleReprojectionError<F>::evaluateErrorImplementation() {
 
 template<typename F>
 void SimpleReprojectionError<F>::evaluateJacobiansImplementation(
-    aslam::backend::JacobianContainer & _jacobians) {
+    aslam::backend::JacobianContainer & _jacobians) const {
 
   Eigen::Vector4d p = _point.toHomogeneous();
   typename camera_geometry_t::jacobian_homogeneous_t J;
