@@ -283,6 +283,7 @@ class CalibrationConfig:
 
     def __init__(self, arg_parse):
         self.imu = ImuConfig()
+        self.__has_imu = False
         self.ncamera_label = arg_parse.ncamera_label()
         self.id = md5.new(self.ncamera_label).hexdigest()
         self.cameras = dict()
@@ -295,6 +296,7 @@ class CalibrationConfig:
             else:
                 imu_data = read_yaml(arg_parse.imu_yaml())
                 self.imu.parse_from_kalibr_format(imu_data)
+                self.__has_imu = True
         self.output_file_name = arg_parse.output_file_name()
         self.imu_output_file_name = arg_parse.imu_output_file_name()
 
@@ -311,6 +313,11 @@ class CalibrationConfig:
         elif 'ncameras' in data:
             self.__is_kalibr_format = False
             self.__extract_maplab_data(data)
+        elif 'cameras' in data:
+            print('Got yaml file in the old ncamera format.')
+            self.__is_kalibr_format = False
+            modified_data = {'ncameras': [data]}
+            self.__extract_maplab_data(modified_data, extract_imu=False)
         else:
             sys.exit("Unknown calibration format. Exiting.")
 
@@ -323,7 +330,7 @@ class CalibrationConfig:
         print("Got a calibration file in kalibr format ({0} cameras).".format(
             self.num_cameras))
 
-    def __extract_maplab_data(self, data):
+    def __extract_maplab_data(self, data, extract_imu=True):
         self.ncamera_label = data['ncameras'][0]['label']
         self.id = data['ncameras'][0]['id']
         cameras_dict = data['ncameras'][0]['cameras']
@@ -333,8 +340,10 @@ class CalibrationConfig:
             self.cameras[cam_name] = CameraConfig(cam_name)
             self.cameras[cam_name].parse_from_maplab_format(
                 cameras_dict[cam_index])
-        imu_data = data['sensors'][0]
-        self.imu.parse_from_maplab_format(imu_data)
+        if extract_imu:
+            imu_data = data['sensors'][0]
+            self.imu.parse_from_maplab_format(imu_data)
+            self.__has_imu = True
         print("Got a calibration file in maplab format ({0} cameras).".format(
             self.num_cameras))
 
@@ -349,6 +358,7 @@ class CalibrationConfig:
         write_yaml(self.__get_output_file_name(), camchain_dict)
         print("Wrote " + str(self.__get_output_file_name()) + ".")
         if not self.imu_output_file_name is None:
+            assert self.__has_imu
             imu_dict = self.imu.get_kalibr_format()
             use_default_flow_style = False
             write_yaml(self.imu_output_file_name, imu_dict,
@@ -356,6 +366,7 @@ class CalibrationConfig:
             print("Wrote " + str(self.imu_output_file_name) + ".")
 
     def __write_maplab_data(self):
+        assert self.__has_imu
         sensors_dict = OrderedDict()
         sensors_dict['sensors'] = [self.imu.get_maplab_format()]
         sensors_dict['ncameras'] = [
@@ -384,6 +395,9 @@ class CalibrationConfig:
         else:
             if 'sensors' in self.input_file_name:
                 return self.input_file_name.replace('sensors',
+                                                    'camchain-imucam')
+            elif 'ncamera' in self.input_file_name:
+                return self.input_file_name.replace('ncamera',
                                                     'camchain-imucam')
             else:
                 return 'camchain-imucam.yaml'
