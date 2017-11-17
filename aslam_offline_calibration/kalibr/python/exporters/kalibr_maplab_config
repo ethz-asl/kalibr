@@ -205,7 +205,10 @@ class CameraConfig:
         cam_dict['T_cam_imu'] = self.T_cn_i.T().tolist()
         cam_dict['cam_overlaps'] = self.cam_overlaps
         cam_dict['timeshift_cam_imu'] = self.timeshift_cam_imu
-        cam_dict['rostopic'] = self.rostopic
+        if not self.rostopic.endswith('/image_raw'):
+            cam_dict['rostopic'] = self.rostopic + '/image_raw'
+        else:
+            imu_dict['rostopic'] = self.rostopic
         cam_dict['resolution'] = self.resolution
         return cam_dict
 
