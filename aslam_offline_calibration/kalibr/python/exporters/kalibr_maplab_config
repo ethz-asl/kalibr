@@ -165,7 +165,7 @@ class CameraConfig:
             keys in cam_dict
             for keys in ('T_cam_imu', 'cam_overlaps', 'camera_model',
                          'distortion_coeffs', 'distortion_model', 'intrinsics',
-                         'resolution', 'rostopic', 'timeshift_cam_imu'))
+                         'resolution', 'rostopic'))
         self.T_cn_i = sm.Transformation(np.array(cam_dict['T_cam_imu']))
         self.cam_overlaps = cam_dict['cam_overlaps']
         self.camera_model = cam_dict['camera_model']
@@ -174,7 +174,8 @@ class CameraConfig:
         self.intrinsics = cam_dict['intrinsics']
         self.resolution = cam_dict['resolution']
         self.rostopic = cam_dict['rostopic'].replace('/image_raw', '')
-        self.timeshift_cam_imu = cam_dict['timeshift_cam_imu']
+        if 'timeshift_cam_imu' in cam_dict:
+            self.timeshift_cam_imu = cam_dict['timeshift_cam_imu']
         self.__is_initialized = True
 
     def parse_from_maplab_format(self, cam_dict):
