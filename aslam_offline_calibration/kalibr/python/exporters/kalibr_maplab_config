@@ -9,55 +9,47 @@ import sys
 import yaml
 
 
-class ArgParse:
-
-    def __init__(self):
-        parser = argparse.ArgumentParser()
-        parser.add_argument(
-            '--cam',
-            dest='cam_yaml',
-            help="Camera configuration as yaml file (maplab or kalibr format).",
-            required=True)
-        parser.add_argument(
-            '--imu',
-            dest='imu_yaml',
-            help=
-            "IMU configuration (only used for conversion from kalibr format).",
-            required=False)
-        parser.add_argument(
-            '--label',
-            dest='ncamera_label',
-            help=
-            "Name of the NCamera label (only used for conversion from kalibr "
-            "format)",
-            default='ncamera',
-            required=False)
-        parser.add_argument(
-            '--out',
-            dest='output_file_name',
-            help="Name of the output file (optional if input file is named "
-            "camchain-imucam-* or sensors-*).")
-        parser.add_argument(
-            '--imu-out',
-            dest='imu_output_file_name',
-            help="Name of the IMU output file (only for conversions from "
-            "maplab to kalibr.")
-        self.parsed_args = parser.parse_args()
-
-    def cam_yaml(self):
-        return self.parsed_args.cam_yaml
-
-    def imu_yaml(self):
-        return self.parsed_args.imu_yaml
-
-    def ncamera_label(self):
-        return self.parsed_args.ncamera_label
-
-    def output_file_name(self):
-        return self.parsed_args.output_file_name
-
-    def imu_output_file_name(self):
-        return self.parsed_args.imu_output_file_name
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--cam',
+        dest='cam_yaml',
+        help="Camera configuration as yaml file. This can either be in maplab "
+        "format (sensors.yaml/ncamera.yaml) or kalibr format "
+        "(camchain-imucam.yaml).",
+        required=True)
+    parser.add_argument(
+        '--imu',
+        dest='imu_yaml',
+        help="IMU configuration (only used for conversion from kalibr format "
+        "to the sensors.yaml maplab format).",
+        required=False)
+    parser.add_argument(
+        '--label',
+        dest='ncamera_label',
+        help="Name of the NCamera label (only used for conversion from kalibr "
+        "format).",
+        default='ncamera',
+        required=False)
+    parser.add_argument(
+        '--out',
+        dest='output_file_name',
+        help="Name of the output file (optional if input file is named "
+        "camchain-imucam-* or sensors-*).")
+    parser.add_argument(
+        '--imu-out',
+        dest='imu_output_file_name',
+        help="Name of the IMU output file (only for conversions from "
+        "maplab to kalibr.")
+    parser.add_argument(
+        '--to-ncamera',
+        dest='to_ncamera',
+        help="If set to true, the kalibr calibration file is converted to the "
+        "ncamera maplab format.",
+        default=False,
+        required=False,
+        action='store_true')
+    return parser.parse_args()
 
 
 def list_to_ordered_dict(input_list):
@@ -163,9 +155,9 @@ class CameraConfig:
     def parse_from_kalibr_format(self, cam_dict):
         assert all(
             keys in cam_dict
-            for keys in ('T_cam_imu', 'cam_overlaps', 'camera_model',
-                         'distortion_coeffs', 'distortion_model', 'intrinsics',
-                         'resolution', 'rostopic', 'timeshift_cam_imu'))
+            for keys in
+            ('T_cam_imu', 'cam_overlaps', 'camera_model', 'distortion_coeffs',
+             'distortion_model', 'intrinsics', 'resolution', 'rostopic'))
         self.T_cn_i = sm.Transformation(np.array(cam_dict['T_cam_imu']))
         self.cam_overlaps = cam_dict['cam_overlaps']
         self.camera_model = cam_dict['camera_model']
@@ -174,7 +166,8 @@ class CameraConfig:
         self.intrinsics = cam_dict['intrinsics']
         self.resolution = cam_dict['resolution']
         self.rostopic = cam_dict['rostopic'].replace('/image_raw', '')
-        self.timeshift_cam_imu = cam_dict['timeshift_cam_imu']
+        if 'timeshift_cam_imu' in cam_dict:
+            self.timeshift_cam_imu = cam_dict['timeshift_cam_imu']
         self.__is_initialized = True
 
     def parse_from_maplab_format(self, cam_dict):
@@ -281,24 +274,26 @@ def write_yaml(file_name,
 
 class CalibrationConfig:
 
-    def __init__(self, arg_parse):
+    def __init__(self, parsed_args):
         self.imu = ImuConfig()
         self.__has_imu = False
-        self.ncamera_label = arg_parse.ncamera_label()
+        self.ncamera_label = parsed_args.ncamera_label
         self.id = md5.new(self.ncamera_label).hexdigest()
         self.cameras = dict()
-        self.input_file_name = arg_parse.cam_yaml()
+        self.input_file_name = parsed_args.cam_yaml
         data = read_yaml(self.input_file_name)
         self.__extract_data(data)
+        self.to_ncamera = parsed_args.to_ncamera
         if self.__is_kalibr_format:
-            if arg_parse.imu_yaml() is None:
-                sys.exit("No IMU yaml file given, exiting.")
-            else:
-                imu_data = read_yaml(arg_parse.imu_yaml())
-                self.imu.parse_from_kalibr_format(imu_data)
-                self.__has_imu = True
-        self.output_file_name = arg_parse.output_file_name()
-        self.imu_output_file_name = arg_parse.imu_output_file_name()
+            if not self.to_ncamera:
+                if parsed_args.imu_yaml is None:
+                    sys.exit("No IMU yaml file given, exiting.")
+                else:
+                    imu_data = read_yaml(parsed_args.imu_yaml)
+                    self.imu.parse_from_kalibr_format(imu_data)
+                    self.__has_imu = True
+        self.output_file_name = parsed_args.output_file_name
+        self.imu_output_file_name = parsed_args.imu_output_file_name
 
     def write_converted_yaml(self):
         if self.__is_kalibr_format:
@@ -314,7 +309,6 @@ class CalibrationConfig:
             self.__is_kalibr_format = False
             self.__extract_maplab_data(data)
         elif 'cameras' in data:
-            print('Got yaml file in the old ncamera format.')
             self.__is_kalibr_format = False
             modified_data = {'ncameras': [data]}
             self.__extract_maplab_data(modified_data, extract_imu=False)
@@ -327,8 +321,7 @@ class CalibrationConfig:
             cam_name = 'cam{0}'.format(cam_index)
             self.cameras[cam_name] = CameraConfig(cam_name)
             self.cameras[cam_name].parse_from_kalibr_format(data[cam_name])
-        print("Got a calibration file in kalibr format ({0} cameras).".format(
-            self.num_cameras))
+        print("Got a calibration file in kalibr format.")
 
     def __extract_maplab_data(self, data, extract_imu=True):
         self.ncamera_label = data['ncameras'][0]['label']
@@ -344,8 +337,7 @@ class CalibrationConfig:
             imu_data = data['sensors'][0]
             self.imu.parse_from_maplab_format(imu_data)
             self.__has_imu = True
-        print("Got a calibration file in maplab format ({0} cameras).".format(
-            self.num_cameras))
+        print("Got a calibration file in maplab format.")
 
     def __write_kalibr_data(self):
         camchain_dict = OrderedDict()
@@ -366,9 +358,11 @@ class CalibrationConfig:
             print("Wrote " + str(self.imu_output_file_name) + ".")
 
     def __write_maplab_data(self):
-        assert self.__has_imu
+        if not self.to_ncamera:
+            assert self.__has_imu
         sensors_dict = OrderedDict()
-        sensors_dict['sensors'] = [self.imu.get_maplab_format()]
+        if not self.to_ncamera:
+            sensors_dict['sensors'] = [self.imu.get_maplab_format()]
         sensors_dict['ncameras'] = [
             OrderedDict([('label', self.ncamera_label), ('id', self.id),
                          ('cameras', list())])
@@ -379,8 +373,13 @@ class CalibrationConfig:
                 self.cameras[cam_name].get_maplab_format())
         use_default_flow_style = False
         use_indent_dumper = True
-        write_yaml(self.__get_output_file_name(), sensors_dict,
-                   use_default_flow_style, use_indent_dumper)
+        if not self.to_ncamera:
+            write_yaml(self.__get_output_file_name(), sensors_dict,
+                       use_default_flow_style, use_indent_dumper)
+        else:
+            ncameras_dict = sensors_dict['ncameras'][0]
+            write_yaml(self.__get_output_file_name(), ncameras_dict,
+                       use_default_flow_style, use_indent_dumper)
         print("Wrote " + str(self.__get_output_file_name()) + ".")
 
     def __get_output_file_name(self):
@@ -388,8 +387,12 @@ class CalibrationConfig:
             return self.output_file_name
         elif self.__is_kalibr_format:
             if 'camchain-imucam' in self.input_file_name:
-                return self.input_file_name.replace('camchain-imucam',
-                                                    'sensors')
+                if not self.to_ncamera:
+                    return self.input_file_name.replace('camchain-imucam',
+                                                        'sensors')
+                else:
+                    return self.input_file_name.replace('camchain-imucam',
+                                                        'ncamera')
             else:
                 return 'sensors.yaml'
         else:
@@ -405,6 +408,6 @@ class CalibrationConfig:
 
 if __name__ == "__main__":
     setup_yaml()
-    arg_parse = ArgParse()
-    calib_config = CalibrationConfig(arg_parse)
+    parsed_args = parse_args()
+    calib_config = CalibrationConfig(parsed_args)
     calib_config.write_converted_yaml()
