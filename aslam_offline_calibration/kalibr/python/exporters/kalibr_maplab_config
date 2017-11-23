@@ -16,7 +16,7 @@ def parse_args():
         dest='cam_yaml',
         help="Camera configuration as yaml file. This can either be in maplab "
         "format (sensors.yaml/ncamera.yaml) or kalibr format "
-        "(camchain-imucam.yaml)",
+        "(camchain-imucam.yaml).",
         required=True)
     parser.add_argument(
         '--imu',
@@ -28,7 +28,7 @@ def parse_args():
         '--label',
         dest='ncamera_label',
         help="Name of the NCamera label (only used for conversion from kalibr "
-        "format)",
+        "format).",
         default='ncamera',
         required=False)
     parser.add_argument(
