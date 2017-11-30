@@ -189,6 +189,8 @@ class CameraConfig:
         self.camera_model = cam_dict['camera']['type']
         self.intrinsics = dict_to_list(cam_dict['camera']['intrinsics'])
         self.distortion_model = cam_dict['camera']['distortion']['type']
+        if self.distortion_model == 'radial-tangential':
+            self.distortion_model = 'radtan'
         self.distortion_coeffs = dict_to_list(
             cam_dict['camera']['distortion']['parameters'])
         self.__is_initialized = True
@@ -209,7 +211,7 @@ class CameraConfig:
         if not self.rostopic.endswith('/image_raw'):
             cam_dict['rostopic'] = self.rostopic + '/image_raw'
         else:
-            imu_dict['rostopic'] = self.rostopic
+            cam_dict['rostopic'] = self.rostopic
         cam_dict['resolution'] = self.resolution
         return cam_dict
 
@@ -225,8 +227,11 @@ class CameraConfig:
         cam_dict['camera']['image_width'] = self.resolution[0]
         cam_dict['camera']['type'] = self.camera_model
         cam_dict['camera']['intrinsics'] = list_to_ordered_dict(self.intrinsics)
+        maplab_distortion_model = self.distortion_model
+        if maplab_distortion_model == 'radtan':
+            maplab_distortion_model = 'radial-tangential'
         cam_dict['camera']['distortion'] = OrderedDict(
-            [('type', self.distortion_model),
+            [('type', maplab_distortion_model),
              ('parameters', list_to_ordered_dict(self.distortion_coeffs))])
         cam_dict['T_B_C'] = list_to_ordered_dict(
             self.T_cn_i.inverse().T().tolist())
