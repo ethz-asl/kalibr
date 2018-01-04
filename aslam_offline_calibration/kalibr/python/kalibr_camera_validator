@@ -26,6 +26,7 @@ import igraph
 # make numpy print prettier
 np.set_printoptions(suppress=True)
 
+
 class CalibrationTargetDetector(object):
     def __init__(self, camera, targetConfig):
 
@@ -111,7 +112,7 @@ class CameraChainValidator(object):
             edge["A"][cidx_dest] = self.prepareStereoRectificationMaps(cidx_src, cidx_dest)
                 
         #register the callback for the synchronized images
-        sync_sub = message_filters.ApproximateTimeSynchronizer([val.image_sub for val in self.monovalidators],2,0.01)
+        sync_sub = message_filters.ApproximateTimeSynchronizer([val.image_sub for val in self.monovalidators],2,0.02)
         sync_sub.registerCallback(self.synchronizedCallback)
 
         #initialize message throttler
@@ -119,7 +120,7 @@ class CameraChainValidator(object):
 
     def synchronizedCallback(self, *cam_msgs):
         #throttle image processing
-        rate = 2 #Hz
+        rate = 10 #Hz
         timeNow = time.time()
         if (timeNow-self.timeLast < 1.0/rate) and self.timeLast!=0:
             return
@@ -151,13 +152,13 @@ class CameraChainValidator(object):
                 validator.undist_image = validator.undistorter.undistortImage(np_image)
                             
             #generate a mono view for each cam
-            validator.generateMonoview(np_image, observation, success)            
+            #validator.generateMonoview(np_image, observation, success)            
             
         #generate all rectification views
         for edge in self.G.es:
             cidx_src = edge.source
             cidx_dest = edge.target
-            self.generatePairView(cidx_src, cidx_dest)
+            self.generatePairView(cidx_src, cidx_dest,timestamp)
                 
         cv2.waitKey(1)
     
@@ -196,10 +197,10 @@ class CameraChainValidator(object):
         
         return np_rect_image
 
-    def generatePairView(self, camAnr, camBnr):
+    def generatePairView(self, camAnr, camBnr,timestamp):
         #prepare the window
         windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
-        cv2.namedWindow(windowName, 1)
+        #cv2.namedWindow(windowName, 1)
         #get the mono validators for each cam
         camA = self.monovalidators[camAnr]
         camB = self.monovalidators[camBnr]
@@ -261,7 +262,7 @@ class CameraChainValidator(object):
         
         #draw some epilines
         np_image_rect = cv2.cvtColor(np_image_rect, cv2.COLOR_GRAY2BGR)
-        n=10
+        n=40
         for i in range(0,n):
             y = np_image_rect.shape[0]*i/n
             cv2.line(np_image_rect, (0,y), (2*np_image_rect.shape[1],y),(0,255,0));
@@ -294,15 +295,16 @@ class CameraChainValidator(object):
                 if err_txt == "":
                     continue
                  
-                cv2.putText(np_image_rect, err_txt, (x,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
-                cv2.putText(np_image_rect, "{0: .4f}".format(err_val), (x+100,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
-        else:
+                #cv2.putText(np_image_rect, err_txt, (x,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
+                #cv2.putText(np_image_rect, "{0: .4f}".format(err_val), (x+100,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
+        #else:
  
-            cv2.putText(np_image_rect, "Detection failed...", (np_image_rect.shape[0]/2,np_image_rect.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
-            
+            #cv2.putText(np_image_rect, "Detection failed...", (np_image_rect.shape[0]/2,np_image_rect.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
+        
+
         cv2.imshow(windowName, np_image_rect)
-        cv2.waitKey(1)
-    
+        cv2.imwrite("/home/xobejuk/im" +str(timestamp.to_sec()) +".png", np_image_rect)
+
     
     def prepareStereoRectificationMaps(self, camAnr, camBnr):        
         #get the camera parameters for the undistorted cameras
@@ -311,7 +313,7 @@ class CameraChainValidator(object):
         camIdealA = np.array([[camIdealA[0],0,camIdealA[2]], [0,camIdealA[1],camIdealA[3]], [0,0,1]])
         camIdealB = np.array([[camIdealB[0],0,camIdealB[2]], [0,camIdealB[1],camIdealB[3]], [0,0,1]])
         imageSize = (self.monovalidators[camAnr].undist_camera.projection().ru(), self.monovalidators[camAnr].undist_camera.projection().rv())
-        
+
         #get the baseline between the cams       
         baseline_BA = self.getTransformationCamFromTo(camAnr, camBnr)
         
@@ -476,7 +478,7 @@ if __name__ == "__main__":
     else:
         sm.setLoggingLevel(sm.LoggingLevel.Info)
     
-    cv2.startWindowThread()
+    #cv2.startWindowThread()
 
     #load the configuration yamls
     targetConfig = kc.ConfigReader.CalibrationTargetParameters(parsed.targetYaml)
