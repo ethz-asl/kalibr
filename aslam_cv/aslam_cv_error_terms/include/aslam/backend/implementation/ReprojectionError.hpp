@@ -61,7 +61,7 @@ double ReprojectionError<F>::evaluateErrorImplementation() {
 
 template<typename F>
 void ReprojectionError<F>::evaluateJacobiansImplementation(
-    aslam::backend::JacobianContainer & _jacobians) {
+    aslam::backend::JacobianContainer & _jacobians) const {
   //const keypoint_t & k = _frame->keypoint(_keypointIndex);
   const camera_geometry_t & cam = *_camera.camera();
 

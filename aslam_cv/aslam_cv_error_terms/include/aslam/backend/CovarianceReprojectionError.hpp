@@ -53,7 +53,7 @@ namespace aslam {
       virtual double evaluateErrorImplementation();
 
       /// \brief evaluate the jacobian
-      virtual void evaluateJacobiansImplementation(JacobianContainer & J);
+      virtual void evaluateJacobiansImplementation(JacobianContainer & J) const;
 
       /// \brief the frame that this measurement comes from.
       const frame_t * _frame;

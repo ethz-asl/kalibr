@@ -37,7 +37,7 @@ private:
   MarginalizationPriorErrorTerm();
 
   virtual double evaluateErrorImplementation();
-  virtual void evaluateJacobiansImplementation(JacobianContainer & outJ);
+  virtual void evaluateJacobiansImplementation(JacobianContainer & outJ) const;
 
   // computes the minimal difference of all design variables between the linearization point at marginalization and the current guess (i.e. log(x_bar - x))
   Eigen::VectorXd getDifferenceSinceMarginalization();

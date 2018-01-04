@@ -36,27 +36,31 @@ cs_add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
-# Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
-add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
+if(CATKIN_ENABLE_TESTING)
+
+  # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
+  add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
 
-catkin_add_gtest(${PROJECT_NAME}_tests
-  test/test_main.cpp
-  test/PinholeCameraGeometry.cpp
-  test/OmniCameraGeometry.cpp
-  test/RadialTangentialDistortion.cpp
-  test/EquidistantDistortion.cpp
-  test/FovDistortion.cpp
-  test/Triangulation.cpp
-  test/testFrame.cpp
-  test/GridCalibration.cpp
-  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test
-)
+  catkin_add_gtest(${PROJECT_NAME}_tests
+    test/test_main.cpp
+    test/PinholeCameraGeometry.cpp
+    test/OmniCameraGeometry.cpp
+    test/RadialTangentialDistortion.cpp
+    test/EquidistantDistortion.cpp
+    test/FovDistortion.cpp
+    test/Triangulation.cpp
+    test/testFrame.cpp
+    test/GridCalibration.cpp
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test
+    )
 
-SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -lpthread")
 
-target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${Boost_LIBRARIES})
+  SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -lpthread")
 
+  target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${Boost_LIBRARIES})
+
+endif()
 
 cs_install()
 cs_export()

@@ -43,7 +43,7 @@ namespace aslam {
       double evaluateError();
 
       /// \brief evaluate the Jacobians.
-      void evaluateJacobians(JacobianContainer & outJacobians);
+      void evaluateJacobians(JacobianContainer & outJacobians) const;
 
       /// \brief evaluate the Jacobians using finite differences.
       void evaluateJacobiansFiniteDifference(JacobianContainer & outJacobians);
@@ -127,7 +127,7 @@ namespace aslam {
       virtual double evaluateErrorImplementation() = 0;
 
       /// \brief evaluate the Jacobians
-      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) = 0;
+      virtual void evaluateJacobiansImplementation(JacobianContainer & outJacobians) const = 0;
 
       /// \brief get the number of dimensions of this error term.
       virtual size_t getDimensionImplementation() const = 0;

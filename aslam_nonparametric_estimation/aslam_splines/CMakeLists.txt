@@ -15,14 +15,18 @@ cs_add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
-catkin_add_gtest(${PROJECT_NAME}_test
-  test/test_main.cpp
-  test/TestBSplineExpressions.cpp
-  test/TestErrors.cpp
-#  test/TestOPTBSpline.cpp
-  )
+if(CATKIN_ENABLE_TESTING)
 
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+  catkin_add_gtest(${PROJECT_NAME}_test
+    test/test_main.cpp
+    test/TestBSplineExpressions.cpp
+    test/TestErrors.cpp
+    #  test/TestOPTBSpline.cpp
+    )
+
+  target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+
+endif()
 
 cs_install()
 cs_export()

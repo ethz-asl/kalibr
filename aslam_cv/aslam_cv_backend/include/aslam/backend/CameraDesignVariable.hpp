@@ -45,7 +45,7 @@ namespace aslam {
 		boost::shared_ptr<DesignVariableAdapter<distortion_t> > distortionDesignVariable()  { return _distortionDv; }
 		boost::shared_ptr<DesignVariableAdapter<shutter_t> > shutterDesignVariable()  { return _shutterDv; }
 
-		boost::shared_ptr<camera_t> camera() { return _camera; }
+		boost::shared_ptr<camera_t> camera() const { return _camera; }
 
 		/// \brief Get the keypoint time as an expression. If the shutter
 		///        parameters are being estimated, this will be hooked up

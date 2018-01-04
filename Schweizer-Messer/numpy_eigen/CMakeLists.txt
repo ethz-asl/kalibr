@@ -45,6 +45,9 @@ add_python_export_library(${PROJECT_NAME}_test
 #############
 ## Testing ##
 #############
+if(CATKIN_ENABLE_TESTING)
 
-## Add nosetest based cpp test target.
-catkin_add_nosetests(test/numpy_eigen_tests.py)
+  ## Add nosetest based cpp test target.
+  catkin_add_nosetests(test/numpy_eigen_tests.py)
+
+endif()

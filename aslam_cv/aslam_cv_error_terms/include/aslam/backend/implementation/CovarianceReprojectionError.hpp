@@ -123,7 +123,7 @@ namespace aslam {
 
 
     template<typename F>
-    void CovarianceReprojectionError<F>::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & _jacobians)
+    void CovarianceReprojectionError<F>::evaluateJacobiansImplementation(aslam::backend::JacobianContainer & _jacobians) const
     {
       //const keypoint_t & k = _frame->keypoint(_keypointIndex);
       const camera_geometry_t & cam = _frame->geometry();
