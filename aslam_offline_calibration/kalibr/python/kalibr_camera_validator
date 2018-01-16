@@ -299,16 +299,14 @@ class CameraChainValidator(object):
                 if err_txt == "":
                     continue
                  
-                #cv2.putText(np_image_rect, err_txt, (x,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
-                #cv2.putText(np_image_rect, "{0: .4f}".format(err_val), (x+100,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
-        #else:
+                cv2.putText(np_image_rect, err_txt, (x,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
+                cv2.putText(np_image_rect, "{0: .4f}".format(err_val), (x+100,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
+        else:
  
-            #cv2.putText(np_image_rect, "Detection failed...", (np_image_rect.shape[0]/2,np_image_rect.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
+            cv2.putText(np_image_rect, "Detection failed...", (np_image_rect.shape[0]/2,np_image_rect.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
         
 
         cv2.imshow(windowName, np_image_rect)
-        cv2.imwrite("/home/xobejuk/im" +str(timestamp.to_sec()) +".png", np_image_rect)
-
     
     def prepareStereoRectificationMaps(self, camAnr, camBnr):        
         #get the camera parameters for the undistorted cameras
@@ -482,8 +480,6 @@ if __name__ == "__main__":
     else:
         sm.setLoggingLevel(sm.LoggingLevel.Info)
     
-    #cv2.startWindowThread()
-
     #load the configuration yamls
     targetConfig = kc.ConfigReader.CalibrationTargetParameters(parsed.targetYaml)
     

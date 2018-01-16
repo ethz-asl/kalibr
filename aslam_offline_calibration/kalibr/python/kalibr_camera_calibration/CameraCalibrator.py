@@ -26,7 +26,7 @@ LANDMARK_GROUP_ID = 2
 
 class OptimizationDiverged(Exception):
     pass
-#Future: Depth in cameraModel
+
 class CameraGeometry(object):
     def __init__(self, cameraModel, targetConfig, dataset, verbose=False):
         self.dataset = dataset
@@ -116,10 +116,9 @@ class TargetDetector(object):
                                                                  options)
         elif targetType == 'assymetric_aprilgrid':
             options = acv_april.AprilgridOptions()
-            #enforce more than one row --> pnp solution can be bad if all points are almost on a line...
             options.minTagsForValidObs  = 1
             options.showExtractionVideo = showCorners
-            #options.maxSubpixDisplacement2 = 2
+            options.maxSubpixDisplacement2 = 2
             #options.doSubpixRefinement = False
             vectorTags =[]
             for tag in targetParams['tags']:
@@ -577,7 +576,6 @@ def recoverCovariance(cself):
     #split the variance for baselines
     baseline_cov = est_stds[0:6*(numCams-1)]
     std_baselines = np.array(baseline_cov).reshape(numCams-1,6).tolist()
-  
     cam_cov = est_stds[6*(numCams-1):]
     std_cameras = list()
 

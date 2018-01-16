@@ -50,20 +50,6 @@ class BagImageDatasetReader(object):
 
     # sort the indices by header.stamp
     self.indices = self.sortByTime(self.indices)
-
-    if self.topic == '/hw/cam_nav':
-    #  print "performing throttle"
-      valid_indices = []
-      prev = -1
-      for idx in self.indices:
-        topic, data, stamp = self.bag._read_message(self.index[idx].position)
-        timestamp = data.header.stamp.secs * 1e9 + data.header.stamp.nsecs
-        dif = timestamp/(1e9) - prev
-        if dif > 0.33 or prev == -1: #10Hz - 0.1
-          prev = timestamp/(1e9)
-          valid_indices.append(idx)
-          
-      self.indices = valid_indices
   
     # go through the bag and remove the indices outside the timespan [bag_start_time, bag_end_time]
     if bag_from_to:

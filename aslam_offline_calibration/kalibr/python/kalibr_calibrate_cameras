@@ -76,9 +76,7 @@ def parseArgs():
             
     parser = KalibrArgParser(description='Calibrate the intrinsics and extrinsics of a camera system with non-shared overlapping field of view.', usage=usage)
     parser.add_argument('--models', nargs='+', dest='models', help='The camera model {0} to estimate'.format(cameraModels.keys()), required=True)
-    #Cam File with initial Intrinsics
-    parser.add_argument('--cam', dest='chainYaml', help='Camera configuration as yaml file', required=False)
-
+  
     groupSource = parser.add_argument_group('Data source')
     groupSource.add_argument('--bag', dest='bagfile', help='The bag file with the data')
     groupSource.add_argument('--topics', nargs='+', dest='topics', help='The list of image topics', required=True)
@@ -107,8 +105,6 @@ def parseArgs():
     outputSettings.add_argument('--show-extraction', action='store_true', dest='showextraction', help='Show the calibration target extraction. (disables plots)')
     outputSettings.add_argument('--plot', action='store_true', dest='plot', help='Plot during calibration (this could be slow).')
     outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
-    
-
 
     #print help if no argument is specified
     if len(sys.argv)==1:
@@ -157,7 +153,6 @@ def main():
     numCams = len(parsed.topics)
 
     obsdb = kcc.ObservationDatabase(parsed.max_delta_approxsync)
-
 
     for cam_id in range(0, numCams):
         topic = parsed.topics[cam_id]
@@ -231,7 +226,6 @@ def main():
                 print "\t projection cam{0}: {1}".format(cam_idx, cam.geometry.projection().getParameters().flatten())
                 print "\t distortion cam{0}: {1}".format(cam_idx, cam.geometry.projection().distortion().getParameters().flatten())
                 
-
             print "initializing calibrator"
 
             calibrator = kcc.CameraCalibration(cameraList, baseline_guesses, verbose=parsed.verbose, useBlakeZissermanMest=parsed.doBlakeZisserman)
