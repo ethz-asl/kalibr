@@ -730,10 +730,6 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
   //process all images
   size_t nImages = observations.size();
 
-  /*if (dynamic_cast<GridCalibrationTargetAssymetricAprilgrid*>(&observations[0].target()) != nullptr)
-  {
-    assymetricGrid = true;
-  }*/
 
   // Initialize focal length
   // C. Hughes, P. Denny, M. Glavin, and E. Jones,
