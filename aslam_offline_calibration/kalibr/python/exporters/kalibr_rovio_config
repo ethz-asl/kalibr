@@ -11,7 +11,29 @@ import rospkg
 from matplotlib.colors import LogNorm
 np.set_printoptions(suppress=True)
 
-def printCameraBlock(camConfig, T_SC, q_SC):
+
+def list_fill_with(l, min_size, elem):
+    """Fill up array with `elem` to ensure minimum length of `min_size`"""
+    if len(l) >= min_size:
+        return l
+    else:
+        return l + [elem]*(min_size-len(l))
+
+
+def map_dist_model(model_kalibr, params_kalibr):
+    """Map distortion model names and ensure minimum number of elements in parameter list"""
+    # Kalibr might write fewer parameters than ROVIO expects, so fill up with 0.0
+    if model_kalibr == "radtan":
+        return "plumb_bob", list_fill_with(params_kalibr, 5, 0.0)
+    elif model_kalibr == "equidistant":
+        return "equidistant", list_fill_with(params_kalibr, 4, 0.0)
+    elif model_kalibr == "fov":
+        return "fov", list_fill_with(params_kalibr, 1, 0.0)
+    else:
+        return model_kalibr, params_kalibr
+
+
+def printCameraBlock(camConfig, t_SC, q_CS):
     #example topic= /cam0/image_raw
     topic = camConfig.getRosTopic()
 
@@ -30,15 +52,15 @@ def printCameraBlock(camConfig, T_SC, q_SC):
     STRING_OUT+= "{\n"
     STRING_OUT+= "  CalibrationFile  ;            Camera-Calibration file for intrinsics\n"
 
-    STRING_OUT+= "  qCM_x  {0}                               X-entry of IMU to Camera quaterion (Hamilton)\n".format(q_SC[0])
-    STRING_OUT+= "  qCM_y  {0}                               Y-entry of IMU to Camera quaterion (Hamilton)\n".format(q_SC[1])
-    STRING_OUT+= "  qCM_z  {0}                               Z-entry of IMU to Camera quaterion (Hamilton)\n".format(q_SC[2])
-    STRING_OUT+= "  qCM_w  {0}                               W-entry of IMU to Camera quaterion (Hamilton)\n".format(q_SC[3])
-    STRING_OUT+= "  MrMC_x {0}                               X-entry of IMU to Camera vector (expressed in IMU CF) [m]\n".format(T_SC[0,3])
-    STRING_OUT+= "  MrMC_y {0}                               Y-entry of IMU to Camera vector (expressed in IMU CF) [m]\n".format(T_SC[1,3])
-    STRING_OUT+= "  MrMC_z {0}                               Z-entry of IMU to Camera vector (expressed in IMU CF) [m]\n".format(T_SC[2,3])
+    STRING_OUT+= "  qCM_x  {0};                               X-entry of IMU to Camera quaterion (Hamilton)\n".format(q_CS[0])
+    STRING_OUT+= "  qCM_y  {0};                               Y-entry of IMU to Camera quaterion (Hamilton)\n".format(q_CS[1])
+    STRING_OUT+= "  qCM_z  {0};                               Z-entry of IMU to Camera quaterion (Hamilton)\n".format(q_CS[2])
+    STRING_OUT+= "  qCM_w  {0};                               W-entry of IMU to Camera quaterion (Hamilton)\n".format(q_CS[3])
+    STRING_OUT+= "  MrMC_x {0};                               X-entry of IMU to Camera vector (expressed in IMU CF) [m]\n".format(t_SC[0])
+    STRING_OUT+= "  MrMC_y {0};                               Y-entry of IMU to Camera vector (expressed in IMU CF) [m]\n".format(t_SC[1])
+    STRING_OUT+= "  MrMC_z {0};                               Z-entry of IMU to Camera vector (expressed in IMU CF) [m]\n".format(t_SC[2])
 
-    STRING_OUT+="}\n\n"
+    STRING_OUT+="}\n"
 
 
 
@@ -68,18 +90,21 @@ def printCameraBlock(camConfig, T_SC, q_SC):
     dist_model = distortion[0]
     dist_params = distortion[1]
 
-    CAM_CALIBRATION+="distortion_model: {0}\n".format(dist_model)
+    dist_model_rovio, dist_params_rovio = map_dist_model(dist_model, dist_params)
+
+    CAM_CALIBRATION+="distortion_model: {0}\n".format(dist_model_rovio)
 
     CAM_CALIBRATION+="distortion_coefficients:\n"
     CAM_CALIBRATION+="  rows: 1\n"
-    CAM_CALIBRATION+="  cols: 4\n"
+    CAM_CALIBRATION+="  cols: {}\n".format(len(dist_params_rovio))
 
-    CAM_CALIBRATION+="  data: [{0}, {1}, {2}, {3}]\n".format(dist_params[0], dist_params[1], dist_params[2], dist_params[3])
+    CAM_CALIBRATION+="  data: [{0}]\n".format(", ".join("{}".format(x) for x in dist_params_rovio))
 
     CAM_CALIBRATION+="\n"
 
     with open('rovio_cam' + str(cidx) + '.yaml', 'w') as file_:
       file_.write(CAM_CALIBRATION)
+      print("written '{}'".format(file_.name))
 
     return STRING_OUT
 
@@ -96,7 +121,7 @@ if __name__ == "__main__":
     # get the file path
     kalibr_path = rospack.get_path('kalibr')
 
-    print(kalibr_path)
+    print("Using Kalibr at '{}'".format(kalibr_path))
     #load the camchain.yaml
     camchain = kc.ConfigReader.CameraChainParameters(parsed.chainYaml)
 
@@ -109,12 +134,22 @@ if __name__ == "__main__":
     for cidx in range(0, camchain.numCameras()):
         camConfig = camchain.getCameraParameters(cidx)
 
-        T_SC = camchain.getExtrinsicsImuToCam(cidx).inverse().T()
-        q_SC = camchain.getExtrinsicsImuToCam(cidx).inverse().q()
-        CONFIG += printCameraBlock(camConfig, T_SC, q_SC)
+        # TF_imu_cam transforms points from camera to imu frame (inverse transformation of Kalibr camchain file)
+        TF_imu_cam = camchain.getExtrinsicsImuToCam(cidx).inverse()
+
+        # T_SC is translational part of transformation from camera to imu frame
+        t_SC = TF_imu_cam.t()
+
+        # T_CS is rotation from imu to camera frame, so inverse of rotational part of TF_imu_cam. However, Kalibr uses
+        # JPL quaternions and ROVIO uses Hamilton, so there is an additional inversion to convert the quaternion to
+        # Hamilton, which cancels out with the first inversion, resulting in no explicit inversion.
+        q_CS = TF_imu_cam.q()
+
+        CONFIG += printCameraBlock(camConfig, t_SC, q_CS)
 
     with open(kalibr_path + '/python/exporters/auxiliary_files/rovio_footer.txt', 'r') as file_:
         CONFIG += file_.read()
 
     with open('rovio_test.info', 'w') as file_:
       file_.write(CONFIG)
+      print("written '{}'".format(file_.name))
