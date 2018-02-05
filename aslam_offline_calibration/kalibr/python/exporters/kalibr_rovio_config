@@ -13,7 +13,7 @@ np.set_printoptions(suppress=True)
 
 
 def list_fill_with(l, min_size, elem):
-    """Fill up array with `elem` to ensure minimum length of `min_size`."""
+    """Fill up array with `elem` to ensure minimum length of `min_size`"""
     if len(l) >= min_size:
         return l
     else:
@@ -21,8 +21,8 @@ def list_fill_with(l, min_size, elem):
 
 
 def map_dist_model(model_kalibr, params_kalibr):
-    """Map distortion model names and ensure minimum number of elements in parameter list"
-    # Kalibr might write fewer parameters than ROVIO expects, to fill up with 0.0
+    """Map distortion model names and ensure minimum number of elements in parameter list"""
+    # Kalibr might write fewer parameters than ROVIO expects, so fill up with 0.0
     if model_kalibr == "radtan":
         return "plumb_bob", list_fill_with(params_kalibr, 5, 0.0)
     elif model_kalibr == "equidistant":
@@ -33,7 +33,7 @@ def map_dist_model(model_kalibr, params_kalibr):
         return model_kalibr, params_kalibr
 
 
-def printCameraBlock(camConfig, T_SC, q_CS):
+def printCameraBlock(camConfig, t_SC, q_CS):
     #example topic= /cam0/image_raw
     topic = camConfig.getRosTopic()
 
