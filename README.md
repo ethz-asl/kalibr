@@ -1,5 +1,7 @@
 ![Kalibr](https://raw.githubusercontent.com/wiki/ethz-asl/kalibr/images/kalibr_small.png)
 
+*Ubuntu 14.04+ROS indigo* and *Ubuntu 16.04+ROS kinetic*: [![Build Status](https://jenkins.asl.ethz.ch/job/kalibr_weekly/badge/icon?style=plastic)](https://jenkins.asl.ethz.ch/job/kalibr_weekly)
+
 ## Introduction
 Kalibr is a toolbox that solves the following calibration problems:
 
