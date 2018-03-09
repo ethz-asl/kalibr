@@ -74,18 +74,26 @@ class ImuConfig:
         self.__is_initialized = False
 
     def parse_from_kalibr_format(self, imu_dict):
-        self.rostopic = imu_dict['rostopic']
+        assert 'imu0' in imu_dict, "No 'imu0' entry found in the IMU yaml file."
+        if len(imu_dict) > 1:
+            print(
+                "Got more than one IMU. Taking configuration of 'imu0' entry.")
+        imu0_dict = imu_dict['imu0']
+
+        self.rostopic = imu0_dict['rostopic']
         self.id = md5.new(self.rostopic).hexdigest()
-        self.update_rate = imu_dict['update_rate']
+        self.T_i_b = np.array(imu0_dict['T_i_b'])
+        self.time_offset = imu0_dict['time_offset']
+        self.update_rate = imu0_dict['update_rate']
 
         # Gyro noise density. [rad/s*1/sqrt(Hz)]
-        self.gyro_noise_density = imu_dict['gyroscope_noise_density']
+        self.gyro_noise_density = imu0_dict['gyroscope_noise_density']
         # Accelerometer noise density. [m/s^2*1/sqrt(Hz)]
-        self.acc_noise_density = imu_dict['accelerometer_noise_density']
+        self.acc_noise_density = imu0_dict['accelerometer_noise_density']
         # Gyro bias random walk. [rad/s^2*1/sqrt(Hz)]
-        self.gyro_random_walk = imu_dict['gyroscope_random_walk']
+        self.gyro_random_walk = imu0_dict['gyroscope_random_walk']
         # Accelerometer bias random walk. [m/s^3*1/sqrt(Hz)]
-        self.acc_random_walk = imu_dict['accelerometer_random_walk']
+        self.acc_random_walk = imu0_dict['accelerometer_random_walk']
 
         self.saturation_accel_max_mps2 = 150.0
         self.saturation_gyro_max_radps = 7.5
@@ -95,6 +103,8 @@ class ImuConfig:
     def parse_from_maplab_format(self, imu_dict):
         self.rostopic = imu_dict['hardware_id']
         self.id = imu_dict['id']
+        self.T_i_b = np.eye(4)
+        self.time_offset = 0.0
         self.update_rate = 200.0
 
         # Gyro noise density. [rad/s*1/sqrt(Hz)]
@@ -116,12 +126,16 @@ class ImuConfig:
     def get_kalibr_format(self):
         assert self.__is_initialized
         imu_dict = OrderedDict()
-        imu_dict['rostopic'] = self.rostopic
-        imu_dict['update_rate'] = self.update_rate
-        imu_dict['accelerometer_noise_density'] = self.acc_noise_density
-        imu_dict['accelerometer_random_walk'] = self.acc_random_walk
-        imu_dict['gyroscope_noise_density'] = self.gyro_noise_density
-        imu_dict['gyroscope_random_walk'] = self.gyro_random_walk
+        imu_dict['imu0'] = OrderedDict()
+        imu_dict['imu0']['T_i_b'] = self.T_i_b.tolist()
+        imu_dict['imu0']['accelerometer_noise_density'] = self.acc_noise_density
+        imu_dict['imu0']['accelerometer_random_walk'] = self.acc_random_walk
+        imu_dict['imu0']['gyroscope_noise_density'] = self.gyro_noise_density
+        imu_dict['imu0']['gyroscope_random_walk'] = self.gyro_random_walk
+        imu_dict['imu0']['model'] = 'calibrated'
+        imu_dict['imu0']['rostopic'] = self.rostopic
+        imu_dict['imu0']['time_offset'] = self.time_offset
+        imu_dict['imu0']['update_rate'] = self.update_rate
         return imu_dict
 
     def get_maplab_format(self):
@@ -357,9 +371,7 @@ class CalibrationConfig:
         if not self.imu_output_file_name is None:
             assert self.__has_imu
             imu_dict = self.imu.get_kalibr_format()
-            use_default_flow_style = False
-            write_yaml(self.imu_output_file_name, imu_dict,
-                       use_default_flow_style)
+            write_yaml(self.imu_output_file_name, imu_dict)
             print("Wrote " + str(self.imu_output_file_name) + ".")
 
     def __write_maplab_data(self):
@@ -376,15 +388,15 @@ class CalibrationConfig:
             cam_name = 'cam{0}'.format(cam_index)
             sensors_dict['ncameras'][0]['cameras'].append(
                 self.cameras[cam_name].get_maplab_format())
-        use_default_flow_style = False
+        default_flow_style = False
         use_indent_dumper = True
         if not self.to_ncamera:
             write_yaml(self.__get_output_file_name(), sensors_dict,
-                       use_default_flow_style, use_indent_dumper)
+                       default_flow_style, use_indent_dumper)
         else:
             ncameras_dict = sensors_dict['ncameras'][0]
             write_yaml(self.__get_output_file_name(), ncameras_dict,
-                       use_default_flow_style, use_indent_dumper)
+                       default_flow_style, use_indent_dumper)
         print("Wrote " + str(self.__get_output_file_name()) + ".")
 
     def __get_output_file_name(self):
