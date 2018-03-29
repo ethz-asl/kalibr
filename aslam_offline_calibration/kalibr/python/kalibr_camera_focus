@@ -2,7 +2,7 @@
 print "importing libraries"
 import rospy
 import cv2
-import cv
+#import cv
 import numpy as np
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -12,7 +12,7 @@ class CameraFocus:
     def __init__(self, topic):
         self.topic = topic
         self.windowNameOrig = "Camera: {0}".format(self.topic)
-        cv2.namedWindow(self.windowNameOrig, 2)
+        #cv2.namedWindow(self.windowNameOrig, 2)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber(self.topic, Image, self.callback)
     
@@ -53,9 +53,11 @@ if __name__ == "__main__":
         camval = CameraFocus(topic) 
     
     rospy.init_node('kalibr_validator', anonymous=True)
+    rate = rospy.Rate(10) # 10hz
     try:
         rospy.spin()
+        rate.sleep()
     except KeyboardInterrupt:
         print "Shutting down" 
     
-    cv.DestroyAllWindows()
+    cv2.destroyAllWindows()

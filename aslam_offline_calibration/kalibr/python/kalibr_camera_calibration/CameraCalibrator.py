@@ -28,13 +28,12 @@ class OptimizationDiverged(Exception):
     pass
 
 class CameraGeometry(object):
-    def __init__(self, cameraModel, targetConfig, dataset, geometry=None, verbose=False):
+    def __init__(self, cameraModel, targetConfig, dataset, verbose=False):
         self.dataset = dataset
         
         self.model = cameraModel
-        if geometry is None:
-            self.geometry = cameraModel.geometry()
-        
+        self.geometry = cameraModel.geometry()
+
         if not type(self.geometry) == cameraModel.geometry:
             raise RuntimeError("The type of geometry passed in \"%s\" does not match the model type \"%s\"" % (type(geometry),type(cameraModel.geometry)))
         
@@ -56,7 +55,7 @@ class CameraGeometry(object):
         success = self.geometry.initializeIntrinsics(observations)
         if not success:
             sm.logError("initialization of focal length for cam with topic {0} failed  ".format(self.dataset.topic))
-        
+    
         #in case of an omni model, first optimize over intrinsics only
         #(--> catch most of the distortion with the projection model)
         if self.model == acvb.DistortedOmni:
@@ -115,6 +114,22 @@ class TargetDetector(object):
                                                                  targetParams['tagSize'], 
                                                                  targetParams['tagSpacing'], 
                                                                  options)
+        elif targetType == 'assymetric_aprilgrid':
+            options = acv_april.AprilgridOptions()
+            options.minTagsForValidObs  = 1
+            options.showExtractionVideo = showCorners
+            options.maxSubpixDisplacement2 = 2
+            #options.doSubpixRefinement = False
+            vectorTags =[]
+            for tag in targetParams['tags']:
+                structTag = acv_april.TargetPoint()
+                structTag.x = tag["pos"][0]
+                structTag.y = tag["pos"][1]
+                structTag.size =tag["size"]
+                vectorTags.append(structTag)
+
+            self.grid = acv_april.GridCalibrationTargetAssymetricAprilgrid(vectorTags,
+                                                                 options)
         else:
             RuntimeError('Unknown calibration target type!')
 
@@ -156,7 +171,7 @@ class CalibrationTargetOptimizationProblem(ic.CalibrationOptimizationProblem):
         
         # 1. Create a design variable for this pose
         T_target_camera = T_tc_guess
-        
+
         rval.dv_T_target_camera = aopt.TransformationDv(T_target_camera)
         for i in range(0, rval.dv_T_target_camera.numDesignVariables()):
             rval.addDesignVariable( rval.dv_T_target_camera.getDesignVariable(i), TRANSFORMATION_GROUP_ID)
@@ -191,6 +206,7 @@ class CalibrationTargetOptimizationProblem(ic.CalibrationOptimizationProblem):
             #build baseline chain (target->cam0->baselines->camN)                
             T_cam0_target = rval.dv_T_target_camera.expression.inverse()
             T_camN_calib = T_cam0_target
+
             for idx in range(0, cam_id):
                 T_camN_calib =  baselines[idx].toExpression() * T_camN_calib
             
@@ -368,12 +384,10 @@ def getReprojectionErrorStatistics(all_rerrs):
         if view_rerrs is not None: #if cam sees target in this view
             for rerr in view_rerrs:
                 if not (rerr==np.array([None,None])).all(): #if corner was observed
-                    rerr_matrix.append(rerr)
-    
+                    rerr_matrix.append(rerr)    
     
     rerr_matrix = np.array(rerr_matrix)
     gc.enable()
-    
     mean = np.mean(rerr_matrix, 0, dtype=np.float)
     std = np.std(rerr_matrix, 0, dtype=np.float)
  
@@ -562,27 +576,25 @@ def recoverCovariance(cself):
     #split the variance for baselines
     baseline_cov = est_stds[0:6*(numCams-1)]
     std_baselines = np.array(baseline_cov).reshape(numCams-1,6).tolist()
-    
-    #split camera cov
     cam_cov = est_stds[6*(numCams-1):]
     std_cameras = list()
-    
+
     offset=0
     for cidx, cam in enumerate(cself.cameras):
         nt = cam.geometry.minimalDimensionsDistortion() +  \
              cam.geometry.minimalDimensionsProjection() +  \
              cam.geometry.minimalDimensionsShutter()
-        
+       
         std_cameras.append( cam_cov[offset:offset+nt].flatten().tolist() )
         offset = offset+nt
-    
+
     return std_baselines, std_cameras
 
 def printParameters(cself, dest=sys.stdout):
     #get the covariances
     std_baselines, std_cameras = recoverCovariance(cself)
 
-    #print cameras
+    #print cameras 
     print >> dest, "Camera-system parameters:"
     for cidx, cam in enumerate(cself.cameras):
         d = cam.geometry.projection().distortion().getParameters().flatten(1)
@@ -595,10 +607,14 @@ def printParameters(cself, dest=sys.stdout):
         print >> dest, "\t projection: %s +- %s" % (p, np.array(dp))
         
         #reproj error statistics
-        corners, reprojs, rerrs = getReprojectionErrors(cself, cidx)        
-        if len(rerrs)>0:
+        corners, reprojs, rerrs = getReprojectionErrors(cself, cidx) 
+        
+        if len(rerrs)>0 and rerrs.count(None)!= len(rerrs):
             me, se = getReprojectionErrorStatistics(rerrs)
             print >> dest, "\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1])
+        else:
+            print "No error data for cam{0}".format(cidx)
+
         print >> dest
 
     #print baselines

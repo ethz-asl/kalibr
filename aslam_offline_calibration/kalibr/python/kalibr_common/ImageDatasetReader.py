@@ -50,7 +50,7 @@ class BagImageDatasetReader(object):
 
     # sort the indices by header.stamp
     self.indices = self.sortByTime(self.indices)
-
+  
     # go through the bag and remove the indices outside the timespan [bag_start_time, bag_end_time]
     if bag_from_to:
       self.indices = self.truncateIndicesFromTime(self.indices, bag_from_to)

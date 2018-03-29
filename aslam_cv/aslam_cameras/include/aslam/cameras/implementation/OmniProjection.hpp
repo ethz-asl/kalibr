@@ -744,7 +744,7 @@ bool OmniProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<GridCa
 
   // Now we try to find a non-radial line to initialize the focal length
   bool success = false;
-
+  bool assymetric = false;
   //go though all images and pick the best estimate (=lowest mean reproj. err)
   for (size_t i = 0; i < observations.size(); ++i) {
     const GridCalibrationTargetObservation& obs = observations.at(i);
@@ -762,6 +762,11 @@ bool OmniProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<GridCa
         Eigen::Vector2d imagePoint;
         Eigen::Vector3d gridPoint;
 
+        if (target.gridPoint(r,c)(0)==-1){
+          assymetric = true;
+          continue;
+        }
+
         if (obs.imageGridPoint(r, c, imagePoint)) {
           double u = imagePoint[0] - _cu;
           double v = imagePoint[1] - _cv;
@@ -774,8 +779,10 @@ bool OmniProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<GridCa
       }
 
       // MIN_CORNERS is an arbitrary threshold for the number of corners
-      const size_t MIN_CORNERS = 4;
-      if (count > MIN_CORNERS)
+      size_t MIN_CORNERS = 4;
+      if (assymetric)
+        MIN_CORNERS = 2;
+      if (count >= MIN_CORNERS)
       {
         // Resize P to fit with the count of valid points.
         cv::Mat C;

@@ -102,6 +102,23 @@ class IccCamera():
                                                             targetParams['tagSize'], 
                                                             targetParams['tagSpacing'], 
                                                             options)
+        elif targetType == 'assymetric_aprilgrid':
+            options = acv_april.AprilgridOptions()
+            #enforce more than one row --> pnp solution can be bad if all points are almost on a line...
+            options.minTagsForValidObs  = 1
+            options.showExtractionVideo = showExtraction
+            #options.maxSubpixDisplacement2 = 2
+            options.doSubpixRefinement = False
+            vectorTags =[]
+            for tag in targetParams['tags']:
+                structTag = acv_april.TargetPoint()
+                structTag.x = tag["pos"][0]
+                structTag.y = tag["pos"][1]
+                structTag.size =tag["size"]
+                vectorTags.append(structTag)
+
+            grid = acv_april.GridCalibrationTargetAssymetricAprilgrid(vectorTags,
+                                                                 options)
         else:
             raise RuntimeError( "Unknown calibration target." )
                           

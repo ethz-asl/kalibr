@@ -244,11 +244,12 @@ class MulticamCalibrationGraph(object):
         
         #transform it back to cam0 (T_t_cN --> T_t_c0)
         T_cN_c0 = sm.Transformation()
+
         for baseline_HL in baselines_HL[0:cam_id_max]:
             T_cN_c0 = baseline_HL * T_cN_c0
-        
+
         T_t_c0 = T_t_cN * T_cN_c0
-        
+
         return T_t_c0
     
     #get all observations between two cameras

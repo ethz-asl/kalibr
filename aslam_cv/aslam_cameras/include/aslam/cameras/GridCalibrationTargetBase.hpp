@@ -15,6 +15,7 @@
 #include <sm/boost/serialization.hpp>
 #include <sm/assert_macros.hpp>
 
+
 namespace aslam {
 namespace cameras {
 
@@ -78,7 +79,8 @@ class GridCalibrationTargetBase {
   ///        in outImagePoints was observed
   virtual bool computeObservation(const cv::Mat & /*image*/,
                                   Eigen::MatrixXd & /*outImagePoints*/,
-                                  std::vector<bool> & /*outCornerObserved*/) const
+                                  std::vector<bool> & /*outCornerObserved*/
+                                  ) const
   {
     SM_ASSERT_TRUE(Exception, true, "you need to implement this method for each target!");
     return false;
