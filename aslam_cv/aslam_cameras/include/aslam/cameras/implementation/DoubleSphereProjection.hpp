@@ -285,19 +285,24 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToEuclidean(
   outPoint.derived().resize(3);
 
   // Unproject...
-  outPoint[0] = _recip_fu * (keypoint[0] - _cu);
-  outPoint[1] = _recip_fv * (keypoint[1] - _cv);
+  const double mx = _recip_fu * (keypoint[0] - _cu);
+  const double my = _recip_fv * (keypoint[1] - _cv);
 
-  // Re-distort
-  //_distortion.undistort(outPoint.derived().template head<2>());
 
-  double rho2_d = outPoint[0] * outPoint[0] + outPoint[1] * outPoint[1];
+  const double r2 = mx * mx + my * my;
+  const double mz = (1 - _xi2 * _xi2 * r2) /
+                    (_xi2 * std::sqrt(1 - (2 * _xi2 - 1) * r2) + 1 - _xi2);
+  const double mz2 = mz * mz;
+  const double k =
+      (mz * _xi1 + std::sqrt(mz2 + (1 - _xi1 * _xi1) * r2)) / (mz2 + r2);
 
-  if (!isUndistortedKeypointValid(rho2_d))
-    return false;
+  outPoint[0] = k * mx;
+  outPoint[1] = k * my;
+  outPoint[2] = k * mz - _xi1;
 
-  outPoint[2] = 1
-      - _xi2 * (rho2_d + 1) / (_xi2 + sqrt(1 + (1 - _xi2 * _xi2) * rho2_d));
+
+  // if (!isUndistortedKeypointValid(rho2_d))
+  //   return false;
 
   return true;
 
@@ -322,49 +327,67 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToEuclidean(
   outPoint.derived().resize(3);
 
   // Unproject...
-  outPoint[0] = _recip_fu * (keypoint[0] - _cu);
-  outPoint[1] = _recip_fv * (keypoint[1] - _cv);
 
-  // Re-distort
-  Eigen::MatrixXd Jd(2, 2);
-  _distortion.undistort(outPoint.derived().template head<2>(), Jd);
+  // if (!isUndistortedKeypointValid(rho2_d))
+  //   return false;
 
-  double rho2_d = outPoint[0] * outPoint[0] + outPoint[1] * outPoint[1];
+  const double mx = _recip_fu * (keypoint[0] - _cu);
+  const double my = _recip_fv * (keypoint[1] - _cv);
 
-  if (!isUndistortedKeypointValid(rho2_d))
-    return false;
+  const double r2 = mx * mx + my * my;
 
-  double tmpZ = sqrt(-(rho2_d) * (_xi2 * _xi2 - 1.0) + 1.0);
-  double tmpA = _xi2 + tmpZ;
-  double recip_tmpA = 1.0 / tmpA;
+  const double _xi2_2 = _xi2 * _xi2;
+  const double _xi1_2 = _xi1 * _xi1;
 
-  outPoint[2] = 1 - _xi2 * (rho2_d + 1) * recip_tmpA;
+  const double sqrt2 = std::sqrt(1 - (2 * _xi2 - 1) * r2);
+  const double sqrt2_inv = double(1.0) / sqrt2;
+
+  const double norm2 = _xi2 * sqrt2 + 1 - _xi2;
+  const double norm2_inv = double(1.0) / norm2;
+  const double norm2_inv2 = norm2_inv * norm2_inv;
+
+  const double mz = (1 - _xi2_2 * r2) * norm2_inv;
+  const double mz2 = mz * mz;
+
+  const double norm1 = mz2 + r2;
+  const double norm1_inv = double(1.0) / norm1;
+  const double norm1_inv2 = norm1_inv * norm1_inv;
+
+  const double sqrt1 = std::sqrt(mz2 + (1 - _xi1_2) * r2);
+  const double sqrt1_inv = double(1.0) / sqrt1;
+  const double k = (mz * _xi1 + sqrt1) * norm1_inv;
+
+  outPoint[0] = k * mx;
+  outPoint[1] = k * my;
+  outPoint[2] = k * mz - _xi1;
+
+  const double d_mz_d_r2 =
+      (0.5 * _xi2 - _xi2_2) * (r2 * _xi2_2 - 1) * sqrt2_inv * norm2_inv2 -
+      _xi2_2 * norm2_inv;
+
+  const double d_mz_d_mx = 2 * mx * d_mz_d_r2;
+  const double d_mz_d_my = 2 * my * d_mz_d_r2;
+
+  double d_k_d_r2 =
+      (_xi1 * d_mz_d_r2 + 0.5 * sqrt1_inv * (2 * mz * d_mz_d_r2 + 1 - _xi1_2)) *
+          norm1_inv -
+      (mz * _xi1 + sqrt1) * (2 * mz * d_mz_d_r2 + 1) * norm1_inv2;
+
+  double d_k_d_mx = d_k_d_r2 * 2 * mx;
+  double d_k_d_my = d_k_d_r2 * 2 * my;
 
   // \todo analytical Jacobian
   Eigen::MatrixBase<DERIVED_JK> & mbJk =
       const_cast<Eigen::MatrixBase<DERIVED_JK> &>(outJk);
   DERIVED_JK & Jk = mbJk.derived();
 
-  double r0 = outPoint[0];
-  double r1 = outPoint[1];
+  Jk(0, 0) = _recip_fu * (mx * d_k_d_mx + k);
+  Jk(1, 0) = _recip_fu * my * d_k_d_mx;
+  Jk(2, 0) = _recip_fu * (mz * d_k_d_mx + k * d_mz_d_mx);
 
-  double recip_tmpA2 = recip_tmpA * recip_tmpA;
-  //double recip_tmpA2 = 1.0/tmpA2;
-  double tmpB = 1.0 / tmpZ;
-  Jk(0, 0) = Jd(0, 0) * _recip_fu;
-  Jk(0, 1) = Jd(0, 1) * _recip_fv;
-  Jk(1, 0) = Jd(1, 0) * _recip_fu;
-  Jk(1, 1) = Jd(1, 1) * _recip_fv;
-
-  double mul = -_xi2
-      * (2.0 * recip_tmpA
-          + recip_tmpA2 * (_xi2 * _xi2 - 1.0) * tmpB * (rho2_d + 1.0));
-  Eigen::Vector2d J3;
-  J3[0] = r0 * mul;
-  J3[1] = r1 * mul;
-
-  Jk.row(2) = J3.transpose() * Jd
-      * Eigen::Vector2d(_recip_fu, _recip_fv).asDiagonal();
+  Jk(0, 1) = _recip_fv * mx * d_k_d_my;
+  Jk(1, 1) = _recip_fv * (my * d_k_d_my + k);
+  Jk(2, 1) = _recip_fv * (mz * d_k_d_my + k * d_mz_d_my);
 
   //ASLAM_CAMERAS_ESTIMATE_JACOBIAN(this,keypointToEuclidean, keypoint, 1e-5, Jk);
 
@@ -433,31 +456,53 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointIntrinsicsJacobian
 
   Eigen::MatrixBase<DERIVED_JI> & J =
       const_cast<Eigen::MatrixBase<DERIVED_JI> &>(outJi);
-  J.derived().resize(KeypointDimension, 5);
+  J.derived().resize(KeypointDimension, 6);
   J.setZero();
 
-  keypoint_t kp;
-  double d = p.norm();
-  double rz = 1.0 / (p[2] + _xi2 * d);
-  kp[0] = p[0] * rz;
-  kp[1] = p[1] * rz;
 
-  Eigen::Vector2d Jxi;
-  Jxi[0] = -kp[0] * d * rz;
-  Jxi[1] = -kp[1] * d * rz;
+  const double& x = p[0];
+  const double& y = p[1];
+  const double& z = p[2];
 
-  Eigen::Matrix2d Jd;
-  _distortion.distort(kp, Jd);
+  const double xx = x * x;
+  const double yy = y * y;
+  const double zz = z * z;
 
-  Jd.row(0) *= _fu;
-  Jd.row(1) *= _fv;
-  J.col(0) = Jd * Jxi;
+  const double r2 = xx + yy;
 
-  J(0, 1) = kp[0];
-  J(0, 3) = 1;
+  const double d1_2 = r2 + zz;
+  const double d1 = std::sqrt(d1_2);
+  const double d1_inv = double(1.0) / d1;
 
-  J(1, 2) = kp[1];
-  J(1, 4) = 1;
+  const double k = _xi1 * d1 + z;
+  const double kk = k * k;
+
+  const double d2_2 = r2 + kk;
+  const double d2 = std::sqrt(d2_2);
+  const double d2_inv = double(1.0) / d2;
+
+  const double norm = _xi2 * d2 + (1 - _xi2) * k;
+  const double norm_inv = double(1.0) / norm;
+  const double norm_inv2 = norm_inv * norm_inv;
+
+  const double mx = x * norm_inv;
+  const double my = y * norm_inv;
+
+  J.setZero();
+
+  const double tmp4 = (_xi2 - 1 - _xi2 * k * d2_inv) * d1 * norm_inv2;
+  const double tmp5 = (k - d2) * norm_inv2;
+
+  J(0, 0) = _fu * x * tmp4;
+  J(1, 0) = _fv * y * tmp4;
+
+  J(0, 1) = _fu * x * tmp5;
+  J(1, 1) = _fv * y * tmp5;
+
+  J(0, 2) = mx;
+  J(0, 4) = 1;
+  J(1, 3) = my;
+  J(1, 5) = 1;
 
 }
 
@@ -470,19 +515,13 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_P>, 3);
 
-  double d = p.norm();
-  double rz = 1.0 / (p[2] + _xi2 * d);
-  keypoint_t kp;
-  kp[0] = p[0] * rz;
-  kp[1] = p[1] * rz;
-
-  _distortion.distortParameterJacobian(kp, outJd);
+  // Camera model assumes no distortion.
 
   Eigen::MatrixBase<DERIVED_JD> & J =
       const_cast<Eigen::MatrixBase<DERIVED_JD> &>(outJd);
 
-  J.row(0) *= _fu;
-  J.row(1) *= _fv;
+  J.setZero();
+
 
 }
 
@@ -584,7 +623,7 @@ Eigen::VectorXd DoubleSphereProjection<DISTORTION_T>::createRandomKeypoint() con
 
     // Now we run the point through distortion and projection.
     // Apply distortion
-    _distortion.distort(u);
+    // _distortion.distort(u);
 
     u[0] = _fu * u[0] + _cu;
     u[1] = _fv * u[1] + _cv;
@@ -691,12 +730,12 @@ void DoubleSphereProjection<DISTORTION_T>::update(const double * v) {
 }
 template<typename DISTORTION_T>
 int DoubleSphereProjection<DISTORTION_T>::minimalDimensions() const {
-  return 5;
+  return 6;
 }
 
 template<typename DISTORTION_T>
 Eigen::Vector2i DoubleSphereProjection<DISTORTION_T>::parameterSize() const {
-  return Eigen::Vector2i(5, 1);
+  return Eigen::Vector2i(6, 1);
 }
 
 template<typename DISTORTION_T>
