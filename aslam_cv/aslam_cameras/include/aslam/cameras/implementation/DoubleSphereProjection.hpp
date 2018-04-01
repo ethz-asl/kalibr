@@ -648,7 +648,7 @@ Eigen::VectorXd DoubleSphereProjection<DISTORTION_T>::createRandomKeypoint() con
     u.setRandom();
     u = u - Eigen::Vector2d(0.5, 0.5);
     u /= u.norm();
-    u *= ((double) rand() / (double) RAND_MAX) * _one_over_xixi_m_1;
+    u *= ((double) rand() / (double) RAND_MAX) * _one_over_2xi2_m_1;
 
     // Now we run the point through distortion and projection.
     // Apply distortion
@@ -695,7 +695,7 @@ bool DoubleSphereProjection<DISTORTION_T>::isValid(
 template<typename DISTORTION_T>
 bool DoubleSphereProjection<DISTORTION_T>::isUndistortedKeypointValid(
     const double rho2_d) const {
-  return true; //xi() <= 1.0 || rho2_d <= _one_over_xixi_m_1;
+  return xi2() <= 0.5 || rho2_d <= _one_over_2xi2_m_1;
 }
 
 template<typename DISTORTION_T>
@@ -740,7 +740,7 @@ void DoubleSphereProjection<DISTORTION_T>::updateTemporaries() {
   _recip_fu = 1.0 / _fu;
   _recip_fv = 1.0 / _fv;
   _fu_over_fv = _fu / _fv;
-  _one_over_xixi_m_1 = 1;// 1.0 / (_xi * _xi - 1);
+  _one_over_2xi2_m_1 = _xi2 > 0.5 ? 1.0 / (2*_xi2 - 1) : std::numeric_limits<double>::max();
   _fov_parameter = 1;//(_xi <= 1.0) ? _xi : 1 / _xi;
 }
 
@@ -793,7 +793,7 @@ bool DoubleSphereProjection<DISTORTION_T>::isBinaryEqual(
       && _cv == rhs._cv && _ru == rhs._ru && _rv == rhs._rv
       && _recip_fu == rhs._recip_fu && _recip_fv == rhs._recip_fv
       && _fu_over_fv == rhs._fu_over_fv
-      && _one_over_xixi_m_1 == rhs._one_over_xixi_m_1
+      && _one_over_2xi2_m_1 == rhs._one_over_2xi2_m_1
       && _distortion.isBinaryEqual(rhs._distortion);
 }
 
