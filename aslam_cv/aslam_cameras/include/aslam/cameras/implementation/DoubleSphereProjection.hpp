@@ -518,13 +518,39 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian
       Eigen::MatrixBase<DERIVED_P>, 3);
 
   // Camera model assumes no distortion.
+  const double& x = p[0];
+  const double& y = p[1];
+  const double& z = p[2];
+
+  double xx = x * x;
+  double yy = y * y;
+  double zz = z * z;
+
+  double r2 = xx + yy;
+
+  double d1_2 = r2 + zz;
+  double d1 = std::sqrt(d1_2);
+
+  double k = _xi1 * d1 + z;
+  double kk = k * k;
+
+  double d2_2 = r2 + kk;
+  double d2 = std::sqrt(d2_2);
+
+  double norm = _xi2 * d2 + (1 - _xi2) * k;
+  double norm_inv = 1.0 / norm;
+
+  keypoint_t kp;
+  kp[0] = p[0] * norm_inv;
+  kp[1] = p[1] * norm_inv;
+
+  _distortion.distortParameterJacobian(kp, outJd);
 
   Eigen::MatrixBase<DERIVED_JD> & J =
       const_cast<Eigen::MatrixBase<DERIVED_JD> &>(outJd);
 
-  (void)(p);
-  J.setZero();
-
+  J.row(0) *= _fu;
+  J.row(1) *= _fv;
 
 }
 

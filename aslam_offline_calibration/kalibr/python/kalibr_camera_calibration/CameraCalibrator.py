@@ -656,11 +656,13 @@ def saveChainParametersYaml(cself, resultFile, graph):
     cameraModels = {acvb.DistortedPinhole: 'pinhole',
                     acvb.EquidistantPinhole: 'pinhole',
                     acvb.FovPinhole: 'pinhole',
-                    acvb.DistortedOmni: 'omni'}
+                    acvb.DistortedOmni: 'omni',
+                    acvb.DoubleSphere: 'ds'}
     distortionModels = {acvb.DistortedPinhole: 'radtan',
                         acvb.EquidistantPinhole: 'equidistant',
                         acvb.FovPinhole: 'fov',
-                        acvb.DistortedOmni: 'radtan'}
+                        acvb.DistortedOmni: 'radtan',
+                        acvb.DoubleSphere: 'none'}
 
     chain = cr.CameraChainParameters(resultFile, createYaml=True)
     for cam_id, cam in enumerate(cself.cameras):
