@@ -1,3 +1,6 @@
+
+#include <aslam/cameras/OmniProjection.hpp>
+
 namespace aslam {
 
 namespace cameras {
@@ -472,7 +475,6 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointIntrinsicsJacobian
 
   const double d1_2 = r2 + zz;
   const double d1 = std::sqrt(d1_2);
-  const double d1_inv = double(1.0) / d1;
 
   const double k = _xi1 * d1 + z;
   const double kk = k * k;
@@ -520,6 +522,7 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian
   Eigen::MatrixBase<DERIVED_JD> & J =
       const_cast<Eigen::MatrixBase<DERIVED_JD> &>(outJd);
 
+  (void)(p);
   J.setZero();
 
 
@@ -797,12 +800,22 @@ bool DoubleSphereProjection<DISTORTION_T>::initializeIntrinsics(const std::vecto
   SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
   SM_ASSERT_TRUE(Exception, observations.size() != 0, "Need min. one observation");
 
-  bool success = true;
+  
 
-  //set the parameters
-  // _fu = gamma0;
-  // _fv = gamma0;
-  updateTemporaries();
+  OmniProjection<DISTORTION_T> omni(1, _fu, _fv, _cu, _cv, _ru, _rv);
+  bool success = omni.initializeIntrinsics(observations);
+
+  if(success) {
+    _xi1 = 0;
+    _xi2 = 0.5 * omni.xi();
+    _fu = 0.5 * omni.fu();
+    _fv = 0.5 * omni.fv();
+    _cu = omni.cu();
+    _cv = omni.cv();
+
+    updateTemporaries();
+  }
+
   return success;
 }  // initializeIntrinsics()
 

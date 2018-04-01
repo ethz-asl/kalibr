@@ -114,6 +114,9 @@ void exportCameraGeometries() {
   exportCameraGeometry<FovDistortedOmniRsCameraGeometry>(
       "FovDistortedOmniRsCameraGeometry");
 
+
+  exportCameraGeometry<DoubleSphereCameraGeometry>("DoubleSphereCameraGeometry");
+
   exportCameraGeometry<OmniCameraGeometry>("OmniCameraGeometry");
   exportCameraGeometry<DistortedOmniCameraGeometry>(
       "DistortedOmniCameraGeometry");

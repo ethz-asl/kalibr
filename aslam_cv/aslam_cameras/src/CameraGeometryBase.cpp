@@ -44,6 +44,10 @@ boost::shared_ptr<CameraGeometryBase> CameraGeometryBase::create(
     rval.reset(
         new CameraGeometry<OmniProjection<EquidistantDistortion>, GlobalShutter,
             NoMask>(config));
+  } else if (type == "DoubleSphere") {
+    rval.reset(
+        new CameraGeometry<DoubleSphereProjection<NoDistortion>, GlobalShutter, NoMask>(
+            config));
   } else if (type == "PinholeRs") {
     rval.reset(
         new CameraGeometry<PinholeProjection<NoDistortion>, RollingShutter,

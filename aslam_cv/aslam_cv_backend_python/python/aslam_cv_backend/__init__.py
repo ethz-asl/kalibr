@@ -86,3 +86,14 @@ class FovPinhole(CameraModel):
     distortionType = aslam_cv.FovDistortion
     shutterType = aslam_cv.GlobalShutter
     frameType = aslam_cv.FovDistortedPinholeFrame
+
+class DoubleSphere(CameraModel):
+    geometry = aslam_cv.DoubleSphereCameraGeometry
+    reprojectionError = DoubleSphereReprojectionError
+    reprojectionErrorSimple = DoubleSphereReprojectionErrorSimple
+    designVariable = DoubleSphereCameraGeometryDesignVariable
+    projectionType = aslam_cv.DoubleSphereProjection
+    distortionType = aslam_cv.NoDistortion
+    shutterType = aslam_cv.GlobalShutter
+    frameType = aslam_cv.DoubleSphereFrame
+

@@ -1,6 +1,7 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/cameras/PinholeProjection.hpp>
 #include <aslam/cameras/OmniProjection.hpp>
+#include <aslam/cameras/DoubleSphereProjection.hpp>
 #include <aslam/cameras/NoDistortion.hpp>
 #include <aslam/cameras/EquidistantDistortion.hpp>
 #include <aslam/cameras/FovDistortion.hpp>
@@ -290,6 +291,52 @@ void exportOmniProjection(std::string name) {
 }
 
 template<typename D>
+void exportDoubleSphereProjection(std::string name) {
+
+  D & (DoubleSphereProjection<D>::*omnidistortion)() = &DoubleSphereProjection<D>::distortion;
+
+  class_<DoubleSphereProjection<D>, boost::shared_ptr<DoubleSphereProjection<D> > > doubleSphereProjection(
+      name.c_str(), init<>());
+  sm::python::unique_register_ptr_to_python<boost::shared_ptr<DoubleSphereProjection<D> > >();
+
+  doubleSphereProjection.def(init<>((name + "(distortion_t distortion)").c_str())).def(
+      init<double, double, double, double, double, double, int, int, D>(
+          (name
+              + "(double xi1, double xi2, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV, distortion_t distortion)")
+              .c_str())).def(
+      init<double, double, double, double, double, double, int, int>(
+          (name
+              + "(double xi1, double xi2, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV)")
+              .c_str()))
+  /// \brief the xi parameter that controls the spherical projection.
+      .def("xi1", &DoubleSphereProjection<D>::xi1)
+  /// \brief the xi parameter that controls the spherical projection.
+      .def("xi2", &DoubleSphereProjection<D>::xi2)
+  /// \brief The horizontal focal length in pixels.
+      .def("fu", &DoubleSphereProjection<D>::fu)
+  /// \brief The vertical focal length in pixels.
+      .def("fv", &DoubleSphereProjection<D>::fv)
+  /// \brief The horizontal image center in pixels.
+      .def("cu", &DoubleSphereProjection<D>::cu)
+  /// \brief The vertical image center in pixels.
+      .def("cv", &DoubleSphereProjection<D>::cv)
+  /// \brief The horizontal resolution in pixels.
+      .def("ru", &DoubleSphereProjection<D>::ru)
+  /// \brief The vertical resolution in pixels.
+      .def("rv", &DoubleSphereProjection<D>::rv).def("focalLengthCol",
+                                             &DoubleSphereProjection<D>::focalLengthCol)
+      .def("focalLengthRow", &DoubleSphereProjection<D>::focalLengthRow).def(
+      "opticalCenterCol", &DoubleSphereProjection<D>::opticalCenterCol).def(
+      "opticalCenterRow", &DoubleSphereProjection<D>::opticalCenterRow).def(
+      "distortion", omnidistortion, return_internal_reference<>()).def(
+      "setDistortion", &DoubleSphereProjection<D>::setDistortion).def_pickle(
+      sm::python::pickle_suite<DoubleSphereProjection<D> >());
+  exportGenericProjectionFunctions<DoubleSphereProjection<D> >(doubleSphereProjection);
+  //exportGenericProjectionDesignVariable< OmniProjection<D> >(name);
+
+}
+
+template<typename D>
 void exportPinholeProjection(std::string name) {
 
   typename PinholeProjection<D>::distortion_t & (PinholeProjection<D>::*distortion1)() = &PinholeProjection<D>::distortion;
@@ -367,6 +414,9 @@ void exportCameraProjections() {
   exportOmniProjection<NoDistortion>("OmniProjection");
   exportOmniProjection<RadialTangentialDistortion>("DistortedOmniProjection");
   exportOmniProjection<FovDistortion>("FovOmniProjection");
+
+  exportDoubleSphereProjection<NoDistortion>("DoubleSphereProjection");
+
 
   // distortion:
   // exportAPrioriInformationError<aslam::backend::DesignVariableAdapter< RadialTangentialDistortion > >("RadialTangentialDistortionAPrioriInformationError");

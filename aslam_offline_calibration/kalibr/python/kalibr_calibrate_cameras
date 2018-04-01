@@ -33,7 +33,8 @@ def initBagDataset(bagfile, topic, from_to):
 cameraModels = { 'pinhole-radtan': acvb.DistortedPinhole,
                  'pinhole-equi':   acvb.EquidistantPinhole,
                  'pinhole-fov':    acvb.FovPinhole,
-                 'omni-radtan':    acvb.DistortedOmni }
+                 'omni-radtan':    acvb.DistortedOmni,
+                 'ds':             acvb.DoubleSphere}
 
 def signal_exit(signal, frame):
     sm.logWarn("Shutdown requested! (CTRL+C)")
