@@ -47,19 +47,19 @@ def distortPoint((x,y), distortion_model, distortion_coeffs):
         xy = x * y
         rho2 = x2 + y2
         rad_dist = distortion_coeffs[0] * rho2 + distortion_coeffs[1] * rho2**2
-        x += x * rad_dist + 2.0 * distortion_coeffs[2] * xy + 
-          distortion_coeffs[3] * (rho2 + 2.0 * x2)
-        y += y * rad_dist + 2.0 * distortion_coeffs[2] * xy + 
-          distortion_coeffs[3] * (rho2 + 2.0 * y2);
+        x += x * rad_dist + 2.0 * distortion_coeffs[2] * xy + \
+            distortion_coeffs[3] * (rho2 + 2.0 * x2)
+        y += y * rad_dist + 2.0 * distortion_coeffs[2] * xy + \
+            distortion_coeffs[3] * (rho2 + 2.0 * y2)
         return (x, y) 
     elif distortion_model == "equidistant":
         r = math.sqrt(x**2 + y**2)
         if r < 1e-8:
           return (x,y)
         theta = math.atan(r)
-        thetad = theta * (1 + distortion_coeffs[0] * theta**2  + 
-            distortion_coeffs[1] * theta**4 + distortion_coeffs[2] * theta**6 +
-            distortion_coeffs[3] * theta**8)
+        thetad = theta * (1 + distortion_coeffs[0] * theta**2  + \
+            distortion_coeffs[1] * theta**4 + distortion_coeffs[2] * \
+            theta**6 + distortion_coeffs[3] * theta**8)
         scaling = thetad / r
         return (scaling * x, scaling * y)
     elif distortion_model ==  "fov":
@@ -82,13 +82,16 @@ def distortPoint((x,y), distortion_model, distortion_coeffs):
     else:
       raise Exception('Distortion model ' + distortion_model + ' not found.')
 
-def distort(image, distortion_model, distortion_coeffs, focal_lengths, principal_point):
+def distort(image, distortion_model, distortion_coeffs, focal_lengths, 
+        principal_point):
     distorted_image = np.zeros(image.shape)
     for i in range(0, image.shape[0]):
       for j in range(0, image.shape[1]):
         normalized_point = normalize((i, j) ,focal_lengths, principal_point)
-        distorted_normalized = distortPoint(normalized_point, distortion_model, distortion_coeffs)
-        distorted = denormalize(distorted_normalized, focal_lengths, principal_point)
+        distorted_normalized = distortPoint(normalized_point, distortion_model,
+            distortion_coeffs)
+        distorted = denormalize(distorted_normalized, focal_lengths, 
+            principal_point)
         if (int(distorted[0]) < 0 or int(distorted[0]) > image.shape[0] or
             int(distorted[1]) < 0 or int(distorted[1]) > image.shape[1]):
           continue
@@ -130,15 +133,20 @@ def main():
             cam = 'cam{0}'.format(cam_index)
             intrinsics = np.asarray(camchain.data[cam]['intrinsics'])
             resolution = np.asarray(camchain.data[cam]['resolution'])
-            distortion_coeffs = np.asarray(camchain.data[cam]['distortion_coeffs'])
+            distortion_coeffs = np.asarray(
+                camchain.data[cam]['distortion_coeffs'])
             distortion_model = camchain.data[cam]['distortion_model']
             focal_lengths = intrinsics[0:2]
             principal_point = intrinsics[2:4]
-            raw_image = drawImage(resolution, parsed_args.number_of_rectangles, parsed_args.line_thickness)
+            plt.subplot(num_cameras, 1 , cam_index + 1)
+            raw_image = drawImage(resolution, parsed_args.number_of_rectangles,
+                parsed_args.line_thickness)
             imshow(raw_image, 'Blues')
-            distorted_image = distort(raw_image, distortion_model, distortion_coeffs, focal_lengths, principal_point)
+            distorted_image = distort(raw_image, distortion_model, 
+                distortion_coeffs, focal_lengths, principal_point)
             imshow(distorted_image, 'Reds', 0.5)
-            plt.show()
+            plt.title(cam)
+        plt.show()
 
 if __name__ == "__main__":
     main()
