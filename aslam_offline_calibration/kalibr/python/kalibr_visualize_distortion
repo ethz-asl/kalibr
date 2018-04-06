@@ -41,7 +41,7 @@ def denormalize((x,y), focal_lengths, principal_point):
     return (u,v)
 
 def distortPoint((x,y), distortion_model, distortion_coeffs):
-    if distortion_model == "radial-tangential":
+    if distortion_model == "radial-tangential" or distortion_model == "radtan":
         x2 = x**2
         y2 = y**2
         xy = x * y
@@ -52,7 +52,7 @@ def distortPoint((x,y), distortion_model, distortion_coeffs):
         y += y * rad_dist + 2.0 * distortion_coeffs[2] * xy + \
             distortion_coeffs[3] * (rho2 + 2.0 * y2)
         return (x, y) 
-    elif distortion_model == "equidistant":
+    elif distortion_model == "equidistant" or distortion_model == "equi":
         r = math.sqrt(x**2 + y**2)
         if r < 1e-8:
           return (x,y)
@@ -65,10 +65,8 @@ def distortPoint((x,y), distortion_model, distortion_coeffs):
     elif distortion_model ==  "fov":
         w = distortion_coeffs[0]
         r_u = np.linalg.norm((x,y))
-        ru3 = ru**3
         tanwhalf = math.tan(w / 2)
-        tanwhalfsq = tanwhalf**2
-        atan_wrd = atan(2. * tanwhalf * r_u)
+        atan_wrd = math.atan(2. * tanwhalf * r_u)
         
         r_rd = 0.0
         if w * w < 1e-5:
