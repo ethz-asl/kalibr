@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import argparse
 import kalibr_common as kc
 import math
@@ -11,13 +12,12 @@ import sm
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description=
-        'Visualizes a camchain-cam.yaml distortion.')
+        'Visualize distortion of a camchain file.')
     parser.add_argument(
         '--cam',
         dest='chain_yaml',
         help=
-        'Camera configuration as yaml file (can take multiple configurations).',
-        nargs='+',
+        'Camera configuration as yaml file.',
         required=True)
     parser.add_argument(
         '--number_of_rectangles',
@@ -41,6 +41,8 @@ def denormalize((x,y), focal_lengths, principal_point):
     return (u,v)
 
 def distortPoint((x,y), distortion_model, distortion_coeffs):
+    # Distortes a point regarding the distortion model. The Input point has to
+    # be in normalized coordinates.
     if distortion_model == "radial-tangential" or distortion_model == "radtan":
         x2 = x**2
         y2 = y**2
@@ -96,24 +98,26 @@ def distort(image, distortion_model, distortion_coeffs, focal_lengths,
         distorted_image[int(distorted[0]), int(distorted[1])] = image[i,j]
     return distorted_image
 
-def drawImage(resolution, n, line_thickness):
+def drawImage(resolution, num_rectangles, line_thickness):
+    assert num_rectangles > 0
+    assert line_thickness > 0
     raw_image = np.zeros((resolution[1], resolution[0]))
-    for i in range(1, n+1):
-      h_offset = i*resolution[0] / 2 / (n + 1) 
-      v_offset = i*resolution[1] / 2 / (n + 1)
+    for i in range(1, num_rectangles + 1):
+      h_offset = i*resolution[0] / 2 / (num_rectangles + 1) 
+      v_offset = i*resolution[1] / 2 / (num_rectangles + 1)
       # Draw lines.
       for t in range(0, line_thickness):
         for i in range(-h_offset, h_offset):
-            raw_image[resolution[1]/2 - v_offset - t, 
-                resolution[0]/2 + i] = 255;
-            raw_image[resolution[1]/2 + v_offset + t,
-                resolution[0]/2 + i] = 255;
+            raw_image[resolution[1] / 2 - v_offset - t, 
+                resolution[0] / 2 + i] = 255;
+            raw_image[resolution[1] / 2 + v_offset + t,
+                resolution[0] / 2 + i] = 255;
       for t in range(0, line_thickness):
         for j in range(-v_offset, v_offset):
-            raw_image[resolution[1]/2 + j,
-                resolution[0]/2 - h_offset - t] = 255
-            raw_image[resolution[1]/2 + j, 
-                resolution[0]/2 + h_offset + t] = 255
+            raw_image[resolution[1] / 2 + j,
+                resolution[0] / 2 - h_offset - t] = 255
+            raw_image[resolution[1] / 2 + j, 
+                resolution[0] / 2 + h_offset + t] = 255
     return raw_image
 
 def imshow(image, color, alpha = 1):
@@ -123,28 +127,27 @@ def imshow(image, color, alpha = 1):
 
 def main():
     parsed_args = parse_arguments()
-    for camchain_yaml in parsed_args.chain_yaml:
-        camchain = kc.ConfigReader.CameraChainParameters(camchain_yaml)
-        num_cameras = camchain.numCameras()
-        print("Plotting distortion with " + str(num_cameras) + " cameras.")
-        for cam_index in range(num_cameras):
-            cam = 'cam{0}'.format(cam_index)
-            intrinsics = np.asarray(camchain.data[cam]['intrinsics'])
-            resolution = np.asarray(camchain.data[cam]['resolution'])
-            distortion_coeffs = np.asarray(
-                camchain.data[cam]['distortion_coeffs'])
-            distortion_model = camchain.data[cam]['distortion_model']
-            focal_lengths = intrinsics[0:2]
-            principal_point = intrinsics[2:4]
-            plt.subplot(num_cameras, 1 , cam_index + 1)
-            raw_image = drawImage(resolution, parsed_args.number_of_rectangles,
-                parsed_args.line_thickness)
-            imshow(raw_image, 'Blues')
-            distorted_image = distort(raw_image, distortion_model, 
-                distortion_coeffs, focal_lengths, principal_point)
-            imshow(distorted_image, 'Reds', 0.5)
-            plt.title(cam)
-        plt.show()
+    camchain = kc.ConfigReader.CameraChainParameters(parsed_args.chain_yaml)
+    num_cameras = camchain.numCameras()
+    print("Plotting distortion with " + str(num_cameras) + " cameras.")
+    for cam_index in range(num_cameras):
+        cam = 'cam{0}'.format(cam_index)
+        intrinsics = np.asarray(camchain.data[cam]['intrinsics'])
+        resolution = np.asarray(camchain.data[cam]['resolution'])
+        distortion_coeffs = np.asarray(
+            camchain.data[cam]['distortion_coeffs'])
+        distortion_model = camchain.data[cam]['distortion_model']
+        focal_lengths = intrinsics[0:2]
+        principal_point = intrinsics[2:4]
+        plt.subplot(num_cameras, 1 , cam_index + 1)
+        raw_image = drawImage(resolution, parsed_args.number_of_rectangles,
+            parsed_args.line_thickness)
+        imshow(raw_image, 'Blues')
+        distorted_image = distort(raw_image, distortion_model, 
+            distortion_coeffs, focal_lengths, principal_point)
+        imshow(distorted_image, 'Reds', alpha=0.5)
+        plt.title(cam)
+    plt.show()
 
 if __name__ == "__main__":
     main()
