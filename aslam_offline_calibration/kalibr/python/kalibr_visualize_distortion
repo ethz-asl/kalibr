@@ -22,10 +22,12 @@ def parse_arguments():
     parser.add_argument(
         '--number_of_rectangles',
         help="Number of rectangles to draw.",
+        type=int,
         default=5)
     parser.add_argument(
         '--line_thickness',
         help="Line thickness.",
+        type=int,
         default=3)
     parsed_args = parser.parse_args()
     return parsed_args
@@ -125,7 +127,7 @@ def imshow(image, color, alpha = 1):
     plt.axis('equal')
     plt.axis([0, image.shape[1], 0, image.shape[0]])
 
-def main():
+def view_distortions():
     parsed_args = parse_arguments()
     camchain = kc.ConfigReader.CameraChainParameters(parsed_args.chain_yaml)
     num_cameras = camchain.numCameras()
@@ -150,4 +152,4 @@ def main():
     plt.show()
 
 if __name__ == "__main__":
-    main()
+    view_distortions()
