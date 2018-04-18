@@ -5,8 +5,6 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import message_filters
 
-print "importing libraries"
-import cv
 import cv2
 import sm
 import aslam_cv as acv
@@ -450,7 +448,7 @@ class MonoCameraValidator(object):
                 px_fix =  int(px * 2**shift)
                 py_fix =  int(py * 2**shift)
                 radius_fix = int(radius * 2**shift)
-                cv2.circle(np_image, (px_fix, py_fix), radius=radius_fix, color=(255,255,0), thickness=thickness, shift=shift, lineType=cv2.CV_AA)
+                cv2.circle(np_image, (px_fix, py_fix), radius=radius_fix, color=(255,255,0), thickness=thickness, shift=shift, lineType=cv2.LINE_AA)
 
         else:
             cv2.putText(np_image, "Detection failed...", (np_image.shape[0]/2,np_image.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.5, color=(0, 0, 255), thickness=2)
@@ -488,4 +486,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print "Shutting down"
     
-    cv.DestroyAllWindows()
+    cv2.destroyAllWindows()
