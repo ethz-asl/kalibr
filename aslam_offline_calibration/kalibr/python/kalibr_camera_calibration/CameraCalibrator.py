@@ -866,4 +866,22 @@ def saveResultTxt(cself, filename="camera_calibration_result.txt"):
     print >> f1, ""
 
     cself.cameras[0].ctarget.targetConfig.printDetails(f1)
-    
+
+
+def save_kd_yaml(cself, filename="myyaml.yaml"):
+    for cidx, cam in enumerate(cself.cameras):
+        d = cam.geometry.projection().distortion().getParameters().flatten(1)
+        p = cam.geometry.projection().getParameters().flatten(1)
+
+        fs = cv2.FileStorage(filename, cv2.FILE_STORAGE_WRITE)
+        # K matrix
+        # [fx 0  cx]
+        # [0  fy cy]
+        # [0  0   1]
+        fs.write('K matrix', np.matrix([[p[0], 0, p[2]], [0, p[1], p[3]], [0, 0, 1]]))
+        # D vector
+        fs.write('D vector', d)
+
+       
+   
+   
