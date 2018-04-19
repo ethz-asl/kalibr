@@ -409,7 +409,11 @@ def main():
             resultFileTxt = "results-cam-" + bagtag + ".txt"
             kcc.saveResultTxt(calibrator, filename=resultFileTxt)
             print "  Detailed results written to file: {0}".format(resultFileTxt)
-            
+
+            # save my yaml file to transfer data
+            result_yaml_file = "fisheye_parameters.yaml"
+            kcc.save_kd_yaml(calibrator, filename=result_yaml_file)
+
             #generate report
             reportFile = "report-cam-" + bagtag + ".pdf"
             G=None; 
