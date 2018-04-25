@@ -79,8 +79,8 @@ bool GridCalibrationTargetCheckerboard::computeObservation(const cv::Mat & image
 
   // set the open cv flags
   int flags = 0;
-  if (_options.performFastCheck)
-    flags += cv::CALIB_CB_FAST_CHECK;
+  // if (_options.performFastCheck)
+  //   flags += cv::CALIB_CB_FAST_CHECK;
   if (_options.useAdaptiveThreshold)
     flags += cv::CALIB_CB_ADAPTIVE_THRESH;
   if ( _options.normalizeImage)
