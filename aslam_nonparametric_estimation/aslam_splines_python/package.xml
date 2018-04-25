@@ -28,5 +28,5 @@
   <build_depend>sm_opencv</build_depend>
   <build_depend>sm_property_tree</build_depend>
   <build_depend>sm_logging</build_depend>
-  <build_depend>opencv2_catkin</build_depend>
+  <build_depend>opencv3_catkin</build_depend>
 </package>
