@@ -291,6 +291,7 @@ void exportOmniProjection(std::string name) {
 }
 
 template<typename D>
+// TODO @demmeln: fix comments
 void exportDoubleSphereProjection(std::string name) {
 
   D & (DoubleSphereProjection<D>::*omnidistortion)() = &DoubleSphereProjection<D>::distortion;
