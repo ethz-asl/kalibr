@@ -33,6 +33,7 @@ def initBagDataset(bagfile, topic, from_to):
 cameraModels = { 'pinhole-radtan': acvb.DistortedPinhole,
                  'pinhole-equi':   acvb.EquidistantPinhole,
                  'pinhole-fov':    acvb.FovPinhole,
+                 'omni-none':      acvb.Omni,
                  'omni-radtan':    acvb.DistortedOmni,
                  'ds-none':        acvb.DoubleSphere}
 

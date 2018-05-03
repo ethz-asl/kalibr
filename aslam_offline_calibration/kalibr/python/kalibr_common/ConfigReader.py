@@ -59,7 +59,7 @@ class AslamCamera(object):
                 self.keypointType = cv.Keypoint2
                 self.reprojectionErrorType = cvb.FovDistortedPinholeReprojectionErrorSimple
                 self.undistorterType = cv.FovPinholeUndistorterNoMask
-            else:
+            elif dist_model == 'none':
                 proj = cv.PinholeProjection(focalLength[0], focalLength[1], 
                                             principalPoint[0], principalPoint[1], 
                                             resolution[0], resolution[1])
@@ -69,6 +69,8 @@ class AslamCamera(object):
                 self.frameType = cv.PinholeFrame
                 self.keypointType = cv.Keypoint2
                 self.reprojectionErrorType = cvb.PinholeReprojectionErrorSimple
+            else:
+                self.raiseError("pinhole camera model does not support distortion model '{}'".format(dist_model))
                 
         elif camera_model == 'omni':
             xi_omni = intrinsics[0]
@@ -113,7 +115,19 @@ class AslamCamera(object):
                 self.reprojectionErrorType = cvb.EquidistantDistortedOmniReprojectionErrorSimple
 
             elif dist_model == 'none':
-                self.raiseError("camera model omni needs a distortion model! (none is invalid)")
+
+                proj = cv.OmniProjection(xi_omni, focalLength[0], focalLength[1],
+                                                        principalPoint[0], principalPoint[1],
+                                                        resolution[0], resolution[1])
+
+                self.geometry = cv.OmniCameraGeometry(proj)
+
+                self.frameType = cv.OmniFrame
+                self.keypointType = cv.Keypoint2
+                self.reprojectionErrorType = cvb.OmniReprojectionErrorSimple
+
+            else:
+                self.raiseError("omni camera model does not support distortion model '{}'".format(dist_model))
         
         elif camera_model == 'ds':
             xi_omni = intrinsics[0:1]
@@ -123,8 +137,7 @@ class AslamCamera(object):
             if dist_model == 'none':
                 proj = cv.DoubleSphereProjection(xi_omni[0], xi_omni[1], focalLength[0], focalLength[1], 
                                                         principalPoint[0], principalPoint[1], 
-                                                        resolution[0], resolution[1], 
-                                                        dist)
+                                                        resolution[0], resolution[1])
 
                 self.geometry = cv.DoubleSphereCameraGeometry(proj)
                 
@@ -134,10 +147,10 @@ class AslamCamera(object):
                 self.undistorterType = cv.DoubleSphereUndistorterNoMask
                 
             else:
-                self.raiseError("camera model ds does not support distortion model!")
+                self.raiseError("camera model ds does not support distortion model '{}'".format(dist_model))
 
         else:
-            self.raiseError("Unknown camera model")
+            self.raiseError("Unknown camera model '{}'".format(camera_model))
         
     @classmethod
     def fromParameters(cls, params):

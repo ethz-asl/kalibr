@@ -661,6 +661,7 @@ def saveChainParametersYaml(cself, resultFile, graph):
     distortionModels = {acvb.DistortedPinhole: 'radtan',
                         acvb.EquidistantPinhole: 'equidistant',
                         acvb.FovPinhole: 'fov',
+                        acvb.Omni: 'none',
                         acvb.DistortedOmni: 'radtan',
                         acvb.DoubleSphere: 'none'}
 

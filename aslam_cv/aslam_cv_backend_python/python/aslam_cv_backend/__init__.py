@@ -14,6 +14,16 @@ from libaslam_cv_backend_python import *
 class CameraModel(object):
     pass
 
+class Omni(CameraModel):
+    geometry = aslam_cv.OmniCameraGeometry
+    reprojectionError = OmniReprojectionError
+    reprojectionErrorSimple = OmniReprojectionErrorSimple
+    designVariable = OmniCameraGeometryDesignVariable
+    projectionType = aslam_cv.OmniProjection
+    distortionType = aslam_cv.NoDistortion
+    shutterType = aslam_cv.GlobalShutter
+    frameType = aslam_cv.OmniFrame
+
 class DistortedOmni(CameraModel):
     geometry = aslam_cv.DistortedOmniCameraGeometry
     reprojectionError = DistortedOmniReprojectionError
