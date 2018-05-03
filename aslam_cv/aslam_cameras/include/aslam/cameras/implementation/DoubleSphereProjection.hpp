@@ -838,6 +838,10 @@ bool DoubleSphereProjection<DISTORTION_T>::initializeIntrinsics(const std::vecto
     _fv = 0.5 * omni.fv();
     _cu = omni.cu();
     _cv = omni.cv();
+    _ru = omni.ru();
+    _rv = omni.rv();
+    // FIXME
+    //_distortion.clear();
 
     updateTemporaries();
   }
