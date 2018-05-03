@@ -3,8 +3,6 @@
 
 #include <Eigen/Core>
 #include "StaticAssert.hpp"
-#include <sm/boost/serialization.hpp>
-
 namespace sm {
 class PropertyTree;
 }  // namespace sm
@@ -21,7 +19,6 @@ class NoDistortion {
 
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   enum {
-    // NOTE @demmeln: why not 0???
     IntrinsicsDimension = -1  //!< The number of distortion coefficients
   };
 
@@ -55,11 +52,6 @@ class NoDistortion {
   void setParameters(const Eigen::MatrixXd & P);
   Eigen::Vector2i parameterSize() const;
 
-  /// \brief Compatibility with boost::serialization.
-  enum {
-    CLASS_SERIALIZATION_VERSION = 0
-  };
-
   template<class Archive>
   void serialize(Archive & /* ar */, const unsigned int /* version */) {
   }
@@ -81,7 +73,5 @@ class NoDistortion {
 }  // namespace aslam
 
 #include "implementation/NoDistortion.hpp"
-
-SM_BOOST_CLASS_VERSION (aslam::cameras::NoDistortion);
 
 #endif /* ASLAM_CAMERAS_DISTORTION_HPP */
