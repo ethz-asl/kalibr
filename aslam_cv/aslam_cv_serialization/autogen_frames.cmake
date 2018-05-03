@@ -7,6 +7,7 @@ SET( AUTOGEN_FRAME_CPP_FILES
 	src/autogen/Frame-OmniCameraGeometry.cpp
 	src/autogen/Frame-DistortedOmniCameraGeometry.cpp
 	src/autogen/Frame-EquidistantDistortedOmniCameraGeometry.cpp
+	src/autogen/Frame-DoubleSphereCameraGeometry.cpp
 	src/autogen/Frame-PinholeRsCameraGeometry.cpp
 	src/autogen/Frame-DistortedPinholeRsCameraGeometry.cpp
 	src/autogen/Frame-EquidistantDistortedPinholeRsCameraGeometry.cpp
