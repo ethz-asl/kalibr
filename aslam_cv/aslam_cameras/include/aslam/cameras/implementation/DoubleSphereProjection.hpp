@@ -91,6 +91,7 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
   outKeypoint.derived().resize(2);
   //    SM_OUT(p.transpose());
 
+  // FIXME @demmeln: Add checks for this
   // Check if point will lead to a valid projection
   //if (p[2] <= -(_fov_parameter * d))
   //  return false;
@@ -125,6 +126,7 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
   //SM_OUT(outKeypoint[0]);
   //SM_OUT(outKeypoint[1]);
 
+  // FIXME @demmeln: Either add this properly, or add checks that ensure that NoDistortion
   //_distortion.distort(outKeypoint);
   //std::cout << "distort\n";
   //SM_OUT(outKeypoint[0]);

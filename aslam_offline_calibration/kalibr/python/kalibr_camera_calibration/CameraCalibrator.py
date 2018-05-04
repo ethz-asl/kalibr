@@ -656,6 +656,7 @@ def saveChainParametersYaml(cself, resultFile, graph):
     cameraModels = {acvb.DistortedPinhole: 'pinhole',
                     acvb.EquidistantPinhole: 'pinhole',
                     acvb.FovPinhole: 'pinhole',
+                    acvb.Omni: 'omni',
                     acvb.DistortedOmni: 'omni',
                     acvb.DoubleSphere: 'ds'}
     distortionModels = {acvb.DistortedPinhole: 'radtan',
@@ -680,6 +681,10 @@ def saveChainParametersYaml(cself, resultFile, graph):
             camParams.setIntrinsics(cameraModel, [P.xi(), P.fu(), P.fv(), P.cu(), P.cv()] )
         elif cameraModel == 'pinhole':
             camParams.setIntrinsics(cameraModel, [P.fu(), P.fv(), P.cu(), P.cv()] )
+        elif cameraModel == 'ds':
+            camParams.setIntrinsics(cameraModel, [P.xi1(), P.xi2(), P.fu(), P.fv(), P.cu(), P.cv()] )
+        else:
+            raise RuntimeError("Invalid camera model {}.".format(cameraModel))
         camParams.setResolution( [P.ru(), P.rv()] )
         dist_coeffs = P.distortion().getParameters().flatten(1)
         camParams.setDistortion( distortionModel, dist_coeffs)
