@@ -252,6 +252,8 @@ class DoubleSphereProjection {
   static DoubleSphereProjection<distortion_t> getTestProjection();
  private:
 
+  // FIXME @demmeln: rename xi1 and xi2 to xi and alpha
+
   /// \brief the xi1 parameter that controls the spherical projection.
   double _xi1;
   /// \brief the xi2 parameter that controls the spherical projection.

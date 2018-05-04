@@ -241,28 +241,45 @@ class CameraParameters(ParametersBase):
     #intrinsics
     def checkIntrinsics(self, model, intrinsics):
         cameraModels = ['pinhole', 
-                        'omni']
+                        'omni',
+                        'ds']
         
         if model not in cameraModels:
-            self.raiseError('Unknown camera model; available models: {0}. )'.format(cameraModels) )
+            self.raiseError("Unknown camera model '{}'; available models: {}.".format(model, ", ".join(cameraModels)) )
         
         if model == 'pinhole':
             if len(intrinsics) != 4:
-                self.raiseError("invalid intrinsics for pinhole; [fu, fv, pu, pv]")
+                self.raiseError("invalid intrinsics for pinhole; should be [fu, fv, pu, pv], but got {} parameters".format(len(intrinsics)))
 
             focalLength = intrinsics[0:2]
             principalPoint = intrinsics[2:4]
             
         elif model == 'omni':
             if len(intrinsics) != 5:
-                self.raiseError("invalid intrinsics for omni; [xi, fu, fv, pu, pv]")
+                self.raiseError("invalid intrinsics for omni; should be [xi, fu, fv, pu, pv], but got {} parameters".format(len(intrinsics)))
             
             xi_omni = intrinsics[0]
             focalLength = intrinsics[1:3]
             principalPoint = intrinsics[3:5]
             
             if xi_omni<0:
-                self.raiseError("invalid xi_omni (xi>0)" )
+                self.raiseError("invalid xi_omni of {} (xi>0)".format(xi_omni) )
+
+        elif model == "ds":
+
+            if len(intrinsics) != 6:
+                self.raiseError("invalid intrinsics for ds; should be [xi, alpha, fu, fv, pu, pv], but got {} parameters".format(len(intrinsics)))
+
+            xi_ds = intrinsics[0]
+            alpha_ds = intrinsics[1]
+            focalLength = intrinsics[2:4]
+            principalPoint = intrinsics[4:6]
+
+            if alpha_ds < 0 or alpha_ds >= 1:
+                self.raiseError("invalid alpha_ds of {} (0<=alpha<1)".format(alpha_ds) )
+
+        else:
+            self.raiseError('internal error: invalid camera model {} (should have been checked before)'.format(model))
         
         if not isinstance(focalLength[0],float) or not isinstance(focalLength[1],float) or focalLength[0] < 0.0 or focalLength[1] < 0.0:
             self.raiseError("invalid focalLength (2 floats)")
@@ -291,10 +308,12 @@ class CameraParameters(ParametersBase):
                                         'none': 0}
                
         if model not in distortionModelsAndNumParams:
-            self.raiseError('Unknown distortion model. Supported models: {0}. )'.format(distortionModels) )
+            self.raiseError("Unknown distortion model '{}'. Supported models: {}. )".format(
+                model, ", ".join(distortionModelsAndNumParams.keys())))
         
         if len(coeffs) != distortionModelsAndNumParams[model]:
-            self.raiseError("distortion model requires 4 coefficients")
+            self.raiseError("distortion model '{}' requires {} coefficients; {} given".format(
+                model, distortionModelsAndNumParams[model], len(coeffs)))
     
     @catch_keyerror
     def getDistortion(self):       
@@ -338,12 +357,23 @@ class CameraParameters(ParametersBase):
             xi_omni = intrinsics[0]
             focalLength = intrinsics[1:3]
             principalPoint = intrinsics[3:5]
-            
+
+        elif camera_model == 'ds':
+            [xi_ds, alpha_ds] = intrinsics[0:2]
+            focalLength = intrinsics[2:4]
+            principalPoint = intrinsics[4:6]
+
+        else:
+            self.raiseError("Unknown camera model '{}'.".format(camera_model))
+
         print >> dest, "  Camera model: {0}".format(camera_model)
         print >> dest, "  Focal length: {0}".format(focalLength)
         print >> dest, "  Principal point: {0}".format(principalPoint)
         if camera_model == 'omni':
             print >> dest, "  Omni xi: {0}".format(xi_omni)
+        if camera_model == 'ds':
+            print >> dest, "  DS xi: {0}".format(xi_ds)
+            print >> dest, "  DS alpha: {0}".format(alpha_ds)
         print >> dest, "  Distortion model: {0}".format(dist_model)
         print >> dest, "  Distortion coefficients: {0}".format(dist_coeff)
 
@@ -399,8 +429,8 @@ class ImuParameters(ParametersBase):
     
     def setAccelerometerStatistics(self, noise_density, random_walk):
         self.checkAccelerometerStatistics(noise_density, random_walk)
-        self.data["accelerometer_noise_density"] = accelerometer_noise_density
-        self.data["accelerometer_random_walk"] = accelerometer_random_walk
+        self.data["accelerometer_noise_density"] = noise_density
+        self.data["accelerometer_random_walk"] = random_walk
     
     #gyro statistics
     def checkGyroStatistics(self, noise_density, random_walk):
@@ -417,8 +447,8 @@ class ImuParameters(ParametersBase):
     
     def setGyroStatistics(self, noise_density, random_walk):
         self.checkGyroStatistics(noise_density, random_walk)
-        self.data["gyroscope_noise_density"] = accelerometer_noise_density
-        self.data["gyroscope_random_walk"] = accelerometer_random_walk
+        self.data["gyroscope_noise_density"] = noise_density
+        self.data["gyroscope_random_walk"] = random_walk
 
     
     ###################################################
