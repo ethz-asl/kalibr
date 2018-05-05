@@ -91,11 +91,6 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
   outKeypoint.derived().resize(2);
   //    SM_OUT(p.transpose());
 
-  // FIXME @demmeln: Add checks for this
-  // Check if point will lead to a valid projection
-  //if (p[2] <= -(_fov_parameter * d))
-  //  return false;
-
   const double& x = p[0];
   const double& y = p[1];
   const double& z = p[2];
@@ -108,6 +103,11 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
 
   double d1_2 = r2 + zz;
   double d1 = std::sqrt(d1_2);
+
+  // FIXME @demmeln: Add checks for this
+  // Check if point will lead to a valid projection
+  if (p[2] <= -(_fov_parameter * d1))
+   return false;
 
   double k = _xi1 * d1 + z;
   double kk = k * k;
@@ -166,10 +166,6 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
   J.derived().resize(KeypointDimension, 3);
   J.setZero();
 
-  // Check if point will lead to a valid projection
-  //if (p[2] <= -(_fov_parameter * d))
-  //  return false;
-
   // project the point
 
   const double& x = p[0];
@@ -185,6 +181,10 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
   double d1_2 = r2 + zz;
   double d1 = std::sqrt(d1_2);
   double d1_inv = 1.0 / d1;
+
+    // Check if point will lead to a valid projection
+  if (p[2] <= -(_fov_parameter * d1))
+   return false;
 
   double k = _xi1 * d1 + z;
   double kk = k * k;
@@ -743,7 +743,8 @@ void DoubleSphereProjection<DISTORTION_T>::updateTemporaries() {
   _recip_fv = 1.0 / _fv;
   _fu_over_fv = _fu / _fv;
   _one_over_2xi2_m_1 = _xi2 > 0.5 ? 1.0 / (2*_xi2 - 1) : std::numeric_limits<double>::max();
-  _fov_parameter = 1;//(_xi <= 1.0) ? _xi : 1 / _xi;
+  _fov_parameter2 = _xi2 <= 0.5 ?_xi2/(1-_xi2) : (1-_xi2)/_xi2;
+  _fov_parameter = (_fov_parameter2*_fov_parameter2 + _xi1) / (2*_fov_parameter2 * _xi1 + _xi1*_xi1 + 1);
 }
 
 // aslam::backend compatibility

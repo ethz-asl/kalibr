@@ -279,7 +279,7 @@ class DoubleSphereProjection {
   double _fu_over_fv;
   double _one_over_2xi2_m_1;
   double _fov_parameter;  //PM: is = xi for xi=<1, = 1/xi for x>1. Used for determining valid projections. Better name?
-
+  double _fov_parameter2;
 
   distortion_t _distortion;
 
