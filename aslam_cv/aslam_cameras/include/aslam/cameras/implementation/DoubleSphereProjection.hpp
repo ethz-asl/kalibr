@@ -744,7 +744,7 @@ void DoubleSphereProjection<DISTORTION_T>::updateTemporaries() {
   _fu_over_fv = _fu / _fv;
   _one_over_2xi2_m_1 = _xi2 > 0.5 ? 1.0 / (2*_xi2 - 1) : std::numeric_limits<double>::max();
   _fov_parameter2 = _xi2 <= 0.5 ?_xi2/(1-_xi2) : (1-_xi2)/_xi2;
-  _fov_parameter = (_fov_parameter2*_fov_parameter2 + _xi1) / (2*_fov_parameter2 * _xi1 + _xi1*_xi1 + 1);
+  _fov_parameter = (_fov_parameter2 + _xi1) / std::sqrt(2*_fov_parameter2 * _xi1 + _xi1*_xi1 + 1);
 }
 
 // aslam::backend compatibility
