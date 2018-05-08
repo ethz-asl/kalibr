@@ -584,6 +584,7 @@ bool OmniProjection<DISTORTION_T>::isValid(
 template<typename DISTORTION_T>
 bool OmniProjection<DISTORTION_T>::isUndistortedKeypointValid(
     const double rho2_d) const {
+  // TODO @demmeln: does this match paper?
   return xi() <= 1.0 || rho2_d <= _one_over_xixi_m_1;
 }
 
@@ -692,6 +693,7 @@ OmniProjection<DISTORTION_T> OmniProjection<DISTORTION_T>::getTestProjection() {
 
 template<typename DISTORTION_T>
 void OmniProjection<DISTORTION_T>::resizeIntrinsics(double scale) {
+  // FIMXE @demmeln ?
   _fu *= scale;
   _fv *= scale;
   _cu *= scale;

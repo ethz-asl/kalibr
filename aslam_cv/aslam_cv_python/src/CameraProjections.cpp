@@ -1,6 +1,8 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/cameras/PinholeProjection.hpp>
 #include <aslam/cameras/OmniProjection.hpp>
+#include <aslam/cameras/UnifiedProjection.hpp>
+#include <aslam/cameras/ExtendedUnifiedProjection.hpp>
 #include <aslam/cameras/DoubleSphereProjection.hpp>
 #include <aslam/cameras/NoDistortion.hpp>
 #include <aslam/cameras/EquidistantDistortion.hpp>
@@ -291,10 +293,99 @@ void exportOmniProjection(std::string name) {
 }
 
 template<typename D>
-// TODO @demmeln: fix comments
+void exportUnifiedProjection(std::string name) {
+
+  D & (UnifiedProjection<D>::*distortion)() = &UnifiedProjection<D>::distortion;
+
+  class_<UnifiedProjection<D>, boost::shared_ptr<UnifiedProjection<D> > > unifiedProjection(
+      name.c_str(), init<>());
+  sm::python::unique_register_ptr_to_python<boost::shared_ptr<UnifiedProjection<D> > >();
+
+  unifiedProjection.def(init<>((name + "(distortion_t distortion)").c_str())).def(
+      init<double, double, double, double, double, int, int, D>(
+          (name
+              + "(double alpha, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV, distortion_t distortion)")
+              .c_str())).def(
+      init<double, double, double, double, double, int, int>(
+          (name
+              + "(double alpha, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV)")
+              .c_str()))
+  /// \brief the alpha parameter that relates spherical and pinhole projection.
+      .def("alpha", &UnifiedProjection<D>::alpha)
+  /// \brief The horizontal focal length in pixels.
+      .def("fu", &UnifiedProjection<D>::fu)
+  /// \brief The vertical focal length in pixels.
+      .def("fv", &UnifiedProjection<D>::fv)
+  /// \brief The horizontal image center in pixels.
+      .def("cu", &UnifiedProjection<D>::cu)
+  /// \brief The vertical image center in pixels.
+      .def("cv", &UnifiedProjection<D>::cv)
+  /// \brief The horizontal resolution in pixels.
+      .def("ru", &UnifiedProjection<D>::ru)
+  /// \brief The vertical resolution in pixels.
+      .def("rv", &UnifiedProjection<D>::rv).def("focalLengthCol",
+                                             &UnifiedProjection<D>::focalLengthCol)
+      .def("focalLengthRow", &UnifiedProjection<D>::focalLengthRow).def(
+      "opticalCenterCol", &UnifiedProjection<D>::opticalCenterCol).def(
+      "opticalCenterRow", &UnifiedProjection<D>::opticalCenterRow).def(
+      "distortion", distortion, return_internal_reference<>()).def(
+      "setDistortion", &UnifiedProjection<D>::setDistortion).def_pickle(
+      sm::python::pickle_suite<UnifiedProjection<D> >());
+  exportGenericProjectionFunctions<UnifiedProjection<D> >(unifiedProjection);
+  //exportGenericProjectionDesignVariable< UnifiedProjection<D> >(name);
+
+}
+
+template<typename D>
+void exportExtendedUnifiedProjection(std::string name) {
+
+  D & (ExtendedUnifiedProjection<D>::*distortion)() = &ExtendedUnifiedProjection<D>::distortion;
+
+  class_<ExtendedUnifiedProjection<D>, boost::shared_ptr<ExtendedUnifiedProjection<D> > > extendedUnifiedProjection(
+      name.c_str(), init<>());
+  sm::python::unique_register_ptr_to_python<boost::shared_ptr<ExtendedUnifiedProjection<D> > >();
+
+  extendedUnifiedProjection.def(init<>((name + "(distortion_t distortion)").c_str())).def(
+      init<double, double, double, double, double, double, int, int, D>(
+          (name
+              + "(double alpha, double beta, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV, distortion_t distortion)")
+              .c_str())).def(
+      init<double, double, double, double, double, double, int, int>(
+          (name
+              + "(double alpha, double beta, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV)")
+              .c_str()))
+  /// \brief the alpha parameter that relates ellipsoid and pinhole projection.
+      .def("alpha", &ExtendedUnifiedProjection<D>::alpha)
+  /// \brief the beta parameter that controls the ellipsoid shape.
+      .def("beta", &ExtendedUnifiedProjection<D>::beta)
+  /// \brief The horizontal focal length in pixels.
+      .def("fu", &ExtendedUnifiedProjection<D>::fu)
+  /// \brief The vertical focal length in pixels.
+      .def("fv", &ExtendedUnifiedProjection<D>::fv)
+  /// \brief The horizontal image center in pixels.
+      .def("cu", &ExtendedUnifiedProjection<D>::cu)
+  /// \brief The vertical image center in pixels.
+      .def("cv", &ExtendedUnifiedProjection<D>::cv)
+  /// \brief The horizontal resolution in pixels.
+      .def("ru", &ExtendedUnifiedProjection<D>::ru)
+  /// \brief The vertical resolution in pixels.
+      .def("rv", &ExtendedUnifiedProjection<D>::rv).def("focalLengthCol",
+                                             &ExtendedUnifiedProjection<D>::focalLengthCol)
+      .def("focalLengthRow", &ExtendedUnifiedProjection<D>::focalLengthRow).def(
+      "opticalCenterCol", &ExtendedUnifiedProjection<D>::opticalCenterCol).def(
+      "opticalCenterRow", &ExtendedUnifiedProjection<D>::opticalCenterRow).def(
+      "distortion", distortion, return_internal_reference<>()).def(
+      "setDistortion", &ExtendedUnifiedProjection<D>::setDistortion).def_pickle(
+      sm::python::pickle_suite<ExtendedUnifiedProjection<D> >());
+  exportGenericProjectionFunctions<ExtendedUnifiedProjection<D> >(extendedUnifiedProjection);
+  //exportGenericProjectionDesignVariable< ExtendedUnifiedProjection<D> >(name);
+
+}
+
+template<typename D>
 void exportDoubleSphereProjection(std::string name) {
 
-  D & (DoubleSphereProjection<D>::*omnidistortion)() = &DoubleSphereProjection<D>::distortion;
+  D & (DoubleSphereProjection<D>::*distortion)() = &DoubleSphereProjection<D>::distortion;
 
   class_<DoubleSphereProjection<D>, boost::shared_ptr<DoubleSphereProjection<D> > > doubleSphereProjection(
       name.c_str(), init<>());
@@ -303,16 +394,16 @@ void exportDoubleSphereProjection(std::string name) {
   doubleSphereProjection.def(init<>((name + "(distortion_t distortion)").c_str())).def(
       init<double, double, double, double, double, double, int, int, D>(
           (name
-              + "(double xi1, double xi2, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV, distortion_t distortion)")
+              + "(double xi, double alpha, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV, distortion_t distortion)")
               .c_str())).def(
       init<double, double, double, double, double, double, int, int>(
           (name
-              + "(double xi1, double xi2, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV)")
+              + "(double xi, double alpha, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV)")
               .c_str()))
-  /// \brief the xi parameter that controls the spherical projection.
-      .def("xi1", &DoubleSphereProjection<D>::xi1)
-  /// \brief the xi parameter that controls the spherical projection.
-      .def("xi2", &DoubleSphereProjection<D>::xi2)
+  /// \brief the xi parameter corresponding to distance between spheres.
+      .def("xi", &DoubleSphereProjection<D>::xi)
+  /// \brief the alpha parameter that relates second sphere and pinhole projection.
+      .def("alpha", &DoubleSphereProjection<D>::alpha)
   /// \brief The horizontal focal length in pixels.
       .def("fu", &DoubleSphereProjection<D>::fu)
   /// \brief The vertical focal length in pixels.
@@ -329,11 +420,11 @@ void exportDoubleSphereProjection(std::string name) {
       .def("focalLengthRow", &DoubleSphereProjection<D>::focalLengthRow).def(
       "opticalCenterCol", &DoubleSphereProjection<D>::opticalCenterCol).def(
       "opticalCenterRow", &DoubleSphereProjection<D>::opticalCenterRow).def(
-      "distortion", omnidistortion, return_internal_reference<>()).def(
+      "distortion", distortion, return_internal_reference<>()).def(
       "setDistortion", &DoubleSphereProjection<D>::setDistortion).def_pickle(
       sm::python::pickle_suite<DoubleSphereProjection<D> >());
   exportGenericProjectionFunctions<DoubleSphereProjection<D> >(doubleSphereProjection);
-  //exportGenericProjectionDesignVariable< OmniProjection<D> >(name);
+  //exportGenericProjectionDesignVariable< DoubleSphereProjection<D> >(name);
 
 }
 
@@ -415,6 +506,10 @@ void exportCameraProjections() {
   exportOmniProjection<NoDistortion>("OmniProjection");
   exportOmniProjection<RadialTangentialDistortion>("DistortedOmniProjection");
   exportOmniProjection<FovDistortion>("FovOmniProjection");
+
+  exportUnifiedProjection<NoDistortion>("UnifiedProjection");
+
+  exportExtendedUnifiedProjection<NoDistortion>("ExtendedUnifiedProjection");
 
   exportDoubleSphereProjection<NoDistortion>("DoubleSphereProjection");
 

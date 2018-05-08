@@ -22,6 +22,8 @@ BOOST_CLASS_EXPORT_KEY(aslam::cameras::FovDistortedPinholeCameraGeometry);
 BOOST_CLASS_EXPORT_KEY(aslam::cameras::OmniCameraGeometry);
 BOOST_CLASS_EXPORT_KEY(aslam::cameras::DistortedOmniCameraGeometry);
 BOOST_CLASS_EXPORT_KEY(aslam::cameras::EquidistantDistortedOmniCameraGeometry);
+BOOST_CLASS_EXPORT_KEY(aslam::cameras::UnifiedCameraGeometry);
+BOOST_CLASS_EXPORT_KEY(aslam::cameras::ExtendedUnifiedCameraGeometry);
 BOOST_CLASS_EXPORT_KEY(aslam::cameras::DoubleSphereCameraGeometry);
 BOOST_CLASS_EXPORT_KEY(aslam::cameras::PinholeRsCameraGeometry);
 BOOST_CLASS_EXPORT_KEY(aslam::cameras::DistortedPinholeRsCameraGeometry);

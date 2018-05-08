@@ -35,6 +35,8 @@ cameraModels = { 'pinhole-radtan': acvb.DistortedPinhole,
                  'pinhole-fov':    acvb.FovPinhole,
                  'omni-none':      acvb.Omni,
                  'omni-radtan':    acvb.DistortedOmni,
+                 'uni-none':       acvb.Unified,
+                 'extuni-none':    acvb.ExtendedUnified,
                  'ds-none':        acvb.DoubleSphere}
 
 def signal_exit(signal, frame):

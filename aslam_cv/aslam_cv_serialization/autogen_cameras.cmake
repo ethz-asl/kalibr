@@ -7,6 +7,8 @@ SET( AUTOGEN_CAMERA_CPP_FILES
 	src/autogen/Camera-OmniCameraGeometry.cpp
 	src/autogen/Camera-DistortedOmniCameraGeometry.cpp
 	src/autogen/Camera-EquidistantDistortedOmniCameraGeometry.cpp
+	src/autogen/Camera-UnifiedCameraGeometry.cpp
+	src/autogen/Camera-ExtendedUnifiedCameraGeometry.cpp
 	src/autogen/Camera-DoubleSphereCameraGeometry.cpp
 	src/autogen/Camera-PinholeRsCameraGeometry.cpp
 	src/autogen/Camera-DistortedPinholeRsCameraGeometry.cpp

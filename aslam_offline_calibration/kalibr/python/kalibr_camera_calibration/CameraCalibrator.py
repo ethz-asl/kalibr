@@ -658,12 +658,16 @@ def saveChainParametersYaml(cself, resultFile, graph):
                     acvb.FovPinhole: 'pinhole',
                     acvb.Omni: 'omni',
                     acvb.DistortedOmni: 'omni',
+                    acvb.Unified: 'uni',
+                    acvb.ExtendedUnified: 'extuni',
                     acvb.DoubleSphere: 'ds'}
     distortionModels = {acvb.DistortedPinhole: 'radtan',
                         acvb.EquidistantPinhole: 'equidistant',
                         acvb.FovPinhole: 'fov',
                         acvb.Omni: 'none',
                         acvb.DistortedOmni: 'radtan',
+                        acvb.Unified: 'none',
+                        acvb.ExtendedUnified: 'none',
                         acvb.DoubleSphere: 'none'}
 
     chain = cr.CameraChainParameters(resultFile, createYaml=True)
@@ -681,8 +685,12 @@ def saveChainParametersYaml(cself, resultFile, graph):
             camParams.setIntrinsics(cameraModel, [P.xi(), P.fu(), P.fv(), P.cu(), P.cv()] )
         elif cameraModel == 'pinhole':
             camParams.setIntrinsics(cameraModel, [P.fu(), P.fv(), P.cu(), P.cv()] )
+        elif cameraModel == 'uni':
+            camParams.setIntrinsics(cameraModel, [P.alpha(), P.fu(), P.fv(), P.cu(), P.cv()] )
+        elif cameraModel == 'extuni':
+            camParams.setIntrinsics(cameraModel, [P.alpha(), P.beta(), P.fu(), P.fv(), P.cu(), P.cv()] )
         elif cameraModel == 'ds':
-            camParams.setIntrinsics(cameraModel, [P.xi1(), P.xi2(), P.fu(), P.fv(), P.cu(), P.cv()] )
+            camParams.setIntrinsics(cameraModel, [P.xi(), P.alpha(), P.fu(), P.fv(), P.cu(), P.cv()] )
         else:
             raise RuntimeError("Invalid camera model {}.".format(cameraModel))
         camParams.setResolution( [P.ru(), P.rv()] )

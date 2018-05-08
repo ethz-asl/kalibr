@@ -190,13 +190,12 @@ class DoubleSphereProjection {
   }
   ;
 
-  /// \brief the xi parameter corresponding to distance between spheres.
-  double xi() const {
-    return _xi;
-  }
-  /// \brief the alpha parameter that relates second sphere and pinhole projection.
-  double alpha() const {
-    return _alpha;
+  /// \brief the xi1 parameter that controls the spherical projection.
+  double xi1() const {
+    return _xi1;
+  }  /// \brief the xi2 parameter that controls the spherical projection.
+  double xi2() const {
+    return _xi2;
   }
   /// \brief The horizontal focal length in pixels.
   double fu() const {
@@ -253,10 +252,12 @@ class DoubleSphereProjection {
   static DoubleSphereProjection<distortion_t> getTestProjection();
  private:
 
-  /// \brief the xi parameter corresponding to distance between spheres.
-  double _xi;
-  /// \brief the alpha parameter that relates second sphere and pinhole projection.
-  double _alpha;
+  // FIXME @demmeln: rename xi1 and xi2 to xi and alpha
+
+  /// \brief the xi1 parameter that controls the spherical projection.
+  double _xi1;
+  /// \brief the xi2 parameter that controls the spherical projection.
+  double _xi2;
   /// \brief The horizontal focal length in pixels.
   double _fu;
   /// \brief The vertical focal length in pixels.
@@ -276,7 +277,7 @@ class DoubleSphereProjection {
   double _recip_fu;
   double _recip_fv;
   double _fu_over_fv;
-  double _one_over_2alpha_m_1;
+  double _one_over_2xi2_m_1;
   double _fov_parameter;  //!< parameter related to the valid region of the camera model
 
   distortion_t _distortion;
