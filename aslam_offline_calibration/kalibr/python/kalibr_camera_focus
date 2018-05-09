@@ -57,4 +57,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print "Shutting down" 
     
-    cv2.DestroyAllWindows()
+    cv2.destroyAllWindows()
