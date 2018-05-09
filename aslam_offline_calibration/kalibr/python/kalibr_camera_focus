@@ -2,7 +2,6 @@
 print "importing libraries"
 import rospy
 import cv2
-import cv
 import numpy as np
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -58,4 +57,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print "Shutting down" 
     
-    cv.DestroyAllWindows()
+    cv2.DestroyAllWindows()
