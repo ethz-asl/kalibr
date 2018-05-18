@@ -166,7 +166,8 @@ class DoubleSphereProjection {
 
   /// \brief is the projection invertible?
   bool isProjectionInvertible() const {
-    return false;
+     /// FIXME @demmeln true? --> where is it used?
+    return true;
   }
 
   /// \brief set the distortion model.

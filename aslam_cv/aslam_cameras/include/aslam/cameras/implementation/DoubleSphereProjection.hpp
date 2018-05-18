@@ -134,7 +134,7 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
   //SM_OUT(outKeypoint[0]);
   //SM_OUT(outKeypoint[1]);
 
-  // TODO: ... distortion not implemented ...
+  // TODO @demmeln: ... distortion not implemented ...
   //_distortion.distort(outKeypoint);
   //std::cout << "distort\n";
   //SM_OUT(outKeypoint[0]);
@@ -322,7 +322,7 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToEuclidean(
   outPoint[1] = k * my;
   outPoint[2] = k * mz - _xi;
 
-  // TODO: ... distortion not implemented ...
+  // TODO @demmeln: ... distortion not implemented ...
 
 
   return true;
@@ -564,7 +564,7 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian
   kp[0] = p[0] * norm_inv;
   kp[1] = p[1] * norm_inv;
 
-  // TODO: ... distortion not implemented ...
+  // TODO @demmeln: ... distortion not implemented ...
   //_distortion.distortParameterJacobian(kp, outJd);
 
   Eigen::MatrixBase<DERIVED_JD> & J =
@@ -671,11 +671,11 @@ Eigen::VectorXd DoubleSphereProjection<DISTORTION_T>::createRandomKeypoint() con
     u.setRandom();
     u = u - Eigen::Vector2d(0.5, 0.5);
     u /= u.norm();
-    u *= ((double) rand() / (double) RAND_MAX) * _one_over_2alpha_m_1;
+    u *= ((double) rand() / (double) RAND_MAX) * sqrt(_one_over_2alpha_m_1);
 
     // Now we run the point through distortion and projection.
     // Apply distortion
-    // TODO: ... distortion not implemented ...
+    // TODO @demmeln: ... distortion not implemented ...
     // _distortion.distort(u);
 
     u[0] = _fu * u[0] + _cu;
@@ -712,7 +712,7 @@ bool DoubleSphereProjection<DISTORTION_T>::isValid(
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_K>, 2);
 
-  // FIXME: shouldn't it be -0.5  <-->  ru()-0.5?
+  // FIXME @demmeln: shouldn't it be -0.5  <-->  ru()-0.5? --> checks if integer converted coordinates result in valid pixel?
 
   return keypoint(0) >= 0 && keypoint(0) < ru() && keypoint(1) >= 0
       && keypoint(1) < rv();
@@ -740,7 +740,7 @@ bool DoubleSphereProjection<DISTORTION_T>::isUndistortedKeypointValid(
 
 
 
-// TODO: check the following...
+// TODO @demmeln: check the following...
 
 
 
@@ -757,7 +757,7 @@ bool DoubleSphereProjection<DISTORTION_T>::isLiftable(
   y[1] = _recip_fv * (keypoint[1] - _cv);
 
   // Re-distort
-  // TODO: ... distortion not implemented ...
+  // TODO @demmeln: ... distortion not implemented ...
   //_distortion.undistort(y);
 
   // Now check if it is on the sensor
@@ -889,6 +889,8 @@ bool DoubleSphereProjection<DISTORTION_T>::initializeIntrinsics(const std::vecto
   if(success) {
     _xi = 0;
     // TODO @demmeln: why 0.5 xi?
+
+    // xi is initialized to 1 in OmniProjection --> alpha should be 0.5
     _alpha = 0.5 * omni.xi();
     _fu = 0.5 * omni.fu();
     _fv = 0.5 * omni.fv();

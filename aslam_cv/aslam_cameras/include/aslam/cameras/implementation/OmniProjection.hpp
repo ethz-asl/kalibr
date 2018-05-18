@@ -299,7 +299,6 @@ bool OmniProjection<DISTORTION_T>::keypointToEuclidean(
 
   outPoint[2] = 1 - _xi * (rho2_d + 1) * recip_tmpA;
 
-  // \todo analytical Jacobian
   Eigen::MatrixBase<DERIVED_JK> & mbJk =
       const_cast<Eigen::MatrixBase<DERIVED_JK> &>(outJk);
   DERIVED_JK & Jk = mbJk.derived();

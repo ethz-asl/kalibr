@@ -127,6 +127,7 @@ class AslamCamera(object):
             else:
                 raise RuntimeError("omni camera model does not support distortion model '{}'".format(dist_model))
 
+        # FIMXE: call this "UCM" and "EUCM"
         elif camera_model == 'uni':
             alpha_uni = intrinsics[0]
             focalLength = intrinsics[1:3]
