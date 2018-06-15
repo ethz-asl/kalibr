@@ -2,6 +2,7 @@
 print "importing libraries"
 
 import kalibr_common as kc
+import cv
 import cv2
 import csv
 import os
@@ -53,7 +54,7 @@ if parsed.image_topics is not None:
       
       for timestamp, image in dataset:
         params = list()
-        params.append(cv2.cv.CV_IMWRITE_PNG_COMPRESSION)
+        params.append(cv.CV_IMWRITE_PNG_COMPRESSION)
         params.append(0) #0: loss-less  
         filename = "{0}{1:09d}.png".format(timestamp.secs, timestamp.nsecs)
         cv2.imwrite( "{0}/cam{1}/{2}".format(parsed.output_folder, cidx, filename), image, params )
