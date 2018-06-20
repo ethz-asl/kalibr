@@ -143,7 +143,10 @@ class BagImageDatasetReader(object):
     elif data.encoding == "8UC4" or data.encoding == "bgra8":
       img_data = np.array(self.CVB.imgmsg_to_cv2(data))
       img_data = cv2.cvtColor(img_data, cv2.COLOR_BGRA2GRAY)
+    elif data.encoding == "bayer_rggb8":
+      img_data = np.array(self.CVB.imgmsg_to_cv2(data))
+      img_data = cv2.cvtColor(img_data, cv2.COLOR_BAYER_BG2GRAY)
     else:
       raise RuntimeError(
-          "Unsupported Image format '{}' (Supported are: 16UC1 / mono16, 8UC1 / mono8, 8UC3 / rgb8 / bgr8, 8UC4 / bgra8 and ImageSnappyMsg)".format(data.encoding));
+          "Unsupported Image format '{}' (Supported are: 16UC1 / mono16, 8UC1 / mono8, 8UC3 / rgb8 / bgr8, 8UC4 / bgra8, bayer_rggb8 and ImageSnappyMsg)".format(data.encoding));
     return (timestamp, img_data)
