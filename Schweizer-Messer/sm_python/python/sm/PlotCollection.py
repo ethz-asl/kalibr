@@ -5,7 +5,7 @@ import wx
 import wx.aui
 import matplotlib as mpl
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
-from matplotlib.backends.backend_wxagg import NavigationToolbar2Wx as Toolbar
+from matplotlib.backends.backend_wx import NavigationToolbar2Wx as Toolbar
 import collections
 
 class PlotCollection:
