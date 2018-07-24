@@ -46,7 +46,6 @@ if(CATKIN_ENABLE_TESTING)
     test/test_main.cpp
     test/PinholeCameraGeometry.cpp
     test/OmniCameraGeometry.cpp
-    test/UnifiedCameraGeometry.cpp
     test/ExtendedUnifiedCameraGeometry.cpp
     test/DoubleSphereCameraGeometry.cpp
     test/RadialTangentialDistortion.cpp

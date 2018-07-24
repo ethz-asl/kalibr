@@ -97,16 +97,6 @@ class FovPinhole(CameraModel):
     shutterType = aslam_cv.GlobalShutter
     frameType = aslam_cv.FovDistortedPinholeFrame
 
-class Unified(CameraModel):
-    geometry = aslam_cv.UnifiedCameraGeometry
-    reprojectionError = UnifiedReprojectionError
-    reprojectionErrorSimple = UnifiedReprojectionErrorSimple
-    designVariable = UnifiedCameraGeometryDesignVariable
-    projectionType = aslam_cv.UnifiedProjection
-    distortionType = aslam_cv.NoDistortion
-    shutterType = aslam_cv.GlobalShutter
-    frameType = aslam_cv.UnifiedFrame
-
 class ExtendedUnified(CameraModel):
     geometry = aslam_cv.ExtendedUnifiedCameraGeometry
     reprojectionError = ExtendedUnifiedReprojectionError

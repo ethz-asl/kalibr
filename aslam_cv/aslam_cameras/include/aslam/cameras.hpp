@@ -7,7 +7,6 @@
 // Projection models
 #include <aslam/cameras/PinholeProjection.hpp>
 #include <aslam/cameras/OmniProjection.hpp>
-#include <aslam/cameras/UnifiedProjection.hpp>
 #include <aslam/cameras/ExtendedUnifiedProjection.hpp>
 #include <aslam/cameras/DoubleSphereProjection.hpp>
 #include <aslam/cameras/DepthProjection.hpp>
@@ -45,7 +44,6 @@ typedef CameraGeometry<OmniProjection<EquidistantDistortion>, GlobalShutter,
 typedef CameraGeometry<OmniProjection<FovDistortion>, GlobalShutter,
     NoMask> FovDistortedOmniCameraGeometry;
 
-typedef CameraGeometry<UnifiedProjection<NoDistortion>, GlobalShutter, NoMask> UnifiedCameraGeometry;
 typedef CameraGeometry<ExtendedUnifiedProjection<NoDistortion>, GlobalShutter, NoMask> ExtendedUnifiedCameraGeometry;
 typedef CameraGeometry<DoubleSphereProjection<NoDistortion>, GlobalShutter, NoMask> DoubleSphereCameraGeometry;
 

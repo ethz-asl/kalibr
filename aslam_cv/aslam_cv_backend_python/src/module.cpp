@@ -39,7 +39,6 @@ BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
   aslam::python::exportReprojectionErrors<FovDistortedPinholeRsCameraGeometry>("FovDistortedPinholeRs");
   aslam::python::exportCovarianceReprojectionError<FovDistortedPinholeRsCameraGeometry>("FovDistortedPinholeRs");
 
-  aslam::python::exportReprojectionErrors<UnifiedCameraGeometry>("Unified");
   aslam::python::exportReprojectionErrors<ExtendedUnifiedCameraGeometry>("Extended");
   aslam::python::exportReprojectionErrors<DoubleSphereCameraGeometry>("DoubleSphere");
 
@@ -78,7 +77,6 @@ BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
   exportCameraDesignVariables<EquidistantDistortedOmniRsCameraGeometry>("EquidistantDistortedOmniRsCameraGeometry");
   exportCameraDesignVariables<FovDistortedOmniRsCameraGeometry>("FovDistortedOmniRsCameraGeometry");
 
-  exportCameraDesignVariables<UnifiedCameraGeometry>("UnifiedCameraGeometry");
   exportCameraDesignVariables<ExtendedUnifiedCameraGeometry>("ExtendedUnifiedCameraGeometry");
   exportCameraDesignVariables<DoubleSphereCameraGeometry>("DoubleSphereCameraGeometry");
 
@@ -123,7 +121,6 @@ BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
   exportGenericProjectionDesignVariable< PinholeProjection<EquidistantDistortion> >("EquidistantDistortedPinholeProjection");
   exportGenericProjectionDesignVariable< PinholeProjection<FovDistortion> >("FovDistortedPinholeProjection");
 
-  exportGenericProjectionDesignVariable< UnifiedProjection<NoDistortion> >("UnifiedProjection");
   exportGenericProjectionDesignVariable< ExtendedUnifiedProjection<NoDistortion> >("ExtendedUnifiedProjection");
   exportGenericProjectionDesignVariable< DoubleSphereProjection<NoDistortion> >("DoubleSphereProjection");
 

@@ -1,5 +1,6 @@
 
-#include <aslam/cameras/OmniProjection.hpp>
+#include <aslam/cameras/DoubleSphereProjection.hpp>
+#include <aslam/cameras/NoDistortion.hpp>
 
 namespace aslam {
 
@@ -20,7 +21,7 @@ DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection()
 
   // NOTE @demmeln 2018-05-07: In order to use this with distortion, you need to add the proper calls for projection
   //     and unprojection, including for Jacobian computation.
-  EIGEN_STATIC_ASSERT_SAME_TYPE(T, NoDistortion, "Currently only implemented for 'NoDistortion'");
+  EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
 
   updateTemporaries();
 

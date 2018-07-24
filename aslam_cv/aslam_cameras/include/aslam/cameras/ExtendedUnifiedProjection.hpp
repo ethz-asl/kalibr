@@ -1,5 +1,5 @@
-#ifndef ASLAM_CAMERAS_DOUBLE_SPHERE_PROJECTION_HPP
-#define ASLAM_CAMERAS_DOUBLE_SPHERE_PROJECTION_HPP
+#ifndef ASLAM_CAMERAS_EXTENDED_UNIFIED_PROJECTION_HPP
+#define ASLAM_CAMERAS_EXTENDED_UNIFIED_PROJECTION_HPP
 
 #include "StaticAssert.hpp"
 #include "FiniteDifferences.hpp"
@@ -16,7 +16,7 @@ namespace aslam {
 namespace cameras {
 
 template<typename DISTORTION_T>
-class DoubleSphereProjection {
+class ExtendedUnifiedProjection {
  public:
 
   enum {
@@ -34,20 +34,20 @@ class DoubleSphereProjection {
   typedef Eigen::Matrix<double, KeypointDimension, IntrinsicsDimension> jacobian_intrinsics_t;
 
   /// \brief Default constructor
-  DoubleSphereProjection();
+  ExtendedUnifiedProjection();
 
-  DoubleSphereProjection(double xi1, double xi2, double focalLengthU, double focalLengthV,
+  ExtendedUnifiedProjection(double xi1, double xi2, double focalLengthU, double focalLengthV,
                  double imageCenterU, double imageCenterV, int resolutionU,
                  int resolutionV, distortion_t distortion);
 
-  DoubleSphereProjection(double xi1, double xi2, double focalLengthU, double focalLengthV,
+  ExtendedUnifiedProjection(double xi1, double xi2, double focalLengthU, double focalLengthV,
                  double imageCenterU, double imageCenterV, int resolutionU,
                  int resolutionV);
 
-  DoubleSphereProjection(const sm::PropertyTree & config);
+  ExtendedUnifiedProjection(const sm::PropertyTree & config);
 
   /// \brief destructor.
-  virtual ~DoubleSphereProjection();
+  virtual ~ExtendedUnifiedProjection();
 
   /// \brief resize the intrinsics based on a scaling of the image.
   void resizeIntrinsics(double scale);
@@ -191,11 +191,11 @@ class DoubleSphereProjection {
   ;
 
   /// \brief the xi1 parameter that controls the spherical projection.
-  double xi1() const {
-    return _xi1;
+  double alpha() const {
+    return _alpha;
   }  /// \brief the xi2 parameter that controls the spherical projection.
-  double xi2() const {
-    return _xi2;
+  double beta() const {
+    return _beta;
   }
   /// \brief The horizontal focal length in pixels.
   double fu() const {
@@ -247,17 +247,17 @@ class DoubleSphereProjection {
     return KeypointDimension;
   }
 
-  bool isBinaryEqual(const DoubleSphereProjection<distortion_t> & rhs) const;
+  bool isBinaryEqual(const ExtendedUnifiedProjection<distortion_t> & rhs) const;
 
-  static DoubleSphereProjection<distortion_t> getTestProjection();
+  static ExtendedUnifiedProjection<distortion_t> getTestProjection();
  private:
 
   // FIXME @demmeln: rename xi1 and xi2 to xi and alpha
 
   /// \brief the xi1 parameter that controls the spherical projection.
-  double _xi1;
+  double _alpha;
   /// \brief the xi2 parameter that controls the spherical projection.
-  double _xi2;
+  double _beta;
   /// \brief The horizontal focal length in pixels.
   double _fu;
   /// \brief The vertical focal length in pixels.
@@ -287,8 +287,8 @@ class DoubleSphereProjection {
 }  // namespace cameras
 }  // namespace aslam
 
-#include "implementation/DoubleSphereProjection.hpp"
+#include "implementation/ExtendedUnifiedProjection.hpp"
 
-SM_BOOST_CLASS_VERSION_T1 (aslam::cameras::DoubleSphereProjection);
+SM_BOOST_CLASS_VERSION_T1 (aslam::cameras::ExtendedUnifiedProjection);
 
-#endif /* ASLAM_CAMERAS_DOUBLE_SPHERE_PROJECTION_HPP */
+#endif /* ASLAM_CAMERAS_EXTENDED_UNIFIED_PROJECTION_HPP */

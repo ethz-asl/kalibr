@@ -1,14 +1,14 @@
 
-#include <aslam/cameras/OmniProjection.hpp>
+#include <aslam/cameras/ExtendedUnifiedProjection.hpp>
 
 namespace aslam {
 
 namespace cameras {
 
 template<typename DISTORTION_T>
-DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection()
-    : _xi1(0.0),
-      _xi2(0.0),
+ExtendedUnifiedProjection<DISTORTION_T>::ExtendedUnifiedProjection()
+    : _alpha(0.0),
+      _beta(0.0),
       _fu(0.0),
       _fv(0.0),
       _cu(0.0),
@@ -20,10 +20,10 @@ DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection()
 }
 
 template<typename DISTORTION_T>
-DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection(const sm::PropertyTree & config)
+ExtendedUnifiedProjection<DISTORTION_T>::ExtendedUnifiedProjection(const sm::PropertyTree & config)
     : _distortion(sm::PropertyTree(config, "distortion")) {
-  _xi1 = config.getDouble("xi1");
-  _xi2 = config.getDouble("xi2");
+  _alpha = config.getDouble("alpha");
+  _beta = config.getDouble("beta");
   _fu = config.getDouble("fu");
   _fv = config.getDouble("fv");
   _cu = config.getDouble("cu");
@@ -35,14 +35,14 @@ DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection(const sm::PropertyT
 }
 
 template<typename DISTORTION_T>
-DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection(double xi1, double xi2, double focalLengthU,
+ExtendedUnifiedProjection<DISTORTION_T>::ExtendedUnifiedProjection(double alpha, double beta, double focalLengthU,
                                              double focalLengthV,
                                              double imageCenterU,
                                              double imageCenterV,
                                              int resolutionU, int resolutionV,
                                              distortion_t distortion)
-    : _xi1(xi1),
-      _xi2(xi2),
+    : _alpha(alpha),
+      _beta(beta),
       _fu(focalLengthU),
       _fv(focalLengthV),
       _cu(imageCenterU),
@@ -56,13 +56,13 @@ DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection(double xi1, double 
 }
 
 template<typename DISTORTION_T>
-DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection(double xi1, double xi2, double focalLengthU,
+ExtendedUnifiedProjection<DISTORTION_T>::ExtendedUnifiedProjection(double alpha, double beta, double focalLengthU,
                                              double focalLengthV,
                                              double imageCenterU,
                                              double imageCenterV,
                                              int resolutionU, int resolutionV)
-    : _xi1(xi1),
-      _xi2(xi2),
+    : _alpha(alpha),
+      _beta(beta),
       _fu(focalLengthU),
       _fv(focalLengthV),
       _cu(imageCenterU),
@@ -73,12 +73,12 @@ DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection(double xi1, double 
 }
 
 template<typename DISTORTION_T>
-DoubleSphereProjection<DISTORTION_T>::~DoubleSphereProjection() {
+ExtendedUnifiedProjection<DISTORTION_T>::~ExtendedUnifiedProjection() {
 }
 
 template<typename DISTORTION_T>
 template<typename DERIVED_P, typename DERIVED_K>
-bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
+bool ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypoint(
     const Eigen::MatrixBase<DERIVED_P> & p,
     const Eigen::MatrixBase<DERIVED_K> & outKeypointConst) const {
 
@@ -109,13 +109,13 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
   if (p[2] <= -(_fov_parameter * d1))
    return false;
 
-  double k = _xi1 * d1 + z;
+  double k = _alpha * d1 + z;
   double kk = k * k;
 
   double d2_2 = r2 + kk;
   double d2 = std::sqrt(d2_2);
 
-  double norm = _xi2 * d2 + (1 - _xi2) * k;
+  double norm = _beta * d2 + (1 - _beta) * k;
   double norm_inv = 1.0 / norm;
 
   outKeypoint[0] = p[0] * norm_inv;
@@ -144,7 +144,7 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_P, typename DERIVED_K, typename DERIVED_JP>
-bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
+bool ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypoint(
     const Eigen::MatrixBase<DERIVED_P> & p,
     const Eigen::MatrixBase<DERIVED_K> & outKeypointConst,
     const Eigen::MatrixBase<DERIVED_JP> & outJp) const {
@@ -186,14 +186,14 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
   if (p[2] <= -(_fov_parameter * d1))
    return false;
 
-  double k = _xi1 * d1 + z;
+  double k = _alpha * d1 + z;
   double kk = k * k;
 
   double d2_2 = r2 + kk;
   double d2 = std::sqrt(d2_2);
   double d2_inv = 1.0 / d2;
 
-  double norm = _xi2 * d2 + (1 - _xi2) * k;
+  double norm = _beta * d2 + (1 - _beta) * k;
   double norm_inv = 1.0 / norm;
   double norm_inv2 = norm_inv*norm_inv;
 
@@ -204,13 +204,13 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
   outKeypoint[1] = _fv * outKeypoint[1] + _cv;
 
   double xy = x * y;
-  double tt2 = _xi1 * z * d1_inv + 1;
+  double tt2 = _alpha * z * d1_inv + 1;
 
   double d_norm_d_r2 =
-        (_xi1 * (1 - _xi2) * d1_inv + _xi2 * (_xi1 * k * d1_inv + 1) * d2_inv) *
+        (_alpha * (1 - _beta) * d1_inv + _beta * (_alpha * k * d1_inv + 1) * d2_inv) *
         norm_inv2;
 
-  double tmp2 = ((1 - _xi2) * tt2 + _xi2 * k * tt2 * d2_inv) * norm_inv2;
+  double tmp2 = ((1 - _beta) * tt2 + _beta * k * tt2 * d2_inv) * norm_inv2;
 
   J(0, 0) = _fu * (norm_inv - xx * d_norm_d_r2);
   J(1, 0) = -_fv * xy * d_norm_d_r2;
@@ -227,7 +227,7 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_P, typename DERIVED_K>
-bool DoubleSphereProjection<DISTORTION_T>::homogeneousToKeypoint(
+bool ExtendedUnifiedProjection<DISTORTION_T>::homogeneousToKeypoint(
     const Eigen::MatrixBase<DERIVED_P> & ph,
     const Eigen::MatrixBase<DERIVED_K> & outKeypoint) const {
 
@@ -245,7 +245,7 @@ bool DoubleSphereProjection<DISTORTION_T>::homogeneousToKeypoint(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_P, typename DERIVED_K, typename DERIVED_JP>
-bool DoubleSphereProjection<DISTORTION_T>::homogeneousToKeypoint(
+bool ExtendedUnifiedProjection<DISTORTION_T>::homogeneousToKeypoint(
     const Eigen::MatrixBase<DERIVED_P> & ph,
     const Eigen::MatrixBase<DERIVED_K> & outKeypoint,
     const Eigen::MatrixBase<DERIVED_JP> & outJp) const {
@@ -276,7 +276,7 @@ bool DoubleSphereProjection<DISTORTION_T>::homogeneousToKeypoint(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_K, typename DERIVED_P>
-bool DoubleSphereProjection<DISTORTION_T>::keypointToEuclidean(
+bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
     const Eigen::MatrixBase<DERIVED_K> & keypoint,
     const Eigen::MatrixBase<DERIVED_P> & outPointConst) const {
 
@@ -295,15 +295,15 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToEuclidean(
 
 
   const double r2 = mx * mx + my * my;
-  const double mz = (1 - _xi2 * _xi2 * r2) /
-                    (_xi2 * std::sqrt(1 - (2 * _xi2 - 1) * r2) + 1 - _xi2);
+  const double mz = (1 - _beta * _beta * r2) /
+                    (_beta * std::sqrt(1 - (2 * _beta - 1) * r2) + 1 - _beta);
   const double mz2 = mz * mz;
   const double k =
-      (mz * _xi1 + std::sqrt(mz2 + (1 - _xi1 * _xi1) * r2)) / (mz2 + r2);
+      (mz * _alpha + std::sqrt(mz2 + (1 - _alpha * _alpha) * r2)) / (mz2 + r2);
 
   outPoint[0] = k * mx;
   outPoint[1] = k * my;
-  outPoint[2] = k * mz - _xi1;
+  outPoint[2] = k * mz - _alpha;
 
 
   // if (!isUndistortedKeypointValid(rho2_d))
@@ -315,7 +315,7 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToEuclidean(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_K, typename DERIVED_P, typename DERIVED_JK>
-bool DoubleSphereProjection<DISTORTION_T>::keypointToEuclidean(
+bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
     const Eigen::MatrixBase<DERIVED_K> & keypoint,
     const Eigen::MatrixBase<DERIVED_P> & outPointConst,
     const Eigen::MatrixBase<DERIVED_JK> & outJk) const {
@@ -341,42 +341,42 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToEuclidean(
 
   const double r2 = mx * mx + my * my;
 
-  const double _xi2_2 = _xi2 * _xi2;
-  const double _xi1_2 = _xi1 * _xi1;
+  const double _beta_2 = _beta * _beta;
+  const double _alpha_2 = _alpha * _alpha;
 
-  const double sqrt2 = std::sqrt(1 - (2 * _xi2 - 1) * r2);
+  const double sqrt2 = std::sqrt(1 - (2 * _beta - 1) * r2);
   const double sqrt2_inv = double(1.0) / sqrt2;
 
-  const double norm2 = _xi2 * sqrt2 + 1 - _xi2;
+  const double norm2 = _beta * sqrt2 + 1 - _beta;
   const double norm2_inv = double(1.0) / norm2;
   const double norm2_inv2 = norm2_inv * norm2_inv;
 
-  const double mz = (1 - _xi2_2 * r2) * norm2_inv;
+  const double mz = (1 - _beta_2 * r2) * norm2_inv;
   const double mz2 = mz * mz;
 
   const double norm1 = mz2 + r2;
   const double norm1_inv = double(1.0) / norm1;
   const double norm1_inv2 = norm1_inv * norm1_inv;
 
-  const double sqrt1 = std::sqrt(mz2 + (1 - _xi1_2) * r2);
+  const double sqrt1 = std::sqrt(mz2 + (1 - _alpha_2) * r2);
   const double sqrt1_inv = double(1.0) / sqrt1;
-  const double k = (mz * _xi1 + sqrt1) * norm1_inv;
+  const double k = (mz * _alpha + sqrt1) * norm1_inv;
 
   outPoint[0] = k * mx;
   outPoint[1] = k * my;
-  outPoint[2] = k * mz - _xi1;
+  outPoint[2] = k * mz - _alpha;
 
   const double d_mz_d_r2 =
-      (0.5 * _xi2 - _xi2_2) * (r2 * _xi2_2 - 1) * sqrt2_inv * norm2_inv2 -
-      _xi2_2 * norm2_inv;
+      (0.5 * _beta - _beta_2) * (r2 * _beta_2 - 1) * sqrt2_inv * norm2_inv2 -
+      _beta_2 * norm2_inv;
 
   const double d_mz_d_mx = 2 * mx * d_mz_d_r2;
   const double d_mz_d_my = 2 * my * d_mz_d_r2;
 
   double d_k_d_r2 =
-      (_xi1 * d_mz_d_r2 + 0.5 * sqrt1_inv * (2 * mz * d_mz_d_r2 + 1 - _xi1_2)) *
+      (_alpha * d_mz_d_r2 + 0.5 * sqrt1_inv * (2 * mz * d_mz_d_r2 + 1 - _alpha_2)) *
           norm1_inv -
-      (mz * _xi1 + sqrt1) * (2 * mz * d_mz_d_r2 + 1) * norm1_inv2;
+      (mz * _alpha + sqrt1) * (2 * mz * d_mz_d_r2 + 1) * norm1_inv2;
 
   double d_k_d_mx = d_k_d_r2 * 2 * mx;
   double d_k_d_my = d_k_d_r2 * 2 * my;
@@ -402,7 +402,7 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToEuclidean(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_K, typename DERIVED_P>
-bool DoubleSphereProjection<DISTORTION_T>::keypointToHomogeneous(
+bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToHomogeneous(
     const Eigen::MatrixBase<DERIVED_K> & keypoint,
     const Eigen::MatrixBase<DERIVED_P> & outPoint) const {
 
@@ -421,7 +421,7 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToHomogeneous(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_K, typename DERIVED_P, typename DERIVED_JK>
-bool DoubleSphereProjection<DISTORTION_T>::keypointToHomogeneous(
+bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToHomogeneous(
     const Eigen::MatrixBase<DERIVED_K> & keypoint,
     const Eigen::MatrixBase<DERIVED_P> & outPoint,
     const Eigen::MatrixBase<DERIVED_JK> & outJk) const {
@@ -450,7 +450,7 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToHomogeneous(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_P, typename DERIVED_JI>
-void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointIntrinsicsJacobian(
+void ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypointIntrinsicsJacobian(
     const Eigen::MatrixBase<DERIVED_P> & p,
     const Eigen::MatrixBase<DERIVED_JI> & outJi) const {
 
@@ -478,14 +478,14 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointIntrinsicsJacobian
   const double d1_2 = r2 + zz;
   const double d1 = std::sqrt(d1_2);
 
-  const double k = _xi1 * d1 + z;
+  const double k = _alpha * d1 + z;
   const double kk = k * k;
 
   const double d2_2 = r2 + kk;
   const double d2 = std::sqrt(d2_2);
   const double d2_inv = double(1.0) / d2;
 
-  const double norm = _xi2 * d2 + (1 - _xi2) * k;
+  const double norm = _beta * d2 + (1 - _beta) * k;
   const double norm_inv = double(1.0) / norm;
   const double norm_inv2 = norm_inv * norm_inv;
 
@@ -494,7 +494,7 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointIntrinsicsJacobian
 
   J.setZero();
 
-  const double tmp4 = (_xi2 - 1 - _xi2 * k * d2_inv) * d1 * norm_inv2;
+  const double tmp4 = (_beta - 1 - _beta * k * d2_inv) * d1 * norm_inv2;
   const double tmp5 = (k - d2) * norm_inv2;
 
   J(0, 0) = _fu * x * tmp4;
@@ -512,7 +512,7 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointIntrinsicsJacobian
 
 template<typename DISTORTION_T>
 template<typename DERIVED_P, typename DERIVED_JD>
-void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian(
+void ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian(
     const Eigen::MatrixBase<DERIVED_P> & p,
     const Eigen::MatrixBase<DERIVED_JD> & outJd) const {
 
@@ -533,13 +533,13 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian
   double d1_2 = r2 + zz;
   double d1 = std::sqrt(d1_2);
 
-  double k = _xi1 * d1 + z;
+  double k = _alpha * d1 + z;
   double kk = k * k;
 
   double d2_2 = r2 + kk;
   double d2 = std::sqrt(d2_2);
 
-  double norm = _xi2 * d2 + (1 - _xi2) * k;
+  double norm = _beta * d2 + (1 - _beta) * k;
   double norm_inv = 1.0 / norm;
 
   keypoint_t kp;
@@ -558,7 +558,7 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian
 
 template<typename DISTORTION_T>
 template<typename DERIVED_P, typename DERIVED_JI>
-void DoubleSphereProjection<DISTORTION_T>::homogeneousToKeypointIntrinsicsJacobian(
+void ExtendedUnifiedProjection<DISTORTION_T>::homogeneousToKeypointIntrinsicsJacobian(
     const Eigen::MatrixBase<DERIVED_P> & p,
     const Eigen::MatrixBase<DERIVED_JI> & outJi) const {
 
@@ -577,7 +577,7 @@ void DoubleSphereProjection<DISTORTION_T>::homogeneousToKeypointIntrinsicsJacobi
 
 template<typename DISTORTION_T>
 template<typename DERIVED_P, typename DERIVED_JD>
-void DoubleSphereProjection<DISTORTION_T>::homogeneousToKeypointDistortionJacobian(
+void ExtendedUnifiedProjection<DISTORTION_T>::homogeneousToKeypointDistortionJacobian(
     const Eigen::MatrixBase<DERIVED_P> & p,
     const Eigen::MatrixBase<DERIVED_JD> & outJd) const {
 
@@ -596,14 +596,14 @@ void DoubleSphereProjection<DISTORTION_T>::homogeneousToKeypointDistortionJacobi
 
 template<typename DISTORTION_T>
 template<class Archive>
-void DoubleSphereProjection<DISTORTION_T>::load(Archive & ar,
+void ExtendedUnifiedProjection<DISTORTION_T>::load(Archive & ar,
                                         const unsigned int version) {
   SM_ASSERT_LE(std::runtime_error, version,
                (unsigned int) CLASS_SERIALIZATION_VERSION,
                "Unsupported serialization version");
 
-  ar >> BOOST_SERIALIZATION_NVP(_xi1);
-  ar >> BOOST_SERIALIZATION_NVP(_xi2);
+  ar >> BOOST_SERIALIZATION_NVP(_alpha);
+  ar >> BOOST_SERIALIZATION_NVP(_beta);
   ar >> BOOST_SERIALIZATION_NVP(_fu);
   ar >> BOOST_SERIALIZATION_NVP(_fv);
   ar >> BOOST_SERIALIZATION_NVP(_cu);
@@ -617,10 +617,10 @@ void DoubleSphereProjection<DISTORTION_T>::load(Archive & ar,
 
 template<typename DISTORTION_T>
 template<class Archive>
-void DoubleSphereProjection<DISTORTION_T>::save(Archive & ar,
+void ExtendedUnifiedProjection<DISTORTION_T>::save(Archive & ar,
                                         const unsigned int /* version */) const {
-  ar << BOOST_SERIALIZATION_NVP(_xi1);
-  ar << BOOST_SERIALIZATION_NVP(_xi2);
+  ar << BOOST_SERIALIZATION_NVP(_alpha);
+  ar << BOOST_SERIALIZATION_NVP(_beta);
   ar << BOOST_SERIALIZATION_NVP(_fu);
   ar << BOOST_SERIALIZATION_NVP(_fv);
   ar << BOOST_SERIALIZATION_NVP(_cu);
@@ -633,7 +633,7 @@ void DoubleSphereProjection<DISTORTION_T>::save(Archive & ar,
 
 // \brief creates a random valid keypoint.
 template<typename DISTORTION_T>
-Eigen::VectorXd DoubleSphereProjection<DISTORTION_T>::createRandomKeypoint() const {
+Eigen::VectorXd ExtendedUnifiedProjection<DISTORTION_T>::createRandomKeypoint() const {
 
   // This is tricky...The camera model defines a circle on the normalized image
   // plane and the projection equations don't work outside of it.
@@ -665,7 +665,7 @@ Eigen::VectorXd DoubleSphereProjection<DISTORTION_T>::createRandomKeypoint() con
 
 // \brief creates a random visible point. Negative depth means random between 0 and 100 meters.
 template<typename DISTORTION_T>
-Eigen::Vector3d DoubleSphereProjection<DISTORTION_T>::createRandomVisiblePoint(
+Eigen::Vector3d ExtendedUnifiedProjection<DISTORTION_T>::createRandomVisiblePoint(
     double depth) const {
   Eigen::VectorXd y = createRandomKeypoint();
   Eigen::Vector3d p;
@@ -685,7 +685,7 @@ Eigen::Vector3d DoubleSphereProjection<DISTORTION_T>::createRandomVisiblePoint(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_K>
-bool DoubleSphereProjection<DISTORTION_T>::isValid(
+bool ExtendedUnifiedProjection<DISTORTION_T>::isValid(
     const Eigen::MatrixBase<DERIVED_K> & keypoint) const {
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_K>, 2);
@@ -695,14 +695,14 @@ bool DoubleSphereProjection<DISTORTION_T>::isValid(
 }
 
 template<typename DISTORTION_T>
-bool DoubleSphereProjection<DISTORTION_T>::isUndistortedKeypointValid(
+bool ExtendedUnifiedProjection<DISTORTION_T>::isUndistortedKeypointValid(
     const double rho2_d) const {
-  return xi2() <= 0.5 || rho2_d <= _one_over_2xi2_m_1;
+  return beta() <= 0.5 || rho2_d <= _one_over_2xi2_m_1;
 }
 
 template<typename DISTORTION_T>
 template<typename DERIVED_K>
-bool DoubleSphereProjection<DISTORTION_T>::isLiftable(
+bool ExtendedUnifiedProjection<DISTORTION_T>::isLiftable(
     const Eigen::MatrixBase<DERIVED_K> & keypoint) const {
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_K>, 2);
@@ -722,7 +722,7 @@ bool DoubleSphereProjection<DISTORTION_T>::isLiftable(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_P>
-bool DoubleSphereProjection<DISTORTION_T>::isEuclideanVisible(
+bool ExtendedUnifiedProjection<DISTORTION_T>::isEuclideanVisible(
     const Eigen::MatrixBase<DERIVED_P> & p) const {
   keypoint_t k;
   return euclideanToKeypoint(p, k);
@@ -731,27 +731,26 @@ bool DoubleSphereProjection<DISTORTION_T>::isEuclideanVisible(
 
 template<typename DISTORTION_T>
 template<typename DERIVED_P>
-bool DoubleSphereProjection<DISTORTION_T>::isHomogeneousVisible(
+bool ExtendedUnifiedProjection<DISTORTION_T>::isHomogeneousVisible(
     const Eigen::MatrixBase<DERIVED_P> & ph) const {
   keypoint_t k;
   return homogeneousToKeypoint(ph, k);
 }
 
 template<typename DISTORTION_T>
-void DoubleSphereProjection<DISTORTION_T>::updateTemporaries() {
+void ExtendedUnifiedProjection<DISTORTION_T>::updateTemporaries() {
   _recip_fu = 1.0 / _fu;
   _recip_fv = 1.0 / _fv;
   _fu_over_fv = _fu / _fv;
-  _one_over_2xi2_m_1 = _xi2 > 0.5 ? 1.0 / (2*_xi2 - 1) : std::numeric_limits<double>::max();
-  _fov_parameter2 = _xi2 <= 0.5 ?_xi2/(1-_xi2) : (1-_xi2)/_xi2;
-  _fov_parameter = (_fov_parameter2 + _xi1) / std::sqrt(2*_fov_parameter2 * _xi1 + _xi1*_xi1 + 1);
+  _one_over_2xi2_m_1 = _beta > 0.5 ? 1.0 / (2*_beta - 1) : std::numeric_limits<double>::max();
+  _fov_parameter = (_alpha) / std::sqrt(_alpha*_alpha + 1);
 }
 
 // aslam::backend compatibility
 template<typename DISTORTION_T>
-void DoubleSphereProjection<DISTORTION_T>::update(const double * v) {
-  _xi1 += v[0];
-  _xi2 += v[1];
+void ExtendedUnifiedProjection<DISTORTION_T>::update(const double * v) {
+  _alpha += v[0];
+  _beta += v[1];
   _fu += v[2];
   _fv += v[3];
   _cu += v[4];
@@ -761,26 +760,26 @@ void DoubleSphereProjection<DISTORTION_T>::update(const double * v) {
 
 }
 template<typename DISTORTION_T>
-int DoubleSphereProjection<DISTORTION_T>::minimalDimensions() const {
+int ExtendedUnifiedProjection<DISTORTION_T>::minimalDimensions() const {
   return 6;
 }
 
 template<typename DISTORTION_T>
-Eigen::Vector2i DoubleSphereProjection<DISTORTION_T>::parameterSize() const {
+Eigen::Vector2i ExtendedUnifiedProjection<DISTORTION_T>::parameterSize() const {
   return Eigen::Vector2i(6, 1);
 }
 
 template<typename DISTORTION_T>
-void DoubleSphereProjection<DISTORTION_T>::getParameters(Eigen::MatrixXd & P) const {
+void ExtendedUnifiedProjection<DISTORTION_T>::getParameters(Eigen::MatrixXd & P) const {
   P.resize(6, 1);
-  P << _xi1, _xi2, _fu, _fv, _cu, _cv;
+  P << _alpha, _beta, _fu, _fv, _cu, _cv;
 }
 template<typename DISTORTION_T>
-void DoubleSphereProjection<DISTORTION_T>::setParameters(const Eigen::MatrixXd & P) {
+void ExtendedUnifiedProjection<DISTORTION_T>::setParameters(const Eigen::MatrixXd & P) {
   SM_ASSERT_EQ(std::runtime_error, P.rows(), 6, "Incorrect size");
   SM_ASSERT_EQ(std::runtime_error, P.cols(), 1, "Incorrect size");
-  _xi1 = P(0, 0);
-  _xi2 = P(1, 0);
+  _alpha = P(0, 0);
+  _beta = P(1, 0);
   _fu = P(2, 0);
   _fv = P(3, 0);
   _cu = P(4, 0);
@@ -790,9 +789,9 @@ void DoubleSphereProjection<DISTORTION_T>::setParameters(const Eigen::MatrixXd &
 }
 
 template<typename DISTORTION_T>
-bool DoubleSphereProjection<DISTORTION_T>::isBinaryEqual(
-    const DoubleSphereProjection<distortion_t> & rhs) const {
-  return _xi1 == rhs._xi1 && _xi2 == rhs._xi2 && _fu == rhs._fu && _fv == rhs._fv && _cu == rhs._cu
+bool ExtendedUnifiedProjection<DISTORTION_T>::isBinaryEqual(
+    const ExtendedUnifiedProjection<distortion_t> & rhs) const {
+  return _alpha == rhs._alpha && _beta == rhs._beta && _fu == rhs._fu && _fv == rhs._fv && _cu == rhs._cu
       && _cv == rhs._cv && _ru == rhs._ru && _rv == rhs._rv
       && _recip_fu == rhs._recip_fu && _recip_fv == rhs._recip_fv
       && _fu_over_fv == rhs._fu_over_fv
@@ -801,13 +800,13 @@ bool DoubleSphereProjection<DISTORTION_T>::isBinaryEqual(
 }
 
 template<typename DISTORTION_T>
-DoubleSphereProjection<DISTORTION_T> DoubleSphereProjection<DISTORTION_T>::getTestProjection() {
-  return DoubleSphereProjection<DISTORTION_T>(-0.11234234, 0.5234234, 200, 200, 320, 240, 640, 480,
+ExtendedUnifiedProjection<DISTORTION_T> ExtendedUnifiedProjection<DISTORTION_T>::getTestProjection() {
+  return ExtendedUnifiedProjection<DISTORTION_T>(-0.11234234, 0.5234234, 200, 200, 320, 240, 640, 480,
                                       DISTORTION_T::getTestDistortion());
 }
 
 template<typename DISTORTION_T>
-void DoubleSphereProjection<DISTORTION_T>::resizeIntrinsics(double scale) {
+void ExtendedUnifiedProjection<DISTORTION_T>::resizeIntrinsics(double scale) {
   _fu *= scale;
   _fv *= scale;
   _cu *= scale;
@@ -824,7 +823,7 @@ void DoubleSphereProjection<DISTORTION_T>::resizeIntrinsics(double scale) {
 /// These functions were developed with the help of Lionel Heng and the excellent camodocal
 /// https://github.com/hengli/camodocal
 template<typename DISTORTION_T>
-bool DoubleSphereProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<GridCalibrationTargetObservation> &observations) {
+bool ExtendedUnifiedProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<GridCalibrationTargetObservation> &observations) {
 
   SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
   SM_ASSERT_TRUE(Exception, observations.size() != 0, "Need min. one observation");
@@ -835,8 +834,8 @@ bool DoubleSphereProjection<DISTORTION_T>::initializeIntrinsics(const std::vecto
   bool success = omni.initializeIntrinsics(observations);
 
   if(success) {
-    _xi1 = 0;
-    _xi2 = 0.5 * omni.xi();
+    _alpha = 0;
+    _beta = 0.5 * omni.xi();
     _fu = 0.5 * omni.fu();
     _fv = 0.5 * omni.fv();
     _cu = omni.cu();
@@ -853,7 +852,7 @@ bool DoubleSphereProjection<DISTORTION_T>::initializeIntrinsics(const std::vecto
 }  // initializeIntrinsics()
 
 template<typename DISTORTION_T>
-size_t DoubleSphereProjection<DISTORTION_T>::computeReprojectionError(
+size_t ExtendedUnifiedProjection<DISTORTION_T>::computeReprojectionError(
     const GridCalibrationTargetObservation & obs,
     const sm::kinematics::Transformation & T_target_camera,
     double & outErr) const {
@@ -881,7 +880,7 @@ size_t DoubleSphereProjection<DISTORTION_T>::computeReprojectionError(
 /// These functions were developed with the help of Lionel Heng and the excellent camodocal
 /// https://github.com/hengli/camodocal
 template<typename DISTORTION_T>
-bool DoubleSphereProjection<DISTORTION_T>::estimateTransformation(
+bool ExtendedUnifiedProjection<DISTORTION_T>::estimateTransformation(
     const GridCalibrationTargetObservation & obs,
     sm::kinematics::Transformation & out_T_t_c) const {
   using detail::square;

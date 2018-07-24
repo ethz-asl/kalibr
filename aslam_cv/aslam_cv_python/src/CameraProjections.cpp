@@ -1,7 +1,6 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <aslam/cameras/PinholeProjection.hpp>
 #include <aslam/cameras/OmniProjection.hpp>
-#include <aslam/cameras/UnifiedProjection.hpp>
 #include <aslam/cameras/ExtendedUnifiedProjection.hpp>
 #include <aslam/cameras/DoubleSphereProjection.hpp>
 #include <aslam/cameras/NoDistortion.hpp>
@@ -293,50 +292,6 @@ void exportOmniProjection(std::string name) {
 }
 
 template<typename D>
-void exportUnifiedProjection(std::string name) {
-
-  D & (UnifiedProjection<D>::*distortion)() = &UnifiedProjection<D>::distortion;
-
-  class_<UnifiedProjection<D>, boost::shared_ptr<UnifiedProjection<D> > > unifiedProjection(
-      name.c_str(), init<>());
-  sm::python::unique_register_ptr_to_python<boost::shared_ptr<UnifiedProjection<D> > >();
-
-  unifiedProjection.def(init<>((name + "(distortion_t distortion)").c_str())).def(
-      init<double, double, double, double, double, int, int, D>(
-          (name
-              + "(double alpha, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV, distortion_t distortion)")
-              .c_str())).def(
-      init<double, double, double, double, double, int, int>(
-          (name
-              + "(double alpha, double focalLengthU, double focalLengthV, double imageCenterU, double imageCenterV, int resolutionU, int resolutionV)")
-              .c_str()))
-  /// \brief the alpha parameter that relates spherical and pinhole projection.
-      .def("alpha", &UnifiedProjection<D>::alpha)
-  /// \brief The horizontal focal length in pixels.
-      .def("fu", &UnifiedProjection<D>::fu)
-  /// \brief The vertical focal length in pixels.
-      .def("fv", &UnifiedProjection<D>::fv)
-  /// \brief The horizontal image center in pixels.
-      .def("cu", &UnifiedProjection<D>::cu)
-  /// \brief The vertical image center in pixels.
-      .def("cv", &UnifiedProjection<D>::cv)
-  /// \brief The horizontal resolution in pixels.
-      .def("ru", &UnifiedProjection<D>::ru)
-  /// \brief The vertical resolution in pixels.
-      .def("rv", &UnifiedProjection<D>::rv).def("focalLengthCol",
-                                             &UnifiedProjection<D>::focalLengthCol)
-      .def("focalLengthRow", &UnifiedProjection<D>::focalLengthRow).def(
-      "opticalCenterCol", &UnifiedProjection<D>::opticalCenterCol).def(
-      "opticalCenterRow", &UnifiedProjection<D>::opticalCenterRow).def(
-      "distortion", distortion, return_internal_reference<>()).def(
-      "setDistortion", &UnifiedProjection<D>::setDistortion).def_pickle(
-      sm::python::pickle_suite<UnifiedProjection<D> >());
-  exportGenericProjectionFunctions<UnifiedProjection<D> >(unifiedProjection);
-  //exportGenericProjectionDesignVariable< UnifiedProjection<D> >(name);
-
-}
-
-template<typename D>
 void exportExtendedUnifiedProjection(std::string name) {
 
   D & (ExtendedUnifiedProjection<D>::*distortion)() = &ExtendedUnifiedProjection<D>::distortion;
@@ -506,8 +461,6 @@ void exportCameraProjections() {
   exportOmniProjection<NoDistortion>("OmniProjection");
   exportOmniProjection<RadialTangentialDistortion>("DistortedOmniProjection");
   exportOmniProjection<FovDistortion>("FovOmniProjection");
-
-  exportUnifiedProjection<NoDistortion>("UnifiedProjection");
 
   exportExtendedUnifiedProjection<NoDistortion>("ExtendedUnifiedProjection");
 

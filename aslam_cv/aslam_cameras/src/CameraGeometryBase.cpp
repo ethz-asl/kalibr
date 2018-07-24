@@ -44,10 +44,6 @@ boost::shared_ptr<CameraGeometryBase> CameraGeometryBase::create(
     rval.reset(
         new CameraGeometry<OmniProjection<EquidistantDistortion>, GlobalShutter,
             NoMask>(config));
-  } else if (type == "Unified") {
-    rval.reset(
-        new CameraGeometry<UnifiedProjection<NoDistortion>, GlobalShutter, NoMask>(
-            config));
   } else if (type == "ExtendedUnified") {
     rval.reset(
         new CameraGeometry<ExtendedUnifiedProjection<NoDistortion>, GlobalShutter, NoMask>(

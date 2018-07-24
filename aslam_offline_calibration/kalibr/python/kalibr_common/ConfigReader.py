@@ -127,28 +127,7 @@ class AslamCamera(object):
             else:
                 raise RuntimeError("omni camera model does not support distortion model '{}'".format(dist_model))
 
-        # FIMXE: call this "UCM" and "EUCM"
-        elif camera_model == 'uni':
-            alpha_uni = intrinsics[0]
-            focalLength = intrinsics[1:3]
-            principalPoint = intrinsics[3:5]
-
-            if dist_model == 'none':
-                proj = cv.UnifiedProjection(alpha_uni, focalLength[0], focalLength[1],
-                                            principalPoint[0], principalPoint[1],
-                                            resolution[0], resolution[1])
-
-                self.geometry = cv.UnifiedCameraGeometry(proj)
-
-                self.frameType = cv.UnifiedFrame
-                self.keypointType = cv.Keypoint2
-                self.reprojectionErrorType = cvb.UnifiedReprojectionErrorSimple
-                self.undistorterType = cv.UnifiedUndistorterNoMask
-
-            else:
-                raise RuntimeError("camera model {} does not support distortion model '{}'".format(camera_model, dist_model))
-
-        elif camera_model == 'extuni':
+        elif camera_model == 'eucm':
             alpha_uni = intrinsics[0]
             beta_uni = intrinsics[1]
             focalLength = intrinsics[2:4]
