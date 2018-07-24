@@ -566,7 +566,9 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian
   kp[1] = p[1] * norm_inv;
 
   // TODO @demmeln: ... distortion not implemented ...
-  //_distortion.distortParameterJacobian(kp, outJd);
+  // Do not comment out!!! Allocates memory...
+  _distortion.distortParameterJacobian(kp, outJd);
+  
 
   Eigen::MatrixBase<DERIVED_JD> & J =
       const_cast<Eigen::MatrixBase<DERIVED_JD> &>(outJd);
