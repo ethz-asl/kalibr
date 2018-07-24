@@ -39,7 +39,7 @@ BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
   aslam::python::exportReprojectionErrors<FovDistortedPinholeRsCameraGeometry>("FovDistortedPinholeRs");
   aslam::python::exportCovarianceReprojectionError<FovDistortedPinholeRsCameraGeometry>("FovDistortedPinholeRs");
 
-  aslam::python::exportReprojectionErrors<ExtendedUnifiedCameraGeometry>("Extended");
+  aslam::python::exportReprojectionErrors<ExtendedUnifiedCameraGeometry>("ExtendedUnified");
   aslam::python::exportReprojectionErrors<DoubleSphereCameraGeometry>("DoubleSphere");
 
   aslam::python::exportReprojectionErrors<OmniCameraGeometry>("Omni");

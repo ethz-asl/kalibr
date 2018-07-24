@@ -851,7 +851,7 @@ bool DoubleSphereProjection<DISTORTION_T>::isBinaryEqual(
 
 template<typename DISTORTION_T>
 DoubleSphereProjection<DISTORTION_T> DoubleSphereProjection<DISTORTION_T>::getTestProjection() {
-  return DoubleSphereProjection<DISTORTION_T>(-0.11234234, 0.5234234, 200, 200, 320, 240, 640, 480,
+  return DoubleSphereProjection<DISTORTION_T>(-0.18, 0.59, 313, 313, 640, 512, 1280, 1024,
                                       DISTORTION_T::getTestDistortion());
 }
 
