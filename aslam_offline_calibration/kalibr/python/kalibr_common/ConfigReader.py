@@ -261,7 +261,7 @@ class CameraParameters(ParametersBase):
     def checkIntrinsics(self, model, intrinsics):
         cameraModels = ['pinhole', 
                         'omni',
-                        'eucm'
+                        'eucm',
                         'ds']
         
         if model not in cameraModels:
