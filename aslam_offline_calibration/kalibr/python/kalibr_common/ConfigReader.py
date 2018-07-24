@@ -261,6 +261,7 @@ class CameraParameters(ParametersBase):
     def checkIntrinsics(self, model, intrinsics):
         cameraModels = ['pinhole', 
                         'omni',
+                        'eucm'
                         'ds']
         
         if model not in cameraModels:
@@ -296,6 +297,22 @@ class CameraParameters(ParametersBase):
 
             if alpha_ds < 0 or alpha_ds >= 1:
                 self.raiseError("invalid alpha_ds of {} (0<=alpha<1)".format(alpha_ds) )
+
+        elif model == "eucm":
+
+            if len(intrinsics) != 6:
+                self.raiseError("invalid intrinsics for ds; should be [xi, alpha, fu, fv, pu, pv], but got {} parameters".format(len(intrinsics)))
+
+            alpha_eucm = intrinsics[0]
+            beta_eucm = intrinsics[1]
+            focalLength = intrinsics[2:4]
+            principalPoint = intrinsics[4:6]
+
+            if alpha_eucm < 0 or alpha_eucm >= 1:
+                self.raiseError("invalid alpha_eucm of {} (0<=alpha<1)".format(alpha_ds) )
+
+            if beta_eucm < 0:
+                self.raiseError("invalid beta_eucm of {} (beta>=0)".format(beta_eucm) )
 
         else:
             self.raiseError('internal error: invalid camera model {} (should have been checked before)'.format(model))
@@ -377,6 +394,11 @@ class CameraParameters(ParametersBase):
             focalLength = intrinsics[1:3]
             principalPoint = intrinsics[3:5]
 
+        elif camera_model == 'eucm':
+            [alpha_eucm, beta_eucm] = intrinsics[0:2]
+            focalLength = intrinsics[2:4]
+            principalPoint = intrinsics[4:6]
+
         elif camera_model == 'ds':
             [xi_ds, alpha_ds] = intrinsics[0:2]
             focalLength = intrinsics[2:4]
@@ -390,6 +412,9 @@ class CameraParameters(ParametersBase):
         print >> dest, "  Principal point: {0}".format(principalPoint)
         if camera_model == 'omni':
             print >> dest, "  Omni xi: {0}".format(xi_omni)
+        if camera_model == 'eucm':
+            print >> dest, "  EUCM alpha: {0}".format(alpha_eucm)
+            print >> dest, "  EUCM beta: {0}".format(beta_eucm)
         if camera_model == 'ds':
             print >> dest, "  DS xi: {0}".format(xi_ds)
             print >> dest, "  DS alpha: {0}".format(alpha_ds)
