@@ -143,7 +143,6 @@ class AslamCamera(object):
                 self.frameType = cv.ExtendedUnifiedFrame
                 self.keypointType = cv.Keypoint2
                 self.reprojectionErrorType = cvb.ExtendedUnifiedReprojectionErrorSimple
-                self.undistorterType = cv.ExtendedUnifiedUndistorterNoMask
 
             else:
                 raise RuntimeError("camera model {} does not support distortion model '{}'".format(camera_model, dist_model))
@@ -164,7 +163,6 @@ class AslamCamera(object):
                 self.frameType = cv.DoubleSphereFrame
                 self.keypointType = cv.Keypoint2
                 self.reprojectionErrorType = cvb.DoubleSphereReprojectionErrorSimple
-                self.undistorterType = cv.DoubleSphereUndistorterNoMask
             else:
                 raise RuntimeError("camera model {} does not support distortion model '{}'".format(camera_model, dist_model))
 
@@ -309,7 +307,7 @@ class CameraParameters(ParametersBase):
             principalPoint = intrinsics[4:6]
 
             if alpha_eucm < 0 or alpha_eucm >= 1:
-                self.raiseError("invalid alpha_eucm of {} (0<=alpha<1)".format(alpha_ds) )
+                self.raiseError("invalid alpha_eucm of {} (0<=alpha<1)".format(alpha_eucm) )
 
             if beta_eucm < 0:
                 self.raiseError("invalid beta_eucm of {} (beta>=0)".format(beta_eucm) )

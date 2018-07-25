@@ -95,31 +95,23 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypoint(
   const double& y = p[1];
   const double& z = p[2];
 
-  double xx = x * x;
-  double yy = y * y;
-  double zz = z * z;
+  const double xx = x * x;
+  const double yy = y * y;
+  const double zz = z * z;
 
-  double r2 = xx + yy;
-
-  double d1_2 = r2 + zz;
-  double d1 = std::sqrt(d1_2);
+  const double d2 = _beta * (xx + yy) + zz;
+  const double d = std::sqrt(d2);
 
   // FIXME @demmeln: Add checks for this
   // Check if point will lead to a valid projection
-  if (p[2] <= -(_fov_parameter * d1))
+  if (z <= -(_fov_parameter * d))
    return false;
 
-  double k = _alpha * d1 + z;
-  double kk = k * k;
-
-  double d2_2 = r2 + kk;
-  double d2 = std::sqrt(d2_2);
-
-  double norm = _beta * d2 + (1 - _beta) * k;
+  double norm = _alpha * d + (1 - _alpha) * z;
   double norm_inv = 1.0 / norm;
 
-  outKeypoint[0] = p[0] * norm_inv;
-  outKeypoint[1] = p[1] * norm_inv;
+  outKeypoint[0] = x * norm_inv;
+  outKeypoint[1] = y * norm_inv;
   //std::cout << "normalize\n";
   //SM_OUT(d);
   //SM_OUT(rz);
@@ -176,26 +168,16 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypoint(
   double yy = y * y;
   double zz = z * z;
 
-  double r2 = xx + yy;
-
-  double d1_2 = r2 + zz;
-  double d1 = std::sqrt(d1_2);
-  double d1_inv = 1.0 / d1;
+  double d2 = _beta * (xx + yy) + zz;
+  double d = std::sqrt(d2);
+  double d_inv = 1.0/d;
 
     // Check if point will lead to a valid projection
-  if (p[2] <= -(_fov_parameter * d1))
+  if (z <= -(_fov_parameter * d))
    return false;
 
-  double k = _alpha * d1 + z;
-  double kk = k * k;
-
-  double d2_2 = r2 + kk;
-  double d2 = std::sqrt(d2_2);
-  double d2_inv = 1.0 / d2;
-
-  double norm = _beta * d2 + (1 - _beta) * k;
+  double norm = _alpha * d + (1 - _alpha) * z;
   double norm_inv = 1.0 / norm;
-  double norm_inv2 = norm_inv*norm_inv;
 
   outKeypoint[0] = p[0] * norm_inv;
   outKeypoint[1] = p[1] * norm_inv;
@@ -203,24 +185,20 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypoint(
   outKeypoint[0] = _fu * outKeypoint[0] + _cu;
   outKeypoint[1] = _fv * outKeypoint[1] + _cv;
 
-  double xy = x * y;
-  double tt2 = _alpha * z * d1_inv + 1;
+  double denom = norm_inv * norm_inv * d_inv;
+  double mid = -(_alpha * _beta * x * y) * denom;
+  double add = norm * d;
+  double addz = (_alpha * z + (1 - _alpha) * d);
 
-  double d_norm_d_r2 =
-        (_alpha * (1 - _beta) * d1_inv + _beta * (_alpha * k * d1_inv + 1) * d2_inv) *
-        norm_inv2;
 
-  double tmp2 = ((1 - _beta) * tt2 + _beta * k * tt2 * d2_inv) * norm_inv2;
-
-  J(0, 0) = _fu * (norm_inv - xx * d_norm_d_r2);
-  J(1, 0) = -_fv * xy * d_norm_d_r2;
-
-  J(0, 1) = -_fu * xy * d_norm_d_r2;
-  J(1, 1) = _fv * (norm_inv - yy * d_norm_d_r2);
-
-  J(0, 2) = -_fu * x * tmp2;
-  J(1, 2) = -_fv * y * tmp2;
-
+  J(0, 0) = _fu * (add - x * x * _alpha * _beta) * denom;
+  J(1, 0) = _fv * mid;
+  
+  J(0, 1) = _fu * mid;
+  J(1, 1) = _fv * (add - y * y * _alpha * _beta) * denom;
+  
+  J(0, 2) = -_fu * x * addz * denom;
+  J(1, 2) = -_fv * y * addz * denom;
 
   return isValid(outKeypoint);
 }
@@ -295,16 +273,14 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
 
 
   const double r2 = mx * mx + my * my;
-  const double mz = (1 - _beta * _beta * r2) /
-                    (_beta * std::sqrt(1 - (2 * _beta - 1) * r2) + 1 - _beta);
-  const double mz2 = mz * mz;
-  const double k =
-      (mz * _alpha + std::sqrt(mz2 + (1 - _alpha * _alpha) * r2)) / (mz2 + r2);
+  const double gamma = 1 - _alpha;
+  const double k = (1 - _alpha * _alpha * _beta * r2) /
+               (_alpha * std::sqrt(1 - (_alpha - gamma) * _beta * r2) + gamma);
+  const double norm_inv = 1.0 / std::sqrt(r2 + k * k);
 
-  outPoint[0] = k * mx;
-  outPoint[1] = k * my;
-  outPoint[2] = k * mz - _alpha;
-
+  outPoint[0] = mx * norm_inv;
+  outPoint[1] = my * norm_inv;
+  outPoint[2] = k * norm_inv;
 
   // if (!isUndistortedKeypointValid(rho2_d))
   //   return false;
@@ -340,59 +316,40 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
   const double my = _recip_fv * (keypoint[1] - _cv);
 
   const double r2 = mx * mx + my * my;
+  const double gamma = 1 - _alpha;
 
-  const double _beta_2 = _beta * _beta;
-  const double _alpha_2 = _alpha * _alpha;
+  const double tmp1 = (1 - _alpha * _alpha * _beta * r2);
+  const double tmp_sqrt = std::sqrt(1 - (_alpha - gamma) * _beta * r2);
+  const double tmp2 = (_alpha * tmp_sqrt + gamma);
 
-  const double sqrt2 = std::sqrt(1 - (2 * _beta - 1) * r2);
-  const double sqrt2_inv = double(1.0) / sqrt2;
+  const double tmp2_inv = 1.0 / tmp2;
+  const double tmp2_inv2 = tmp2_inv * tmp2_inv;
 
-  const double norm2 = _beta * sqrt2 + 1 - _beta;
-  const double norm2_inv = double(1.0) / norm2;
-  const double norm2_inv2 = norm2_inv * norm2_inv;
+  const double d_k_d_r2 = 0.5 * _alpha * _beta *
+            (-2 * _alpha * tmp2 + tmp1 * (_alpha - gamma) / tmp_sqrt) *
+            tmp2_inv2;
 
-  const double mz = (1 - _beta_2 * r2) * norm2_inv;
-  const double mz2 = mz * mz;
+  const double k = tmp1 * tmp2_inv;
 
-  const double norm1 = mz2 + r2;
-  const double norm1_inv = double(1.0) / norm1;
-  const double norm1_inv2 = norm1_inv * norm1_inv;
+  const double norm_inv = 1.0 / std::sqrt(r2 + k * k);
 
-  const double sqrt1 = std::sqrt(mz2 + (1 - _alpha_2) * r2);
-  const double sqrt1_inv = double(1.0) / sqrt1;
-  const double k = (mz * _alpha + sqrt1) * norm1_inv;
+  outPoint[0] = mx * norm_inv;
+  outPoint[1] = my * norm_inv;
+  outPoint[2] = k * norm_inv;
 
-  outPoint[0] = k * mx;
-  outPoint[1] = k * my;
-  outPoint[2] = k * mz - _alpha;
-
-  const double d_mz_d_r2 =
-      (0.5 * _beta - _beta_2) * (r2 * _beta_2 - 1) * sqrt2_inv * norm2_inv2 -
-      _beta_2 * norm2_inv;
-
-  const double d_mz_d_mx = 2 * mx * d_mz_d_r2;
-  const double d_mz_d_my = 2 * my * d_mz_d_r2;
-
-  double d_k_d_r2 =
-      (_alpha * d_mz_d_r2 + 0.5 * sqrt1_inv * (2 * mz * d_mz_d_r2 + 1 - _alpha_2)) *
-          norm1_inv -
-      (mz * _alpha + sqrt1) * (2 * mz * d_mz_d_r2 + 1) * norm1_inv2;
-
-  double d_k_d_mx = d_k_d_r2 * 2 * mx;
-  double d_k_d_my = d_k_d_r2 * 2 * my;
+  const double d_norm_inv_d_r2 = -0.5 * (1 + 2 * k * d_k_d_r2) * norm_inv * norm_inv * norm_inv;
 
   // \todo analytical Jacobian
   Eigen::MatrixBase<DERIVED_JK> & mbJk =
       const_cast<Eigen::MatrixBase<DERIVED_JK> &>(outJk);
   DERIVED_JK & Jk = mbJk.derived();
-
-  Jk(0, 0) = _recip_fu * (mx * d_k_d_mx + k);
-  Jk(1, 0) = _recip_fu * my * d_k_d_mx;
-  Jk(2, 0) = _recip_fu * (mz * d_k_d_mx + k * d_mz_d_mx);
-
-  Jk(0, 1) = _recip_fv * mx * d_k_d_my;
-  Jk(1, 1) = _recip_fv * (my * d_k_d_my + k);
-  Jk(2, 1) = _recip_fv * (mz * d_k_d_my + k * d_mz_d_my);
+  
+  Jk(0, 0) = (norm_inv + 2 * mx * mx * d_norm_inv_d_r2) * _recip_fu;
+  Jk(1, 0) = (2 * my * mx * d_norm_inv_d_r2) * _recip_fu;
+  Jk(2, 0) = 2 * mx * (k * d_norm_inv_d_r2 + d_k_d_r2 * norm_inv) * _recip_fu;
+  Jk(0, 1) = (2 * my * mx * d_norm_inv_d_r2) * _recip_fv;
+  Jk(1, 1) = (norm_inv + 2 * my * my * d_norm_inv_d_r2) * _recip_fv;
+  Jk(2, 1) = 2 * my * (k * d_norm_inv_d_r2 + d_k_d_r2 * norm_inv) * _recip_fv;
 
   //ASLAM_CAMERAS_ESTIMATE_JACOBIAN(this,keypointToEuclidean, keypoint, 1e-5, Jk);
 
@@ -469,39 +426,37 @@ void ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypointIntrinsicsJacob
   const double& y = p[1];
   const double& z = p[2];
 
-  const double xx = x * x;
-  const double yy = y * y;
-  const double zz = z * z;
 
-  const double r2 = xx + yy;
+  double xx = x * x;
+  double yy = y * y;
+  double zz = z * z;
 
-  const double d1_2 = r2 + zz;
-  const double d1 = std::sqrt(d1_2);
+  double r2 = xx + yy;
 
-  const double k = _alpha * d1 + z;
-  const double kk = k * k;
+  double d2 = _beta * r2 + zz;
+  double d = std::sqrt(d2);
+  double d_inv = 1.0/d;
 
-  const double d2_2 = r2 + kk;
-  const double d2 = std::sqrt(d2_2);
-  const double d2_inv = double(1.0) / d2;
+  double norm = _alpha * d + (1 - _alpha) * z;
+  double norm_inv = 1.0 / norm;
+  double norm_inv2 = norm_inv * norm_inv;
 
-  const double norm = _beta * d2 + (1 - _beta) * k;
-  const double norm_inv = double(1.0) / norm;
-  const double norm_inv2 = norm_inv * norm_inv;
-
-  const double mx = x * norm_inv;
-  const double my = y * norm_inv;
+  double mx = p[0] * norm_inv;
+  double my = p[1] * norm_inv;
 
   J.setZero();
 
-  const double tmp4 = (_beta - 1 - _beta * k * d2_inv) * d1 * norm_inv2;
-  const double tmp5 = (k - d2) * norm_inv2;
+  const double tmp_x = -_fu * x * norm_inv2;
+  const double tmp_y = -_fu * y * norm_inv2;
 
-  J(0, 0) = _fu * x * tmp4;
-  J(1, 0) = _fv * y * tmp4;
+  const double tmp4 = (d - z);
+  const double tmp5 = 0.5 * _alpha * r2 * d_inv;
 
-  J(0, 1) = _fu * x * tmp5;
-  J(1, 1) = _fv * y * tmp5;
+  J(0, 0) = tmp_x * tmp4;
+  J(1, 0) = tmp_y * tmp4;
+
+  J(0, 1) = tmp_x * tmp5;
+  J(1, 1) = tmp_y * tmp5;
 
   J(0, 2) = mx;
   J(0, 4) = 1;
@@ -519,32 +474,9 @@ void ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypointDistortionJacob
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_P>, 3);
 
-  // Camera model assumes no distortion.
-  const double& x = p[0];
-  const double& y = p[1];
-  const double& z = p[2];
-
-  double xx = x * x;
-  double yy = y * y;
-  double zz = z * z;
-
-  double r2 = xx + yy;
-
-  double d1_2 = r2 + zz;
-  double d1 = std::sqrt(d1_2);
-
-  double k = _alpha * d1 + z;
-  double kk = k * k;
-
-  double d2_2 = r2 + kk;
-  double d2 = std::sqrt(d2_2);
-
-  double norm = _beta * d2 + (1 - _beta) * k;
-  double norm_inv = 1.0 / norm;
-
   keypoint_t kp;
-  kp[0] = p[0] * norm_inv;
-  kp[1] = p[1] * norm_inv;
+  kp[0] = 0;
+  kp[1] =0;
 
   _distortion.distortParameterJacobian(kp, outJd);
 
@@ -742,8 +674,8 @@ void ExtendedUnifiedProjection<DISTORTION_T>::updateTemporaries() {
   _recip_fu = 1.0 / _fu;
   _recip_fv = 1.0 / _fv;
   _fu_over_fv = _fu / _fv;
-  _one_over_2xi2_m_1 = _beta > 0.5 ? 1.0 / (2*_beta - 1) : std::numeric_limits<double>::max();
-  _fov_parameter = (_alpha) / std::sqrt(_alpha*_alpha + 1);
+  _one_over_2xi2_m_1 = _alpha > 0.5 ? 1.0 / _beta * (2*_alpha - 1) : std::numeric_limits<double>::max();
+  _fov_parameter = (_alpha <= 0.5) ? _alpha/(1-_alpha) : (1-_alpha) / _alpha;
 }
 
 // aslam::backend compatibility
@@ -801,7 +733,7 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::isBinaryEqual(
 
 template<typename DISTORTION_T>
 ExtendedUnifiedProjection<DISTORTION_T> ExtendedUnifiedProjection<DISTORTION_T>::getTestProjection() {
-  return ExtendedUnifiedProjection<DISTORTION_T>(-0.11234234, 0.5234234, 200, 200, 320, 240, 640, 480,
+  return ExtendedUnifiedProjection<DISTORTION_T>(0.63, 1.04, 380, 380, 640, 512, 1280, 1024,
                                       DISTORTION_T::getTestDistortion());
 }
 
@@ -834,8 +766,8 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::initializeIntrinsics(const std::ve
   bool success = omni.initializeIntrinsics(observations);
 
   if(success) {
-    _alpha = 0;
-    _beta = 0.5 * omni.xi();
+    _alpha = 0.5 * omni.xi();
+    _beta = 1.0;
     _fu = 0.5 * omni.fu();
     _fv = 0.5 * omni.fv();
     _cu = omni.cu();
