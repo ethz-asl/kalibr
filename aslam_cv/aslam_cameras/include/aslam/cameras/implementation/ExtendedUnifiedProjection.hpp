@@ -271,8 +271,11 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
   const double mx = _recip_fu * (keypoint[0] - _cu);
   const double my = _recip_fv * (keypoint[1] - _cv);
 
-
   const double r2 = mx * mx + my * my;
+
+  if (!isUndistortedKeypointValid(r2))
+    return false;
+
   const double gamma = 1 - _alpha;
   const double k = (1 - _alpha * _alpha * _beta * r2) /
                (_alpha * std::sqrt(1 - (_alpha - gamma) * _beta * r2) + gamma);
@@ -282,8 +285,7 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
   outPoint[1] = my * norm_inv;
   outPoint[2] = k * norm_inv;
 
-  // if (!isUndistortedKeypointValid(rho2_d))
-  //   return false;
+
 
   return true;
 
@@ -309,13 +311,16 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
 
   // Unproject...
 
-  // if (!isUndistortedKeypointValid(rho2_d))
-  //   return false;
+
 
   const double mx = _recip_fu * (keypoint[0] - _cu);
   const double my = _recip_fv * (keypoint[1] - _cv);
 
   const double r2 = mx * mx + my * my;
+
+  if (!isUndistortedKeypointValid(r2))
+    return false;
+
   const double gamma = 1 - _alpha;
 
   const double tmp1 = (1 - _alpha * _alpha * _beta * r2);
@@ -629,7 +634,7 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::isValid(
 template<typename DISTORTION_T>
 bool ExtendedUnifiedProjection<DISTORTION_T>::isUndistortedKeypointValid(
     const double rho2_d) const {
-  return beta() <= 0.5 || rho2_d <= _one_over_2xi2_m_1;
+  return alpha() <= 0.5 || rho2_d <= _one_over_2xi2_m_1;
 }
 
 template<typename DISTORTION_T>
@@ -674,7 +679,7 @@ void ExtendedUnifiedProjection<DISTORTION_T>::updateTemporaries() {
   _recip_fu = 1.0 / _fu;
   _recip_fv = 1.0 / _fv;
   _fu_over_fv = _fu / _fv;
-  _one_over_2xi2_m_1 = _alpha > 0.5 ? 1.0 / _beta * (2*_alpha - 1) : std::numeric_limits<double>::max();
+  _one_over_2xi2_m_1 = 1.0 / _beta * (2*_alpha - 1);
   _fov_parameter = (_alpha <= 0.5) ? _alpha/(1-_alpha) : (1-_alpha) / _alpha;
 }
 
