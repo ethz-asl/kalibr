@@ -17,13 +17,12 @@ DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection()
       _ru(1),
       _rv(1) {
 
-  // FIXME: check if we can copy distortion handling from omni model
+  updateTemporaries();
 
   // NOTE @demmeln 2018-05-07: In order to use this with distortion, you need to add the proper calls for projection
   //     and unprojection, including for Jacobian computation.
   EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
 
-  updateTemporaries();
 
 }
 
@@ -40,6 +39,8 @@ DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection(const sm::PropertyT
   _rv = config.getInt("rv");
 
   updateTemporaries();
+
+  EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
 }
 
 template<typename DISTORTION_T>
@@ -62,6 +63,7 @@ DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection(double xi, double a
   // 0
   updateTemporaries();
 
+  EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
 }
 
 template<typename DISTORTION_T>
@@ -80,6 +82,8 @@ DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection(double xi, double a
       _ru(resolutionU),
       _rv(resolutionV) {
   updateTemporaries();
+
+  EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
 }
 
 template<typename DISTORTION_T>
@@ -538,44 +542,10 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_P>, 3);
 
-  // Camera model assumes no distortion.
-  const double& x = p[0];
-  const double& y = p[1];
-  const double& z = p[2];
-
-  double xx = x * x;
-  double yy = y * y;
-  double zz = z * z;
-
-  double r2 = xx + yy;
-
-  double d1_2 = r2 + zz;
-  double d1 = std::sqrt(d1_2);
-
-  double k = _xi * d1 + z;
-  double kk = k * k;
-
-  double d2_2 = r2 + kk;
-  double d2 = std::sqrt(d2_2);
-
-  double norm = _alpha * d2 + (1 - _alpha) * k;
-  double norm_inv = 1.0 / norm;
-
-  keypoint_t kp;
-  kp[0] = p[0] * norm_inv;
-  kp[1] = p[1] * norm_inv;
-
-  // TODO @demmeln: ... distortion not implemented ...
-  // Do not comment out!!! Allocates memory...
-  _distortion.distortParameterJacobian(kp, outJd);
-  
-
   Eigen::MatrixBase<DERIVED_JD> & J =
       const_cast<Eigen::MatrixBase<DERIVED_JD> &>(outJd);
 
-  J.row(0) *= _fu;
-  J.row(1) *= _fv;
-
+  J.derived().resize(2, 0);
 }
 
 template<typename DISTORTION_T>
@@ -728,25 +698,6 @@ bool DoubleSphereProjection<DISTORTION_T>::isUndistortedKeypointValid(
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// TODO @demmeln: check the following...
-
-
-
 template<typename DISTORTION_T>
 template<typename DERIVED_K>
 bool DoubleSphereProjection<DISTORTION_T>::isLiftable(
@@ -758,10 +709,6 @@ bool DoubleSphereProjection<DISTORTION_T>::isLiftable(
   Eigen::Vector2d y;
   y[0] = _recip_fu * (keypoint[0] - _cu);
   y[1] = _recip_fv * (keypoint[1] - _cv);
-
-  // Re-distort
-  // TODO @demmeln: ... distortion not implemented ...
-  //_distortion.undistort(y);
 
   // Now check if it is on the sensor
   double rho2_d = y[0] * y[0] + y[1] * y[1];

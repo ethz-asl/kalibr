@@ -1,5 +1,6 @@
 
 #include <aslam/cameras/ExtendedUnifiedProjection.hpp>
+#include <aslam/cameras/NoDistortion.hpp>
 
 namespace aslam {
 
@@ -17,6 +18,8 @@ ExtendedUnifiedProjection<DISTORTION_T>::ExtendedUnifiedProjection()
       _rv(1) {
   updateTemporaries();
 
+  EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
+
 }
 
 template<typename DISTORTION_T>
@@ -32,6 +35,8 @@ ExtendedUnifiedProjection<DISTORTION_T>::ExtendedUnifiedProjection(const sm::Pro
   _rv = config.getInt("rv");
 
   updateTemporaries();
+
+  EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
 }
 
 template<typename DISTORTION_T>
@@ -53,6 +58,8 @@ ExtendedUnifiedProjection<DISTORTION_T>::ExtendedUnifiedProjection(double alpha,
   // 0
   updateTemporaries();
 
+  EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
+
 }
 
 template<typename DISTORTION_T>
@@ -70,6 +77,8 @@ ExtendedUnifiedProjection<DISTORTION_T>::ExtendedUnifiedProjection(double alpha,
       _ru(resolutionU),
       _rv(resolutionV) {
   updateTemporaries();
+
+  EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
 }
 
 template<typename DISTORTION_T>
@@ -309,10 +318,6 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
       DERIVED_P> &>(outPointConst);
   outPoint.derived().resize(3);
 
-  // Unproject...
-
-
-
   const double mx = _recip_fu * (keypoint[0] - _cu);
   const double my = _recip_fv * (keypoint[1] - _cv);
 
@@ -473,24 +478,16 @@ void ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypointIntrinsicsJacob
 template<typename DISTORTION_T>
 template<typename DERIVED_P, typename DERIVED_JD>
 void ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian(
-    const Eigen::MatrixBase<DERIVED_P> & p,
+    const Eigen::MatrixBase<DERIVED_P> &,
     const Eigen::MatrixBase<DERIVED_JD> & outJd) const {
 
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_P>, 3);
 
-  keypoint_t kp;
-  kp[0] = 0;
-  kp[1] =0;
-
-  _distortion.distortParameterJacobian(kp, outJd);
-
   Eigen::MatrixBase<DERIVED_JD> & J =
       const_cast<Eigen::MatrixBase<DERIVED_JD> &>(outJd);
 
-  J.row(0) *= _fu;
-  J.row(1) *= _fv;
-
+  J.derived().resize(2, 0);
 }
 
 template<typename DISTORTION_T>
@@ -587,7 +584,7 @@ Eigen::VectorXd ExtendedUnifiedProjection<DISTORTION_T>::createRandomKeypoint() 
     u.setRandom();
     u = u - Eigen::Vector2d(0.5, 0.5);
     u /= u.norm();
-    u *= ((double) rand() / (double) RAND_MAX) * _one_over_2xi2_m_1;
+    u *= ((double) rand() / (double) RAND_MAX) * _one_over_beta_2alpha_m_1;
 
     // Now we run the point through distortion and projection.
     // Apply distortion
@@ -634,7 +631,7 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::isValid(
 template<typename DISTORTION_T>
 bool ExtendedUnifiedProjection<DISTORTION_T>::isUndistortedKeypointValid(
     const double rho2_d) const {
-  return alpha() <= 0.5 || rho2_d <= _one_over_2xi2_m_1;
+  return alpha() <= 0.5 || rho2_d <= _one_over_beta_2alpha_m_1;
 }
 
 template<typename DISTORTION_T>
@@ -648,9 +645,6 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::isLiftable(
   Eigen::Vector2d y;
   y[0] = _recip_fu * (keypoint[0] - _cu);
   y[1] = _recip_fv * (keypoint[1] - _cv);
-
-  // Re-distort
-  _distortion.undistort(y);
 
   // Now check if it is on the sensor
   double rho2_d = y[0] * y[0] + y[1] * y[1];
@@ -679,7 +673,7 @@ void ExtendedUnifiedProjection<DISTORTION_T>::updateTemporaries() {
   _recip_fu = 1.0 / _fu;
   _recip_fv = 1.0 / _fv;
   _fu_over_fv = _fu / _fv;
-  _one_over_2xi2_m_1 = 1.0 / (_beta * (2*_alpha - 1));
+  _one_over_beta_2alpha_m_1 = 1.0 / (_beta * (2*_alpha - 1));
   _fov_parameter = (_alpha <= 0.5) ? _alpha/(1-_alpha) : (1-_alpha) / _alpha;
 }
 
@@ -732,7 +726,7 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::isBinaryEqual(
       && _cv == rhs._cv && _ru == rhs._ru && _rv == rhs._rv
       && _recip_fu == rhs._recip_fu && _recip_fv == rhs._recip_fv
       && _fu_over_fv == rhs._fu_over_fv
-      && _one_over_2xi2_m_1 == rhs._one_over_2xi2_m_1
+      && _one_over_beta_2alpha_m_1 == rhs._one_over_beta_2alpha_m_1
       && _distortion.isBinaryEqual(rhs._distortion);
 }
 

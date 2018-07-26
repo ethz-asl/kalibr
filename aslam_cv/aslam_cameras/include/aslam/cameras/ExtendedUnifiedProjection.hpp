@@ -277,7 +277,7 @@ class ExtendedUnifiedProjection {
   double _recip_fu;
   double _recip_fv;
   double _fu_over_fv;
-  double _one_over_2xi2_m_1;
+  double _one_over_beta_2alpha_m_1;
   double _fov_parameter;  //!< parameter related to the valid region of the camera model
 
   distortion_t _distortion;
