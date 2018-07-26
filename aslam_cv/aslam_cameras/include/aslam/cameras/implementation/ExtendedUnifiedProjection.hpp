@@ -679,7 +679,7 @@ void ExtendedUnifiedProjection<DISTORTION_T>::updateTemporaries() {
   _recip_fu = 1.0 / _fu;
   _recip_fv = 1.0 / _fv;
   _fu_over_fv = _fu / _fv;
-  _one_over_2xi2_m_1 = 1.0 / _beta * (2*_alpha - 1);
+  _one_over_2xi2_m_1 = 1.0 / (_beta * (2*_alpha - 1));
   _fov_parameter = (_alpha <= 0.5) ? _alpha/(1-_alpha) : (1-_alpha) / _alpha;
 }
 
