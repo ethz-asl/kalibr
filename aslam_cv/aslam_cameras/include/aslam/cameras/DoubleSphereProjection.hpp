@@ -166,7 +166,6 @@ class DoubleSphereProjection {
 
   /// \brief is the projection invertible?
   bool isProjectionInvertible() const {
-     /// FIXME @demmeln true? --> where is it used?
     return true;
   }
 
