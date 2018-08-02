@@ -190,10 +190,10 @@ class ExtendedUnifiedProjection {
   }
   ;
 
-  /// \brief the xi1 parameter that controls the spherical projection.
+  /// \brief the alpha parameter that relates ellipsoid and pinhole projection.
   double alpha() const {
     return _alpha;
-  }  /// \brief the xi2 parameter that controls the spherical projection.
+  }  /// \brief the beta parameter that controls the ellipsoid shape.
   double beta() const {
     return _beta;
   }
@@ -252,11 +252,9 @@ class ExtendedUnifiedProjection {
   static ExtendedUnifiedProjection<distortion_t> getTestProjection();
  private:
 
-  // FIXME @demmeln: rename xi1 and xi2 to xi and alpha
-
-  /// \brief the xi1 parameter that controls the spherical projection.
+  /// \brief the alpha parameter that relates ellipsoid and pinhole projection.
   double _alpha;
-  /// \brief the xi2 parameter that controls the spherical projection.
+  /// \brief the beta parameter that controls the ellipsoid shape.
   double _beta;
   /// \brief The horizontal focal length in pixels.
   double _fu;

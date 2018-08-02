@@ -1,4 +1,3 @@
-
 #include <aslam/cameras/DoubleSphereProjection.hpp>
 #include <aslam/cameras/NoDistortion.hpp>
 
@@ -20,10 +19,8 @@ DoubleSphereProjection<DISTORTION_T>::DoubleSphereProjection()
   updateTemporaries();
 
   // NOTE @demmeln 2018-05-07: In order to use this with distortion, you need to add the proper calls for projection
-  //     and unprojection, including for Jacobian computation.
+  //     and unprojection, including for Jacobian computation. Compare to distored-omni model.
   EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
-
-
 }
 
 template<typename DISTORTION_T>
@@ -139,7 +136,6 @@ bool DoubleSphereProjection<DISTORTION_T>::euclideanToKeypoint(
   //SM_OUT(outKeypoint[0]);
   //SM_OUT(outKeypoint[1]);
 
-  // TODO @demmeln: ... distortion not implemented ...
   //_distortion.distort(outKeypoint);
   //std::cout << "distort\n";
   //SM_OUT(outKeypoint[0]);
@@ -249,9 +245,6 @@ bool DoubleSphereProjection<DISTORTION_T>::homogeneousToKeypoint(
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_K>, 2);
 
-  // FIXME @demmeln: check this...
-
-  // hope this works... (required to have valid static asserts)
   if (ph[3] < 0)
     return euclideanToKeypoint(-ph.derived().template head<3>(), outKeypoint);
   else
@@ -276,8 +269,6 @@ bool DoubleSphereProjection<DISTORTION_T>::homogeneousToKeypoint(
       const_cast<Eigen::MatrixBase<DERIVED_JP> &>(outJp);
   J.derived().resize(KeypointDimension, 4);
   J.setZero();
-
-  // FIXME @demmeln: check this... --> what about w == 0?
 
   if (ph[3] < 0) {
     bool success = euclideanToKeypoint(
@@ -327,11 +318,7 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToEuclidean(
   outPoint[1] = k * my;
   outPoint[2] = k * mz - _xi;
 
-  // TODO @demmeln: ... distortion not implemented ...
-
-
   return true;
-
 }
 
 template<typename DISTORTION_T>
@@ -430,8 +417,6 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToHomogeneous(
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_K>, 2);
 
-  // TODO @demmeln: discuss; why p[3] == 0
-
   Eigen::MatrixBase<DERIVED_P> & p =
       const_cast<Eigen::MatrixBase<DERIVED_P> &>(outPoint);
   p.derived().resize(4);
@@ -458,8 +443,6 @@ bool DoubleSphereProjection<DISTORTION_T>::keypointToHomogeneous(
       const_cast<Eigen::MatrixBase<DERIVED_JK> &>(outJk);
   Jk.derived().resize(4, 2);
   Jk.setZero();
-
-  // TODO @demmeln: discuss; why p[3] == 0
 
   Eigen::MatrixBase<DERIVED_P> & p =
       const_cast<Eigen::MatrixBase<DERIVED_P> &>(outPoint);
@@ -545,6 +528,7 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian
   Eigen::MatrixBase<DERIVED_JD> & J =
       const_cast<Eigen::MatrixBase<DERIVED_JD> &>(outJd);
 
+  // currently no distortion implemented
   J.derived().resize(2, 0);
 }
 
@@ -636,8 +620,6 @@ Eigen::VectorXd DoubleSphereProjection<DISTORTION_T>::createRandomKeypoint() con
   // Create a point on the normalized image plane inside the boundary.
   // This is not efficient, but it should be correct.
 
-// TODO @demmeln: check
-
   Eigen::Vector2d u(_ru + 1, _rv + 1);
 
   while (u[0] <= 0 || u[0] >= _ru - 1 || u[1] <= 0 || u[1] >= _rv - 1) {
@@ -648,7 +630,6 @@ Eigen::VectorXd DoubleSphereProjection<DISTORTION_T>::createRandomKeypoint() con
 
     // Now we run the point through distortion and projection.
     // Apply distortion
-    // TODO @demmeln: ... distortion not implemented ...
     // _distortion.distort(u);
 
     u[0] = _fu * u[0] + _cu;
@@ -685,8 +666,6 @@ bool DoubleSphereProjection<DISTORTION_T>::isValid(
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_K>, 2);
 
-  // FIXME @demmeln: shouldn't it be -0.5  <-->  ru()-0.5? --> checks if integer converted coordinates result in valid pixel?
-
   return keypoint(0) >= 0 && keypoint(0) < ru() && keypoint(1) >= 0
       && keypoint(1) < rv();
 }
@@ -696,7 +675,6 @@ bool DoubleSphereProjection<DISTORTION_T>::isUndistortedKeypointValid(
     const double rho2_d) const {
   return alpha() <= 0.5 || rho2_d <= _one_over_2alpha_m_1;
 }
-
 
 template<typename DISTORTION_T>
 template<typename DERIVED_K>
@@ -721,7 +699,6 @@ bool DoubleSphereProjection<DISTORTION_T>::isEuclideanVisible(
     const Eigen::MatrixBase<DERIVED_P> & p) const {
   keypoint_t k;
   return euclideanToKeypoint(p, k);
-
 }
 
 template<typename DISTORTION_T>
@@ -753,8 +730,8 @@ void DoubleSphereProjection<DISTORTION_T>::update(const double * v) {
   _cv += v[5];
 
   updateTemporaries();
-
 }
+
 template<typename DISTORTION_T>
 int DoubleSphereProjection<DISTORTION_T>::minimalDimensions() const {
   return 6;
@@ -806,10 +783,6 @@ DoubleSphereProjection<DISTORTION_T> DoubleSphereProjection<DISTORTION_T>::getTe
 
 template<typename DISTORTION_T>
 void DoubleSphereProjection<DISTORTION_T>::resizeIntrinsics(double scale) {
-
-  // NOTE @demmeln 2018-05-07: It's unclear for what this is used and what it should be (wrt. xi and alpha), so better fail loudly
-  SM_THROW(std::runtime_error, "no implemented");
-
   _fu *= scale;
   _fv *= scale;
   _cu *= scale;
@@ -822,24 +795,19 @@ void DoubleSphereProjection<DISTORTION_T>::resizeIntrinsics(double scale) {
 
 /// \brief initialize the intrinsics based on one view of a gridded calibration target
 /// \return true on success
-///
-/// These functions were developed with the help of Lionel Heng and the excellent camodocal
-/// https://github.com/hengli/camodocal
 template<typename DISTORTION_T>
 bool DoubleSphereProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<GridCalibrationTargetObservation> &observations) {
 
   SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
   SM_ASSERT_TRUE(Exception, observations.size() != 0, "Need min. one observation");
 
-  
-
+  // use the implementation in OmniProjection
   OmniProjection<DISTORTION_T> omni(1, _fu, _fv, _cu, _cv, _ru, _rv);
   bool success = omni.initializeIntrinsics(observations);
 
   if(success) {
+    // initial guess: spheres coincide
     _xi = 0;
-    // TODO @demmeln: why 0.5 xi?
-
     // xi is initialized to 1 in OmniProjection --> alpha should be 0.5
     _alpha = 0.5 * omni.xi();
     _fu = 0.5 * omni.fu();
@@ -854,7 +822,7 @@ bool DoubleSphereProjection<DISTORTION_T>::initializeIntrinsics(const std::vecto
   }
 
   return success;
-}  // initializeIntrinsics()
+}
 
 template<typename DISTORTION_T>
 size_t DoubleSphereProjection<DISTORTION_T>::computeReprojectionError(

@@ -169,8 +169,6 @@ namespace aslam {
         @{
         */
 
-      // TODO @demmeln: add multiple batches at the same time?
-
       /// Adds a measurement batch to the estimator
       ReturnValue addBatch(const BatchSP& batch, bool force = false);
       /// Removes a measurement batch from the estimator

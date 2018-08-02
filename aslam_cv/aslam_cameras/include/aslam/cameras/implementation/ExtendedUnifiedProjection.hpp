@@ -1,4 +1,3 @@
-
 #include <aslam/cameras/ExtendedUnifiedProjection.hpp>
 #include <aslam/cameras/NoDistortion.hpp>
 
@@ -16,10 +15,12 @@ ExtendedUnifiedProjection<DISTORTION_T>::ExtendedUnifiedProjection()
       _cv(0.0),
       _ru(1),
       _rv(1) {
+
   updateTemporaries();
 
+  // NOTE @demmeln 2018-05-07: In order to use this with distortion, you need to add the proper calls for projection
+  //     and unprojection, including for Jacobian computation. Compare to distored-omni model.
   EIGEN_STATIC_ASSERT_SAME_TYPE(DISTORTION_T, NoDistortion, "Currently only implemented for 'NoDistortion'");
-
 }
 
 template<typename DISTORTION_T>
@@ -111,7 +112,6 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypoint(
   const double d2 = _beta * (xx + yy) + zz;
   const double d = std::sqrt(d2);
 
-  // FIXME @demmeln: Add checks for this
   // Check if point will lead to a valid projection
   if (z <= -(_fov_parameter * d))
    return false;
@@ -127,7 +127,6 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypoint(
   //SM_OUT(outKeypoint[0]);
   //SM_OUT(outKeypoint[1]);
 
-  // FIXME @demmeln: Either add this properly, or add checks that ensure that NoDistortion
   //_distortion.distort(outKeypoint);
   //std::cout << "distort\n";
   //SM_OUT(outKeypoint[0]);
@@ -223,7 +222,6 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::homogeneousToKeypoint(
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(
       Eigen::MatrixBase<DERIVED_K>, 2);
 
-  // hope this works... (required to have valid static asserts)
   if (ph[3] < 0)
     return euclideanToKeypoint(-ph.derived().template head<3>(), outKeypoint);
   else
@@ -282,6 +280,7 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
 
   const double r2 = mx * mx + my * my;
 
+  // check if unprojected point is valid
   if (!isUndistortedKeypointValid(r2))
     return false;
 
@@ -294,10 +293,7 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
   outPoint[1] = my * norm_inv;
   outPoint[2] = k * norm_inv;
 
-
-
   return true;
-
 }
 
 template<typename DISTORTION_T>
@@ -349,7 +345,6 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
 
   const double d_norm_inv_d_r2 = -0.5 * (1 + 2 * k * d_k_d_r2) * norm_inv * norm_inv * norm_inv;
 
-  // \todo analytical Jacobian
   Eigen::MatrixBase<DERIVED_JK> & mbJk =
       const_cast<Eigen::MatrixBase<DERIVED_JK> &>(outJk);
   DERIVED_JK & Jk = mbJk.derived();
@@ -360,8 +355,6 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::keypointToEuclidean(
   Jk(0, 1) = (2 * my * mx * d_norm_inv_d_r2) * _recip_fv;
   Jk(1, 1) = (norm_inv + 2 * my * my * d_norm_inv_d_r2) * _recip_fv;
   Jk(2, 1) = 2 * my * (k * d_norm_inv_d_r2 + d_k_d_r2 * norm_inv) * _recip_fv;
-
-  //ASLAM_CAMERAS_ESTIMATE_JACOBIAN(this,keypointToEuclidean, keypoint, 1e-5, Jk);
 
   return true;
 
@@ -487,6 +480,7 @@ void ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypointDistortionJacob
   Eigen::MatrixBase<DERIVED_JD> & J =
       const_cast<Eigen::MatrixBase<DERIVED_JD> &>(outJd);
 
+  // currently no distortion implemented
   J.derived().resize(2, 0);
 }
 
@@ -657,7 +651,6 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::isEuclideanVisible(
     const Eigen::MatrixBase<DERIVED_P> & p) const {
   keypoint_t k;
   return euclideanToKeypoint(p, k);
-
 }
 
 template<typename DISTORTION_T>
@@ -688,8 +681,8 @@ void ExtendedUnifiedProjection<DISTORTION_T>::update(const double * v) {
   _cv += v[5];
 
   updateTemporaries();
-
 }
+
 template<typename DISTORTION_T>
 int ExtendedUnifiedProjection<DISTORTION_T>::minimalDimensions() const {
   return 6;
@@ -750,22 +743,20 @@ void ExtendedUnifiedProjection<DISTORTION_T>::resizeIntrinsics(double scale) {
 
 /// \brief initialize the intrinsics based on one view of a gridded calibration target
 /// \return true on success
-///
-/// These functions were developed with the help of Lionel Heng and the excellent camodocal
-/// https://github.com/hengli/camodocal
 template<typename DISTORTION_T>
 bool ExtendedUnifiedProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<GridCalibrationTargetObservation> &observations) {
 
   SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
   SM_ASSERT_TRUE(Exception, observations.size() != 0, "Need min. one observation");
 
-  
-
+  // use the implementation in OmniProjection
   OmniProjection<DISTORTION_T> omni(1, _fu, _fv, _cu, _cv, _ru, _rv);
   bool success = omni.initializeIntrinsics(observations);
 
   if(success) {
+    // xi is initialized to 1 in OmniProjection --> alpha should be 0.5
     _alpha = 0.5 * omni.xi();
+    // beta == 1 corresponds to omni-model
     _beta = 1.0;
     _fu = 0.5 * omni.fu();
     _fv = 0.5 * omni.fv();
@@ -773,14 +764,13 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::initializeIntrinsics(const std::ve
     _cv = omni.cv();
     _ru = omni.ru();
     _rv = omni.rv();
-    // FIXME @demmeln
-    //_distortion.clear();
+    _distortion.clear();
 
     updateTemporaries();
   }
 
   return success;
-}  // initializeIntrinsics()
+}
 
 template<typename DISTORTION_T>
 size_t ExtendedUnifiedProjection<DISTORTION_T>::computeReprojectionError(
