@@ -36,11 +36,11 @@ class ExtendedUnifiedProjection {
   /// \brief Default constructor
   ExtendedUnifiedProjection();
 
-  ExtendedUnifiedProjection(double xi1, double xi2, double focalLengthU, double focalLengthV,
+  ExtendedUnifiedProjection(double alpha, double beta, double focalLengthU, double focalLengthV,
                  double imageCenterU, double imageCenterV, int resolutionU,
                  int resolutionV, distortion_t distortion);
 
-  ExtendedUnifiedProjection(double xi1, double xi2, double focalLengthU, double focalLengthV,
+  ExtendedUnifiedProjection(double alpha, double beta, double focalLengthU, double focalLengthV,
                  double imageCenterU, double imageCenterV, int resolutionU,
                  int resolutionV);
 
