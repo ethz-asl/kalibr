@@ -36,11 +36,11 @@ class ExtendedUnifiedProjection {
   /// \brief Default constructor
   ExtendedUnifiedProjection();
 
-  ExtendedUnifiedProjection(double xi1, double xi2, double focalLengthU, double focalLengthV,
+  ExtendedUnifiedProjection(double alpha, double beta, double focalLengthU, double focalLengthV,
                  double imageCenterU, double imageCenterV, int resolutionU,
                  int resolutionV, distortion_t distortion);
 
-  ExtendedUnifiedProjection(double xi1, double xi2, double focalLengthU, double focalLengthV,
+  ExtendedUnifiedProjection(double alpha, double beta, double focalLengthU, double focalLengthV,
                  double imageCenterU, double imageCenterV, int resolutionU,
                  int resolutionV);
 
@@ -190,10 +190,10 @@ class ExtendedUnifiedProjection {
   }
   ;
 
-  /// \brief the xi1 parameter that controls the spherical projection.
+  /// \brief the alpha parameter that relates ellipsoid and pinhole projection.
   double alpha() const {
     return _alpha;
-  }  /// \brief the xi2 parameter that controls the spherical projection.
+  }  /// \brief the beta parameter that controls the ellipsoid shape.
   double beta() const {
     return _beta;
   }
@@ -252,11 +252,9 @@ class ExtendedUnifiedProjection {
   static ExtendedUnifiedProjection<distortion_t> getTestProjection();
  private:
 
-  // FIXME @demmeln: rename xi1 and xi2 to xi and alpha
-
-  /// \brief the xi1 parameter that controls the spherical projection.
+  /// \brief the alpha parameter that relates ellipsoid and pinhole projection.
   double _alpha;
-  /// \brief the xi2 parameter that controls the spherical projection.
+  /// \brief the beta parameter that controls the ellipsoid shape.
   double _beta;
   /// \brief The horizontal focal length in pixels.
   double _fu;

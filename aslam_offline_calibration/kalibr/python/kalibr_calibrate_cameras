@@ -35,7 +35,7 @@ cameraModels = { 'pinhole-radtan': acvb.DistortedPinhole,
                  'pinhole-fov':    acvb.FovPinhole,
                  'omni-none':      acvb.Omni,
                  'omni-radtan':    acvb.DistortedOmni,
-                 'eucm-none':    acvb.ExtendedUnified,
+                 'eucm-none':      acvb.ExtendedUnified,
                  'ds-none':        acvb.DoubleSphere}
 
 def signal_exit(signal, frame):
@@ -263,8 +263,6 @@ def main():
             progress = sm.Progress2(numViews); progress.sample()
             for view_id, timestamp in enumerate(timestamps):
                 
-                # TODO @demmeln: maybe add option to optimize with all or at least several frames immediately
-
                 #add new batch problem
                 obs_tuple = obsdb.getAllObsAtTimestamp(timestamp)    
                 est_baselines = list()
@@ -335,7 +333,6 @@ def main():
                             corners, reprojs, rerrs = kcc.getReprojectionErrors(calibrator, cidx)        
                             me, se = kcc.getReprojectionErrorStatistics(rerrs)
                             se_threshold = 4.0*se #TODO: find good value 
-                            # FIXME @demmeln: there should be some maximum absolute value for this threshold, at least for the final filtering...
 
                             #select corners to remove
                             cornerRemovalList=list()

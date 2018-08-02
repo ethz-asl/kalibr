@@ -36,11 +36,11 @@ class DoubleSphereProjection {
   /// \brief Default constructor
   DoubleSphereProjection();
 
-  DoubleSphereProjection(double xi1, double xi2, double focalLengthU, double focalLengthV,
+  DoubleSphereProjection(double xi, double alpha, double focalLengthU, double focalLengthV,
                  double imageCenterU, double imageCenterV, int resolutionU,
                  int resolutionV, distortion_t distortion);
 
-  DoubleSphereProjection(double xi1, double xi2, double focalLengthU, double focalLengthV,
+  DoubleSphereProjection(double xi, double alpha, double focalLengthU, double focalLengthV,
                  double imageCenterU, double imageCenterV, int resolutionU,
                  int resolutionV);
 
@@ -166,7 +166,6 @@ class DoubleSphereProjection {
 
   /// \brief is the projection invertible?
   bool isProjectionInvertible() const {
-     /// FIXME @demmeln true? --> where is it used?
     return true;
   }
 
