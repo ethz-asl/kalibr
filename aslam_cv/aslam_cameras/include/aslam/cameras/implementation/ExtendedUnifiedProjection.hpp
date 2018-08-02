@@ -720,6 +720,7 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::isBinaryEqual(
       && _recip_fu == rhs._recip_fu && _recip_fv == rhs._recip_fv
       && _fu_over_fv == rhs._fu_over_fv
       && _one_over_beta_2alpha_m_1 == rhs._one_over_beta_2alpha_m_1
+      && _fov_parameter == rhs._fov_parameter
       && _distortion.isBinaryEqual(rhs._distortion);
 }
 
