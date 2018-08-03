@@ -835,7 +835,7 @@ bool PinholeProjection<DISTORTION_T>::estimateTransformation(
     Eigen::Vector3d backProjection;
 
     if (keypointToEuclidean(imagePoint, backProjection)
-        && backProjection[2] > 0.0) {
+        && backProjection.normalized()[2] > std::cos(80.0*M_PI/180.0)) {
       double x = backProjection[0];
       double y = backProjection[1];
       double z = backProjection[2];
