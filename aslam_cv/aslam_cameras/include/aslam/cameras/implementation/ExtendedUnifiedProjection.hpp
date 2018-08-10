@@ -99,7 +99,6 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypoint(
   Eigen::MatrixBase<DERIVED_K> & outKeypoint = const_cast<Eigen::MatrixBase<
       DERIVED_K> &>(outKeypointConst);
   outKeypoint.derived().resize(2);
-  //    SM_OUT(p.transpose());
 
   const double& x = p[0];
   const double& y = p[1];
@@ -121,22 +120,9 @@ bool ExtendedUnifiedProjection<DISTORTION_T>::euclideanToKeypoint(
 
   outKeypoint[0] = x * norm_inv;
   outKeypoint[1] = y * norm_inv;
-  //std::cout << "normalize\n";
-  //SM_OUT(d);
-  //SM_OUT(rz);
-  //SM_OUT(outKeypoint[0]);
-  //SM_OUT(outKeypoint[1]);
-
-  //_distortion.distort(outKeypoint);
-  //std::cout << "distort\n";
-  //SM_OUT(outKeypoint[0]);
-  //SM_OUT(outKeypoint[1]);
 
   outKeypoint[0] = _fu * outKeypoint[0] + _cu;
   outKeypoint[1] = _fv * outKeypoint[1] + _cv;
-  //std::cout << "project\n";
-  //SM_OUT(outKeypoint[0]);
-  //SM_OUT(outKeypoint[1]);
 
   // Check if keypoint lies on the sensor
   return isValid(outKeypoint);
