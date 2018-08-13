@@ -15,7 +15,14 @@ Kalibr is a toolbox that solves the following calibration problems:
 
 **Please find more information on the [wiki pages](https://github.com/ethz-asl/kalibr/wiki) of this repository.**
 
-**For questions or comments, please use the [user forum](https://groups.google.com/forum/#!forum/kalibr-users).**
+**For questions or comments, please open an issue on Github.**
+
+## Tutorial: IMU-camera calibration
+A video tutorial for the IMU-camera calibration can be found here:
+
+[![alt text](https://user-images.githubusercontent.com/5337083/44033014-50208b8a-9f09-11e8-8e9a-d7d6d3c69d97.png)](https://m.youtube.com/watch?v=puNXsnrYWTY "imu cam calib")
+
+(Credits: @indigomega)
 
 ## Authors
 * Paul Furgale ([email](paul.furgale@mavt.ethz.ch))
