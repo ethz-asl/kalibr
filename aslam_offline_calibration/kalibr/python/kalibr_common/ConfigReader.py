@@ -59,7 +59,7 @@ class AslamCamera(object):
                 self.keypointType = cv.Keypoint2
                 self.reprojectionErrorType = cvb.FovDistortedPinholeReprojectionErrorSimple
                 self.undistorterType = cv.FovPinholeUndistorterNoMask
-            else:
+            elif dist_model == 'none':
                 proj = cv.PinholeProjection(focalLength[0], focalLength[1], 
                                             principalPoint[0], principalPoint[1], 
                                             resolution[0], resolution[1])
@@ -69,6 +69,8 @@ class AslamCamera(object):
                 self.frameType = cv.PinholeFrame
                 self.keypointType = cv.Keypoint2
                 self.reprojectionErrorType = cvb.PinholeReprojectionErrorSimple
+            else:
+                self.raiseError("pinhole camera model does not support distortion model '{}'".format(dist_model))
                 
         elif camera_model == 'omni':
             xi_omni = intrinsics[0]
@@ -84,7 +86,6 @@ class AslamCamera(object):
                                                         resolution[0], resolution[1], 
                                                         dist)
 
-                
                 self.geometry = cv.DistortedOmniCameraGeometry(proj)
                 
                 self.frameType = cv.DistortedOmniFrame
@@ -94,8 +95,7 @@ class AslamCamera(object):
                 
             elif dist_model == 'equidistant':
                 
-                print "Omni with equidistant model not yet supported!"
-                sys.exit(0)
+                raise RuntimeError("Omni with equidistant model not yet supported!")
                 
                 dist = cv.EquidistantPinholeProjection(dist_coeff[0], dist_coeff[1], 
                                                            dist_coeff[2], dist_coeff[3])
@@ -113,10 +113,61 @@ class AslamCamera(object):
                 self.reprojectionErrorType = cvb.EquidistantDistortedOmniReprojectionErrorSimple
 
             elif dist_model == 'none':
-                self.raiseError("camera model omni needs a distortion model! (none is invalid)")
+
+                proj = cv.OmniProjection(xi_omni, focalLength[0], focalLength[1],
+                                                        principalPoint[0], principalPoint[1],
+                                                        resolution[0], resolution[1])
+
+                self.geometry = cv.OmniCameraGeometry(proj)
+
+                self.frameType = cv.OmniFrame
+                self.keypointType = cv.Keypoint2
+                self.reprojectionErrorType = cvb.OmniReprojectionErrorSimple
+
+            else:
+                raise RuntimeError("omni camera model does not support distortion model '{}'".format(dist_model))
+
+        elif camera_model == 'eucm':
+            alpha_uni = intrinsics[0]
+            beta_uni = intrinsics[1]
+            focalLength = intrinsics[2:4]
+            principalPoint = intrinsics[4:6]
+
+            if dist_model == 'none':
+                proj = cv.ExtendedUnifiedProjection(alpha_uni, beta_uni, focalLength[0], focalLength[1],
+                                                    principalPoint[0], principalPoint[1],
+                                                    resolution[0], resolution[1])
+
+                self.geometry = cv.ExtendedUnifiedCameraGeometry(proj)
+
+                self.frameType = cv.ExtendedUnifiedFrame
+                self.keypointType = cv.Keypoint2
+                self.reprojectionErrorType = cvb.ExtendedUnifiedReprojectionErrorSimple
+
+            else:
+                raise RuntimeError("camera model {} does not support distortion model '{}'".format(camera_model, dist_model))
+        
+        elif camera_model == 'ds':
+            xi_ds = intrinsics[0]
+            alpha_ds = intrinsics[1]
+            focalLength = intrinsics[2:4]
+            principalPoint = intrinsics[4:6]
+
+            if dist_model == 'none':
+                proj = cv.DoubleSphereProjection(xi_ds, alpha_ds, focalLength[0], focalLength[1],
+                                                 principalPoint[0], principalPoint[1],
+                                                 resolution[0], resolution[1])
+
+                self.geometry = cv.DoubleSphereCameraGeometry(proj)
                 
+                self.frameType = cv.DoubleSphereFrame
+                self.keypointType = cv.Keypoint2
+                self.reprojectionErrorType = cvb.DoubleSphereReprojectionErrorSimple
+            else:
+                raise RuntimeError("camera model {} does not support distortion model '{}'".format(camera_model, dist_model))
+
         else:
-            self.raiseError("Unknown camera model")
+            raise RuntimeError("Unknown camera model '{}'".format(camera_model))
         
     @classmethod
     def fromParameters(cls, params):
@@ -207,28 +258,62 @@ class CameraParameters(ParametersBase):
     #intrinsics
     def checkIntrinsics(self, model, intrinsics):
         cameraModels = ['pinhole', 
-                        'omni']
+                        'omni',
+                        'eucm',
+                        'ds']
         
         if model not in cameraModels:
-            self.raiseError('Unknown camera model; available models: {0}. )'.format(cameraModels) )
+            self.raiseError("Unknown camera model '{}'; available models: {}.".format(model, ", ".join(cameraModels)) )
         
         if model == 'pinhole':
             if len(intrinsics) != 4:
-                self.raiseError("invalid intrinsics for pinhole; [fu, fv, pu, pv]")
+                self.raiseError("invalid intrinsics for pinhole; should be [fu, fv, pu, pv], but got {} parameters".format(len(intrinsics)))
 
             focalLength = intrinsics[0:2]
             principalPoint = intrinsics[2:4]
             
         elif model == 'omni':
             if len(intrinsics) != 5:
-                self.raiseError("invalid intrinsics for omni; [xi, fu, fv, pu, pv]")
+                self.raiseError("invalid intrinsics for omni; should be [xi, fu, fv, pu, pv], but got {} parameters".format(len(intrinsics)))
             
             xi_omni = intrinsics[0]
             focalLength = intrinsics[1:3]
             principalPoint = intrinsics[3:5]
             
             if xi_omni<0:
-                self.raiseError("invalid xi_omni (xi>0)" )
+                self.raiseError("invalid xi_omni of {} (xi>0)".format(xi_omni) )
+
+        elif model == "ds":
+
+            if len(intrinsics) != 6:
+                self.raiseError("invalid intrinsics for ds; should be [xi, alpha, fu, fv, pu, pv], but got {} parameters".format(len(intrinsics)))
+
+            xi_ds = intrinsics[0]
+            alpha_ds = intrinsics[1]
+            focalLength = intrinsics[2:4]
+            principalPoint = intrinsics[4:6]
+
+            if alpha_ds < 0 or alpha_ds >= 1:
+                self.raiseError("invalid alpha_ds of {} (0<=alpha<1)".format(alpha_ds) )
+
+        elif model == "eucm":
+
+            if len(intrinsics) != 6:
+                self.raiseError("invalid intrinsics for ds; should be [xi, alpha, fu, fv, pu, pv], but got {} parameters".format(len(intrinsics)))
+
+            alpha_eucm = intrinsics[0]
+            beta_eucm = intrinsics[1]
+            focalLength = intrinsics[2:4]
+            principalPoint = intrinsics[4:6]
+
+            if alpha_eucm < 0 or alpha_eucm >= 1:
+                self.raiseError("invalid alpha_eucm of {} (0<=alpha<1)".format(alpha_eucm) )
+
+            if beta_eucm < 0:
+                self.raiseError("invalid beta_eucm of {} (beta>=0)".format(beta_eucm) )
+
+        else:
+            self.raiseError('internal error: invalid camera model {} (should have been checked before)'.format(model))
         
         if not isinstance(focalLength[0],float) or not isinstance(focalLength[1],float) or focalLength[0] < 0.0 or focalLength[1] < 0.0:
             self.raiseError("invalid focalLength (2 floats)")
@@ -257,10 +342,12 @@ class CameraParameters(ParametersBase):
                                         'none': 0}
                
         if model not in distortionModelsAndNumParams:
-            self.raiseError('Unknown distortion model. Supported models: {0}. )'.format(distortionModels) )
+            self.raiseError("Unknown distortion model '{}'. Supported models: {}. )".format(
+                model, ", ".join(distortionModelsAndNumParams.keys())))
         
         if len(coeffs) != distortionModelsAndNumParams[model]:
-            self.raiseError("distortion model requires 4 coefficients")
+            self.raiseError("distortion model '{}' requires {} coefficients; {} given".format(
+                model, distortionModelsAndNumParams[model], len(coeffs)))
     
     @catch_keyerror
     def getDistortion(self):       
@@ -304,12 +391,31 @@ class CameraParameters(ParametersBase):
             xi_omni = intrinsics[0]
             focalLength = intrinsics[1:3]
             principalPoint = intrinsics[3:5]
-            
+
+        elif camera_model == 'eucm':
+            [alpha_eucm, beta_eucm] = intrinsics[0:2]
+            focalLength = intrinsics[2:4]
+            principalPoint = intrinsics[4:6]
+
+        elif camera_model == 'ds':
+            [xi_ds, alpha_ds] = intrinsics[0:2]
+            focalLength = intrinsics[2:4]
+            principalPoint = intrinsics[4:6]
+
+        else:
+            self.raiseError("Unknown camera model '{}'.".format(camera_model))
+
         print >> dest, "  Camera model: {0}".format(camera_model)
         print >> dest, "  Focal length: {0}".format(focalLength)
         print >> dest, "  Principal point: {0}".format(principalPoint)
         if camera_model == 'omni':
             print >> dest, "  Omni xi: {0}".format(xi_omni)
+        if camera_model == 'eucm':
+            print >> dest, "  EUCM alpha: {0}".format(alpha_eucm)
+            print >> dest, "  EUCM beta: {0}".format(beta_eucm)
+        if camera_model == 'ds':
+            print >> dest, "  DS xi: {0}".format(xi_ds)
+            print >> dest, "  DS alpha: {0}".format(alpha_ds)
         print >> dest, "  Distortion model: {0}".format(dist_model)
         print >> dest, "  Distortion coefficients: {0}".format(dist_coeff)
 
@@ -365,8 +471,8 @@ class ImuParameters(ParametersBase):
     
     def setAccelerometerStatistics(self, noise_density, random_walk):
         self.checkAccelerometerStatistics(noise_density, random_walk)
-        self.data["accelerometer_noise_density"] = accelerometer_noise_density
-        self.data["accelerometer_random_walk"] = accelerometer_random_walk
+        self.data["accelerometer_noise_density"] = noise_density
+        self.data["accelerometer_random_walk"] = random_walk
     
     #gyro statistics
     def checkGyroStatistics(self, noise_density, random_walk):
@@ -383,8 +489,8 @@ class ImuParameters(ParametersBase):
     
     def setGyroStatistics(self, noise_density, random_walk):
         self.checkGyroStatistics(noise_density, random_walk)
-        self.data["gyroscope_noise_density"] = accelerometer_noise_density
-        self.data["gyroscope_random_walk"] = accelerometer_random_walk
+        self.data["gyroscope_noise_density"] = noise_density
+        self.data["gyroscope_random_walk"] = random_walk
 
     
     ###################################################

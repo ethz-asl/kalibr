@@ -39,6 +39,9 @@ BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
   aslam::python::exportReprojectionErrors<FovDistortedPinholeRsCameraGeometry>("FovDistortedPinholeRs");
   aslam::python::exportCovarianceReprojectionError<FovDistortedPinholeRsCameraGeometry>("FovDistortedPinholeRs");
 
+  aslam::python::exportReprojectionErrors<ExtendedUnifiedCameraGeometry>("ExtendedUnified");
+  aslam::python::exportReprojectionErrors<DoubleSphereCameraGeometry>("DoubleSphere");
+
   aslam::python::exportReprojectionErrors<OmniCameraGeometry>("Omni");
   aslam::python::exportReprojectionErrors<OmniRsCameraGeometry>("OmniRs");
   aslam::python::exportCovarianceReprojectionError<OmniRsCameraGeometry>("OmniRs");
@@ -73,6 +76,9 @@ BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
   exportCameraDesignVariables<DistortedOmniRsCameraGeometry>("DistortedOmniRsCameraGeometry");
   exportCameraDesignVariables<EquidistantDistortedOmniRsCameraGeometry>("EquidistantDistortedOmniRsCameraGeometry");
   exportCameraDesignVariables<FovDistortedOmniRsCameraGeometry>("FovDistortedOmniRsCameraGeometry");
+
+  exportCameraDesignVariables<ExtendedUnifiedCameraGeometry>("ExtendedUnifiedCameraGeometry");
+  exportCameraDesignVariables<DoubleSphereCameraGeometry>("DoubleSphereCameraGeometry");
 
   exportCameraDesignVariables<OmniCameraGeometry>("OmniCameraGeometry");
   exportCameraDesignVariables<DistortedOmniCameraGeometry>("DistortedOmniCameraGeometry");
@@ -114,6 +120,9 @@ BOOST_PYTHON_MODULE(libaslam_cv_backend_python)
   exportGenericProjectionDesignVariable< PinholeProjection<RadialTangentialDistortion> >("DistortedPinholeProjection");
   exportGenericProjectionDesignVariable< PinholeProjection<EquidistantDistortion> >("EquidistantDistortedPinholeProjection");
   exportGenericProjectionDesignVariable< PinholeProjection<FovDistortion> >("FovDistortedPinholeProjection");
+
+  exportGenericProjectionDesignVariable< ExtendedUnifiedProjection<NoDistortion> >("ExtendedUnifiedProjection");
+  exportGenericProjectionDesignVariable< DoubleSphereProjection<NoDistortion> >("DoubleSphereProjection");
 
   exportGenericProjectionDesignVariable< OmniProjection<NoDistortion> >("OmniProjection");
   exportGenericProjectionDesignVariable< OmniProjection<RadialTangentialDistortion> >("DistortedOmniProjection");

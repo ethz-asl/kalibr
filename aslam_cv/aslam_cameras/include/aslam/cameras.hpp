@@ -7,6 +7,8 @@
 // Projection models
 #include <aslam/cameras/PinholeProjection.hpp>
 #include <aslam/cameras/OmniProjection.hpp>
+#include <aslam/cameras/ExtendedUnifiedProjection.hpp>
+#include <aslam/cameras/DoubleSphereProjection.hpp>
 #include <aslam/cameras/DepthProjection.hpp>
 
 // Distortion models
@@ -41,6 +43,9 @@ typedef CameraGeometry<OmniProjection<EquidistantDistortion>, GlobalShutter,
     NoMask> EquidistantDistortedOmniCameraGeometry;
 typedef CameraGeometry<OmniProjection<FovDistortion>, GlobalShutter,
     NoMask> FovDistortedOmniCameraGeometry;
+
+typedef CameraGeometry<ExtendedUnifiedProjection<NoDistortion>, GlobalShutter, NoMask> ExtendedUnifiedCameraGeometry;
+typedef CameraGeometry<DoubleSphereProjection<NoDistortion>, GlobalShutter, NoMask> DoubleSphereCameraGeometry;
 
 typedef CameraGeometry<PinholeProjection<NoDistortion>, RollingShutter, NoMask> PinholeRsCameraGeometry;
 typedef CameraGeometry<PinholeProjection<RadialTangentialDistortion>,
