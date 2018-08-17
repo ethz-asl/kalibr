@@ -165,7 +165,7 @@ boost::posix_time::time_duration DurationBase<T>::toBoost() const {
 #if defined(BOOST_DATE_TIME_HAS_NANOSECONDS)
   return bt::seconds(sec) + bt::nanoseconds(nsec);
 #else
-  return bt::seconds(sec) + bt::microseconds(nsec / 1000.0);
+  return bt::seconds(sec) + bt::microseconds(static_cast<int32_t>(nsec / 1000.0));
 #endif
 }
 

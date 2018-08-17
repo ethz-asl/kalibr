@@ -1,4 +1,3 @@
-
 #include <aslam/backend/MatrixTransformation.hpp>
 #include <sm/kinematics/rotations.hpp>
 #include <aslam/Exceptions.hpp>
@@ -17,7 +16,7 @@ namespace aslam {
     	_UpdatePattern << UpdatePattern;              // Pattern of the Matrix;  1: design variables; 0: constants
     	_UpdateDimension = 0;
     	for (int i=0; i<9; i++){
-    		if (_UpdatePattern(i%3,floor(static_cast<double>(i/3)))==1){
+    		if (_UpdatePattern(i%3,int(floor(static_cast<double>(i/3))))==1){
     			_UpdateDimension ++;					// Count, how many design variables are in the matrix
     		}
     	}
@@ -41,8 +40,8 @@ namespace aslam {
       Eigen::Matrix3d dA;
       int j=0;
       for (int i=0; i<9; i++){
-    	  _A(i%3,floor(static_cast<double>(i/3))) += _UpdatePattern(i%3,floor(static_cast<double>(i/3)))*dp[j];
-    	  if (_UpdatePattern(i%3,floor(static_cast<double>(i/3)))==1){j++; }
+    	  _A(i%3,int(floor(static_cast<double>(i/3)))) += _UpdatePattern(i%3,int(floor(static_cast<double>(i/3))))*dp[j];
+    	  if (_UpdatePattern(i%3,int(floor(static_cast<double>(i/3))))==1){j++; }
       }
     }
     
@@ -71,7 +70,7 @@ namespace aslam {
     	Eigen::MatrixXd finalJacobian(3,_UpdateDimension);
 		int j=0;
 		for (int i=0; i<9; i++){
-			if (_UpdatePattern(i%3,floor(static_cast<double>(i/3)))==1){
+			if (_UpdatePattern(i%3,int(floor(static_cast<double>(i/3))))==1){
 				SM_ASSERT_GT_DBG(aslam::Exception, _UpdateDimension, j , "Incorrect update dimension! It doesn't match the pattern");
 				finalJacobian.col(j) = applyChainRule.col(i);		// took out only the rows for the values, which are design variables
 				j++;
@@ -115,4 +114,3 @@ namespace aslam {
 
   } // namespace backend
 } // namespace aslam
-
