@@ -2,7 +2,8 @@
 print "importing libraries"
 
 import kalibr_common as kc
-import cv
+
+
 import cv2
 import csv
 import os
@@ -10,7 +11,13 @@ import sys
 import argparse
 import sm
 
-print
+
+try:
+    import cv
+    png_flag = cv.CV_IMWRITE_PNG_COMPRESSION
+except ImportError:    
+    png_flag = cv2.IMWRITE_PNG_COMPRESSION
+
 
 #setup the argument list
 parser = argparse.ArgumentParser(description='Extract a ROS bag containing a image and imu topics.')
@@ -54,7 +61,7 @@ if parsed.image_topics is not None:
       
       for timestamp, image in dataset:
         params = list()
-        params.append(cv.CV_IMWRITE_PNG_COMPRESSION)
+        params.append(png_flag)
         params.append(0) #0: loss-less  
         filename = "{0}{1:09d}.png".format(timestamp.secs, timestamp.nsecs)
         cv2.imwrite( "{0}/cam{1}/{2}".format(parsed.output_folder, cidx, filename), image, params )
