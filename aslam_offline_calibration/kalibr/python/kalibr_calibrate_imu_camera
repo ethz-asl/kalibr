@@ -45,11 +45,11 @@ def parseArgs():
             return formatter.format_help()     
         
     usage = """
-    Example usage to calibrate a camera system against an IMU using an aprilgrid
-    with temporal calibration enabled.
+    Example usage to calibrate a camera system against an IMU using an aprilgrid.
+    Temporal calibration is enabled by default.
     
     %(prog)s --bag MYROSBAG.bag --cam camchain.yaml --imu imu.yaml \\
-             --target aprilgrid.yaml --time-calibration
+             --target aprilgrid.yaml 
     
     camchain.yaml: is the camera-system calibration output of the multiple-camera
                    calibratin tool (kalibr_calibrate_cameras)
@@ -89,7 +89,7 @@ def parseArgs():
     
     #optimization options
     groupOpt = parser.add_argument_group('Optimization options')
-    groupOpt.add_argument('--time-calibration', action='store_false', dest='no_time', help='Enable the temporal calibration', required=False)      
+    groupOpt.add_argument('--no-time-calibration', action='store_true', dest='no_time', help='Disable the temporal calibration', required=False)      
     groupOpt.add_argument('--max-iter', type=int, default=30, dest='max_iter', help='Max. iterations (default: %(default)s)', required=False)
     groupOpt.add_argument('--recover-covariance', action='store_true', dest='recover_cov', help='Recover the covariance of the design variables.', required=False)
     groupOpt.add_argument('--timeoffset-padding', type=float, default=10.e-3, dest='timeoffset_padding', help='Maximum range in which the timeoffset may change during estimation [s] (default: %(default)s)', required=False)
