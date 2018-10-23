@@ -86,11 +86,14 @@ def generateAprilTag(canvas, position, metricSize, tagSpacing, tagID, tagFamilil
             c.fill(path.rect(point[0], point[1], metricSquareSize, metricSquareSize),[color.rgb.black])
 
 #tagSpaceing in % of tagSize
-def generateAprilBoard(canvas, n_cols, n_rows, tagSize, tagSpacing=0.25, tagFamilily="t36h11"):
+def generateAprilBoard(canvas, n_cols, n_rows, tagSize, tagSpacing=0.25, tagFamilily="t36h11", skipIds=None):
     
     if(tagSpacing<0 or tagSpacing>1.0):
         print "[ERROR]: Invalid tagSpacing specified.  [0-1.0] of tagSize"
         sys.exit(0)
+
+    if skipIds is None:
+        skip_ids = []
         
     #convert to cm
     tagSize = tagSize*100.0
@@ -105,9 +108,10 @@ def generateAprilBoard(canvas, n_cols, n_rows, tagSize, tagSpacing=0.25, tagFami
     for y in range(0,n_rows):
         for x in range(0,n_cols):
             id = n_cols * y + x
-            pos = ( x*(1+tagSpacing)*tagSize, y*(1+tagSpacing)*tagSize)
-            generateAprilTag(canvas, pos, tagSize, tagSpacing, id, tagFamililyData, rotation=2)
-            #c.text(pos[0]+0.45*tagSize, pos[1]-0.7*tagSize*tagSpacing, "{0}".format(id))
+            if id not in skipIds:
+                pos = ( x*(1+tagSpacing)*tagSize, y*(1+tagSpacing)*tagSize)
+                generateAprilTag(canvas, pos, tagSize, tagSpacing, id, tagFamililyData, rotation=2)
+                #c.text(pos[0]+0.45*tagSize, pos[1]-0.7*tagSize*tagSpacing, "{0}".format(id))
     
     #draw axis
     pos = ( -1.5*tagSpacing*tagSize, -1.5*tagSpacing*tagSize)
@@ -175,7 +179,8 @@ if __name__ == "__main__":
     aprilOptions.add_argument('--tsize', type=float, default=0.08, dest='tsize', help='The size of one tag [m] (default: %(default)s)')
     aprilOptions.add_argument('--tspace', type=float, default=0.3, dest='tagspacing', help='The space between the tags in fraction of the edge size [0..1] (default: %(default)s)')
     aprilOptions.add_argument('--tfam', default='t36h11', dest='tagfamiliy', help='Familiy of April tags {0} (default: %(default)s)'.format(AprilTagCodes.TagFamilies.keys())) 
-    
+    aprilOptions.add_argument('--skip-ids', default='', dest='skipIds', help='Space-separated list of tag ids to leave blank (default: none)')
+
     checkerOptions = parser.add_argument_group('Checkerboard arguments')    
     checkerOptions.add_argument('--csx', type=float, default=0.05, dest='chessSzX', help='The size of one chessboard square in x direction [m] (default: %(default)s)')
     checkerOptions.add_argument('--csy', type=float, default=0.05, dest='chessSzY', help='The size of one chessboard square in y direction [m] (default: %(default)s)')
@@ -189,13 +194,16 @@ if __name__ == "__main__":
         parsed = parser.parse_args()
     except:
         sys.exit(0)
+
+    # post-process arguments
+    parsed.skipIds = [int(x) for x in parsed.skipIds.split(" ") if x]
  
     #open a new canvas
     c = canvas.canvas()
     
     #draw the board
     if parsed.gridType == "apriltag":
-        generateAprilBoard(canvas, parsed.n_cols, parsed.n_rows, parsed.tsize, parsed.tagspacing, parsed.tagfamiliy)
+        generateAprilBoard(canvas, parsed.n_cols, parsed.n_rows, parsed.tsize, parsed.tagspacing, parsed.tagfamiliy, parsed.skipIds)
     elif parsed.gridType == "checkerboard":
         generateCheckerboard(c, parsed.n_cols, parsed.n_rows, parsed.chessSzX, parsed.chessSzY)
     else:
