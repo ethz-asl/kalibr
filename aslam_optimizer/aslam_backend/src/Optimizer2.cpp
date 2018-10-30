@@ -296,7 +296,8 @@ namespace aslam {
                     const int dbd = d->minimalDimensions();
                     Eigen::VectorXd dxS = _dx.segment(startIdx, dbd);
                     dxS *= d->scaling();
-                    d->update(&dxS[0], dbd);
+                    if(dbd > 0)
+                        d->update(&dxS[0], dbd);
                     startIdx += dbd;
                 }
                 // Track the maximum delta
