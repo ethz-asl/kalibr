@@ -65,6 +65,9 @@ class CameraChainValidator(object):
         self.chainConfig = chainConfig
         self.numCameras = chainConfig.numCameras()
         self.bridge = CvBridge()
+        #cv2.namedWindow("test")
+        self.num = 0
+
         
         #initialize the cameras in the chain
         self.G = igraph.Graph(self.numCameras)
@@ -101,13 +104,15 @@ class CameraChainValidator(object):
                 
         #register the callback for the synchronized images
         #sync_sub = message_filters.TimeSynchronizer([val.image_sub for val in self.monovalidators],1)
-        sync_sub = message_filters.ApproximateTimeSynchronizer([val.image_sub for val in self.monovalidators], 1, 0.5)
+        sync_sub = message_filters.ApproximateTimeSynchronizer([val.image_sub for val in self.monovalidators], 10, 0.5)
         sync_sub.registerCallback(self.synchronizedCallback)
 
         #initialize message throttler
         self.timeLast = 0
 
     def synchronizedCallback(self, *cam_msgs):
+        #print("Call back received..")
+
         #throttle image processing
         rate = 2 #Hz
         timeNow = time.time()
@@ -118,7 +123,7 @@ class CameraChainValidator(object):
         #process the images of all cameras
         self.observations=[]; 
         for cam_nr, msg in enumerate(cam_msgs):
-          
+         
             #convert image to numpy
             try:
                 if (msg.encoding == "rgb8" or msg.encoding == "bgra8"):
@@ -126,9 +131,10 @@ class CameraChainValidator(object):
                 else:
                   cv_image = self.bridge.imgmsg_to_cv2(msg)
                 np_image = np.array(cv_image)
+                
             except CvBridgeError, e:
                 print e
-            
+        
             #get the corresponding monovalidator instance
             validator = self.monovalidators[cam_nr]
             
@@ -145,16 +151,15 @@ class CameraChainValidator(object):
                 validator.undist_image = validator.undistorter.undistortImage(np_image)
                             
             #generate a mono view for each cam
-            validator.generateMonoview(np_image, observation, success)            
+            #validator.generateMonoview(np_image, observation, success)            
             
-        #generate all rectification views
+        # #generate all rectification views
         for edge in self.G.es:
             cidx_src = edge.source
             cidx_dest = edge.target
             self.generatePairView(cidx_src, cidx_dest)
-                
-        cv2.waitKey(1)
-    
+        cv2.waitKey(100)
+
     #returns transformation T_to_from
     def getTransformationCamFromTo(self, cidx_from, cidx_to):
         #build pose chain (target->cam0->baselines->camN)
@@ -193,7 +198,7 @@ class CameraChainValidator(object):
     def generatePairView(self, camAnr, camBnr):
         #prepare the window
         windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
-        cv2.namedWindow(windowName, 1)
+        #cv2.namedWindow(windowName, 1)
             
         #get the mono validators for each cam
         camA = self.monovalidators[camAnr]
@@ -254,12 +259,15 @@ class CameraChainValidator(object):
                                            camB.undist_image, 
                                            edge["rect_map"][camBnr])
         
+        #cv2.imshow("A", camA.undist_image)
+        #cv2.imshow("B", camB.undist_image)
+
         #draw some epilines
         np_image_rect = cv2.cvtColor(np_image_rect, cv2.COLOR_GRAY2BGR)
         n=10
         for i in range(0,n):
             y = np_image_rect.shape[0]*i/n
-            cv2.line(np_image_rect, (0,y), (2*np_image_rect.shape[1],y),(0,255,0));
+            # cv2.line(np_image_rect, (0,y), (2*np_image_rect.shape[1],y),(0,255,0));
     
     
         if len(common_ids) > 0:
@@ -289,13 +297,17 @@ class CameraChainValidator(object):
                 if err_txt == "":
                     continue
                  
-                cv2.putText(np_image_rect, err_txt, (x,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
-                cv2.putText(np_image_rect, "{0: .4f}".format(err_val), (x+100,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
+                # cv2.putText(np_image_rect, err_txt, (x,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
+                # cv2.putText(np_image_rect, "{0: .4f}".format(err_val), (x+100,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
+                
+                if 'mean' in err_txt:
+                    print('DEBUG 1:', err_txt, str(err_val))
         else:
- 
-            cv2.putText(np_image_rect, "Detection failed...", (np_image_rect.shape[0]/2,np_image_rect.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
+            # cv2.putText(np_image_rect, "Detection failed...", (np_image_rect.shape[0]/2,np_image_rect.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
+            print('DEBUG 2:', "Detection failed...")
             
-        cv2.imshow(windowName, np_image_rect)
+
+        # cv2.imshow(windowName, np_image_rect)
     
     
     def prepareStereoRectificationMaps(self, camAnr, camBnr):        
@@ -379,7 +391,7 @@ class MonoCameraValidator(object):
         
         self.topic = camConfig.getRosTopic()
         self.windowName = "Camera: {0}".format(self.topic)
-        cv2.namedWindow(self.windowName, 1)
+        #cv2.namedWindow(self.windowName, 1)
     
         #register the cam topic to the message synchronizer
         self.image_sub = message_filters.Subscriber(self.topic, Image)
@@ -402,61 +414,65 @@ class MonoCameraValidator(object):
     
     def generateMonoview(self, np_image, observation, obs_valid):
         np_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2BGR)
-
+        
         if obs_valid:
-            #calculate the reprojection error statistics
-            cornersImage = observation.getCornersImageFrame();
-            cornersReproj = observation.getCornerReprojection(self.camera.geometry);
+             #calculate the reprojection error statistics
+             cornersImage = observation.getCornersImageFrame();
+             cornersReproj = observation.getCornerReprojection(self.camera.geometry);
             
-            reprojectionErrors2 = cornersImage-cornersReproj
-            reprojectionErrors = np.sum(np.abs(reprojectionErrors2)**2, axis=-1)**(1./2)
+             reprojectionErrors2 = cornersImage-cornersReproj
+             reprojectionErrors = np.sum(np.abs(reprojectionErrors2)**2, axis=-1)**(1./2)
             
-            #save the errors for reprojection error map plotting
-            self.cornersImage.append(cornersImage)
-            self.reprojectionErrors.append(reprojectionErrors)
+             #save the errors for reprojection error map plotting
+             self.cornersImage.append(cornersImage)
+             self.reprojectionErrors.append(reprojectionErrors)
             
-            outputList = [ ( "mean_x:  ", np.mean(reprojectionErrors2[:,0]) ),
-                           ( "std_x:   ", np.std(reprojectionErrors2[:,0]) ),
-                           ( "max_y:   ", np.max(reprojectionErrors2[:,0]) ),
-                           ( "min_x:   ", np.min(reprojectionErrors2[:,0]) ),
-                           ( "", 0),
-                           ( "mean_y:  ", np.mean(reprojectionErrors2[:,1]) ),
-                           ( "std_y:   ", np.std(reprojectionErrors2[:,1]) ),
-                           ( "max_y:   ", np.max(reprojectionErrors2[:,1]) ),
-                           ( "min_y:   ", np.min(reprojectionErrors2[:,1]) ),
-                           ( "", 0),
-                           ( "mean_L2: ", np.mean(reprojectionErrors) ),
-                           ( "std_L2:  ", np.std(reprojectionErrors) ),
-                           ( "max_L2:  ", np.max(reprojectionErrors) ),
-                           ( "min_L2:  ", np.min(reprojectionErrors) )      ]
+             outputList = [ ( "mean_x:  ", np.mean(reprojectionErrors2[:,0]) ),
+                            ( "std_x:   ", np.std(reprojectionErrors2[:,0]) ),
+                            ( "max_y:   ", np.max(reprojectionErrors2[:,0]) ),
+                            ( "min_x:   ", np.min(reprojectionErrors2[:,0]) ),
+                            ( "", 0),
+                            ( "mean_y:  ", np.mean(reprojectionErrors2[:,1]) ),
+                            ( "std_y:   ", np.std(reprojectionErrors2[:,1]) ),
+                            ( "max_y:   ", np.max(reprojectionErrors2[:,1]) ),
+                            ( "min_y:   ", np.min(reprojectionErrors2[:,1]) ),
+                            ( "", 0),
+                            ( "mean_L2: ", np.mean(reprojectionErrors) ),
+                            ( "std_L2:  ", np.std(reprojectionErrors) ),
+                            ( "max_L2:  ", np.max(reprojectionErrors) ),
+                            ( "min_L2:  ", np.min(reprojectionErrors) )      ]
 
-            #print the text
-            y = 20; x = 20
-            for err_txt, err_val in outputList:
-                fontScale = 0.75
-                y += int(42*fontScale)
+        #     #print the text
+             y = 20; x = 20
+             for err_txt, err_val in outputList:
+                 fontScale = 0.75
+                 y += int(42*fontScale)
                 
-                if err_txt == "":
-                    continue
+                 if err_txt == "":
+                     continue
                 
-                cv2.putText(np_image, err_txt, (x,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
-                cv2.putText(np_image, "{0: .4f}".format(err_val), (x+100,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
+                 # cv2.putText(np_image, err_txt, (x,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
+                 # cv2.putText(np_image, "{0: .4f}".format(err_val), (x+100,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
+
+                 if 'mean' in err_txt:
+                    print('DEBUG 3:', err_txt, str(err_val))
             
-            #draw reprojected corners
-            for px, py in zip(cornersReproj[:,0],cornersReproj[:,1]):
-                #convert pixel to fixed point (opencv subpixel rendering...)
-                shift = 4; radius = 0.5; thickness = 1
-                px_fix =  int(px * 2**shift)
-                py_fix =  int(py * 2**shift)
-                radius_fix = int(radius * 2**shift)
-                cv2.circle(np_image, (px_fix, py_fix), radius=radius_fix, color=(255,255,0), thickness=thickness, shift=shift, lineType=cv2.LINE_AA)
+             #draw reprojected corners
+             for px, py in zip(cornersReproj[:,0],cornersReproj[:,1]):
+                 #convert pixel to fixed point (opencv subpixel rendering...)
+                 shift = 4; radius = 0.5; thickness = 1
+                 px_fix =  int(px * 2**shift)
+                 py_fix =  int(py * 2**shift)
+                 radius_fix = int(radius * 2**shift)
+                 # cv2.circle(np_image, (px_fix, py_fix), radius=radius_fix, color=(255,255,0), thickness=thickness, shift=shift, lineType=cv2.LINE_AA)
 
         else:
-            cv2.putText(np_image, "Detection failed...", (np_image.shape[0]/2,np_image.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.5, color=(0, 0, 255), thickness=2)
-
-        cv2.imshow(self.windowName, np_image)
-        cv2.waitKey(1)
-
+             # cv2.putText(np_image, "Detection failed...", (np_image.shape[0]/2,np_image.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.5, color=(0, 0, 255), thickness=2)
+             print('DEBUG 4:', "Detection failed...")
+        
+        #print("Updating image frame")
+        # cv2.imshow(self.windowName, np_image)
+        cv2.waitKey(100)
 
 if __name__ == "__main__":        
     parser = argparse.ArgumentParser(description='Validate the intrinsics of a camera.')
