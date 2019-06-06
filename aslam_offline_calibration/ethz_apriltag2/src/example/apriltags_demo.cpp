@@ -302,12 +302,12 @@ public:
       cerr << "ERROR: Can't find video device " << m_deviceId << "\n";
       exit(1);
     }
-    m_cap.set(CV_CAP_PROP_FRAME_WIDTH, m_width);
-    m_cap.set(CV_CAP_PROP_FRAME_HEIGHT, m_height);
+    m_cap.set(cv::CAP_PROP_FRAME_WIDTH, m_width);
+    m_cap.set(cv::CAP_PROP_FRAME_HEIGHT, m_height);
     cout << "Camera successfully opened (ignore error messages above...)" << endl;
     cout << "Actual resolution: "
-         << m_cap.get(CV_CAP_PROP_FRAME_WIDTH) << "x"
-         << m_cap.get(CV_CAP_PROP_FRAME_HEIGHT) << endl;
+         << m_cap.get(cv::CAP_PROP_FRAME_WIDTH) << "x"
+         << m_cap.get(cv::CAP_PROP_FRAME_HEIGHT) << endl;
 
     // prepare window for drawing the camera images
     if (m_draw) {
@@ -380,7 +380,7 @@ public:
       //      m_cap.retrieve(image);
 
       // detect April tags (requires a gray scale image)
-      cv::cvtColor(image, image_gray, CV_BGR2GRAY);
+      cv::cvtColor(image, image_gray, cv::COLOR_BGR2GRAY);
       vector<AprilTags::TagDetection> detections = m_tagDetector->extractTags(image_gray);
 
       // print out each detection

@@ -50,8 +50,8 @@ GridCalibrationTargetCheckerboard::GridCalibrationTargetCheckerboard(
 void GridCalibrationTargetCheckerboard::initialize()
 {
   if (_options.showExtractionVideo) {
-    cv::namedWindow("Checkerboard corners", CV_WINDOW_AUTOSIZE);
-    cvStartWindowThread();
+    cv::namedWindow("Checkerboard corners", cv::WINDOW_AUTOSIZE);
+    cv::startWindowThread();
   }
 }
 
@@ -97,21 +97,21 @@ bool GridCalibrationTargetCheckerboard::computeObservation(const cv::Mat & image
   if (_options.doSubpixelRefinement && success) {
     cv::cornerSubPix(
         image, centers, cv::Size(_options.windowWidth, _options.windowWidth), cv::Size(-1, -1),
-        cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
+        cv::TermCriteria(cv::TermCriteria::EPS + cv::TermCriteria::MAX_ITER, 30, 0.1));
   }
 
   //draw corners
   if (_options.showExtractionVideo) {
     //image with refined (blue) and raw corners (red)
     cv::Mat imageCopy1 = image.clone();
-    cv::cvtColor(imageCopy1, imageCopy1, CV_GRAY2RGB);
+    cv::cvtColor(imageCopy1, imageCopy1, cv::COLOR_GRAY2RGB);
     cv::drawChessboardCorners(imageCopy1, cv::Size(rows(), cols()), centers,
                               true);
 
     // write error msg
     if (!success)
       cv::putText(imageCopy1, "Detection failed! (frame not used)",
-                  cv::Point(50, 50), CV_FONT_HERSHEY_SIMPLEX, 0.8,
+                  cv::Point(50, 50), cv::FONT_HERSHEY_SIMPLEX, 0.8,
                   CV_RGB(255,0,0), 3, 8, false);
 
     cv::imshow("Checkerboard corners", imageCopy1);  // OpenCV call
