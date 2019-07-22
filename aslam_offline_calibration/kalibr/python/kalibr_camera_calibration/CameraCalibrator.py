@@ -598,8 +598,11 @@ def printParameters(cself, dest=sys.stdout):
         corners, reprojs, rerrs = getReprojectionErrors(cself, cidx)        
         if len(rerrs)>0:
             me, se = getReprojectionErrorStatistics(rerrs)
-            print >> dest, "\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1])
-        print >> dest
+            try:
+              print >> dest, "\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1])
+            except:
+              print >> dest, "\t Failed printing the reprojection error."
+            print >> dest
 
     #print baselines
     for bidx, baseline in enumerate(cself.baselines):

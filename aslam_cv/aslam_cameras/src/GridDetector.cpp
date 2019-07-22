@@ -32,7 +32,7 @@ GridDetector::GridDetector(boost::shared_ptr<CameraGeometryBase> geometry,
 void GridDetector::initializeDetector()
 {
   if (_options.plotCornerReprojection) {
-    cv::namedWindow("Corner reprojection");
+    cv::namedWindow("Corner reprojection", cv::WINDOW_NORMAL);
   }
 }
 
