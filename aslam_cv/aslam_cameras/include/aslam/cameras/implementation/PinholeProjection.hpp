@@ -1,5 +1,6 @@
 #include <opencv2/core/eigen.hpp>
 #include <Eigen/StdVector>
+#include <iostream>
 
 namespace aslam {
 
@@ -777,9 +778,15 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
     }
   }
 
-  //get the median of the guesses
-  if(f_guesses.empty())
-    return false;
+  // Get the median of the guesses if available.
+  f_guesses.clear();
+  if(f_guesses.empty()) {
+   float input_guess;
+   std::cout << "Initialization of focal length failed. Provide manual initialization: ";
+   std::cin >> input_guess;
+   std::cout << "Initialize focal length to " << input_guess << "\n";
+   f_guesses.push_back(static_cast<float>(input_guess));
+  }
   double f0 = PinholeHelpers::medianOfVectorElements(f_guesses);
 
   //set the estimate
