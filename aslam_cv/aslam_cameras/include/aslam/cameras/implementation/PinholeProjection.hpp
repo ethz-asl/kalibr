@@ -779,7 +779,6 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
   }
 
   // Get the median of the guesses if available.
-  f_guesses.clear();
   if(f_guesses.empty()) {
    float input_guess;
    std::cout << "Initialization of focal length failed. Provide manual initialization: ";
