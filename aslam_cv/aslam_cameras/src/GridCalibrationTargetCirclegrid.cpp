@@ -31,6 +31,7 @@ void GridCalibrationTargetCirclegrid::initialize()
 {
   if (_options.showExtractionVideo) {
     cv::namedWindow("Circlegrid corners", cv::WINDOW_AUTOSIZE);
+    cv::resizeWindow("Circlegrid corners", 640, 480);
     cv::startWindowThread();
   }
 }

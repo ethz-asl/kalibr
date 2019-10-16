@@ -33,6 +33,7 @@ void GridDetector::initializeDetector()
 {
   if (_options.plotCornerReprojection) {
     cv::namedWindow("Corner reprojection", cv::WINDOW_NORMAL);
+    cv::resizeWindow("Corner reprojection", 640, 480);
   }
 }
 

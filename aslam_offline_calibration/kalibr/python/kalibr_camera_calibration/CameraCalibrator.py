@@ -458,7 +458,7 @@ def plotAzumithalError(cself, cam_id, fno=1, clearFigure=True, stats=None, noSho
     if stats is None:
         stats = getAllPointStatistics(cself, cam_id)
     angleError = np.array([ [ np.degrees(s.azumithalAngle), math.sqrt(s.squaredError)] for s in stats ])
-    # sort by azumithal angle
+    # sort by azimuthal angle
     sae = angleError[ angleError[:,0].argsort() ]
     # Now plot
     f = pl.figure(fno)
@@ -469,12 +469,12 @@ def plotAzumithalError(cself, cam_id, fno=1, clearFigure=True, stats=None, noSho
     pl.subplot(121)
     pl.plot(sae[:,0],sae[:,1],'bx-')
     pl.grid('on')
-    pl.xlabel('azumithal angle (deg)')
+    pl.xlabel('azimuthal angle (deg)')
     pl.ylabel('reprojection error (pixels)')
     pl.subplot(122)
     pl.hist(sae[:,0])
     pl.grid('on')
-    pl.xlabel('azumithal angle (deg)')
+    pl.xlabel('azimuthal angle (deg)')
     pl.ylabel('count')
     if not noShow:
         pl.show()
@@ -772,7 +772,7 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True, graph=None, 
         plotter.add_figure(title, f)
         figs.append(f)
         f = pl.figure(cidx*10+2)
-        title="cam{0}: azimutal error".format(cidx)
+        title="cam{0}: azimuthal error".format(cidx)
         plotAzumithalError(cself, cidx, fno=f.number, noShow=True, title=title)
         plotter.add_figure(title, f)
         figs.append(f)
