@@ -120,7 +120,7 @@ class CameraChainValidator(object):
           
             #convert image to numpy
             try:
-                if (msg.encoding == "rgb8"):
+                if (msg.encoding == "rgb8" or msg.encoding == "bgra8"):
                   cv_image = np.squeeze(np.array(self.bridge.imgmsg_to_cv2(msg, "mono8")))
                 else:
                   cv_image = self.bridge.imgmsg_to_cv2(msg)
