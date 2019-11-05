@@ -100,7 +100,7 @@ class CameraChainValidator(object):
             edge["A"][cidx_dest] = self.prepareStereoRectificationMaps(cidx_src, cidx_dest)
                 
         #register the callback for the synchronized images
-        sync_sub = message_filters.TimeSynchronizer([val.image_sub for val in self.monovalidators],1)
+        sync_sub = message_filters.ApproximateTimeSynchronizer([val.image_sub for val in self.monovalidators], 10, 0.02)
         sync_sub.registerCallback(self.synchronizedCallback)
 
         #initialize message throttler
