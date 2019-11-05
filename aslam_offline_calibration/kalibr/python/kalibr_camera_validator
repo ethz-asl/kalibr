@@ -192,7 +192,7 @@ class CameraChainValidator(object):
     def generatePairView(self, camAnr, camBnr):
         #prepare the window
         windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
-        cv2.namedWindow(windowName, 1)
+        cv2.namedWindow(windowName, cv2.WINDOW_AUTOSIZE)
             
         #get the mono validators for each cam
         camA = self.monovalidators[camAnr]
@@ -378,7 +378,6 @@ class MonoCameraValidator(object):
         
         self.topic = camConfig.getRosTopic()
         self.windowName = "Camera: {0}".format(self.topic)
-        cv2.namedWindow(self.windowName, 1)
     
         #register the cam topic to the message synchronizer
         self.image_sub = message_filters.Subscriber(self.topic, Image)
@@ -400,6 +399,7 @@ class MonoCameraValidator(object):
         
     
     def generateMonoview(self, np_image, observation, obs_valid):
+        cv2.namedWindow(self.windowName, cv2.WINDOW_AUTOSIZE)
         np_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2BGR)
 
         if obs_valid:
