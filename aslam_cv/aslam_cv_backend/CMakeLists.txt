@@ -6,6 +6,8 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 catkin_simple()
 
+include_directories(${Boost_INCLUDE_DIRS})
+
 cs_add_library(${PROJECT_NAME}
   src/GridCalibrationTargetDesignVariableContainer.cpp
   # src/CameraGeometryDesignVariableContainer.cpp

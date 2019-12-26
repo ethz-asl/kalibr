@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.3)
 project(sm_random)
 
 find_package(catkin REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
+
 include_directories(${catkin_INCLUDE_DIRS})
 
 catkin_package(
@@ -11,7 +13,7 @@ catkin_package(
   DEPENDS
 )
 
-include_directories(include)
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 ##############
 ## Building ##

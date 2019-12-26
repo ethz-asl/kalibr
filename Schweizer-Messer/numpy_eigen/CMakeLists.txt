@@ -22,6 +22,7 @@ add_definitions(-std=c++0x -D__STRICT_ANSI__)
 include_directories(include ${Boost_INCLUDE_DIRS})
 
 IF(APPLE)
+include_directories(include /usr/local/lib/python2.7/site-packages/numpy/core/include ${Boost_INCLUDE_DIRS})  
   link_directories( /usr/local/lib )
 ENDIF(APPLE)
 

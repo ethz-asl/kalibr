@@ -4,6 +4,9 @@ project(kalibr)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
+find_package(Boost REQUIRED COMPONENTS serialization) 
+include_directories(${Boost_INCLUDE_DIRS})
+
 ##################################
 # error terms (+python export)
 ##################################

@@ -8,8 +8,9 @@ find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common numpy_eigen sm_k
                                         sm_property_tree python_module)
 include_directories(${catkin_INCLUDE_DIRS})
 find_package(Eigen REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
-include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 
 catkin_package(

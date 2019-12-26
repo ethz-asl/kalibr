@@ -3,7 +3,11 @@ project(bsplines)
 
 find_package(catkin_simple REQUIRED)
 
+find_package(Boost REQUIRED COMPONENTS system)
+
 catkin_simple()
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 cs_add_library(${PROJECT_NAME} 
   src/BSpline.cpp
