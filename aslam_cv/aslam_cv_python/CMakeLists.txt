@@ -34,6 +34,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_cv
 #  src/MultiFrameFactory.cpp
   src/OmniUndistorter.cpp
   src/PinholeUndistorter.cpp
+  src/NullUndistorter.cpp
 )
 
 find_package(Boost REQUIRED COMPONENTS serialization) 

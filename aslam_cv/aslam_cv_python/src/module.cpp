@@ -14,6 +14,7 @@ void exportUndistorters();
 //void exportNCameras();
 void exportPinholeUndistorter();
 void exportOmniUndistorter();
+void exportNullUndistorter();
 
 
 // The title of this library must match exactly
@@ -32,4 +33,5 @@ BOOST_PYTHON_MODULE(libaslam_cv_python)
 //  exportNCameras();
   exportPinholeUndistorter();
   exportOmniUndistorter();
+  exportNullUndistorter();
 }

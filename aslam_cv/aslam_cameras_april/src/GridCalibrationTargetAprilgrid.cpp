@@ -27,11 +27,12 @@ namespace cameras {
 ///   ^      0-------1  2-------3
 ///   |-->x
 GridCalibrationTargetAprilgrid::GridCalibrationTargetAprilgrid(
-    size_t tagRows, size_t tagCols, double tagSize, double tagSpacing,
+    size_t tagRows, size_t tagCols, double tagSize, double tagSpacing, int low_id,
     const AprilgridOptions &options)
     : GridCalibrationTargetBase(2 * tagRows, 2 * tagCols),  //4 points per tag
       _tagSize(tagSize),
       _tagSpacing(tagSpacing),
+      _low_id(low_id),
       _options(options),
       _tagCodes(AprilTags::tagCodes36h11) {
   SM_ASSERT_GT(Exception, tagSize, 0.0, "tagSize has to be positive");
@@ -109,6 +110,11 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
    * outside). tagCorners should still be okay as apriltag-lib
    * extrapolates them, only the subpix refinement will fail
    */
+
+  for (auto& detection : detections){
+    assert(detection.id >= _low_id);
+    detection.id -= _low_id;
+  }
 
   //min. distance [px] of tag corners from image border (tag is not used if violated)
   std::vector<AprilTags::TagDetection>::iterator iter = detections.begin();

@@ -81,6 +81,8 @@ def distortPoint((x,y), distortion_model, distortion_coeffs):
           else:
             r_rd = atan_wrd / (r_u * w)
         return (x * r_rd, y * r_rd)
+    elif distortion_model == "none":
+        return (x,y)
     else:
       raise Exception('Distortion model ' + distortion_model + ' not found.')
 

@@ -29,6 +29,8 @@ class CalibrationTargetDetector(object):
 
         targetParams = targetConfig.getTargetParams()
         targetType = targetConfig.getTargetType()
+
+        self.targetType = targetType
         
         #set up target
         if( targetType == 'checkerboard' ):
@@ -47,7 +49,16 @@ class CalibrationTargetDetector(object):
                                                           options)
         
         elif( targetType == 'aprilgrid' ):
-            grid = acv_april.GridCalibrationTargetAprilgrid(targetParams['tagRows'], 
+
+            if 'low_id' in targetParams:
+                grid = acv_april.GridCalibrationTargetAprilgrid(targetParams['tagRows'], 
+                                                            targetParams['tagCols'], 
+                                                            targetParams['tagSize'], 
+                                                            targetParams['tagSpacing'],
+                                                            targetParams['low_id'])
+                print("April tag starts from id %d" % targetParams['low_id'])
+            else:
+                grid = acv_april.GridCalibrationTargetAprilgrid(targetParams['tagRows'], 
                                                             targetParams['tagCols'], 
                                                             targetParams['tagSize'], 
                                                             targetParams['tagSpacing'])
@@ -120,14 +131,14 @@ class CameraChainValidator(object):
           
             #convert image to numpy
             try:
-                if (msg.encoding == "rgb8"):
+                if (msg.encoding != "mono8"):
                   cv_image = np.squeeze(np.array(self.bridge.imgmsg_to_cv2(msg, "mono8")))
                 else:
                   cv_image = self.bridge.imgmsg_to_cv2(msg)
                 np_image = np.array(cv_image)
             except CvBridgeError, e:
                 print e
-            
+
             #get the corresponding monovalidator instance
             validator = self.monovalidators[cam_nr]
             
@@ -142,10 +153,10 @@ class CameraChainValidator(object):
                 validator.undist_image = validator.undistorter.undistortImageToPinhole(np_image)
             else:
                 validator.undist_image = validator.undistorter.undistortImage(np_image)
-                            
+            
             #generate a mono view for each cam
             validator.generateMonoview(np_image, observation, success)            
-            
+  
         #generate all rectification views
         for edge in self.G.es:
             cidx_src = edge.source
@@ -192,7 +203,7 @@ class CameraChainValidator(object):
     def generatePairView(self, camAnr, camBnr):
         #prepare the window
         windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
-        cv2.namedWindow(windowName, 1)
+        cv2.namedWindow(windowName, cv2.WINDOW_AUTOSIZE)
             
         #get the mono validators for each cam
         camA = self.monovalidators[camAnr]
@@ -247,12 +258,12 @@ class CameraChainValidator(object):
         edge_idx = self.G.get_eid(camAnr, camBnr)
         edge = self.G.es[edge_idx]
         A_rect = edge["A"][camAnr] #some for cam B
-        
+
         np_image_rect = self.rectifyImages(camA.undist_image, 
                                            edge["rect_map"][camAnr], 
                                            camB.undist_image, 
                                            edge["rect_map"][camBnr])
-        
+    
         #draw some epilines
         np_image_rect = cv2.cvtColor(np_image_rect, cv2.COLOR_GRAY2BGR)
         n=10
@@ -297,17 +308,41 @@ class CameraChainValidator(object):
         cv2.imshow(windowName, np_image_rect)
     
     
-    def prepareStereoRectificationMaps(self, camAnr, camBnr):        
-        #get the camera parameters for the undistorted cameras
+    def prepareStereoRectificationMaps(self, camAnr, camBnr):
+         #get the camera parameters for the undistorted cameras
         camIdealA = self.monovalidators[camAnr].undist_camera.projection().getParameters().flatten()
         camIdealB = self.monovalidators[camBnr].undist_camera.projection().getParameters().flatten()
-        camIdealA = np.array([[camIdealA[0],0,camIdealA[2]], [0,camIdealA[1],camIdealA[3]], [0,0,1]])
-        camIdealB = np.array([[camIdealB[0],0,camIdealB[2]], [0,camIdealB[1],camIdealB[3]], [0,0,1]])
+
+        if (self.monovalidators[camAnr].target.targetType != 'aprilgrid'):
+            Afx = camIdealA[0]
+            Afy = camIdealA[1]
+            Acx = camIdealA[2]
+            Acy = camIdealA[3]
+
+            Bfx = camIdealB[0]
+            Bfy = camIdealB[1]
+            Bcx = camIdealB[2]
+            Bcy = camIdealB[3]
+        else:
+            Afx = camIdealA[2]
+            Afy = camIdealA[3]
+            Acx = camIdealA[4]
+            Acy = camIdealA[5]
+
+            Bfx = camIdealB[2]
+            Bfy = camIdealB[3]
+            Bcx = camIdealB[4]
+            Bcy = camIdealB[5]
+
+
+      
+        camIdealA = np.array([[Afx,0,Acx], [0,Afy,Acy], [0,0,1]])
+        camIdealB = np.array([[Bfx,0,Bcx], [0,Bfy,Bcy], [0,0,1]])
         imageSize = (self.monovalidators[camAnr].undist_camera.projection().ru(), self.monovalidators[camAnr].undist_camera.projection().rv())
         
         #get the baseline between the cams       
         baseline_BA = self.getTransformationCamFromTo(camAnr, camBnr)
-        
+
         ##
         #A.Fusiello, E. Trucco, A. Verri: A compact algorithm for recification of stereo pairs, 1999
         ##
@@ -378,7 +413,6 @@ class MonoCameraValidator(object):
         
         self.topic = camConfig.getRosTopic()
         self.windowName = "Camera: {0}".format(self.topic)
-        cv2.namedWindow(self.windowName, 1)
     
         #register the cam topic to the message synchronizer
         self.image_sub = message_filters.Subscriber(self.topic, Image)

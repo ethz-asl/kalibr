@@ -83,7 +83,7 @@ class GridCalibrationTargetAprilgrid : public GridCalibrationTargetBase {
 
   /// \brief initialize based on checkerboard geometry
   GridCalibrationTargetAprilgrid(size_t tagRows, size_t tagCols, double tagSize,
-                                 double tagSpacing, const AprilgridOptions &options = AprilgridOptions());
+                                 double tagSpacing, int low_id = 0, const AprilgridOptions &options = AprilgridOptions());
 
   virtual ~GridCalibrationTargetAprilgrid() {};
 
@@ -104,6 +104,9 @@ class GridCalibrationTargetAprilgrid : public GridCalibrationTargetBase {
 
   /// \brief space between tags (tagSpacing [m] = tagSize * tagSpacing)
   double _tagSpacing;
+
+  /// \brief the starting tag id of the tags on the calibration board
+  int _low_id;
 
   /// \brief target extraction options
   AprilgridOptions _options;

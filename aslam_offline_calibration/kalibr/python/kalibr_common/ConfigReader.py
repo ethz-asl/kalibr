@@ -163,6 +163,7 @@ class AslamCamera(object):
                 self.frameType = cv.DoubleSphereFrame
                 self.keypointType = cv.Keypoint2
                 self.reprojectionErrorType = cvb.DoubleSphereReprojectionErrorSimple
+                self.undistorterType = cv.DSNullUndistorter
             else:
                 raise RuntimeError("camera model {} does not support distortion model '{}'".format(camera_model, dist_model))
 
@@ -620,6 +621,11 @@ class CalibrationTargetParameters(ParametersBase):
                             'tagSize': tagSize,
                             'tagSpacing': tagSpacing,
                             'targetType': targetType}
+
+            if 'low_id' in self.data:
+                targetParams['low_id'] = self.data['low_id']
+            else:
+                targetParams['low_id'] = 0
             
         return targetParams
         
@@ -646,6 +652,7 @@ class CalibrationTargetParameters(ParametersBase):
             print >> dest, "    Cols: {0}".format(targetParams['tagCols'])
             print >> dest, "    Size: {0} [m]".format(targetParams['tagSize'])
             print >> dest, "    Spacing {0} [m]".format( targetParams['tagSize']*targetParams['tagSpacing'] )
+            print >> dest, "    Low-id {0}".format(targetParams['low_id'])
 
 
         

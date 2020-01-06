@@ -21,8 +21,10 @@ BOOST_PYTHON_MODULE(libaslam_cameras_april_python)
   class_<GridCalibrationTargetAprilgrid, bases<GridCalibrationTargetBase>,
       boost::shared_ptr<GridCalibrationTargetAprilgrid>, boost::noncopyable>(
       "GridCalibrationTargetAprilgrid",
-      init<size_t, size_t, double, double, GridCalibrationTargetAprilgrid::AprilgridOptions>(
+      init<size_t, size_t, double, double, int, GridCalibrationTargetAprilgrid::AprilgridOptions>(
           "GridCalibrationTargetAprilgrid(size_t tagRows, size_t tagCols, double tagSize, double tagSpacing, AprilgridOptions options)"))
+      .def(init<size_t, size_t, double, double, int>(
+          "GridCalibrationTargetAprilgrid(size_t tagRows, size_t tagCols, double tagSize, double tagSpacing, int)"))
       .def(init<size_t, size_t, double, double>(
           "GridCalibrationTargetAprilgrid(size_t tagRows, size_t tagCols, double tagSize, double tagSpacing)"))
       .def(init<>("Do not use the default constructor. It is only necessary for the pickle interface"))
