@@ -136,6 +136,7 @@ class GridCalibrationTargetAprilgrid : public GridCalibrationTargetBase {
     ar << BOOST_SERIALIZATION_BASE_OBJECT_NVP(GridCalibrationTargetBase);
     ar << BOOST_SERIALIZATION_NVP(_tagSize);
     ar << BOOST_SERIALIZATION_NVP(_tagSpacing);
+    ar << BOOST_SERIALIZATION_NVP(_low_id);
     ar << BOOST_SERIALIZATION_NVP(_options);
   }
   template<class Archive>
@@ -146,6 +147,7 @@ class GridCalibrationTargetAprilgrid : public GridCalibrationTargetBase {
     ar >> BOOST_SERIALIZATION_BASE_OBJECT_NVP(GridCalibrationTargetBase);
     ar >> BOOST_SERIALIZATION_NVP(_tagSize);
     ar >> BOOST_SERIALIZATION_NVP(_tagSpacing);
+    ar >> BOOST_SERIALIZATION_NVP(_low_id);
     ar >> BOOST_SERIALIZATION_NVP(_options);
     initialize();
   }

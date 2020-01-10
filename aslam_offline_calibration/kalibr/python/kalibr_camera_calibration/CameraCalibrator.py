@@ -109,12 +109,21 @@ class TargetDetector(object):
             #enforce more than one row --> pnp solution can be bad if all points are almost on a line...
             options.minTagsForValidObs = int( np.max( [targetParams['tagRows'], targetParams['tagCols']] ) + 1 )
             options.showExtractionVideo = showCorners
-            
-            self.grid = acv_april.GridCalibrationTargetAprilgrid(targetParams['tagRows'], 
-                                                                 targetParams['tagCols'], 
-                                                                 targetParams['tagSize'], 
-                                                                 targetParams['tagSpacing'], 
-                                                                 options)
+
+            if 'low_id' in targetParams:
+                self.grid = acv_april.GridCalibrationTargetAprilgrid(targetParams['tagRows'], 
+                                                            targetParams['tagCols'], 
+                                                            targetParams['tagSize'], 
+                                                            targetParams['tagSpacing'],
+                                                            targetParams['low_id'],
+                                                            options)
+                print("April tag starts from id %d" % targetParams['low_id'])
+            else:
+                self.grid = acv_april.GridCalibrationTargetAprilgrid(targetParams['tagRows'], 
+                                                            targetParams['tagCols'], 
+                                                            targetParams['tagSize'], 
+                                                            targetParams['tagSpacing'],
+                                                            options)
         else:
             RuntimeError('Unknown calibration target type!')
 
