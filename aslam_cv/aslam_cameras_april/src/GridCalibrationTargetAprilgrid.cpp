@@ -56,9 +56,8 @@ GridCalibrationTargetAprilgrid::GridCalibrationTargetAprilgrid() :
 void GridCalibrationTargetAprilgrid::initialize()
 {
   if (_options.showExtractionVideo) {
-    cv::namedWindow("Aprilgrid: Tag detection");
-    cv::namedWindow("Aprilgrid: Tag corners");
-    cvStartWindowThread();
+    cv::namedWindow("Aprilgrid: Tag detection", cv::WINDOW_NORMAL);
+    cv::namedWindow("Aprilgrid: Tag corners", cv::WINDOW_NORMAL);
   }
 
   //create the tag detector
