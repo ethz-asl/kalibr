@@ -17,15 +17,15 @@
 
     <build_depend>python_module</build_depend>
 
-    <build_depend>brisk</build_depend>
+    <!-- <build_depend>brisk</build_depend> -->
 
     <build_depend>aslam_cv_serialization</build_depend>
     <build_depend>aslam_imgproc</build_depend>
     <build_depend>aslam_cameras</build_depend>
     <build_depend>aslam_time</build_depend>
-    <build_depend>aslam_features2d</build_depend>
-    <build_depend>aslam_camera_system</build_depend>
-    <build_depend>aslam_matcher</build_depend>
+    <!-- <build_depend>aslam_features2d</build_depend> -->
+    <!-- <build_depend>aslam_camera_system</build_depend> -->
+    <!-- <build_depend>aslam_matcher</build_depend> -->
     <build_depend>aslam_cv_serialization</build_depend>
 
     <build_depend>eigen</build_depend>
