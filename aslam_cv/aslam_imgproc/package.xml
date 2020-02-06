@@ -24,8 +24,8 @@
   <build_depend>aslam_time</build_depend>
   <build_depend>aslam_cameras</build_depend>
   <build_depend>aslam_frames</build_depend>
-  <build_depend>opencv2_catkin</build_depend>
-  <build_depend>eigen_catkin</build_depend>
+  <build_depend>libopencv-dev</build_depend>
+  <build_depend>eigen</build_depend>
   <build_depend>numpy_eigen</build_depend>
 
 

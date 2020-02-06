@@ -13,7 +13,7 @@
     <build_depend>sm_kinematics</build_depend>
     <build_depend>sm_python</build_depend>
     <build_depend>sm_opencv</build_depend>
-    <build_depend>opencv2_catkin</build_depend>
+    <build_depend>libopencv-dev</build_depend>
 
     <build_depend>python_module</build_depend>
 
@@ -28,5 +28,5 @@
     <build_depend>aslam_matcher</build_depend>
     <build_depend>aslam_cv_serialization</build_depend>
 
-    <build_depend>eigen_catkin</build_depend>
+    <build_depend>eigen</build_depend>
 </package>
