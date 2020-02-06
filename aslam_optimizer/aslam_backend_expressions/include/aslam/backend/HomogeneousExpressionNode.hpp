@@ -4,7 +4,7 @@
 #include <aslam/backend/JacobianContainer.hpp>
 #include "TransformationExpressionNode.hpp"
 #include <boost/shared_ptr.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include "EuclideanExpression.hpp"
 
 

@@ -16,16 +16,16 @@
   <build_depend>aslam_backend_python</build_depend>
   <build_depend>incremental_calibration_python</build_depend>
   <build_depend>aslam_cameras_april</build_depend>
-  <build_depend>aslam_cameras_april_python</build_depend>
+  <!-- <build_depend>aslam_cameras_april_python</build_depend> -->
   <build_depend>aslam_splines_python</build_depend>
-  <build_depend>eigen_catkin</build_depend>
+  <build_depend>eigen</build_depend>
   <build_depend>numpy_eigen</build_depend>
   <build_depend>python_module</build_depend>
   <build_depend>sparse_block_matrix</build_depend>
   <build_depend>sm_python</build_depend>
   <build_depend>aslam_cv_backend_python</build_depend>
        
-  <run_depend>aslam_cameras_april_python</run_depend>
+  <!-- <run_depend>aslam_cameras_april_python</run_depend> -->
   <run_depend>aslam_cv_backend_python</run_depend>
   <run_depend>aslam_backend_python</run_depend>
   <run_depend>incremental_calibration_python</run_depend>

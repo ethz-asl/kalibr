@@ -10,8 +10,8 @@
 
 #ifndef SM_QUATERNION_ALGEBRA_HPP
 #define SM_QUATERNION_ALGEBRA_HPP
-#include <Eigen/Core>
-#include <Eigen/Geometry>
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Geometry>
 
 namespace sm { namespace kinematics {
     

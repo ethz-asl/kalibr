@@ -8,8 +8,8 @@
 #include "aslam/backend/Marginalizer.hpp"
 
 #include <aslam/backend/DenseQrLinearSystemSolver.hpp>
-#include <Eigen/QR>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/QR>
+#include <eigen3/Eigen/Dense>
 #include <aslam/backend/DenseMatrix.hpp>
 
 #include <iostream>

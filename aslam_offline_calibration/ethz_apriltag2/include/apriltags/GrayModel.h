@@ -3,7 +3,7 @@
 #ifndef GRAYMODEL_H
 #define GRAYMODEL_H
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <vector>
 
 namespace AprilTags {

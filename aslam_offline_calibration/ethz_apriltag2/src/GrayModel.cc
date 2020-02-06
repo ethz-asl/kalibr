@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include <Eigen/Dense>
-#include <Eigen/LU>
+#include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/LU>
 
 #include "apriltags/GrayModel.h"
 

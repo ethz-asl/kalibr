@@ -12,7 +12,7 @@
 
 #include <gtest/gtest.h>
 #include <sm/source_file_pos.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 namespace sm { namespace eigen {
 

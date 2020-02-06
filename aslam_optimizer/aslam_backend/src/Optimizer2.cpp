@@ -3,7 +3,7 @@
 #include <numeric>
 #include <aslam/backend/ErrorTerm.hpp>
 // M.inverse()
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <sm/eigen/assert_macros.hpp>
 #include <sparse_block_matrix/linear_solver_dense.h>
 #include <sparse_block_matrix/linear_solver_cholmod.h>

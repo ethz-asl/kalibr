@@ -1,6 +1,6 @@
 #include <aslam/cameras/SphericalCameraGeometry.hpp>
 #include <aslam/Exceptions.hpp>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 namespace aslam {
 namespace cameras {

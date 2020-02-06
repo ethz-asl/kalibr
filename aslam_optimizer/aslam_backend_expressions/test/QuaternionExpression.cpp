@@ -1,7 +1,7 @@
 #include <sm/eigen/gtest.hpp>
 #include <sm/eigen/NumericalDiff.hpp>
 #include <sm/kinematics/rotations.hpp>
-#include <Eigen/Geometry>
+#include <eigen3/Eigen/Geometry>
 #include <aslam/backend/QuaternionExpression.hpp>
 #include <aslam/backend/GenericMatrixExpression.hpp>
 #include <aslam/backend/DesignVariableGenericVector.hpp>

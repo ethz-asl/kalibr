@@ -1,7 +1,7 @@
 #ifndef ASLAM_CAMERAS_FOV_DISTORTION_HPP
 #define ASLAM_CAMERAS_FOV_DISTORTION_HPP
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <boost/serialization/nvp.hpp>
 #include "StaticAssert.hpp"
 #include <sm/PropertyTree.hpp>

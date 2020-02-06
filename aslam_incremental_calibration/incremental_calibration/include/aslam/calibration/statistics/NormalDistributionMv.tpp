@@ -16,7 +16,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.       *
  ******************************************************************************/
 
-#include <Eigen/LU>
+#include <eigen3/Eigen/LU>
 
 #include "aslam/calibration/statistics/Randomizer.h"
 #include "aslam/calibration/exceptions/BadArgumentException.h"

@@ -1,7 +1,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>

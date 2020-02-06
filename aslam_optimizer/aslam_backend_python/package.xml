@@ -13,7 +13,7 @@
   <build_depend>aslam_backend_expressions</build_depend>
   <build_depend>numpy_eigen</build_depend>
   <build_depend>python_module</build_depend>
-  <build_depend>eigen_catkin</build_depend>
+  <build_depend>eigen</build_depend>
   <build_depend>sparse_block_matrix</build_depend>
   <build_depend>sm_common</build_depend>
   <build_depend>sm_kinematics</build_depend>

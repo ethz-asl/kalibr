@@ -1,7 +1,7 @@
 #ifndef SM_EIGEN_TRAITS
 #define SM_EIGEN_TRAITS
 
-#include <Eigen/StdVector>
+#include <eigen3/Eigen/StdVector>
 #include <map>
 
 namespace sm {

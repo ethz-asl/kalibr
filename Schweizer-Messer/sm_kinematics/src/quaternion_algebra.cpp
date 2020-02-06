@@ -1,7 +1,7 @@
 #include <sm/kinematics/quaternion_algebra.hpp>
 #include <sm/kinematics/rotations.hpp>
 #include <sm/assert_macros.hpp>
-#include <Eigen/Geometry>
+#include <eigen3/Eigen/Geometry>
 #include <limits>
 #include <cmath>
 

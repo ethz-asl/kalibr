@@ -20,7 +20,7 @@
 #ifndef NUMPY_EIGEN_CONVERTERS_HPP
 #define NUMPY_EIGEN_CONVERTERS_HPP
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <boost/python.hpp>
 #include <boost/python/detail/referent_storage.hpp>
 #include <boost/python/converter/arg_from_python.hpp>

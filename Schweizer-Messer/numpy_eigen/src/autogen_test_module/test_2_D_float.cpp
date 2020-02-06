@@ -1,4 +1,4 @@
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 #include <numpy_eigen/boost_python_headers.hpp>
 Eigen::Matrix<float, 2, Eigen::Dynamic> test_float_2_D(const Eigen::Matrix<float, 2, Eigen::Dynamic> & M)

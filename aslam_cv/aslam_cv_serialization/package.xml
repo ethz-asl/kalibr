@@ -9,9 +9,9 @@
     <buildtool_depend>catkin_simple</buildtool_depend>
 
     <build_depend>aslam_cameras</build_depend>
-    <build_depend>aslam_frames</build_depend>
-    <build_depend>aslam_features2d</build_depend>
-    <build_depend>aslam_camera_system</build_depend>
+    <!-- <build_depend>aslam_frames</build_depend> -->
+    <!-- <build_depend>aslam_features2d</build_depend> -->
+    <!-- <build_depend>aslam_camera_system</build_depend> -->
     <build_depend>aslam_time</build_depend>
 
     <build_depend>sm_common</build_depend>
@@ -21,7 +21,7 @@
     <build_depend>sm_kinematics</build_depend>
     <build_depend>sm_opencv</build_depend>
     <build_depend>sm_logging</build_depend>
-    <build_depend>opencv2_catkin</build_depend>
+    <build_depend>libopencv-dev</build_depend>
     <build_depend>sm_random</build_depend>
 
     <build_depend>eigen</build_depend>

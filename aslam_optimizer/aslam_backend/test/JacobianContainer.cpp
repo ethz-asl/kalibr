@@ -3,7 +3,7 @@
 // std::partial_sum
 #include <numeric>
 #include "DummyDesignVariable.hpp"
-#include <Eigen/Cholesky>
+#include <eigen3/Eigen/Cholesky>
 #include <sm/eigen/matrix_sqrt.hpp>
 
 TEST(JacobianContainerTests, testAddJacobian)

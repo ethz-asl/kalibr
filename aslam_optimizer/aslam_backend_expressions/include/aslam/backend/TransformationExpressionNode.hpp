@@ -1,7 +1,7 @@
 #ifndef ASLAM_TRANSFORMATION_EXPRESSION_NODE
 #define ASLAM_TRANSFORMATION_EXPRESSION_NODE
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <aslam/backend/JacobianContainer.hpp>
 #include <boost/shared_ptr.hpp>
 #include <set>

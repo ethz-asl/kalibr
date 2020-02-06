@@ -1,6 +1,6 @@
 #include <aslam/backend/DenseQrLinearSystemSolver.hpp>
 #include <aslam/backend/ErrorTerm.hpp>
-#include <Eigen/Dense> // householderQr.solve
+#include <eigen3/Eigen/Dense> // householderQr.solve
 #include <sm/PropertyTree.hpp>
 
 namespace aslam {

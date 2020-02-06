@@ -1,6 +1,6 @@
 // Bring in my package's API, which is what I'm testing
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 // Bring in gtest
 #include <gtest/gtest.h>
 #include <sm/eigen/gtest.hpp>

@@ -26,8 +26,8 @@
 
 #include <gtest/gtest.h>
 
-#include <Eigen/Core>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 
 #include <cholmod.h>
 #include <SuiteSparseQR.hpp>

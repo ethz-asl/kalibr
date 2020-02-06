@@ -24,7 +24,7 @@
 #ifndef SM_KINEMATICS_EULER_ANGLES_ZXY_H
 #define SM_KINEMATICS_EULER_ANGLES_ZXY_H
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 #include "sm/kinematics/RotationalKinematics.hpp"
 

@@ -9,8 +9,8 @@
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
   
-  <build_depend>TBB</build_depend>
-  <build_depend>asl_cmake_modules</build_depend>
+  <build_depend>tbb</build_depend>
+  <!-- <build_depend>asl_cmake_modules</build_depend> -->
   <build_depend>sm_common</build_depend>
   <build_depend>sm_eigen</build_depend>
   <build_depend>suitesparse</build_depend>

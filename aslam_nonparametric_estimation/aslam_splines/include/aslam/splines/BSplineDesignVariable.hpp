@@ -3,7 +3,7 @@
 
 #include <aslam/backend/DesignVariableMappedVector.hpp>
 #include <bsplines/BSpline.hpp>
-#include <Eigen/StdVector>
+#include <eigen3/Eigen/StdVector>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <aslam/backend/TransformationExpression.hpp>
 #include <aslam/backend/RotationExpression.hpp>

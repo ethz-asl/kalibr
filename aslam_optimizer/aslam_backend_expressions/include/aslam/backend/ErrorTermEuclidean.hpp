@@ -10,7 +10,7 @@
 
 #include <aslam/backend/ErrorTerm.hpp>
 #include <aslam/backend/EuclideanExpression.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 namespace aslam {
   namespace backend {

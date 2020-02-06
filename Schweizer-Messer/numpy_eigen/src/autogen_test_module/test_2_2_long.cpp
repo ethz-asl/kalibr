@@ -1,4 +1,4 @@
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 #include <numpy_eigen/boost_python_headers.hpp>
 Eigen::Matrix<boost::int64_t, 2, 2> test_long_2_2(const Eigen::Matrix<boost::int64_t, 2, 2> & M)

@@ -1,4 +1,4 @@
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 #include <numpy_eigen/boost_python_headers.hpp>
 Eigen::Matrix<boost::int64_t, Eigen::Dynamic, 6> test_long_D_6(const Eigen::Matrix<boost::int64_t, Eigen::Dynamic, 6> & M)

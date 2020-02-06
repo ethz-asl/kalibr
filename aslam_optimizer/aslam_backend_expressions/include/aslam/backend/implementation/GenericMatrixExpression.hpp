@@ -1,5 +1,5 @@
 #include <sm/boost/null_deleter.hpp>
-#include <Eigen/Geometry>
+#include <eigen3/Eigen/Geometry>
 
 namespace aslam {
 namespace backend {

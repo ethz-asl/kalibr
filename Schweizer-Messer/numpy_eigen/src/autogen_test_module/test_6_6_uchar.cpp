@@ -1,4 +1,4 @@
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 #include <numpy_eigen/boost_python_headers.hpp>
 Eigen::Matrix<boost::uint8_t, 6, 6> test_uchar_6_6(const Eigen::Matrix<boost::uint8_t, 6, 6> & M)

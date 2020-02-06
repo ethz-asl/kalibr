@@ -24,7 +24,7 @@
 #ifndef ASLAM_CALIBRATION_DATA_VECTOR_DESIGN_VARIABLE_H
 #define ASLAM_CALIBRATION_DATA_VECTOR_DESIGN_VARIABLE_H
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 #include <aslam/backend/DesignVariable.hpp>
 

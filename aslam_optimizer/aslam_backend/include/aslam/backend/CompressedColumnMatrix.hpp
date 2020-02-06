@@ -4,9 +4,9 @@
 #include <cs.h>
 #include "Cholmod.hpp"
 #include <vector>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 //#define EIGEN_YES_I_KNOW_SPARSE_MODULE_IS_NOT_STABLE_YET
-//#include <Eigen/Sparse>
+//#include <eigen3/Eigen/Sparse>
 #include <sm/assert_macros.hpp>
 #include <sm/string_routines.hpp>
 #include <boost/cstdint.hpp>

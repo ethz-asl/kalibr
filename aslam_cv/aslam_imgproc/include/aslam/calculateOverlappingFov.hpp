@@ -6,8 +6,8 @@
 #include <sm/assert_macros.hpp>
 #include <sm/kinematics/Transformation.hpp>
 
-#include <Eigen/Core>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 
 namespace aslam {
 

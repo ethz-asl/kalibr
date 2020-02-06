@@ -6,7 +6,7 @@
  */
 
 #include <aslam/backend/MarginalizationPriorErrorTerm.hpp>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <sm/assert_macros.hpp>
 
 using namespace std;

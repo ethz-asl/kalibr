@@ -16,7 +16,7 @@
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/version.hpp>
 #include <sm/boost/serialization.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <aslam/KeypointBase.hpp>
 #include <sm/eigen/static_assert.hpp>
 

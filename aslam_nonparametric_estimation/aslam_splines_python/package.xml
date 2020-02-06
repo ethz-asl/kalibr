@@ -14,7 +14,7 @@
   <build_depend>bsplines</build_depend>
   <build_depend>numpy_eigen</build_depend>
   <build_depend>python_module</build_depend>
-  <build_depend>eigen_catkin</build_depend>
+  <build_depend>eigen</build_depend>
   <build_depend>sparse_block_matrix</build_depend>
   <build_depend>sm_common</build_depend>
   <build_depend>suitesparse</build_depend>
@@ -28,5 +28,5 @@
   <build_depend>sm_opencv</build_depend>
   <build_depend>sm_property_tree</build_depend>
   <build_depend>sm_logging</build_depend>
-  <build_depend>opencv2_catkin</build_depend>
+  <build_depend>libopencv-dev</build_depend>
 </package>

@@ -2,7 +2,7 @@
 #define SM_EIGEN_PROPERTY_TREE_HPP
 
 #include <sm/PropertyTree.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 namespace sm {
     namespace eigen {

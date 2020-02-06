@@ -7,7 +7,7 @@
 #include "TransformationExpressionNode.hpp"
 #include "MatrixExpressionNode.hpp"
 #include <boost/shared_ptr.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <sm/kinematics/RotationalKinematics.hpp>
 
 namespace aslam {

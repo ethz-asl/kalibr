@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include <Eigen/Core>
-#include <Eigen/StdVector>
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/StdVector>
 
 template<template<typename, typename> class Container, typename Type>
 struct Aligned {

@@ -2,7 +2,7 @@
 // if you are using the numpy_eigen interface
 #include <numpy_eigen/boost_python_headers.hpp>
 #include <sparse_block_matrix/sparse_block_matrix.h>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 using namespace boost::python;
 using namespace sparse_block_matrix;

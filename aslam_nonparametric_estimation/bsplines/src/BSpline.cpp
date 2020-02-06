@@ -2,13 +2,13 @@
 #include <sparse_block_matrix/linear_solver_cholmod.h>
 #include <bsplines/BSpline.hpp>
 #include <sm/assert_macros.hpp>
-#include <Eigen/Cholesky>
-#include <Eigen/LU>
-#include <Eigen/QR>
+#include <eigen3/Eigen/Cholesky>
+#include <eigen3/Eigen/LU>
+#include <eigen3/Eigen/QR>
 //#include <asrl/string_routines.hpp>
 // boost::tie()
 #include <boost/tuple/tuple.hpp>
-#include <Eigen/SVD> 
+#include <eigen3/Eigen/SVD> 
 
 namespace bsplines {
     
