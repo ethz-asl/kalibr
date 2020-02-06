@@ -19,9 +19,9 @@ COPY ./ src/kalibr
 # copy manifests for caching
 WORKDIR /opt
 RUN find ./ -name "package.xml" | \
+      xargs cp --parents -t /tmp \
+    && find ./ -name "COLCON_IGNORE" | \
       xargs cp --parents -t /tmp
-    # && find ./ -name "COLCON_IGNORE" | \
-    #   xargs cp --parents -t /tmp
 
 # multi-stage for building
 FROM $FROM_IMAGE AS build
