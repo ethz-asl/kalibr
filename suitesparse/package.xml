@@ -14,5 +14,6 @@
   <build_depend>liblapack-dev</build_depend>
   <build_depend>libblas-dev</build_depend>
   <build_depend>gfortran</build_depend>
+  <build_depend>wget</build_depend>
 
 </package>

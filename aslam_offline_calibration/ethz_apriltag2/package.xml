@@ -10,4 +10,5 @@
   <build_depend>cmake_modules</build_depend>
   <build_depend>libopencv-dev</build_depend>
   <build_depend>eigen</build_depend>
+  <build_depend>libv4l-dev</build_depend>
 </package>
