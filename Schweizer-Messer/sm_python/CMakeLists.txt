@@ -7,7 +7,7 @@ find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common numpy_eigen sm_k
                                         sm_timing sm_logging sm_matrix_archive
                                         sm_property_tree python_module)
 include_directories(${catkin_INCLUDE_DIRS})
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 

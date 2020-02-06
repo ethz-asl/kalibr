@@ -4,7 +4,7 @@ project(sm_eigen)
 find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common sm_random)
 include_directories(${catkin_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system serialization)
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 

@@ -5,7 +5,7 @@ project(ethz_apriltag2)
 find_package(catkin REQUIRED COMPONENTS cmake_modules)
 include_directories(${catkin_INCLUDE_DIRS})
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 catkin_package(
     DEPENDS eigen opencv
@@ -15,7 +15,7 @@ catkin_package(
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/)
 
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
 add_definitions(-fPIC -O3)
