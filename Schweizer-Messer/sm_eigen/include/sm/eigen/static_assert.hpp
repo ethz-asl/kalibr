@@ -1,7 +1,7 @@
 #ifndef SM_EIGEN_STATIC_ASSERT_HPP
 #define SM_EIGEN_STATIC_ASSERT_HPP
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <sm/typetraits.hpp>
 
 

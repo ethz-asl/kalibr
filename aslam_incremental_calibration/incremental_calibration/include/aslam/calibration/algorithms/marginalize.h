@@ -26,7 +26,7 @@
 #include <cstdlib>
 #include <cstddef>
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 #include <cholmod.h>
 

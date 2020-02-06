@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <opencv2/core/core.hpp>
 #include <sm/assert_macros.hpp>
 #include <aslam/cameras/GridCalibrationTargetBase.hpp>

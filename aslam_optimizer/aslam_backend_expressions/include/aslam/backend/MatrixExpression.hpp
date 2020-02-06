@@ -1,7 +1,7 @@
 #ifndef ASLAM_BACKEND_MATRIX_EXPRESSION_HPP
 #define ASLAM_BACKEND_MATRIX_EXPRESSION_HPP
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <boost/shared_ptr.hpp>
 #include <aslam/backend/JacobianContainer.hpp>
 #include "HomogeneousExpression.hpp"

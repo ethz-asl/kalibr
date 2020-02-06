@@ -1,6 +1,6 @@
 // Bring in my package's API, which is what I'm testing
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 // Bring in gtest
 #include <gtest/gtest.h>
 #include <boost/cstdint.hpp>
@@ -13,7 +13,7 @@
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/filesystem.hpp>
 
-#include <Eigen/Geometry>
+#include <eigen3/Eigen/Geometry>
 #include <sm/eigen/serialization.hpp>
 
 

@@ -13,7 +13,7 @@
 #include <sm/eigen/gtest.hpp>
 #include <sm/eigen/NumericalDiff.hpp>
 
-#include <Eigen/LU>
+#include <eigen3/Eigen/LU>
 
 using namespace sm::kinematics;
 

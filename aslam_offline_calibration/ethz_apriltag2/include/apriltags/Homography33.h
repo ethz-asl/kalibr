@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 // interpolate points instead of using homography
 #define INTERPOLATE

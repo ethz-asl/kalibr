@@ -2,7 +2,7 @@
 #define ASLAM_GLOBAL_SHUTTER_HPP
 
 #include <aslam/Time.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/version.hpp>
 #include <sm/boost/serialization.hpp>

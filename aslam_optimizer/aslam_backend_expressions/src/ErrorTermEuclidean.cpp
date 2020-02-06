@@ -1,6 +1,6 @@
 #include <aslam/backend/ErrorTermEuclidean.hpp>
 
-#include <Eigen/LU>
+#include <eigen3/Eigen/LU>
 
 namespace aslam {
   namespace backend {

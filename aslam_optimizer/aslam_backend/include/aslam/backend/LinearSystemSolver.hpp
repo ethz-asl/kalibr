@@ -2,7 +2,7 @@
 #define ASLAM_BACKEND_LINEAR_SYSTEM_SOLVER_HPP
 
 #include <vector>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <boost/function.hpp>
 #include <sm/assert_macros.hpp>
 

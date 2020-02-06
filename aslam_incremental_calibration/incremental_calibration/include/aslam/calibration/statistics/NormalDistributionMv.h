@@ -23,7 +23,7 @@
 
 #include <tuple>
 
-#include <Eigen/Cholesky>
+#include <eigen3/Eigen/Cholesky>
 
 #include "aslam/calibration/statistics/ContinuousDistribution.h"
 #include "aslam/calibration/statistics/SampleDistribution.h"

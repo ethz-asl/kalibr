@@ -25,7 +25,7 @@
 
 #include <cstdlib>
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 /** The OuterProduct namespace contains outer product functions.
     \brief Outer product functions

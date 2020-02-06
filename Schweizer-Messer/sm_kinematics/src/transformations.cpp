@@ -1,5 +1,5 @@
 #include <sm/kinematics/transformations.hpp>
-#include <Eigen/Geometry>
+#include <eigen3/Eigen/Geometry>
 
 namespace sm { namespace kinematics {
 

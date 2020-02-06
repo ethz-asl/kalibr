@@ -1,7 +1,7 @@
 #ifndef ASLAM_CAMERAS_TRIANGULATION_HPP
 #define ASLAM_CAMERAS_TRIANGULATION_HPP
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 namespace aslam {
 namespace cameras {

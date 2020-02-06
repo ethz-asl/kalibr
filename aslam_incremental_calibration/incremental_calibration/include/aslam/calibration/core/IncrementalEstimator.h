@@ -28,7 +28,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 #include <aslam/backend/Optimizer2Options.hpp>
 

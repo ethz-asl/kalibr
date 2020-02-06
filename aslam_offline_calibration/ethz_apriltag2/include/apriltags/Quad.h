@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 #include "apriltags/Homography33.h"
 

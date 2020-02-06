@@ -2,7 +2,7 @@
 #define SM_EIGEN_MATRIX_SQRT_HPP
 
 #include <sm/assert_macros.hpp>
-#include <Eigen/Cholesky>
+#include <eigen3/Eigen/Cholesky>
 
 namespace sm {
     namespace eigen {

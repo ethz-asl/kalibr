@@ -14,7 +14,7 @@
 #include <aslam/Time.hpp>
 #include "Keypoint.hpp"
 #include "FrameBase.hpp"
-#include <Eigen/StdVector>
+#include <eigen3/Eigen/StdVector>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/vector.hpp>

@@ -12,7 +12,7 @@
 #ifndef SM_EIGEN_SERIALIZATION_HPP
 #define SM_EIGEN_SERIALIZATION_HPP
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <sm/assert_macros.hpp>
 #include <boost/serialization/split_free.hpp>
 #include <boost/serialization/nvp.hpp>

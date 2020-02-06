@@ -1,7 +1,7 @@
 #ifndef ASLAM_KEYPOINT_BASE_HPP
 #define ASLAM_KEYPOINT_BASE_HPP
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <aslam/Time.hpp>
 #include <aslam/frontend_ids.hpp>
 #include <aslam/KeypointBase.hpp>

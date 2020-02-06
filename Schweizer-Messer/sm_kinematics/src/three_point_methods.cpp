@@ -1,8 +1,8 @@
 #include <sm/kinematics/three_point_methods.hpp>
-#include <Eigen/SVD>
-#include <Eigen/LU>
+#include <eigen3/Eigen/SVD>
+#include <eigen3/Eigen/LU>
 #include <sm/assert_macros.hpp>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 #include <sm/kinematics/rotations.hpp>
 
 namespace sm { namespace kinematics {

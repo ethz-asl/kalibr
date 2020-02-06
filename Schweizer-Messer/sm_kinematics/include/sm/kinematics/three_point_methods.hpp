@@ -1,7 +1,7 @@
 #ifndef SM_THREE_POINT_METHODS
 #define SM_THREE_POINT_METHODS
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 namespace sm { namespace kinematics {
 

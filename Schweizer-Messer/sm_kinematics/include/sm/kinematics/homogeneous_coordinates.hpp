@@ -1,7 +1,7 @@
 #ifndef SM_MATH_HOMOGENEOUS_COORDINATES_HPP
 #define SM_MATH_HOMOGENEOUS_COORDINATES_HPP
 
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 namespace sm { namespace kinematics {
 

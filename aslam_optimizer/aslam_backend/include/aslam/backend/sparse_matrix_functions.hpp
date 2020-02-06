@@ -3,7 +3,7 @@
 
 #include <sparse_block_matrix/linear_solver.h>
 #include <boost/shared_ptr.hpp>
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 namespace aslam {
   namespace backend {

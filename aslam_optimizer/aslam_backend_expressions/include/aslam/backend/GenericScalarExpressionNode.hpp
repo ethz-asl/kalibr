@@ -2,7 +2,7 @@
 #define ASLAM_BACKEND_GENERIC_SCALAR_EXPRESSION_NODE_HPP
 
 #include <boost/shared_ptr.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 #include <aslam/backend/JacobianContainer.hpp>
 #include <aslam/backend/VectorExpressionNode.hpp>
 

@@ -7,7 +7,7 @@
 #include <boost/static_assert.hpp>
 #include <boost/filesystem.hpp>
 #include <sm/assert_macros.hpp>
-#include <Eigen/Core>
+#include <eigen3/Eigen/Core>
 
 
 // This code only works if a double is 8 bytes.
