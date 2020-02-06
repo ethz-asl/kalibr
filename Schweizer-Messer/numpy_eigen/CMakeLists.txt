@@ -9,7 +9,7 @@ find_package(Eigen3 REQUIRED)
 catkin_python_setup()
 
 add_definitions(${EIGEN_DEFINITIONS})
-include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(include ${EIGEN3_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 include_directories("${PROJECT_SOURCE_DIR}/include/numpy_eigen")
 
 catkin_package(

@@ -9,7 +9,7 @@ find_package(Eigen3 REQUIRED)
 
 catkin_package(
     DEPENDS eigen opencv
-    INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
+    INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIR}
     LIBRARIES ${PROJECT_NAME}
 )
 
@@ -19,7 +19,7 @@ find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
 add_definitions(-fPIC -O3)
-include_directories(include  ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(include  ${EIGEN3_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 
 #library
 file(GLOB SOURCE_FILES "src/*.cc")
