@@ -29,18 +29,9 @@ FROM $FROM_IMAGE AS build
 # install bootstrap tools
 RUN apt-get update && apt-get install --no-install-recommends -y \
     git \
-    python3-colcon-common-extensions \
-    python3-colcon-mixin \
+    python-catkin-tools \
     python3-vcstool \
     && rm -rf /var/lib/apt/lists/*
-
-# setup colcon mixin and metadata
-RUN colcon mixin add default \
-      https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml && \
-    colcon mixin update && \
-    colcon metadata add default \
-      https://raw.githubusercontent.com/colcon/colcon-metadata-repository/master/index.yaml && \
-    colcon metadata update
 
 # install CI dependencies
 RUN apt-get update && apt-get install -q -y \
@@ -67,12 +58,14 @@ COPY --from=cache $OVERLAY_WS ./
 # build overlay source
 ARG OVERLAY_MIXINS="release ccache"
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
-    colcon build \
-      --symlink-install \
-      --mixin $OVERLAY_MIXINS
-      # --event-handlers console_direct+
+    catkin init && \
+    catkin config \
+        --merge-devel \
+        --cmake-args \
+            -DCMAKE_BUILD_TYPE=Release \
+    && catkin build
 
 # source overlay from entrypoint
 RUN sed --in-place \
-      's|^source .*|source "$OVERLAY_WS/install/setup.bash"|' \
+      's|^source .*|source "$OVERLAY_WS/devel/setup.bash"|' \
       /ros_entrypoint.sh
