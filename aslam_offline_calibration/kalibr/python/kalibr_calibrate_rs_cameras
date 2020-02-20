@@ -12,8 +12,9 @@ import kalibr_common as kc
 import kalibr_camera_calibration as kcc
 import kalibr_rs_camera_calibration as rscc
 
-import cv
+
 import cv2
+import cv2 as cv
 import os
 import numpy as np
 import pylab as pl

@@ -9,7 +9,8 @@ import igraph
 import itertools
 import sys
 import pylab as pl
-import Image
+#import Image
+from PIL import Image
 import time
 
 # make numpy print prettier
