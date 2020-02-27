@@ -623,6 +623,8 @@ class CalibrationTargetParameters(ParametersBase):
                             'targetType': targetType}
 
             if 'low_id' in self.data:
+                if not isinstance(self.data['low_id'],int) or self.data['low_id'] < 0:
+                    errList.append("invalid low_id (int)")
                 targetParams['low_id'] = self.data['low_id']
             else:
                 targetParams['low_id'] = 0

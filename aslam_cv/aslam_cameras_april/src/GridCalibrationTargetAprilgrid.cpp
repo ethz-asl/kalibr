@@ -111,9 +111,16 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
    * extrapolates them, only the subpix refinement will fail
    */
 
-  for (auto& detection : detections){
-    assert(detection.id >= _low_id);
-    detection.id -= _low_id;
+  for (auto iter = detections.begin(); iter != detections.end();){
+    if(iter->id < _low_id)
+    {
+      std::cout << "Removing bad ID " <<  iter->id << std::endl;
+      std::cout << "low id " << _low_id<<std::endl;
+      iter = detections.erase(iter);
+      continue;
+    }
+    iter->id -= _low_id;
+    iter++;
   }
 
   //min. distance [px] of tag corners from image border (tag is not used if violated)
