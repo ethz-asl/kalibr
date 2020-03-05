@@ -96,12 +96,21 @@ class IccCamera():
             options = acv_april.AprilgridOptions() 
             options.showExtractionVideo = showExtraction
             options.minTagsForValidObs = int( np.max( [targetParams['tagRows'], targetParams['tagCols']] ) + 1 )
-            
-            grid = acv_april.GridCalibrationTargetAprilgrid(targetParams['tagRows'],
-                                                            targetParams['tagCols'], 
-                                                            targetParams['tagSize'], 
-                                                            targetParams['tagSpacing'], 
-                                                            options)
+
+            if 'low_id' in targetParams:
+                grid = acv_april.GridCalibrationTargetAprilgrid(targetParams['tagRows'],
+                                                                targetParams['tagCols'], 
+                                                                targetParams['tagSize'], 
+                                                                targetParams['tagSpacing'], 
+                                                                targetParams['low_id'],
+                                                                options)
+                print("April tag starts from id %d" % targetParams['low_id'])
+            else:
+                grid = acv_april.GridCalibrationTargetAprilgrid(targetParams['tagRows'],
+                                                                targetParams['tagCols'], 
+                                                                targetParams['tagSize'], 
+                                                                targetParams['tagSpacing'], 
+                                                                options)
         else:
             raise RuntimeError( "Unknown calibration target." )
                           
