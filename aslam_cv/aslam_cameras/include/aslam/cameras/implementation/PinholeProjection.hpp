@@ -739,9 +739,9 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
     SM_ASSERT_TRUE(Exception, obs.target(), "The GridCalibrationTargetObservation has no target object");
     const GridCalibrationTargetBase & target = *obs.target();
 
-    std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> center(target.rows());
+    std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> center;
     double radius[target.rows()];
-    bool skipImage=false;
+    uint32_t num_circles = 0;
 
     for (size_t r=0; r<target.rows(); ++r) {
       std::vector<cv::Point2d> circle;
@@ -751,19 +751,24 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
 
         if (obs.imageGridPoint(r, c, imagePoint))
           circle.push_back(cv::Point2f(imagePoint[0], imagePoint[1]));
-        else
-          //skip this image if the board view is not complete
-          skipImage=true;
       }
-      PinholeHelpers::fitCircle(circle, center[r](0), center[r](1), radius[r]);
+      if (circle.size() < 6) {
+        continue;
+      }
+      Eigen::Vector2d c;
+      double rad;
+      PinholeHelpers::fitCircle(circle, c(0), c(1), rad);
+      radius[num_circles] = rad;
+      center.push_back(c);
+      num_circles++;
     }
 
-    if(skipImage)
+    if (num_circles < 6)
       continue;
 
-    for (size_t j=0; j<target.rows(); ++j)
+    for (size_t j=0; j<num_circles; ++j)
     {
-      for (size_t k=j+1; k<target.cols(); ++k)
+      for (size_t k=j+1; k<num_circles; ++k)
       {
         // find distance between pair of vanishing points which
         // correspond to intersection points of 2 circles
@@ -778,13 +783,14 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
       }
     }
   }
+
   if(f_guesses.empty()) {
     const char* manual_input = std::getenv("KALIBR_MANUAL_FOCAL_LENGTH_INIT");
     if(manual_input != nullptr) {
       double input_guess;
       std::cout << "Initialization of focal length failed. Provide manual initialization: " << std::endl;
       std::cin >> input_guess;
-      SM_ASSERT_GT(std::runtime_error, input_guess, 0.0, 
+      SM_ASSERT_GT(std::runtime_error, input_guess, 0.0,
                 "Focal length needs to be positive.");
       std::cout << "Initializing focal length to " << input_guess << std::endl;
       f_guesses.push_back(input_guess);
