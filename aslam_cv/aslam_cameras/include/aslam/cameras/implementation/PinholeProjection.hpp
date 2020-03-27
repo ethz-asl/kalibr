@@ -739,8 +739,8 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
     SM_ASSERT_TRUE(Exception, obs.target(), "The GridCalibrationTargetObservation has no target object");
     const GridCalibrationTargetBase & target = *obs.target();
 
-    std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> center;
-    double radius[target.rows()];
+    std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> centers;
+    double radii[target.rows()];
     uint32_t num_circles = 0;
 
     for (size_t r=0; r<target.rows(); ++r) {
@@ -752,14 +752,13 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
         if (obs.imageGridPoint(r, c, imagePoint))
           circle.push_back(cv::Point2f(imagePoint[0], imagePoint[1]));
       }
-      if (circle.size() < 6) {
+      if (circle.size() < 6)
         continue;
-      }
-      Eigen::Vector2d c;
-      double rad;
-      PinholeHelpers::fitCircle(circle, c(0), c(1), rad);
-      radius[num_circles] = rad;
-      center.push_back(c);
+      Eigen::Vector2d center;
+      double radius;
+      PinholeHelpers::fitCircle(circle, center(0), center(1), radius);
+      radii[num_circles] = radius;
+      centers.push_back(center);
       num_circles++;
     }
 
@@ -773,8 +772,8 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
         // find distance between pair of vanishing points which
         // correspond to intersection points of 2 circles
         std::vector < cv::Point2d > ipts;
-        ipts = PinholeHelpers::intersectCircles(center[j](0), center[j](1),
-                                                radius[j], center[k](0), center[k](1), radius[k]);
+        ipts = PinholeHelpers::intersectCircles(centers[j](0), centers[j](1),
+                                                radii[j], centers[k](0), centers[k](1), radii[k]);
         if (ipts.size()<2)
           continue;
 
