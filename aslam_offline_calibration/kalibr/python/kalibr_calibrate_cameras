@@ -169,12 +169,12 @@ def main():
         
             #create camera
             cameraModel = cameraModels[modelName]
-            cam = kcc.CameraGeometry(cameraModel, targetConfig, dataset, verbose=(parsed.verbose or parsed.showextraction))
+            cam = kcc.CameraGeometry(cameraModel, targetConfig, dataset, verbose=False)
                 
             #extract the targets
             multithreading = not (parsed.verbose or parsed.showextraction)
             observations = kc.extractCornersFromDataset(cam.dataset, cam.ctarget.detector, 
-                                                        multithreading=multithreading, clearImages=False,
+                                                        multithreading=True, clearImages=False,
                                                         noTransformation=True)
             
             #populate the database

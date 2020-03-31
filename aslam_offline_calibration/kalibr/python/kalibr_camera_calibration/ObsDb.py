@@ -63,6 +63,9 @@ class ObservationDatabase(object):
             self.targetViews[timestamp][cam_id] = dict()
             self.targetViews[timestamp][cam_id]['obs_id'] = obs_idx
             self.targetViews[timestamp][cam_id]['observed_corners'] = set(obs.getCornersIdx())
+            print obs_idx 
+            print set(obs.getCornersIdx())
+            print ""
         else:
             #we already have a view from this camera on this timestamp --> STH IS WRONG
             sm.logError("[TargetViewTable]: Tried to add second view to a given cameraId & " 
