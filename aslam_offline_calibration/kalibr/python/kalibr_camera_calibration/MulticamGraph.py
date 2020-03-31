@@ -87,6 +87,8 @@ class MulticamCalibrationGraph(object):
 #############################################################    
     #check if all cams are connected through observations
     def isGraphConnected(self):
+        print "numcams ", self.numCams
+        print "adhesion ", self.G.adhesion()
         #check if all vertices are connected
         if self.numCams == 1:
             return True
