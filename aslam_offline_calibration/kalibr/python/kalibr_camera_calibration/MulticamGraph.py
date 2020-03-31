@@ -38,10 +38,13 @@ class MulticamCalibrationGraph(object):
         for timestamp in self.obs_db.getAllViewTimestamps():
             #cameras that have a target view at this timestamp instant
             cam_ids_at_timestamp = set( obs_db.getCamIdsAtTimestamp(timestamp) )
-            
+
             #go through all edges of the graph and check if we have common corners
             possible_edges = itertools.combinations(cam_ids_at_timestamp, 2)
-            
+
+            print 'Timestamp {:.20f}'.format(timestamp)
+            print 'Cam ids at timestamp ', len(cam_ids_at_timestamp)
+            print "Num edges ", len(list(possible_edges))
             for edge in possible_edges:
                 cam_id_A = edge[0]
                 cam_id_B = edge[1]
@@ -59,11 +62,13 @@ class MulticamCalibrationGraph(object):
                     #add edege if it isn't existing yet
                     try:
                         edge_idx = G.get_eid(cam_id_A, cam_id_B)
+                        print "Edge existing"
                     except:
                         G.add_edges([(cam_id_A, cam_id_B)])
                         edge_idx = G.get_eid(cam_id_A, cam_id_B)
                         G.es[edge_idx]["obs_ids"] = list()
                         G.es[edge_idx]["weight"] = 0
+                        print "Add edge ", edge_idx, "between ", cam_id_A, " and ", cam_id_B
                     
                     #store the observation of the camera if the lower id first on the edge
                     G.es[edge_idx]["weight"] += len(common_corners)
@@ -83,7 +88,10 @@ class MulticamCalibrationGraph(object):
     #check if all cams are connected through observations
     def isGraphConnected(self):
         #check if all vertices are connected
-        return self.G.adhesion()
+        if self.numCams == 1:
+            return True
+        else:
+            return self.G.adhesion()
         
     #returns the list of cam_ids that share common view with the specified cam_id
     def getCamOverlaps(self, cam_id):

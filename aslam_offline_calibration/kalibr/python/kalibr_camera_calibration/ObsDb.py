@@ -156,7 +156,7 @@ class ObservationDatabase(object):
         
         #data lines
         for time in times_sorted:
-            print time,
+            print '{:.20f}'.format(time),
             for cam_id in range(0, self.numCameras()):
                 try:
                     numCorners = len(self.targetViews[time][cam_id]['observed_corners'])
