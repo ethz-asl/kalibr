@@ -84,7 +84,6 @@ class MulticamCalibrationGraph(object):
 #############################################################    
     #check if all cams are connected through observations
     def isGraphConnected(self):
-
         if self.numCams == 1:
             # Since igaph 0.8, adhesion correctly returns 0 for the non-connected one cam case.
             #   which evaluates to false later on. So we skip the check and return true in the one camera case.
