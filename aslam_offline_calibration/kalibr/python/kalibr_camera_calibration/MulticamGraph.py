@@ -88,7 +88,7 @@ class MulticamCalibrationGraph(object):
             # Since igaph 0.8, adhesion returns 0 instead of -2147483648 for a graph with a single vertex.
             # As 0 evaluates to False later in the process, kalibr exits with the cameras unconnected error.
             # Todo / Future work: Figure out if we should use is_connected instead of adhesion. 
-	    #                     See discussion in PR #358 / https://github.com/ethz-asl/kalibr/pull/358
+            #                     See discussion in PR #358 / https://github.com/ethz-asl/kalibr/pull/358
             return True
         else:
             #check if all vertices are connected
