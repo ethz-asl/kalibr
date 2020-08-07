@@ -66,11 +66,9 @@ def getImuCsvFiles(dir):
     
     return imu_files
 
-def loadImageToRosMsg(filename):
+def loadImageToRosMsg(filename, timestamp):
     image_np = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-    
-    timestamp_nsecs = os.path.splitext(os.path.basename(filename))[0]
-    timestamp = rospy.Time( secs=int(timestamp_nsecs[0:-9]), nsecs=int(timestamp_nsecs[-9:]) )
+    timestamp = rospy.Time( secs=int(timestamp), nsecs=0)
 
     rosimage = Image()
     rosimage.header.stamp = timestamp
@@ -106,8 +104,8 @@ try:
     for camfolder in camfolders:
         camdir = parsed.folder + "/{0}".format(camfolder)
         image_files = getImageFilesFromDir(camdir)
-        for image_filename in image_files:
-            image_msg, timestamp = loadImageToRosMsg(image_filename)
+        for i,image_filename in enumerate(image_files):
+            image_msg, timestamp = loadImageToRosMsg(image_filename, i)
             bag.write("/{0}/image_raw".format(camfolder), image_msg, timestamp)
 
     #write imu data

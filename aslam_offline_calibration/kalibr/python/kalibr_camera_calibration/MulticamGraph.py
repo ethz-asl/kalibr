@@ -84,8 +84,11 @@ class MulticamCalibrationGraph(object):
 #############################################################    
     #check if all cams are connected through observations
     def isGraphConnected(self):
+	if self.numCams == 1:
+		return True
+	else:
         #check if all vertices are connected
-        return self.G.adhesion()
+		return self.G.adhesion()
         
     #returns the list of cam_ids that share common view with the specified cam_id
     def getCamOverlaps(self, cam_id):
