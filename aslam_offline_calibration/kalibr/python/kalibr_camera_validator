@@ -38,7 +38,7 @@ class CalibrationTargetDetector(object):
                                                             targetParams['colSpacingMeters'])
         
         elif( targetType == 'circlegrid' ):
-            options = acv.CirclegridOptions(); 
+            options = acv.CirclegridOptions()
             options.useAsymmetricCirclegrid = targetParams['asymmetricGrid']
             
             grid = acv.GridCalibrationTargetCirclegrid(targetParams['targetRows'],
@@ -60,11 +60,13 @@ class CalibrationTargetDetector(object):
         self.detector = acv.GridDetector(camera.geometry, grid, options)
     
 class CameraChainValidator(object):
-    def __init__(self, chainConfig, targetParams):
+    def __init__(self, chainConfig, targetParams, maxImages):
         
         self.chainConfig = chainConfig
         self.numCameras = chainConfig.numCameras()
         self.bridge = CvBridge()
+        self.numImages = 0
+        self.maxImages = maxImages
         
         #initialize the cameras in the chain
         self.G = igraph.Graph(self.numCameras)
@@ -76,7 +78,7 @@ class CameraChainValidator(object):
             monovalidator = MonoCameraValidator(camConfig, targetParams)
             self.monovalidators.append(monovalidator)
             
-            #add edges to overlap graph
+            #add edges to overlap graph1
             overlaps=chainConfig.getCamOverlaps(cidx)
             for overlap in overlaps:
                 #add edge if it isn't existing yet
@@ -90,7 +92,7 @@ class CameraChainValidator(object):
             cidx_src = edge.source
             cidx_dest = edge.target
 
-            edge["rect_map"]=dict();edge["R"]=dict();edge["A"]=dict();
+            edge["rect_map"]=dict();edge["R"]=dict();edge["A"]=dict()
             
             edge["rect_map"][cidx_src], \
             edge["rect_map"][cidx_dest], \
@@ -144,9 +146,26 @@ class CameraChainValidator(object):
                 validator.undist_image = validator.undistorter.undistortImage(np_image)
                             
             #generate a mono view for each cam
-            validator.generateMonoview(np_image, observation, success)            
-            
-        #generate all rectification views
+            validator.generateMonoview(np_image, observation, success)
+            if success:
+                print("===================== Image: {0} =======".format(self.numImages))
+                self.numImages += 1
+                print("mean_x: {0}\nstd_x: {1}\nmax_x: {2}\nmin_x: {3}\n"
+                                    .format(np.mean(np.abs(validator.overallReprojectionErrors[:,0])),
+                                        np.std(np.abs(validator.overallReprojectionErrors[:,0])),
+                                        np.max(np.abs(validator.overallReprojectionErrors[:,0])),
+                                        np.min(np.abs(validator.overallReprojectionErrors[:,0]))))
+                print("mean_y: {0}\nstd_y: {1}\nmax_y: {2}\nmin_y: {3}\n"
+                                    .format(np.mean(np.abs(validator.overallReprojectionErrors[:,1])),
+                                        np.std(np.abs(validator.overallReprojectionErrors[:,1])),
+                                         np.max(np.abs(validator.overallReprojectionErrors[:,1])),
+                                        np.min(np.abs(validator.overallReprojectionErrors[:,1]))))
+            else:
+                print("Detection failed!!!")
+            print(self.numImages, self.maxImages)
+            if self.numImages > self.maxImages:
+                np.savetxt("ReprojErrorold1vsold2.csv", validator.overallReprojectionErrors, delimiter=",")
+
         for edge in self.G.es:
             cidx_src = edge.source
             cidx_dest = edge.target
@@ -396,6 +415,7 @@ class MonoCameraValidator(object):
         #storage for reproj errors
         self.cornersImage = list()
         self.reprojectionErrors = list()
+        self.overallReprojectionErrors = np.empty((0,2))
         
     
     def generateMonoview(self, np_image, observation, obs_valid):
@@ -409,11 +429,10 @@ class MonoCameraValidator(object):
             
             reprojectionErrors2 = cornersImage-cornersReproj
             reprojectionErrors = np.sum(np.abs(reprojectionErrors2)**2, axis=-1)**(1./2)
-            
             #save the errors for reprojection error map plotting
             self.cornersImage.append(cornersImage)
             self.reprojectionErrors.append(reprojectionErrors)
-            
+            self.overallReprojectionErrors = np.append(self.overallReprojectionErrors, np.array(reprojectionErrors2), axis=0)
             outputList = [ ( "mean_x:  ", np.mean(reprojectionErrors2[:,0]) ),
                            ( "std_x:   ", np.std(reprojectionErrors2[:,0]) ),
                            ( "max_y:   ", np.max(reprojectionErrors2[:,0]) ),
@@ -462,6 +481,7 @@ if __name__ == "__main__":
     parser.add_argument('--target', dest='targetYaml', help='Calibration target configuration as yaml file', required=True)
     parser.add_argument('--cam', dest='chainYaml', help='Camera configuration as yaml file', required=True)
     parser.add_argument('--verbose', action='store_true', dest='verbose', help='Verbose output')
+    parser.add_argument('--max_images', dest="maxImages", type=int, help="Number of images at which the histogram should be plotted")
     parsed = parser.parse_args()
         
     if parsed.verbose:
@@ -477,7 +497,7 @@ if __name__ == "__main__":
     camchain = kc.ConfigReader.CameraChainParameters(parsed.chainYaml)
         
     #create the validator
-    chain_validator = CameraChainValidator(camchain, targetConfig)
+    chain_validator = CameraChainValidator(camchain, targetConfig, parsed.maxImages)
     
     #ros message loops
     rospy.init_node('kalibr_validator', anonymous=True)
