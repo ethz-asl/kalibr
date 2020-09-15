@@ -1,24 +1,23 @@
 #!/usr/bin/env python
 print "importing libraries"
-import rosbag
-import cv_bridge
-
-import sm
-from sm import PlotCollection
-import aslam_cv as acv
-import aslam_cameras_april as acv_april
-import aslam_cv_backend as acvb
-import kalibr_common as kc
-import kalibr_camera_calibration as kcc
-
-import cv2
-import os
-import numpy as np
-import pylab as pl
 import argparse
-import sys
+import os
 import random
 import signal
+import sys
+
+import aslam_cameras_april as acv_april
+import aslam_cv as acv
+import aslam_cv_backend as acvb
+import cv2
+import cv_bridge
+import kalibr_camera_calibration as kcc
+import kalibr_common as kc
+import numpy as np
+import pylab as pl
+import rosbag
+import sm
+from sm import PlotCollection
 
 np.set_printoptions(suppress=True)
 
@@ -310,7 +309,7 @@ def main():
                         initOutlierRejection=False
                         progress_filter = sm.Progress2(len(batches_to_check)); progress_filter.sample()
                     elif runEndFiltering:
-                        #check all batches again after all views have been processed
+                        #check all batches again after all views  have been processed
                         print;print
                         print "All views have been processed.\n\nStarting final outlier filtering..."
                         batches_to_check=range(0, calibrator.estimator.getNumBatches())
@@ -398,9 +397,9 @@ def main():
             kcc.printParameters(calibrator)
             
             if parsed.verbose and len(calibrator.baselines)>1:
-		        f=pl.figure(100006)
-		        kcc.plotCameraRig(calibrator.baselines, fno=f.number, clearFigure=False)
-		        pl.show()
+                f=pl.figure(100006)
+                kcc.plotCameraRig(calibrator.baselines, fno=f.number, clearFigure=False)
+                pl.show()
             
             #write to file
             bagtag = parsed.bagfile.translate(None, "<>:/\|?*").replace('.bag', '', 1)
