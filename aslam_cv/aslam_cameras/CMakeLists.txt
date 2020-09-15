@@ -24,6 +24,7 @@ cs_add_library(${PROJECT_NAME}
   src/GridCalibrationTargetBase.cpp
   src/GridCalibrationTargetCheckerboard.cpp
   src/GridCalibrationTargetCirclegrid.cpp
+  src/GridCalibrationTargetGeneral.cpp
   src/GridDetector.cpp
   src/Triangulation.cpp
   src/FrameBase.cpp

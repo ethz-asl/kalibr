@@ -1,12 +1,13 @@
-import yaml
-import sys
-import numpy as np
 import functools
-
 import math
+import sys
+
 import aslam_cv as cv
 import aslam_cv_backend as cvb
+import numpy as np
 import sm
+import yaml
+
 
 class AslamCamera(object):
     def __init__(self, camera_model, intrinsics, dist_model, dist_coeff, resolution):
@@ -534,7 +535,8 @@ class CalibrationTargetParameters(ParametersBase):
     def checkTargetType(self, target_type):
         targetTypes = ['aprilgrid', 
                        'checkerboard',
-                       'circlegrid']
+                       'circlegrid',
+                       'general']
         
         if target_type not in targetTypes:
             self.raiseError('Unknown calibration target type. Supported types: {0}. )'.format(targetTypes) )
@@ -620,6 +622,16 @@ class CalibrationTargetParameters(ParametersBase):
                             'tagSize': tagSize,
                             'tagSpacing': tagSpacing,
                             'targetType': targetType}
+
+        elif targetType == 'general':
+            try:
+                tagRows = self.data["tagRows"]
+                tagCols = self.data["tagCols"]
+            except KeyErorr, e:
+                self.raiseError("Calibration target configuration in {0} is missing the field: {1}".format(self.yamlFile, str(e)))
+
+            targetParams = {'tagRows': tagRows,
+                            'tagCols': tagCols}
             
         return targetParams
         

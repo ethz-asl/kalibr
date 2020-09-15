@@ -1,21 +1,21 @@
-import sm
-from sm import PlotCollection
-from kalibr_common import ConfigReader as cr
-import aslam_cv as acv
-import aslam_cameras_april as acv_april
-import aslam_cv_backend as acvb
+import gc
+import math
+import sys
+
 import aslam_backend as aopt
+import aslam_cameras_april as acv_april
+import aslam_cv as acv
+import aslam_cv_backend as acvb
+import cv2
 import incremental_calibration as ic
 import kalibr_camera_calibration as kcc
-
-from matplotlib.backends.backend_pdf import PdfPages
 import mpl_toolkits.mplot3d.axes3d as p3
-import cv2
 import numpy as np
 import pylab as pl
-import math
-import gc
-import sys
+import sm
+from kalibr_common import ConfigReader as cr
+from matplotlib.backends.backend_pdf import PdfPages
+from sm import PlotCollection
 
 np.set_printoptions(suppress=True, precision=8)
 
@@ -115,6 +115,9 @@ class TargetDetector(object):
                                                                  targetParams['tagSize'], 
                                                                  targetParams['tagSpacing'], 
                                                                  options)
+        elif targetType == 'general':
+            self.grid = acv.GridCalibrationTargetGeneral(targetParams['tagRows'],
+                                                         targetParams['tagCols'])
         else:
             RuntimeError('Unknown calibration target type!')
 
@@ -881,4 +884,3 @@ def saveResultTxt(cself, filename="camera_calibration_result.txt"):
     print >> f1, ""
 
     cself.cameras[0].ctarget.targetConfig.printDetails(f1)
-    
