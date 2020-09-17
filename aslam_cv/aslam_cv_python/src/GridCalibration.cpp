@@ -288,9 +288,9 @@ void exportGridCalibration() {
 
   class_<GridCalibrationTargetGeneral, bases<GridCalibrationTargetBase>,
       boost::shared_ptr<GridCalibrationTargetGeneral>, boost::noncopyable>(
-      "GridCalibrationTargetGeneral", init<size_t, size_t>(
-          "GridCalibrationTargetGeneral(size_t rows, size_t cols)"))
-      .def(init<size_t, size_t>("GridCalibrationTargetGeneral(size_t rows, size_t cols)"))
+      "GridCalibrationTargetGeneral", init<size_t, size_t, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> >(
+          "GridCalibrationTargetGeneral(size_t rows, size_t cols, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> gridPoints)"))
+      .def(init<size_t, size_t, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>("GridCalibrationTargetGeneral(size_t rows, size_t cols, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> gridPoints)"))
       .def(init<>("Do not use the default constructor. It is only necessary for the pickle interface"))
       .def_pickle(sm::python::pickle_suite<GridCalibrationTargetGeneral>());
 
@@ -313,6 +313,7 @@ void exportGridCalibration() {
     .def("getCornerReprojection", &getCornerReprojection)
     .def("getImage", &getImage)
     .def("setImage", &setImage)
+    .def("setTarget", &GridCalibrationTargetObservation::setTarget)
     .def("clearImage", &GridCalibrationTargetObservation::clearImage)
     .def("hasSuccessfulObservation",  &GridCalibrationTargetObservation::hasSuccessfulObservation)
     .def("imagePoint", &imagePoint)

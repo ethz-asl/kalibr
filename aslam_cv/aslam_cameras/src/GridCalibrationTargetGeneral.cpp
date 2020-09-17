@@ -9,14 +9,19 @@ namespace aslam {
 namespace cameras {
 
 /// \brief Construct a calibration target
-GridCalibrationTargetGeneral::GridCalibrationTargetGeneral(size_t rows, size_t cols)
+GridCalibrationTargetGeneral::GridCalibrationTargetGeneral(size_t rows, size_t cols, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> gridpoints)
     : GridCalibrationTargetBase(rows, cols) {
 
   // allocate memory for the grid points
   _points.resize(size(), 3);
 
+  // for (unsigned int r = 0; r < rows; r++)
+  //   for (unsigned int c = 0; c < cols; c++)
+  //     _points.row(gridCoordinatesToPoint(r, c)) = Eigen::Matrix<double, 1, 3>(gridpoints[gridCoordinatesToPoint(r, c)][0], 
+  //                                                                             gridpoints[gridCoordinatesToPoint(r, c)][1], 0.0);
+  _points = gridpoints;
   //initialize a normal grid
-  createGridPoints();
+  // createGridPoints();
 
   //start the output window if requested
   initialize();

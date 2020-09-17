@@ -28,7 +28,7 @@ class OptimizationDiverged(Exception):
     pass
 
 class CameraGeometry(object):
-    def __init__(self, cameraModel, targetConfig, dataset, geometry=None, verbose=False):
+    def __init__(self, cameraModel, targetConfig, dataset, gridpoints=None, geometry=None, verbose=False):
         self.dataset = dataset
         
         self.model = cameraModel
@@ -44,7 +44,7 @@ class CameraGeometry(object):
         self.isGeometryInitialized = False
         
         #create target detector
-        self.ctarget = TargetDetector(targetConfig, self.geometry, showCorners=verbose, showReproj=verbose)
+        self.ctarget = TargetDetector(targetConfig, self.geometry, gridpoints=gridpoints, showCorners=verbose, showReproj=verbose)
 
     def setDvActiveStatus(self, projectionActive, distortionActive, shutterActice):
         self.dv.projectionDesignVariable().setActive(projectionActive)
@@ -73,7 +73,7 @@ class CameraGeometry(object):
         return success
 
 class TargetDetector(object):
-    def __init__(self, targetConfig, cameraGeometry, showCorners=False, showReproj=False, showOneStep=False):
+    def __init__(self, targetConfig, cameraGeometry, gridpoints=None, showCorners=False, showReproj=False, showOneStep=False):
         self.targetConfig = targetConfig
         
         #initialize the calibration target
@@ -117,7 +117,8 @@ class TargetDetector(object):
                                                                  options)
         elif targetType == 'general':
             self.grid = acv.GridCalibrationTargetGeneral(targetParams['tagRows'],
-                                                         targetParams['tagCols'])
+                                                         targetParams['tagCols'],
+                                                         gridpoints)
         else:
             RuntimeError('Unknown calibration target type!')
 

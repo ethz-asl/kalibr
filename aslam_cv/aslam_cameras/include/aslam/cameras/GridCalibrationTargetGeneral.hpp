@@ -21,7 +21,7 @@ class GridCalibrationTargetGeneral : public GridCalibrationTargetBase {
   typedef boost::shared_ptr<const GridCalibrationTargetGeneral> ConstPtr;
 
   /// \brief initialize based on circlegrid geometry
-  GridCalibrationTargetGeneral(size_t rows, size_t cols);
+  GridCalibrationTargetGeneral(size_t rows, size_t cols, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> gridpoints);
 
   virtual ~GridCalibrationTargetGeneral() {};
 
