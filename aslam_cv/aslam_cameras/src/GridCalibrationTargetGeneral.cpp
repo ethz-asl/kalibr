@@ -9,7 +9,7 @@ namespace aslam {
 namespace cameras {
 
 /// \brief Construct a calibration target
-GridCalibrationTargetGeneral::GridCalibrationTargetGeneral(size_t rows, size_t cols, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> gridpoints)
+GridCalibrationTargetGeneral::GridCalibrationTargetGeneral(size_t rows, size_t cols)
     : GridCalibrationTargetBase(rows, cols) {
 
   // allocate memory for the grid points
@@ -19,7 +19,7 @@ GridCalibrationTargetGeneral::GridCalibrationTargetGeneral(size_t rows, size_t c
   //   for (unsigned int c = 0; c < cols; c++)
   //     _points.row(gridCoordinatesToPoint(r, c)) = Eigen::Matrix<double, 1, 3>(gridpoints[gridCoordinatesToPoint(r, c)][0], 
   //                                                                             gridpoints[gridCoordinatesToPoint(r, c)][1], 0.0);
-  _points = gridpoints;
+  // _points = gridpoints;
   //initialize a normal grid
   // createGridPoints();
 
@@ -35,6 +35,11 @@ void GridCalibrationTargetGeneral::initialize()
   //   cvStartWindowThread();
   // }
 }
+
+void GridCalibrationTargetGeneral::setPoints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &gridpoints){
+
+}
+
 
 /// \brief initialize a checkerboard grid (cols*rows = (cols)*(rows) internal grid points)
 void GridCalibrationTargetGeneral::createGridPoints() {

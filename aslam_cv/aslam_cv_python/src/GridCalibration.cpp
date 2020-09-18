@@ -33,6 +33,13 @@ void setImage(aslam::cameras::GridCalibrationTargetObservation * frame,
   frame->setImage(to);
 }
 
+void setPoints(aslam::cameras::GridCalibrationTargetGeneral *frame,
+                const image_t & gridpoints) {
+
+  // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> _points;
+
+}
+
 
 class PythonImageList {
 public:
@@ -133,7 +140,7 @@ boost::python::tuple imageGridPoint(
 
 /// \brief get all corners in target coordinates (order matches getCornersImageFrame)
 Eigen::MatrixXd getCornersTargetFrame(
-    aslam::cameras::GridCalibrationTargetObservation * frame) {
+  aslam::cameras::GridCalibrationTargetObservation * frame) {
   // Get the corners in the target frame
   std::vector<cv::Point3f> targetCorners;
   unsigned int numCorners = frame->getCornersTargetFrame(targetCorners);
@@ -288,9 +295,9 @@ void exportGridCalibration() {
 
   class_<GridCalibrationTargetGeneral, bases<GridCalibrationTargetBase>,
       boost::shared_ptr<GridCalibrationTargetGeneral>, boost::noncopyable>(
-      "GridCalibrationTargetGeneral", init<size_t, size_t, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> >(
-          "GridCalibrationTargetGeneral(size_t rows, size_t cols, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> gridPoints)"))
-      .def(init<size_t, size_t, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>("GridCalibrationTargetGeneral(size_t rows, size_t cols, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> gridPoints)"))
+      "GridCalibrationTargetGeneral", init<size_t, size_t>("GridCalibrationTargetGeneral(size_t rows, size_t cols)"))
+      .def("setPoints", &setPoints)
+      .def(init<size_t, size_t>("GridCalibrationTargetGeneral(size_t rows, size_t cols)"))
       .def(init<>("Do not use the default constructor. It is only necessary for the pickle interface"))
       .def_pickle(sm::python::pickle_suite<GridCalibrationTargetGeneral>());
 

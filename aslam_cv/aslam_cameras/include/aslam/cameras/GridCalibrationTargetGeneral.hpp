@@ -21,13 +21,15 @@ class GridCalibrationTargetGeneral : public GridCalibrationTargetBase {
   typedef boost::shared_ptr<const GridCalibrationTargetGeneral> ConstPtr;
 
   /// \brief initialize based on circlegrid geometry
-  GridCalibrationTargetGeneral(size_t rows, size_t cols, Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> gridpoints);
+  GridCalibrationTargetGeneral(size_t rows, size_t cols);
 
   virtual ~GridCalibrationTargetGeneral() {};
 
   /// \brief extract the calibration target points from an image and write to an observation
   bool computeObservation(const cv::Mat &image, Eigen::MatrixXd &outImagePoints,
                           std::vector<bool> &outCornerObserved) const;
+
+  void setPoints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &gridpoints);
 
  private:
   /// \brief initialize the object

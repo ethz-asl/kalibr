@@ -117,8 +117,8 @@ class TargetDetector(object):
                                                                  options)
         elif targetType == 'general':
             self.grid = acv.GridCalibrationTargetGeneral(targetParams['tagRows'],
-                                                         targetParams['tagCols'],
-                                                         gridpoints)
+                                                         targetParams['tagCols'])
+            self.grid.setPoints(gridpoints)
         else:
             RuntimeError('Unknown calibration target type!')
 
