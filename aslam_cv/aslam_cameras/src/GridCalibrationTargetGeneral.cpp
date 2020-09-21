@@ -36,8 +36,11 @@ void GridCalibrationTargetGeneral::initialize()
   // }
 }
 
-void GridCalibrationTargetGeneral::setPoints(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> &gridpoints){
-
+void GridCalibrationTargetGeneral::setPoints(const Eigen::MatrixXd &gridpoints){
+    for (unsigned int r = 0; r < _rows; r++)
+      for (unsigned int c = 0; c < _cols; c++)
+        _points.row(gridCoordinatesToPoint(r, c)) = Eigen::Matrix<double, 1, 3>(gridpoints(gridCoordinatesToPoint(r, c),0), 
+                                                                                gridpoints(gridCoordinatesToPoint(r, c),1), 0.0);
 }
 
 

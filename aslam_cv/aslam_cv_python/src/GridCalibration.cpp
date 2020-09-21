@@ -33,9 +33,9 @@ void setImage(aslam::cameras::GridCalibrationTargetObservation * frame,
   frame->setImage(to);
 }
 
-void setPoints(aslam::cameras::GridCalibrationTargetGeneral *frame,
-                const image_t & gridpoints) {
-
+void setPoints(aslam::cameras::GridCalibrationTargetGeneral * frame,
+                const Eigen::MatrixXd & gridpoints) {
+  frame->setPoints(gridpoints);
   // Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> _points;
 
 }
@@ -295,9 +295,9 @@ void exportGridCalibration() {
 
   class_<GridCalibrationTargetGeneral, bases<GridCalibrationTargetBase>,
       boost::shared_ptr<GridCalibrationTargetGeneral>, boost::noncopyable>(
-      "GridCalibrationTargetGeneral", init<size_t, size_t>("GridCalibrationTargetGeneral(size_t rows, size_t cols)"))
+      "GridCalibrationTargetGeneral", 
+      init<size_t, size_t>("GridCalibrationTargetGeneral(size_t rows, size_t cols)"))
       .def("setPoints", &setPoints)
-      .def(init<size_t, size_t>("GridCalibrationTargetGeneral(size_t rows, size_t cols)"))
       .def(init<>("Do not use the default constructor. It is only necessary for the pickle interface"))
       .def_pickle(sm::python::pickle_suite<GridCalibrationTargetGeneral>());
 
