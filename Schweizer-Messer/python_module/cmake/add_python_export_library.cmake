@@ -86,7 +86,7 @@ ${SETUP_PY_TEXT}
       list(APPEND BOOST_COMPONENTS python27)
     endif()
   else()
-    list(APPEND BOOST_COMPONENTS python3)
+    list(APPEND BOOST_COMPONENTS python38)
   endif()
   find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS}) 
 
