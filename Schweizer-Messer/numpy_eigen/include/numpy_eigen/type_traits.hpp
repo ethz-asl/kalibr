@@ -46,7 +46,7 @@ template<> struct TypeToNumPy<unsigned char>
   static const char * typeString() { return "unsigned char"; }
   static bool canConvert(int type)
   {
-    return type == NPY_UBYTE || type == NPY_BYTE || type == NPY_CHAR;
+    return type == NPY_UBYTE || type == NPY_BYTE || type == NPY_STRING;
   }
 };
 
@@ -57,7 +57,7 @@ template<> struct TypeToNumPy<char>
   static const char * typeString() { return "char"; }
   static bool canConvert(int type)
   {
-    return type == NPY_UBYTE || type == NPY_BYTE || type == NPY_CHAR;
+    return type == NPY_UBYTE || type == NPY_BYTE || type == NPY_STRING;
   }
 };
 
@@ -136,8 +136,6 @@ inline const char * npyTypeToString(int npyType)
       return "NPY_NTYPES";
     case NPY_NOTYPE:
       return "NPY_NOTYPE";
-    case NPY_CHAR:
-      return "NPY_CHAR";
     default:
       return "Unknown type";
     }
