@@ -18,5 +18,8 @@ if [ ! -d "$data_dir" ]; then
   exit 1
 fi
 
-docker run -it -v $data_dir:/root/data kalibr
+
+xhost +local:root;
+nvidia-docker run -it -e DISPLAY -e QT_X11_NO_MITSHM=1 -v /tmp/.X11-unix:/tmp/.X11-unix:rw --privileged -v $data_dir:/root/data kalibr
+xhost -local:root;
 
