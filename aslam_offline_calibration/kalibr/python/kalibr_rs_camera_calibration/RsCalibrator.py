@@ -5,6 +5,7 @@ import aslam_cv_backend as acvb
 import aslam_cv as acv
 import aslam_splines as asp
 import incremental_calibration as inc
+from kalibr_common import ConfigReader as cr
 import bsplines
 import numpy as np
 import multiprocessing
@@ -194,6 +195,7 @@ class RsCalibrator(object):
                 )
 
         self.__printResults()
+        self.__saveParametersYaml()
 
     def __generateExtrinsicsInitialGuess(self):
         """Estimate the pose of the camera with a PnP solver. Call after initializing the intrinsics"""
@@ -458,3 +460,47 @@ class RsCalibrator(object):
         print proj.getParameters().flatten()
         print "Distortion:"
         print dist.getParameters().flatten()
+
+    def __saveParametersYaml(self):
+        # Create new config file
+        bagtag = self.__cameraGeometry.dataset.bagfile.translate(None, "<>:/\|?*").replace('.bag', '', 1)
+        resultFile = "camchain-" + bagtag + ".yaml"
+        chain = cr.CameraChainParameters(resultFile, createYaml=True)
+        camParams = cr.CameraParameters(resultFile, createYaml=True)
+        camParams.setRosTopic(self.__cameraGeometry.dataset.topic)
+
+        # Intrinsics
+        cameraModels = {
+            # Rolling shutter
+            acvb.DistortedPinholeRs: 'pinhole',
+            acvb.EquidistantPinholeRs: 'pinhole',
+            acvb.DistortedOmniRs: 'omni',
+            # Global shutter
+            acvb.DistortedPinhole: 'pinhole',
+            acvb.EquidistantPinhole: 'pinhole',
+            acvb.DistortedOmni: 'omni'}
+        cameraModel = cameraModels[self.__cameraGeometry.model]
+        proj = self.__camera_dv.projectionDesignVariable().value()
+        camParams.setIntrinsics(cameraModel, proj.getParameters().flatten())
+        camParams.setResolution([proj.ru(), proj.rv()])
+
+        # Distortion
+        distortionModels = {
+            # Rolling shutter
+            acvb.DistortedPinholeRs: 'radtan',
+            acvb.EquidistantPinholeRs: 'equidistant',
+            acvb.DistortedOmniRs: 'radtan',
+            # Global shutter
+            acvb.DistortedPinhole: 'radtan',
+            acvb.EquidistantPinhole: 'equidistant',
+            acvb.DistortedOmni: 'radtan'}
+        distortionModel = distortionModels[self.__cameraGeometry.model]
+        dist = self.__camera_dv.distortionDesignVariable().value()
+        camParams.setDistortion(distortionModel, dist.getParameters().flatten())
+
+        # Shutter
+        shutter = self.__camera_dv.shutterDesignVariable().value()
+        camParams.setLineDelay(shutter.lineDelay())
+
+        chain.addCameraAtEnd(camParams)
+        chain.writeYaml()
