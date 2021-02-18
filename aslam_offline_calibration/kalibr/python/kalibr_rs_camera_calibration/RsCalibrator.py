@@ -202,7 +202,7 @@ class RsCalibrator(object):
             if (success):
                 observation.set_T_t_c(T_t_c)
             else:
-                sm.logWarn("Could not estimate T_t_c for observation at index" . idx)
+                sm.logWarn("Could not estimate T_t_c for observation at index {0}".format(idx))
 
         return
 
@@ -279,13 +279,14 @@ class RsCalibrator(object):
         #####
         # add all the landmarks once
         landmarks = []
-        landmarks_expr = []
-        for landmark in self.__observations[0].getCornersTargetFrame():
+        landmarks_expr = {}
+        keypoint_ids0 = self.__observations[0].getCornersIdx()
+        for idx, landmark in enumerate(self.__observations[0].getCornersTargetFrame()):
             # design variable for landmark
             landmark_w_dv = aopt.HomogeneousPointDv(sm.toHomogeneous(landmark))
             landmark_w_dv.setActive(self.__config.estimateParameters['landmarks']);
             landmarks.append(landmark_w_dv)
-            landmarks_expr.append(landmark_w_dv.toExpression())
+            landmarks_expr[keypoint_ids0[idx]] = landmark_w_dv.toExpression()
             problem.addDesignVariable(landmark_w_dv, CALIBRATION_GROUP_ID)
 
         #####
@@ -311,7 +312,7 @@ class RsCalibrator(object):
 
         #####
         # add a reprojection error for every corner of each observation
-        for observation in self.__observations:
+        for frameid, observation in enumerate(self.__observations):
             # only process successful observations of a pattern
             if (observation.hasSuccessfulObservation()):
                 # add a frame
@@ -323,6 +324,7 @@ class RsCalibrator(object):
                 #####
                 # add an error term for every observed corner
                 for index, point in enumerate(observation.getCornersImageFrame()):
+
                     # keypoint time offset by line delay as expression type
                     keypoint_time = self.__camera_dv.keypointTime(frame.time(), point)
 
@@ -334,17 +336,25 @@ class RsCalibrator(object):
                     )
                     T_t_w = T_w_t.inverse()
 
+                    # we only have the the first image's design variables
+                    # so any landmark that is not in that frame won't be in the problem
+                    # thus we must skip those measurements that are of a keypoint that isn't visible
+                    keypoint_ids = observation.getCornersIdx()
+                    if not np.any(keypoint_ids[index]==keypoint_ids0):
+                       sm.logWarn("landmark {0} in frame {1} not in first frame".format(keypoint_ids[index],frameid))
+                       continue
+
                     # transform target point to camera frame
-                    p_t = T_t_w * landmarks_expr[index]
+                    p_t = T_t_w * landmarks_expr[keypoint_ids[index]]
 
                     # create the keypoint
+                    keypoint_index = frame.numKeypoints()
                     keypoint = acv.Keypoint2()
                     keypoint.setMeasurement(point)
                     inverseFeatureCovariance = self.__config.inverseFeatureCovariance;
                     keypoint.setInverseMeasurementCovariance(np.eye(len(point)) * inverseFeatureCovariance)
-                    keypoint.setLandmarkId(index)
+                    keypoint.setLandmarkId(keypoint_index)
                     frame.addKeypoint(keypoint)
-                    keypoint_index = frame.numKeypoints() - 1
 
                     # create reprojection error
                     reprojection_error = self.__buildErrorTerm(
@@ -452,7 +462,5 @@ class RsCalibrator(object):
             print shutter.lineDelay()
         print "Intrinsics:"
         print proj.getParameters().flatten()
-        #print "(",proj.fu(),", ",proj.fv(),") (",proj.cu(),", ",proj.cv(),")" #in the future, not all projection models might support these parameters
         print "Distortion:"
         print dist.getParameters().flatten()
-        #print "(",dist.p1(),", ",dist.p2(),") (",dist.k1(),", ",dist.k2(),")" #not all distortion models implement these parameters
