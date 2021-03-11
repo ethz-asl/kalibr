@@ -4,7 +4,14 @@ project(aslam_time)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS serialization system)
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+)
+
 
 cs_add_library(${PROJECT_NAME}
     src/time.cpp

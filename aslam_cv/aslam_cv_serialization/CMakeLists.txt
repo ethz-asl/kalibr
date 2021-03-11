@@ -18,6 +18,12 @@ cs_add_library(${PROJECT_NAME}
 find_package(Boost REQUIRED COMPONENTS serialization system)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
+include_directories(
+	include
+	${catkin_INCLUDE_DIRS}
+	${Boost_INCLUDE_DIRS}
+)
+
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
 #add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 #catkin_add_gtest(${PROJECT_NAME}_tests

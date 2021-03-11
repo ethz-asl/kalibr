@@ -4,6 +4,9 @@ project(aslam_splines_python)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
+find_package(Boost REQUIRED COMPONENTS serialization) 
+include_directories(${Boost_INCLUDE_DIRS})
+
 add_python_export_library(${PROJECT_NAME} python/aslam_splines
   src/spline_module.cpp
   src/BSplineMotionError.cpp

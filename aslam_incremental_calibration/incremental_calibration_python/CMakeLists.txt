@@ -4,6 +4,9 @@ project(incremental_calibration_python)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
+find_package(Boost REQUIRED COMPONENTS system)
+include_directories(${Boost_INCLUDE_DIRS})
+
 if(APPLE)
 
 else()

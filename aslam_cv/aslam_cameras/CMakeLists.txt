@@ -8,6 +8,13 @@ catkin_simple()
 ADD_DEFINITIONS(-DASLAM_USE_ROS )
 
 find_package(Boost REQUIRED COMPONENTS system serialization filesystem)
+find_package(OpenCV REQUIRED)
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+)
 
 #common commands for building c++ executables and libraries
 cs_add_library(${PROJECT_NAME} 

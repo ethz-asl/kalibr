@@ -5,9 +5,10 @@ find_package(catkin_simple REQUIRED)
 catkin_simple()
 
 find_package(OpenCV REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
 
 ADD_DEFINITIONS(-DASLAM_USE_ROS )
-include_directories(${Eigen_INCLUDE_DIRS})
+include_directories(${Eigen_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 
 cs_add_library(${PROJECT_NAME} 

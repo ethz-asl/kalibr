@@ -12,6 +12,9 @@ else()
   set(CMAKE_CXX_FLAGS "-std=c++0x")
 endif()
 
+find_package(Boost REQUIRED COMPONENTS system thread)
+include_directories(${Boost_INCLUDE_DIRS})
+
 cs_add_library(${PROJECT_NAME}
   src/base/Serializable.cpp
   src/base/Timestamp.cpp
@@ -40,7 +43,6 @@ cs_add_library(${PROJECT_NAME}
   src/algorithms/linalg.cpp
 )
 
-find_package(Boost REQUIRED COMPONENTS system thread)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
 if(CATKIN_ENABLE_TESTING)
