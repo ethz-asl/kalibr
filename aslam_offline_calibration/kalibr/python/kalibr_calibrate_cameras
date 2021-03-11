@@ -89,7 +89,7 @@ def parseArgs():
     groupTarget.add_argument('--target', dest='targetYaml', help='Calibration target configuration as yaml file', required=True)
     
     groupTarget = parser.add_argument_group('Image synchronization')
-    groupTarget.add_argument('--approx-sync', dest='max_delta_approxsync', type=float, default=0.02, help='Time tolerance for approximate image synchronization [s] (default: %(default)s)')
+    groupTarget.add_argument('--approx-sync', dest='max_delta_approxsync', type=float, default=0.04, help='Time tolerance for approximate image synchronization [s] (default: %(default)s)')
     
     groupCalibrator = parser.add_argument_group('Calibrator settings')
     groupCalibrator.add_argument('--qr-tol', type=float, default=0.02, dest='qrTol', help='The tolerance on the factors of the QR decomposition (default: %(default)s)')
