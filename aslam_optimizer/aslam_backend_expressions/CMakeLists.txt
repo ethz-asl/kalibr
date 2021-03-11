@@ -9,7 +9,7 @@ find_package(catkin_simple REQUIRED)
 
 catkin_simple()
 
-include_directories(${EIGEN_INCLUDE_DIRS})
+include_directories(${EIGEN3_INCLUDE_DIR})
 
 find_package(Boost REQUIRED COMPONENTS system)
 

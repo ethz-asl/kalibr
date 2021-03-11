@@ -7,7 +7,7 @@ catkin_simple()
 
 find_package(Boost REQUIRED COMPONENTS system)
 
-include_directories(${Eigen_INCLUDE_DIRS})
+include_directories(${EIGEN3_INCLUDE_DIR})
 cs_add_library(${PROJECT_NAME} src/UndistorterBase.cpp)
 
 

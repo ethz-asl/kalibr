@@ -1,5 +1,6 @@
 #ifndef SM_EIGEN_RANDOM_HPP
 #define SM_EIGEN_RANDOM_HPP
+#include <eigen3/Eigen/Dense>
 #include <Eigen/Core>
 
 namespace sm {
