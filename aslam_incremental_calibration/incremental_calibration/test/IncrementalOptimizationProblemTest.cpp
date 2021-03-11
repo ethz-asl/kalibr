@@ -43,11 +43,11 @@ public:
   DummyErrorTerm& operator = (const DummyErrorTerm& other) = delete;
   virtual ~DummyErrorTerm() {};
 protected:
-  virtual double evaluateErrorImplementation() {
+  virtual double evaluateErrorImplementation() override {
     return 0;
   };
   virtual void evaluateJacobiansImplementation(
-    aslam::backend::JacobianContainer& J) {};
+    aslam::backend::JacobianContainer& J) const override {};
 };
 
 using namespace aslam::calibration;

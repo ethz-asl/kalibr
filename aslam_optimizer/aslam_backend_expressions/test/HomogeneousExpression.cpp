@@ -35,7 +35,7 @@ public:
 
 protected:
   /// \brief evaluate the error term
-  virtual double evaluateErrorImplementation()
+  double evaluateErrorImplementation() override
   {
       parent_t::setError(_p.toHomogeneous());
  
@@ -43,7 +43,7 @@ protected:
   }
  
   /// \brief evaluate the jacobian
-  virtual void evaluateJacobiansImplementation(JacobianContainer & jacobians)
+  void evaluateJacobiansImplementation(JacobianContainer & jacobians) const override
   {
     _p.evaluateJacobians(jacobians);
   }

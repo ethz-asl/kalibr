@@ -5,7 +5,7 @@ find_package(catkin REQUIRED COMPONENTS sm_common)
 find_package(Boost REQUIRED COMPONENTS system serialization thread)
 
 catkin_package(
-  INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
+  INCLUDE_DIRS include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
   LIBRARIES sm_boost
   CATKIN_DEPENDS sm_common
   DEPENDS
@@ -37,8 +37,8 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 ## Mark cpp header files for installation
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.hpp"
   PATTERN ".svn" EXCLUDE
 )

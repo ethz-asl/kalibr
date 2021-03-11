@@ -34,7 +34,7 @@ class HpErr : public aslam::backend::ErrorTermFs<4> {
   }
 
   /// \brief evaluate the error term
-  virtual double evaluateErrorImplementation() {
+  double evaluateErrorImplementation() override {
     parent_t::setError(_p.toHomogeneous());
 
     return parent_t::error().dot(parent_t::invR() * parent_t::error());
@@ -42,8 +42,8 @@ class HpErr : public aslam::backend::ErrorTermFs<4> {
 
   /// \brief evaluate the jacobian
 
-  virtual void evaluateJacobiansImplementation(
-      aslam::backend::JacobianContainer & J) {
+  void evaluateJacobiansImplementation(
+      aslam::backend::JacobianContainer & J) const override {
     _p.evaluateJacobians(J);
   }
 
