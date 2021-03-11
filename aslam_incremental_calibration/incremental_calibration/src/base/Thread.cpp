@@ -24,6 +24,7 @@
 #include "aslam/calibration/exceptions/SystemException.h"
 #include "aslam/calibration/exceptions/InvalidOperationException.h"
 
+namespace aslam {
 #ifdef __NR_gettid
 static pid_t gettid (void) {
   return syscall(__NR_gettid);
@@ -33,6 +34,7 @@ static pid_t gettid (void) {
   return -ENOSYS;
 }
 #endif
+}
 
 namespace aslam {
   namespace calibration {
