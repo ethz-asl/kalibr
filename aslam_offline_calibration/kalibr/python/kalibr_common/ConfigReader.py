@@ -360,6 +360,9 @@ class CameraParameters(ParametersBase):
         self.data["distortion_model"] = model
         self.data["distortion_coeffs"] = [ float(val) for val in coeffs ]
 
+    def setLineDelay(self, line_delay):
+        self.data["line_delay"] = line_delay
+
     #resolution
     def checkResolution(self, resolution):
         if len(resolution)!=2 or not isinstance(resolution[0],int) or not isinstance(resolution[1],int):
