@@ -101,6 +101,8 @@ def parseArgs():
     outputSettings.add_argument('--verbose', action='store_true', dest='verbose', help='Verbose output (disables plots)')
     outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
      
+    outputSettings.add_argument('--export-poses', action='store_true', dest='exportPoses', help='Also export the optimized poses.')
+
     #print help if no argument is specified
     if len(sys.argv)==1:
         parser.print_help()
@@ -231,7 +233,14 @@ def main():
     util.generateReport(iCal, filename=reportFile, showOnScreen=not parsed.dontShowReport)
     print "  Report written to {0}".format(reportFile)
     print
-    
+
+    if parsed.exportPoses:
+        print "Exporting poses..."
+        posesFile = "poses-imucam-imu0-" + bagtag + ".csv"
+        util.exportPoses(iCal, filename=posesFile)
+        print "Poses written to {0}".format(posesFile)
+        print
+
 if __name__ == "__main__":
     main()
 #     try:
