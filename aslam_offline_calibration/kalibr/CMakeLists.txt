@@ -39,3 +39,18 @@ endif()
 catkin_python_setup()
 cs_install()
 cs_export()
+
+catkin_install_python(
+  PROGRAMS
+    python/kalibr_bagcreater
+    python/kalibr_camera_focus
+    python/kalibr_bagextractor
+    python/kalibr_camera_validator
+    python/kalibr_visualize_calibration
+    python/kalibr_calibrate_cameras
+    python/kalibr_visualize_distortion
+    python/kalibr_calibrate_imu_camera
+    python/kalibr_create_target_pdf
+    python/kalibr_calibrate_rs_cameras
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
