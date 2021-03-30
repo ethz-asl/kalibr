@@ -128,8 +128,7 @@ ${SETUP_PY_TEXT}
 
   # On OSX and Linux, the python library must end in the extension .so. Build this
   # filename here.
-  get_property(PYLIB_OUTPUT_FILE TARGET ${TARGET_NAME} PROPERTY LOCATION)
-  get_filename_component(PYLIB_OUTPUT_NAME ${PYLIB_OUTPUT_FILE} NAME_WE)
+  get_filename_component(PYLIB_OUTPUT_NAME $<TARGET_FILE:${TARGET_NAME}> NAME_WE)
   set(PYLIB_SO_NAME ${PYLIB_OUTPUT_NAME}.so)
 
   if(APPLE)
