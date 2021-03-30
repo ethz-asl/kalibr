@@ -32,19 +32,22 @@ def parse_arguments():
     parsed_args = parser.parse_args()
     return parsed_args
 
-def normalize((u,v), focal_lengths, principal_point):
+def normalize(xy, focal_lengths, principal_point):
+    (u,v) = xy
     x = (u - principal_point[1]) / focal_lengths[1]
     y = (v - principal_point[0]) / focal_lengths[0]
     return (x,y)
 
-def denormalize((x,y), focal_lengths, principal_point):
+def denormalize(xy, focal_lengths, principal_point):
+    (x,y) = xy
     u = x * focal_lengths[1] + principal_point[1]
     v = y * focal_lengths[0] + principal_point[0]
     return (u,v)
 
-def distortPoint((x,y), distortion_model, distortion_coeffs):
+def distortPoint(xy, distortion_model, distortion_coeffs):
     # Distortes a point regarding the distortion model. The Input point has to
     # be in normalized coordinates.
+    (x,y) = xy
     if distortion_model == "radial-tangential" or distortion_model == "radtan":
         x2 = x**2
         y2 = y**2
