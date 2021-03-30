@@ -78,7 +78,7 @@ def extractCornersFromDataset(dataset, detector, multithreading=False, numProces
             for lidx, data in enumerate(iter(resultq.get, 'STOP')):
                 obs=data[0]; time_idx = data[1]
                 targetObservations[lidx] = (time_idx, obs)
-            targetObservations = list(zip(*sorted(targetObservations, key=lambda tup: tup[0]))[1])
+            targetObservations = list(zip(*sorted(targetObservations, key=lambda tup: tup[0])))[1]
         else:
             targetObservations=[]
     
