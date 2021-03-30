@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(sm_property_tree)
 
+set(CMAKE_CXX_STANDARD 14)
+
 find_package(catkin REQUIRED COMPONENTS sm_common)
 include_directories(${catkin_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system filesystem)
@@ -12,7 +14,6 @@ catkin_package(
   DEPENDS
 )
 add_definitions(-D__STRICT_ANSI__)
-remove_definitions(-std=c++0x -std-c++11)
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 

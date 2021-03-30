@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(aslam_cv_python)
 
+set(CMAKE_CXX_STANDARD 14)
+
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
-add_definitions( -fPIC -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x)
+add_definitions(-fPIC -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long)
 
 if(APPLE)
   add_definitions( -ftemplate-depth-1024)

@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(aslam_backend_expressions)
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+set(CMAKE_CXX_STANDARD 14)
 
-SET(CMAKE_CXX_FLAGS "-std=c++0x")
 
 find_package(catkin_simple REQUIRED)
 
 catkin_simple()
 
 include_directories(${EIGEN3_INCLUDE_DIRS})
+
+include_directories(include)
 
 find_package(Boost REQUIRED COMPONENTS system)
 

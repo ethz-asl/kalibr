@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(sm_kinematics)
 
+set(CMAKE_CXX_STANDARD 14)
+
 find_package(catkin REQUIRED COMPONENTS sm_common sm_eigen sm_boost sm_random)
 include_directories(${catkin_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system serialization filesystem)
@@ -10,7 +12,7 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIRS})
 add_definitions(${EIGEN_DEFINITIONS})
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++0x")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 catkin_package(
   INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}

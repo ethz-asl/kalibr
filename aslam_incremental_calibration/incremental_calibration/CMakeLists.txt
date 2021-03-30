@@ -1,16 +1,12 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(incremental_calibration)
 
+set(CMAKE_CXX_STANDARD 14)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/../cmake/)
 
 find_package(catkin_simple REQUIRED)
 catkin_simple()
-
-if(APPLE)
-  set(CMAKE_CXX_FLAGS "-std=c++11")
-else()
-  set(CMAKE_CXX_FLAGS "-std=c++0x")
-endif()
 
 cs_add_library(${PROJECT_NAME}
   src/base/Serializable.cpp

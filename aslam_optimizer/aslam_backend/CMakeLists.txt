@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(aslam_backend)
 
+set(CMAKE_CXX_STANDARD 14)
+
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
@@ -8,7 +10,7 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 
 include_directories(${EIGEN3_INCLUDE_DIRS})
 
-#add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x -O3)
+#add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -O3)
 
 #target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})
 #rosbuild_link_boost(${PROJECT_NAME} thread system)

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(numpy_eigen)
 
+set(CMAKE_CXX_STANDARD 14)
+
 find_package(catkin REQUIRED COMPONENTS python_module)
 include_directories(${catkin_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system)
@@ -17,7 +19,7 @@ catkin_package(
   LIBRARIES ${PROJECT_NAME}
   DEPENDS
 )
-add_definitions(-std=c++0x -D__STRICT_ANSI__)
+add_definitions(-D__STRICT_ANSI__)
 
 # ignore "error: return-statement with a value, in function returning ‘void’" in "__multiarray_api.h"
 add_compile_options(-fpermissive)

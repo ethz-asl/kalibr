@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(sm_common)
 
+set(CMAKE_CXX_STANDARD 14)
+
 find_package(catkin REQUIRED)
 include_directories(${catkin_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system)
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++0x -D__STRICT_ANSI__")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -D__STRICT_ANSI__")
 
 include_directories(include ${Boost_INCLUDE_DIRS})
 

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(sm_python)
 
+set(CMAKE_CXX_STANDARD 14)
+
 #catkin_python_setup()
 
 find_package(catkin REQUIRED COMPONENTS sm_common numpy_eigen sm_kinematics 
@@ -19,7 +21,7 @@ catkin_package(
                  sm_matrix_archive sm_property_tree python_module
   DEPENDS
 )
-add_definitions(-std=c++0x -D__STRICT_ANSI__)
+add_definitions(-D__STRICT_ANSI__)
 
 include_directories(include)
 
