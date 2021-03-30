@@ -54,7 +54,7 @@ class PlotCollection:
         """
         if len(list(self.figureList.keys())) == 0:
             return
-        app = wx.PySimpleApp()
+        app = wx.App()
         frame = wx.Frame(None,-1,self.frame_name, size=self.window_size)
         plotter = self.PlotNotebook(frame)
         for name in list(self.figureList.keys()):
