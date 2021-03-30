@@ -9,9 +9,6 @@
     <buildtool_depend>catkin_simple</buildtool_depend>
 
     <build_depend>aslam_cameras</build_depend>
-    <build_depend>aslam_frames</build_depend>
-    <build_depend>aslam_features2d</build_depend>
-    <build_depend>aslam_camera_system</build_depend>
     <build_depend>aslam_time</build_depend>
 
     <build_depend>sm_common</build_depend>
