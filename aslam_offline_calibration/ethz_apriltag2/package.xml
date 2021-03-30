@@ -9,5 +9,5 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>eigen</build_depend>
   <build_depend>opencv</build_depend>
-  <build_depend>eigen2</build_depend>
+  <build_depend>libv4l-dev</build_depend>
 </package>
