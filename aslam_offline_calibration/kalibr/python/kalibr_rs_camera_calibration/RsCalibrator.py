@@ -254,7 +254,7 @@ class RsCalibrator(object):
             knots = int(round(seconds * framerate/3))
 
         print()
-        print(("Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, 100, seconds)))
+        print("Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, 100, seconds))
         poseSpline.initPoseSplineSparse(times, curve, knots, 1e-4)
 
         return poseSpline
@@ -458,8 +458,8 @@ class RsCalibrator(object):
         print()
         if (self.__isRollingShutter()):
             print("LineDelay:")
-            print((shutter.lineDelay()))
+            print(shutter.lineDelay())
         print("Intrinsics:")
-        print((proj.getParameters().flatten()))
+        print(proj.getParameters().flatten())
         print("Distortion:")
-        print((dist.getParameters().flatten()))
+        print(dist.getParameters().flatten())

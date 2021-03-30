@@ -80,19 +80,19 @@ class IccCalibrator(object):
                       timeOffsetPadding=0.02,
                       verbose=False  ):
 
-        print(("\tSpline order: %d" % (splineOrder)))
-        print(("\tPose knots per second: %d" % (poseKnotsPerSecond)))
-        print(("\tDo pose motion regularization: %s" % (doPoseMotionError)))
-        print(("\t\txddot translation variance: %f" % (mrTranslationVariance)))
-        print(("\t\txddot rotation variance: %f" % (mrRotationVariance)))
-        print(("\tBias knots per second: %d" % (biasKnotsPerSecond)))
-        print(("\tDo bias motion regularization: %s" % (doBiasMotionError)))
-        print(("\tBlake-Zisserman on reprojection errors %s" % blakeZisserCam))
-        print(("\tAcceleration Huber width (sigma): %f" % (huberAccel)))
-        print(("\tGyroscope Huber width (sigma): %f" % (huberGyro)))
-        print(("\tDo time calibration: %s" % (not noTimeCalibration)))
-        print(("\tMax iterations: %d" % (maxIterations)))
-        print(("\tTime offset padding: %f" % (timeOffsetPadding)))
+        print("\tSpline order: %d" % (splineOrder))
+        print("\tPose knots per second: %d" % (poseKnotsPerSecond))
+        print("\tDo pose motion regularization: %s" % (doPoseMotionError))
+        print("\t\txddot translation variance: %f" % (mrTranslationVariance))
+        print("\t\txddot rotation variance: %f" % (mrRotationVariance))
+        print("\tBias knots per second: %d" % (biasKnotsPerSecond))
+        print("\tDo bias motion regularization: %s" % (doBiasMotionError))
+        print("\tBlake-Zisserman on reprojection errors %s" % blakeZisserCam)
+        print("\tAcceleration Huber width (sigma): %f" % (huberAccel))
+        print("\tGyroscope Huber width (sigma): %f" % (huberGyro))
+        print("\tDo time calibration: %s" % (not noTimeCalibration))
+        print("\tMax iterations: %d" % (maxIterations))
+        print("\tTime offset padding: %f" % (timeOffsetPadding))
 
 
         ############################################
@@ -230,5 +230,4 @@ class IccCalibrator(object):
         try:
             chain.writeYaml(resultFile)
         except:
-            print(("ERROR: Could not write parameters to file: {0}\n".format(resultFile)))
-            
+            "ERROR: Could not write parameters to file: {0}\n".format(resultFile))

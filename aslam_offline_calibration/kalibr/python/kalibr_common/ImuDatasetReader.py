@@ -73,8 +73,8 @@ class BagImuDatasetReader(object):
 
         bagstart = min(timestamps)
         baglength = max(timestamps)-bagstart
-        print(("bagstart",bagstart))
-        print(("baglength",baglength))
+        print("bagstart", bagstart)
+        print("baglength", baglength)
         #some value checking
         if bag_from_to[0]>=bag_from_to[1]:
             raise RuntimeError("Bag start time must be bigger than end time.".format(bag_from_to[0]))

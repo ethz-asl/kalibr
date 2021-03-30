@@ -314,7 +314,7 @@ def getPointStatistics(cself,view_id,cam_id,pidx):
     z = np.array([0,0,1])
     dz = np.dot(z,vc)
     if np.abs(dz - 1.0) > 1e-3:
-        print(("The point statistics are only valid if the camera points down the z axis. This camera has the image center: [%f, %f, %f]" % (z[0],z[1],z[2])))
+        print("The point statistics are only valid if the camera points down the z axis. This camera has the image center: [%f, %f, %f]" % (z[0],z[1],z[2]))
     valid, y = obs.imagePoint(pidx)
     geometry = cself.cameras[cam_id].geometry
     rerr = None
