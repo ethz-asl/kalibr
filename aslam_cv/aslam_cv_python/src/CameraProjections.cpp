@@ -188,7 +188,9 @@ void exportGenericProjectionFunctions(T & proj) {
       "keypointToEuclideanJk",
       &e2kJp<C>,
       "Map a keypoint to a 3x1 Euclidean point and get the Jacobian of the mapping with respect to small changes in the keypoint.\n(p, Jk) = keypointToEuclideanJk(k)");
+  /*
   proj.def("isValid", &C::template isValid<Eigen::VectorXd>);
+           */
   proj.def("setParameters", &C::setParameters,
            "Set the Parameter Vector/Matrix");
   proj.def("getParameters", &getParameters<C>,
