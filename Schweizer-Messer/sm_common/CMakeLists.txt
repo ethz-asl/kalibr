@@ -9,7 +9,6 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -D__STRICT_ANSI__")
 
-include_directories(include ${Boost_INCLUDE_DIRS})
 
 catkin_package(
   INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
@@ -18,7 +17,8 @@ catkin_package(
   DEPENDS
   CFG_EXTRAS export_flags.cmake
 )
-
+  
+include_directories(include ${Boost_INCLUDE_DIRS})
 add_library(${PROJECT_NAME}
   src/progress_info.cpp
 )
@@ -41,7 +41,6 @@ install(TARGETS ${PROJECT_NAME}
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.hpp"
-  PATTERN ".svn" EXCLUDE
 )
 
 #############
