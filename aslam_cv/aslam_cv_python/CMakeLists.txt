@@ -37,6 +37,7 @@ add_python_export_library(${PROJECT_NAME} python/aslam_cv
   src/OmniUndistorter.cpp
   src/PinholeUndistorter.cpp
 )
+target_compile_options(${PROJECT_NAME} PUBLIC "-Wno-deprecated-copy") # TODO: Fix...
 
 find_package(Boost REQUIRED COMPONENTS serialization) 
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
