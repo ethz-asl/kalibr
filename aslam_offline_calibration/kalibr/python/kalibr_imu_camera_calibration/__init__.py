@@ -1,4 +1,4 @@
-from IccCalibrator import *
-import IccUtil as util
-import IccPlots as plots
-import IccSensors as sens
+from .IccCalibrator import *
+from . import IccUtil as util
+from . import IccPlots as plots
+from . import IccSensors as sens

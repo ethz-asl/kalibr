@@ -125,8 +125,8 @@ class CameraChainValidator(object):
                 else:
                   cv_image = self.bridge.imgmsg_to_cv2(msg)
                 np_image = np.array(cv_image)
-            except CvBridgeError, e:
-                print e
+            except CvBridgeError as e:
+                print(e)
             
             #get the corresponding monovalidator instance
             validator = self.monovalidators[cam_nr]
@@ -368,12 +368,12 @@ class CameraChainValidator(object):
 class MonoCameraValidator(object):
     def __init__(self, camConfig, targetParams):
         
-        print "initializing camera geometry"
+        print("initializing camera geometry")
         self.camera = kc.ConfigReader.AslamCamera.fromParameters(camConfig)
         self.target = CalibrationTargetDetector(self.camera, targetConfig)
         
         #print details
-        print "Camera {0}:".format(camConfig.getRosTopic())
+        print("Camera {0}:".format(camConfig.getRosTopic()))
         camConfig.printDetails();    
         
         self.topic = camConfig.getRosTopic()
@@ -472,7 +472,7 @@ if __name__ == "__main__":
     #load the configuration yamls
     targetConfig = kc.ConfigReader.CalibrationTargetParameters(parsed.targetYaml)
     
-    print "Initializing calibration target:".format(targetConfig.getTargetType())
+    print("Initializing calibration target:".format(targetConfig.getTargetType()))
     targetConfig.printDetails()
     camchain = kc.ConfigReader.CameraChainParameters(parsed.chainYaml)
         
@@ -484,6 +484,6 @@ if __name__ == "__main__":
     try:
         rospy.spin()
     except KeyboardInterrupt:
-        print "Shutting down"
+        print("Shutting down")
     
     cv2.destroyAllWindows()

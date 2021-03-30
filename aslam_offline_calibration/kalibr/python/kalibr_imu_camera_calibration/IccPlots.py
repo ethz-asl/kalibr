@@ -33,7 +33,7 @@ def plotGyroErrorPerAxis(cself, iidx, fno=1, clearFigure=True, noShow=False):
         f.clf()
     f.suptitle("imu{0}: angular velocities error".format(iidx))
     
-    for i in xrange(3):
+    for i in range(3):
         pl.subplot(3, 1, i+1)
         pl.plot(errors[:,i])
         pl.xlabel('error index')
@@ -76,7 +76,7 @@ def plotAccelErrorPerAxis(cself, iidx, fno=1, clearFigure=True, noShow=False):
         f.clf()
     f.suptitle("imu{0}: acceleration error".format(iidx))
     
-    for i in xrange(3):
+    for i in range(3):
         pl.subplot(3, 1, i+1)
         pl.plot(errors[:,i])
         pl.xlabel('error index')
@@ -102,7 +102,7 @@ def plotAccelBias(cself, imu_idx, fno=1, clearFigure=True, noShow=False):
 
     sigma_rw = cself.ImuList[imu_idx].getImuConfig().getAccelerometerStatistics()[1]
     bounds = 3. * sigma_rw * np.sqrt(times)
-    for i in xrange(3):
+    for i in range(3):
         pl.subplot(3, 1, i+1)
         pl.plot(times, acc_bias_spline[i,0] + bounds, 'r--')
         pl.plot(times, acc_bias_spline[i,0] - bounds, 'r--')
@@ -122,7 +122,7 @@ def plotAngularVelocityBias(cself, imu_idx, fno=1, clearFigure=True, noShow=Fals
 
     sigma_rw = cself.ImuList[imu_idx].getImuConfig().getGyroStatistics()[1]
     bounds = 3. * sigma_rw * np.sqrt(times)
-    for i in xrange(3):
+    for i in range(3):
         pl.subplot(3, 1, i+1)
         pl.plot(times, gyro_bias_spline[i,0] + bounds, 'r--')
         pl.plot(times, gyro_bias_spline[i,0] - bounds, 'r--')

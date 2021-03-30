@@ -154,7 +154,7 @@ def main():
     for camchain_yaml in parsed_args.chain_yaml:
         camchain = kc.ConfigReader.CameraChainParameters(camchain_yaml)
         num_cameras = camchain.numCameras()
-        print("Plotting configuration with " + str(num_cameras) + " cameras.")
+        print(("Plotting configuration with " + str(num_cameras) + " cameras."))
         base_transform = np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, -1, 0, 0],
                                    [0, 0, 0, 1]])
         T_c0_cn = sm.Transformation(base_transform)

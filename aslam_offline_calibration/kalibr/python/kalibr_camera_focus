@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-print "importing libraries"
+print("importing libraries")
 import rospy
 import cv2
 import cv
@@ -21,8 +21,8 @@ class CameraFocus:
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg)
             np_image= np.array(cv_image)
-        except CvBridgeError, e:
-            print "Could not convert ros message to opencv image: ", e
+        except CvBridgeError as e:
+            print("Could not convert ros message to opencv image: ", e)
             return
     
         #calculate the fft magnitude
@@ -56,6 +56,6 @@ if __name__ == "__main__":
     try:
         rospy.spin()
     except KeyboardInterrupt:
-        print "Shutting down" 
+        print("Shutting down") 
     
     cv.DestroyAllWindows()

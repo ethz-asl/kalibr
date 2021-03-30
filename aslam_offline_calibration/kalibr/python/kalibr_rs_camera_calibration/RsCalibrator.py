@@ -11,9 +11,9 @@ import multiprocessing
 import sys
 import gc
 import math
-from ReprojectionErrorKnotSequenceUpdateStrategy import *
-from RsPlot import plotSpline
-from RsPlot import plotSplineValues
+from .ReprojectionErrorKnotSequenceUpdateStrategy import *
+from .RsPlot import plotSpline
+from .RsPlot import plotSplineValues
 import pylab as pl
 import pdb
 
@@ -253,8 +253,8 @@ class RsCalibrator(object):
         else:
             knots = int(round(seconds * framerate/3))
 
-        print
-        print "Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, 100, seconds)
+        print()
+        print(("Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, 100, seconds)))
         poseSpline.initPoseSplineSparse(times, curve, knots, 1e-4)
 
         return poseSpline
@@ -415,7 +415,7 @@ class RsCalibrator(object):
     def __runOptimization(self, problem ,deltaJ, deltaX, maxIt):
         """Run the given optimization problem problem"""
 
-        print "run new optimisation with initial values:"
+        print("run new optimisation with initial values:")
         self.__printResults()
 
         # verbose and choldmod solving with schur complement trick
@@ -446,13 +446,13 @@ class RsCalibrator(object):
         shutter = self.__camera_dv.shutterDesignVariable().value()
         proj = self.__camera_dv.projectionDesignVariable().value()
         dist = self.__camera_dv.distortionDesignVariable().value()
-        print
+        print()
         if (self.__isRollingShutter()):
-            print "LineDelay:"
-            print shutter.lineDelay()
-        print "Intrinsics:"
-        print proj.getParameters().flatten()
+            print("LineDelay:")
+            print((shutter.lineDelay()))
+        print("Intrinsics:")
+        print((proj.getParameters().flatten()))
         #print "(",proj.fu(),", ",proj.fv(),") (",proj.cu(),", ",proj.cv(),")" #in the future, not all projection models might support these parameters
-        print "Distortion:"
-        print dist.getParameters().flatten()
+        print("Distortion:")
+        print((dist.getParameters().flatten()))
         #print "(",dist.p1(),", ",dist.p2(),") (",dist.k1(),", ",dist.k2(),")" #not all distortion models implement these parameters

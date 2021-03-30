@@ -1,5 +1,5 @@
 from sm import PlotCollection
-import IccPlots as plots
+from . import IccPlots as plots
 import numpy as np
 import pylab as pl
 import sys
@@ -7,74 +7,74 @@ import subprocess
 import yaml
 import time
 from matplotlib.backends.backend_pdf import PdfPages
-import StringIO
+import io
 import matplotlib.patches as patches
 
 def printErrorStatistics(cself, dest=sys.stdout):
     # Reprojection errors
-    print >> dest, "Normalized Residuals\n----------------------------"
+    print("Normalized Residuals\n----------------------------", file=dest)
     for cidx, cam in enumerate(cself.CameraChain.camList):
         if len(cam.allReprojectionErrors)>0:
             e2 = np.array([ np.sqrt(rerr.evaluateError()) for reprojectionErrors in cam.allReprojectionErrors for rerr in reprojectionErrors])
-            print >> dest, "Reprojection error (cam{0}):     mean {1}, median {2}, std: {3}".format(cidx, np.mean(e2), np.median(e2), np.std(e2) )
+            print("Reprojection error (cam{0}):     mean {1}, median {2}, std: {3}".format(cidx, np.mean(e2), np.median(e2), np.std(e2) ), file=dest)
         else:
-            print >> dest, "Reprojection error (cam{0}):     no corners".format(cidx)
+            print("Reprojection error (cam{0}):     no corners".format(cidx), file=dest)
     
     for iidx, imu in enumerate(cself.ImuList):
         # Gyro errors
         e2 = np.array([ np.sqrt(e.evaluateError()) for e in imu.gyroErrors ])
-        print >> dest, "Gyroscope error (imu{0}):        mean {1}, median {2}, std: {3}".format(iidx, np.mean(e2), np.median(e2), np.std(e2))
+        print("Gyroscope error (imu{0}):        mean {1}, median {2}, std: {3}".format(iidx, np.mean(e2), np.median(e2), np.std(e2)), file=dest)
         # Accelerometer errors
         e2 = np.array([ np.sqrt(e.evaluateError()) for e in imu.accelErrors ])
-        print >> dest, "Accelerometer error (imu{0}):    mean {1}, median {2}, std: {3}".format(iidx, np.mean(e2), np.median(e2), np.std(e2))
+        print("Accelerometer error (imu{0}):    mean {1}, median {2}, std: {3}".format(iidx, np.mean(e2), np.median(e2), np.std(e2)), file=dest)
 
-    print >> dest, ""
-    print >> dest, "Residuals\n----------------------------"
+    print("", file=dest)
+    print("Residuals\n----------------------------", file=dest)
     for cidx, cam in enumerate(cself.CameraChain.camList):
         if len(cam.allReprojectionErrors)>0:
             e2 = np.array([ np.linalg.norm(rerr.error()) for reprojectionErrors in cam.allReprojectionErrors for rerr in reprojectionErrors])
-            print >> dest, "Reprojection error (cam{0}) [px]:     mean {1}, median {2}, std: {3}".format(cidx, np.mean(e2), np.median(e2), np.std(e2) )
+            print("Reprojection error (cam{0}) [px]:     mean {1}, median {2}, std: {3}".format(cidx, np.mean(e2), np.median(e2), np.std(e2) ), file=dest)
         else:
-            print >> dest, "Reprojection error (cam{0}) [px]:     no corners".format(cidx)
+            print("Reprojection error (cam{0}) [px]:     no corners".format(cidx), file=dest)
     
     for iidx, imu in enumerate(cself.ImuList):
         # Gyro errors
         e2 = np.array([ np.linalg.norm(e.error()) for e in imu.gyroErrors ])
-        print >> dest, "Gyroscope error (imu{0}) [rad/s]:     mean {1}, median {2}, std: {3}".format(iidx, np.mean(e2), np.median(e2), np.std(e2))
+        print("Gyroscope error (imu{0}) [rad/s]:     mean {1}, median {2}, std: {3}".format(iidx, np.mean(e2), np.median(e2), np.std(e2)), file=dest)
         # Accelerometer errors
         e2 = np.array([ np.linalg.norm(e.error()) for e in imu.accelErrors ])
-        print >> dest, "Accelerometer error (imu{0}) [m/s^2]: mean {1}, median {2}, std: {3}".format(iidx, np.mean(e2), np.median(e2), np.std(e2))
+        print("Accelerometer error (imu{0}) [m/s^2]: mean {1}, median {2}, std: {3}".format(iidx, np.mean(e2), np.median(e2), np.std(e2)), file=dest)
 
 def printGravity(cself):
-    print
-    print "Gravity vector: (in target coordinates): [m/s^2]"
-    print cself.gravityDv.toEuclidean()
+    print()
+    print("Gravity vector: (in target coordinates): [m/s^2]")
+    print(cself.gravityDv.toEuclidean())
 
 def printResults(cself, withCov=False):
     nCams = len(cself.CameraChain.camList)
     for camNr in range(0,nCams):
         T_cam_b = cself.CameraChain.getResultTrafoImuToCam(camNr)
 
-        print
-        print "Transformation T_cam{0}_imu0 (imu0 to cam{0}, T_ci): ".format(camNr)
+        print()
+        print("Transformation T_cam{0}_imu0 (imu0 to cam{0}, T_ci): ".format(camNr))
         if withCov and camNr==0:
-            print "\t quaternion: ", T_cam_b.q(), " +- ", cself.std_trafo_ic[0:3]
-            print "\t translation: ", T_cam_b.t(), " +- ", cself.std_trafo_ic[3:]
-        print T_cam_b.T()
+            print("\t quaternion: ", T_cam_b.q(), " +- ", cself.std_trafo_ic[0:3])
+            print("\t translation: ", T_cam_b.t(), " +- ", cself.std_trafo_ic[3:])
+        print(T_cam_b.T())
         
         if not cself.noTimeCalibration:
-            print
-            print "cam{0} to imu0 time: [s] (t_imu = t_cam + shift)".format(camNr)
-            print cself.CameraChain.getResultTimeShift(camNr),
+            print()
+            print("cam{0} to imu0 time: [s] (t_imu = t_cam + shift)".format(camNr))
+            print(cself.CameraChain.getResultTimeShift(camNr), end=' ')
             
             if withCov:
-                print " +- ", cself.std_times[camNr]
+                print(" +- ", cself.std_times[camNr])
             else:
-                print
+                print()
 
-    print
+    print()
     for (imuNr, imu) in enumerate(cself.ImuList):
-        print "IMU{0}:\n".format(imuNr), "----------------------------"
+        print("IMU{0}:\n".format(imuNr), "----------------------------")
         imu.getImuConfig().printDetails()
             
 def printBaselines(self):
@@ -88,10 +88,10 @@ def printBaselines(self):
             else:
                 isFixed = ""
             
-            print
-            print "Baseline (cam{0} to cam{1}): [m] {2}".format(camNr, camNr+1, isFixed)
-            print T.T()
-            print baseline, "[m]"
+            print()
+            print("Baseline (cam{0} to cam{1}): [m] {2}".format(camNr, camNr+1, isFixed))
+            print(T.T())
+            print(baseline, "[m]")
     
    
 def generateReport(cself, filename="report.pdf", showOnScreen=True):  
@@ -100,10 +100,10 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True):
     offset = 3010
     
     #Output calibration results in text form.
-    sstream = StringIO.StringIO()
+    sstream = io.StringIO()
     printResultTxt(cself, sstream)
     
-    text = [line for line in StringIO.StringIO(sstream.getvalue())]
+    text = [line for line in io.StringIO(sstream.getvalue())]
     linesPerPage = 40
     
     while True:
@@ -198,65 +198,65 @@ def saveResultTxt(cself, filename='cam_imu_result.txt'):
 
 def printResultTxt(cself, stream=sys.stdout):
     
-    print >> stream, "Calibration results"
-    print >> stream, "==================="   
+    print("Calibration results", file=stream)
+    print("===================", file=stream)   
     printErrorStatistics(cself, stream)
   
     # Calibration results
     nCams = len(cself.CameraChain.camList)
     for camNr in range(0,nCams):
         T = cself.CameraChain.getResultTrafoImuToCam(camNr)
-        print >> stream, ""
-        print >> stream, "Transformation (cam{0}):".format(camNr)
-        print >> stream, "-----------------------"
-        print >> stream, "T_ci:  (imu0 to cam{0}): ".format(camNr)   
-        print >> stream, T.T()
-        print >> stream, ""
-        print >> stream, "T_ic:  (cam{0} to imu0): ".format(camNr)   
-        print >> stream, T.inverse().T()
+        print("", file=stream)
+        print("Transformation (cam{0}):".format(camNr), file=stream)
+        print("-----------------------", file=stream)
+        print("T_ci:  (imu0 to cam{0}): ".format(camNr), file=stream)   
+        print(T.T(), file=stream)
+        print("", file=stream)
+        print("T_ic:  (cam{0} to imu0): ".format(camNr), file=stream)   
+        print(T.inverse().T(), file=stream)
     
         # Time
-        print >> stream, ""
-        print >> stream, "timeshift cam{0} to imu0: [s] (t_imu = t_cam + shift)".format(camNr)
-        print >> stream, cself.CameraChain.getResultTimeShift(camNr)
-        print >> stream, ""
+        print("", file=stream)
+        print("timeshift cam{0} to imu0: [s] (t_imu = t_cam + shift)".format(camNr), file=stream)
+        print(cself.CameraChain.getResultTimeShift(camNr), file=stream)
+        print("", file=stream)
 
     #print all baselines in the camera chain
     if nCams > 1:
-        print >> stream, "Baselines:"
-        print >> stream, "----------"
+        print("Baselines:", file=stream)
+        print("----------", file=stream)
 
         for camNr in range(0,nCams-1):
             T, baseline = cself.CameraChain.getResultBaseline(camNr, camNr+1)
-            print >> stream, "Baseline (cam{0} to cam{1}): ".format(camNr, camNr+1)
-            print >> stream, T.T()
-            print >> stream, "baseline norm: ", baseline,  "[m]"
-            print >> stream, ""
+            print("Baseline (cam{0} to cam{1}): ".format(camNr, camNr+1), file=stream)
+            print(T.T(), file=stream)
+            print("baseline norm: ", baseline,  "[m]", file=stream)
+            print("", file=stream)
     
     # Gravity
-    print >> stream, ""
-    print >> stream, "Gravity vector in target coords: [m/s^2]"
-    print >> stream, cself.gravityDv.toEuclidean()
+    print("", file=stream)
+    print("Gravity vector in target coords: [m/s^2]", file=stream)
+    print(cself.gravityDv.toEuclidean(), file=stream)
     
-    print >> stream, ""
-    print >> stream, ""
-    print >> stream, "Calibration configuration"
-    print >> stream, "========================="
-    print >> stream, ""
+    print("", file=stream)
+    print("", file=stream)
+    print("Calibration configuration", file=stream)
+    print("=========================", file=stream)
+    print("", file=stream)
 
     for camNr, cam in enumerate( cself.CameraChain.camList ):
-        print >> stream, "cam{0}".format(camNr)
-        print >> stream, "-----"
+        print("cam{0}".format(camNr), file=stream)
+        print("-----", file=stream)
         cam.camConfig.printDetails(stream)
         cam.targetConfig.printDetails(stream)
-        print >> stream, ""
+        print("", file=stream)
     
-	print >> stream, ""
-    print >> stream, ""
-    print >> stream, "IMU configuration"
-    print >> stream, "================="
-    print >> stream, ""
+	print("", file=stream)
+    print("", file=stream)
+    print("IMU configuration", file=stream)
+    print("=================", file=stream)
+    print("", file=stream)
     for (imuNr, imu) in enumerate(cself.ImuList):
-        print >> stream, "IMU{0}:\n".format(imuNr), "----------------------------"
+        print("IMU{0}:\n".format(imuNr), "----------------------------", file=stream)
         imu.getImuConfig().printDetails(stream)
-        print >> stream, ""
+        print("", file=stream)

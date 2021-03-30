@@ -161,7 +161,7 @@ class MulticamCalibrationGraph(object):
                 camL_nr = vertices[1]
                 camH_nr = vertices[0]
             
-            print "\t initializing camera pair ({0},{1})...  ".format(camL_nr, camH_nr)          
+            print(("\t initializing camera pair ({0},{1})...  ".format(camL_nr, camH_nr)))          
 
             #run the pair extrinsic calibration
             obs_list = self.obs_db.getAllObsTwoCams(camL_nr, camH_nr)

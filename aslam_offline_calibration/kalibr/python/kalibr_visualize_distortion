@@ -131,7 +131,7 @@ def view_distortions():
     parsed_args = parse_arguments()
     camchain = kc.ConfigReader.CameraChainParameters(parsed_args.chain_yaml)
     num_cameras = camchain.numCameras()
-    print("Plotting distortion with " + str(num_cameras) + " cameras.")
+    print(("Plotting distortion with " + str(num_cameras) + " cameras."))
     for cam_index in range(num_cameras):
         cam = 'cam{0}'.format(cam_index)
         intrinsics = np.asarray(camchain.data[cam]['intrinsics'])

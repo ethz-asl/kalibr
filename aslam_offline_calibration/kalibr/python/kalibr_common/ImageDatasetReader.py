@@ -20,8 +20,8 @@ class BagImageDatasetReaderIterator(object):
   def __iter__(self):
     return self
 
-  def next(self):
-    idx = self.iter.next()
+  def __next__(self):
+    idx = next(self.iter)
     return self.dataset.getImage(idx)
 
 
@@ -42,7 +42,7 @@ class BagImageDatasetReader(object):
     indices = self.bag._get_indexes(conx)
 
     try:
-      self.index = indices.next()
+      self.index = next(indices)
     except:
       raise RuntimeError("Could not find topic {0} in {1}.".format(imagetopic, self.bagfile))
 

@@ -314,7 +314,7 @@ def getPointStatistics(cself,view_id,cam_id,pidx):
     z = np.array([0,0,1])
     dz = np.dot(z,vc)
     if np.abs(dz - 1.0) > 1e-3:
-        print("The point statistics are only valid if the camera points down the z axis. This camera has the image center: [%f, %f, %f]" % (z[0],z[1],z[2]))
+        print(("The point statistics are only valid if the camera points down the z axis. This camera has the image center: [%f, %f, %f]" % (z[0],z[1],z[2])))
     valid, y = obs.imagePoint(pidx)
     geometry = cself.cameras[cam_id].geometry
     rerr = None
@@ -385,7 +385,7 @@ def getReprojectionErrors(cself, cam_id):
     
     gc.disable() #append speed up
     for view_id, view in enumerate(cself.views):
-        if cam_id in view.rerrs.keys():
+        if cam_id in list(view.rerrs.keys()):
             view_corners=list(); view_reprojections=list(); view_reprojection_errs=list()
             for rerr in view.rerrs[cam_id]:
                 #add if the corners was observed
@@ -583,77 +583,77 @@ def printParameters(cself, dest=sys.stdout):
     std_baselines, std_cameras = recoverCovariance(cself)
 
     #print cameras
-    print >> dest, "Camera-system parameters:"
+    print("Camera-system parameters:", file=dest)
     for cidx, cam in enumerate(cself.cameras):
         d = cam.geometry.projection().distortion().getParameters().flatten(1)
         p = cam.geometry.projection().getParameters().flatten(1)
         dd = std_cameras[cidx][0:d.shape[0]]
         dp = std_cameras[cidx][d.shape[0]:]
-        print >> dest, "\tcam{0} ({1}):".format(cidx, cam.dataset.topic) 
-        print >> dest, "\t type: %s" % ( type(cam.geometry) ) 
-        print >> dest, "\t distortion: %s +- %s" % (d, np.array(dd))
-        print >> dest, "\t projection: %s +- %s" % (p, np.array(dp))
+        print("\tcam{0} ({1}):".format(cidx, cam.dataset.topic), file=dest) 
+        print("\t type: %s" % ( type(cam.geometry) ), file=dest) 
+        print("\t distortion: %s +- %s" % (d, np.array(dd)), file=dest)
+        print("\t projection: %s +- %s" % (p, np.array(dp)), file=dest)
         
         #reproj error statistics
         corners, reprojs, rerrs = getReprojectionErrors(cself, cidx)        
         if len(rerrs)>0:
             me, se = getReprojectionErrorStatistics(rerrs)
             try:
-              print >> dest, "\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1])
+              print("\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1]), file=dest)
             except:
-              print >> dest, "\t Failed printing the reprojection error."
-            print >> dest
+              print("\t Failed printing the reprojection error.", file=dest)
+            print(file=dest)
 
     #print baselines
     for bidx, baseline in enumerate(cself.baselines):
         T = sm.Transformation( baseline.T() )
         dq = std_baselines[bidx][0:3]
         dt = std_baselines[bidx][3:6]
-        print >> dest, "\tbaseline T_{1}_{0}:".format(bidx, bidx+1) 
-        print >> dest, "\t q: %s +- %s" % (T.q(), np.array(dq))
-        print >> dest, "\t t: %s +- %s" % (T.t(), np.array(dt))
-        print >> dest
+        print("\tbaseline T_{1}_{0}:".format(bidx, bidx+1), file=dest) 
+        print("\t q: %s +- %s" % (T.q(), np.array(dq)), file=dest)
+        print("\t t: %s +- %s" % (T.t(), np.array(dt)), file=dest)
+        print(file=dest)
 
 
 def printDebugEnd(cself):
-    print
-    print
+    print()
+    print()
     
     for cidx, cam in enumerate(cself.cameras):
-        print "cam{0}".format(cidx)
-        print "----------"
-        print
-        print
+        print("cam{0}".format(cidx))
+        print("----------")
+        print()
+        print()
         
         corners, reprojs, rerrs = getReprojectionErrors(cself, cidx)        
         if len(rerrs)>0:
             me, se = getReprojectionErrorStatistics(rerrs)
-            print me[0]
-            print me[1]
-            print se[0]
-            print se[1]
+            print(me[0])
+            print(me[1])
+            print(se[0])
+            print(se[1])
         
-        print
+        print()
         p = cam.geometry.projection().getParameters().flatten(1)
         for temp in p:
-            print temp
+            print(temp)
         
-        print
+        print()
         d = cam.geometry.projection().distortion().getParameters().flatten(1)
         for temp in d:
-            print temp
+            print(temp)
             
         if cidx>0:
             bidx=cidx-1
             T = sm.Transformation( cself.baselines[bidx].T() )
             for temp in T.t():
-                print temp
+                print(temp)
     
             for temp in T.q():
-                print temp
+                print(temp)
     
-    print
-    print
+    print()
+    print()
 
 def saveChainParametersYaml(cself, resultFile, graph):
     cameraModels = {acvb.DistortedPinhole: 'pinhole',
@@ -795,7 +795,7 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True, graph=None, 
     for fig in figs:
         pdf.savefig(fig)
     pdf.close()
-    print "Report written to: {0}".format(filename)
+    print("Report written to: {0}".format(filename))
     
     if showOnScreen:
         plotter.show()  
@@ -821,7 +821,7 @@ def plotCorners(gridobs, fno=1, cornerlist=None, clearFigure=True, plotImage=Tru
             if valid:
                 P.append(y)
             else:
-                print "Tried to plot unobserved corner"       
+                print("Tried to plot unobserved corner")       
         P=np.array(P)
     else:
         #get all points
@@ -870,15 +870,15 @@ def plotCameraRig(baselines, fno=1, clearFigure=True, title=""):
    
 def saveResultTxt(cself, filename="camera_calibration_result.txt"):
     f1=open(filename, 'w')
-    print >> f1, "Calibration results "
-    print >> f1, "===================="
+    print("Calibration results ", file=f1)
+    print("====================", file=f1)
     
     printParameters(cself, f1)
-    print >> f1, ""
-    print >> f1, ""
-    print >> f1, "Target configuration"
-    print >> f1, "===================="
-    print >> f1, ""
+    print("", file=f1)
+    print("", file=f1)
+    print("Target configuration", file=f1)
+    print("====================", file=f1)
+    print("", file=f1)
 
     cself.cameras[0].ctarget.targetConfig.printDetails(f1)
     

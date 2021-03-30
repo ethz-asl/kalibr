@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-print "importing libraries"
+print("importing libraries")
 import rosbag
 import cv_bridge
 
@@ -25,10 +25,10 @@ import signal
 np.set_printoptions(suppress=True)
 
 def __initBagDataset(bagfile, topic, from_to):
-    print "\tDataset:          {0}".format(bagfile)
-    print "\tTopic:            {0}".format(topic)
+    print("\tDataset:          {0}".format(bagfile))
+    print("\tTopic:            {0}".format(topic))
     reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to)
-    print "\tNumber of images: {0}".format(reader.numImages())
+    print("\tNumber of images: {0}".format(reader.numImages()))
     return reader
 
 #available models
@@ -84,7 +84,7 @@ def __parseArgs():
 
     parser = KalibrArgParser(description='Calibrate the intrinsics of a single rolling shutter camera.', usage=usage)
     parser.add_argument('--model', dest='model', help='The camera model to estimate. '
-                        'Currently supported models are {0}, where the suffix \'-rs\' identifies rolling shutter models.'.format(', '.join(cameraModels.keys())), required=True)
+                        'Currently supported models are {0}, where the suffix \'-rs\' identifies rolling shutter models.'.format(', '.join(list(cameraModels.keys()))), required=True)
     parser.add_argument('--frame-rate', dest='framerate', type=int, help='Approximate framerate of the camera.', required=True)
 
     groupSource = parser.add_argument_group('Data source')
@@ -177,7 +177,7 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception,e:
+    except Exception as e:
         sm.logError("Exception: {0}".format(e))
         sys.exit(-1)
 

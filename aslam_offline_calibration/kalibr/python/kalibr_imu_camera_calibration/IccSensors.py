@@ -6,7 +6,7 @@ import aslam_backend as aopt
 import bsplines
 import kalibr_common as kc
 import kalibr_errorterms as ket
-import IccCalibrator as ic
+from . import IccCalibrator as ic
 
 import cv2
 import sys
@@ -17,21 +17,21 @@ import scipy.optimize
 
 
 def initCameraBagDataset(bagfile, topic, from_to=None, perform_synchronization=False):
-    print "Initializing camera rosbag dataset reader:"
-    print "\tDataset:          {0}".format(bagfile)
-    print "\tTopic:            {0}".format(topic)
+    print("Initializing camera rosbag dataset reader:")
+    print("\tDataset:          {0}".format(bagfile))
+    print("\tTopic:            {0}".format(topic))
     reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to, \
                                       perform_synchronization=perform_synchronization)
-    print "\tNumber of images: {0}".format(len(reader.index))
+    print("\tNumber of images: {0}".format(len(reader.index)))
     return reader
 
 def initImuBagDataset(bagfile, topic, from_to=None, perform_synchronization=False):
-    print "Initializing imu rosbag dataset reader:"
-    print "\tDataset:          {0}".format(bagfile)
-    print "\tTopic:            {0}".format(topic)
+    print("Initializing imu rosbag dataset reader:")
+    print("\tDataset:          {0}".format(bagfile))
+    print("\tTopic:            {0}".format(topic))
     reader = kc.BagImuDatasetReader(bagfile, topic, bag_from_to=from_to, \
                                       perform_synchronization=perform_synchronization)
-    print "\tNumber of messages: {0}".format(len(reader.index))
+    print("\tNumber of messages: {0}".format(len(reader.index)))
     return reader
 
 
@@ -114,8 +114,8 @@ class IccCamera():
         self.detector = acv.GridDetector(self.camera.geometry, grid, options)        
 
     def findOrientationPriorCameraToImu(self, imu):
-        print
-        print "Estimating imu-camera rotation prior"
+        print()
+        print("Estimating imu-camera rotation prior")
         
         # build the problem
         problem = aopt.OptimizationProblem()
@@ -186,7 +186,7 @@ class IccCamera():
                 a_w.append(np.dot(poseSpline.orientation(tk), np.dot(R_i_c, - im.alpha)))
         mean_a_w = np.mean(np.asarray(a_w).T, axis=1)
         self.gravity_w = mean_a_w / np.linalg.norm(mean_a_w) * 9.80655
-        print "Gravity was intialized to", self.gravity_w, "[m/s^2]" 
+        print("Gravity was intialized to", self.gravity_w, "[m/s^2]") 
 
         #set the gyro bias prior (if we have more than 1 cameras use recursive average)
         b_gyro = bias.toEuclidean() 
@@ -194,10 +194,10 @@ class IccCamera():
         imu.GyroBiasPrior = (imu.GyroBiasPriorCount-1.0)/imu.GyroBiasPriorCount * imu.GyroBiasPrior + 1.0/imu.GyroBiasPriorCount*b_gyro
 
         #print result
-        print "  Orientation prior camera-imu found as: (T_i_c)"
-        print R_i_c
-        print "  Gyro bias prior found as: (b_gyro)"
-        print b_gyro
+        print("  Orientation prior camera-imu found as: (T_i_c)")
+        print(R_i_c)
+        print("  Gyro bias prior found as: (b_gyro)")
+        print(b_gyro)
     
     #return an etimate of gravity in the world coordinate frame as perceived by this camera
     def getEstimatedGravity(self):
@@ -213,7 +213,7 @@ class IccCamera():
     #          and imu, the maximum corresponds to the timeshift...
     #          in a next step we can use the time shift to estimate the rotation between camera and imu
     def findTimeshiftCameraImuPrior(self, imu, verbose=False):
-        print "Estimating time shift camera to imu:"
+        print("Estimating time shift camera to imu:")
         
         #fit a spline to the camera observations
         poseSpline = self.initPoseSplineFromCamera( timeOffsetPadding=0.0 )
@@ -268,8 +268,8 @@ class IccCamera():
         #store the timeshift (t_imu = t_cam + timeshiftCamToImuPrior)
         self.timeshiftCamToImuPrior = shift
         
-        print "  Time shift camera to imu (t_imu = t_cam + shift):"
-        print self.timeshiftCamToImuPrior
+        print("  Time shift camera to imu (t_imu = t_cam + shift):")
+        print(self.timeshiftCamToImuPrior)
         
     #initialize a pose spline using camera poses (pose spline = T_wb)
     def initPoseSplineFromCamera(self, splineOrder=6, poseKnotsPerSecond=100, timeOffsetPadding=0.02):
@@ -308,8 +308,8 @@ class IccCamera():
         seconds = times[-1] - times[0]
         knots = int(round(seconds * poseKnotsPerSecond))
         
-        print
-        print "Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, poseKnotsPerSecond, seconds)
+        print()
+        print("Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, poseKnotsPerSecond, seconds))
         pose.initPoseSplineSparse(times, curve, knots, 1e-4)
         return pose
     
@@ -326,8 +326,8 @@ class IccCamera():
         problem.addDesignVariable(self.cameraTimeToImuTimeDv, ic.CALIBRATION_GROUP_ID)
         
     def addCameraErrorTerms(self, problem, poseSplineDv, T_cN_b, blakeZissermanDf=0.0, timeOffsetPadding=0.0):
-        print
-        print "Adding camera error terms ({0})".format(self.dataset.topic)
+        print()
+        print("Adding camera error terms ({0})".format(self.dataset.topic))
         
         #progress bar
         iProgress = sm.Progress2( len(self.targetObservations) )
@@ -395,7 +395,7 @@ class IccCamera():
             #update progress bar
             iProgress.sample()
             
-        print "\r  Added {0} camera error terms                      ".format( len(self.targetObservations) )           
+        print("\r  Added {0} camera error terms                      ".format( len(self.targetObservations) ))           
         self.allReprojectionErrors = allReprojectionErrors
 
 #pair of cameras with overlapping field of view (perfectly synced cams required!!)
@@ -444,9 +444,9 @@ class IccCameraChain():
         for camNr in range(1, len(self.camList)):
             self.camList[camNr].T_extrinsic = self.chainConfig.getExtrinsicsLastCamToHere(camNr)
 
-            print "Baseline between cam{0} and cam{1} set to:".format(camNr-1,camNr)
-            print "T= ", self.camList[camNr].T_extrinsic.T()
-            print "Baseline: ", np.linalg.norm(self.camList[camNr].T_extrinsic.t()), " [m]"
+            print("Baseline between cam{0} and cam{1} set to:".format(camNr-1,camNr))
+            print("T= ", self.camList[camNr].T_extrinsic.T())
+            print("Baseline: ", np.linalg.norm(self.camList[camNr].T_extrinsic.t()), " [m]")
    
     #initialize a pose spline for the chain
     def initializePoseSplineFromCameraChain(self, splineOrder=6, poseKnotsPerSecond=100, timeOffsetPadding=0.02):
@@ -563,11 +563,11 @@ class IccImu(object):
             return indent + str(np.array_str(np_array)).replace('\n',"\n"+indent)
 
         def printDetails(self, dest=sys.stdout):
-            print >> dest, "  Model: {0}".format(self.data["model"])
+            print("  Model: {0}".format(self.data["model"]), file=dest)
             kc.ImuParameters.printDetails(self, dest)
-            print >> dest, "  T_i_b"
-            print >> dest, self.formatIndented("    ", np.array(self.data["T_i_b"]))
-            print >> dest, "  time offset with respect to IMU0: {0} [s]".format(self.data["time_offset"])
+            print("  T_i_b", file=dest)
+            print(self.formatIndented("    ", np.array(self.data["T_i_b"])), file=dest)
+            print("  time offset with respect to IMU0: {0} [s]".format(self.data["time_offset"]), file=dest)
 
     def getImuConfig(self):
         self.updateImuConfig()
@@ -617,7 +617,7 @@ class IccImu(object):
             self.stamp = stamp
         
     def loadImuData(self):
-        print "Reading IMU data ({0})".format(self.dataset.topic)
+        print("Reading IMU data ({0})".format(self.dataset.topic))
             
         # prepare progess bar
         iProgress = sm.Progress2( self.dataset.numMessages() )
@@ -636,8 +636,8 @@ class IccImu(object):
         self.imuData = imu
         
         if len(self.imuData)>1:
-            print "\r  Read %d imu readings over %.1f seconds                   " \
-                    % (len(imu), imu[-1].stamp.toSec() - imu[0].stamp.toSec())
+            print("\r  Read %d imu readings over %.1f seconds                   " \
+                    % (len(imu), imu[-1].stamp.toSec() - imu[0].stamp.toSec()))
         else:
             sm.logFatal("Could not find any IMU messages. Please check the dataset.")
             sys.exit(-1)
@@ -666,8 +666,8 @@ class IccImu(object):
 
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
                                    accelNoiseScale=1.0):
-        print
-        print "Adding accelerometer error terms ({0})".format(self.dataset.topic)
+        print()
+        print("Adding accelerometer error terms ({0})".format(self.dataset.topic))
         
         #progress bar
         iProgress = sm.Progress2( len(self.imuData) )
@@ -705,13 +705,13 @@ class IccImu(object):
             #update progress bar
             iProgress.sample()
 
-        print "\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped )
+        print("\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped ))
         self.accelErrors = accelErrors
 
     def addGyroscopeErrorTerms(self, problem, poseSplineDv, mSigma=0.0, gyroNoiseScale=1.0, \
                                g_w=None):
-        print
-        print "Adding gyroscope error terms ({0})".format(self.dataset.topic)
+        print()
+        print("Adding gyroscope error terms ({0})".format(self.dataset.topic))
         
         #progress bar
         iProgress = sm.Progress2( len(self.imuData) )
@@ -743,7 +743,7 @@ class IccImu(object):
             #update progress bar
             iProgress.sample()
 
-        print "\r  Added {0} of {1} gyroscope error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped )           
+        print("\r  Added {0} of {1} gyroscope error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped ))           
         self.gyroErrors = gyroErrors
 
     def initBiasSplines(self, poseSpline, splineOrder, biasKnotsPerSecond):
@@ -752,8 +752,8 @@ class IccImu(object):
         seconds = end - start;
         knots = int(round(seconds * biasKnotsPerSecond))
         
-        print
-        print "Initializing the bias splines with %d knots" % (knots)
+        print()
+        print("Initializing the bias splines with %d knots" % (knots))
         
         #initialize the bias splines
         self.gyroBias = bsplines.BSpline(splineOrder)
@@ -778,8 +778,8 @@ class IccImu(object):
                                         self.r_b_Dv.toEuclidean()))
 
     def findOrientationPrior(self, referenceImu):
-        print
-        print "Estimating imu-imu rotation initial guess."
+        print()
+        print("Estimating imu-imu rotation initial guess.")
         
         # build the problem
         problem = aopt.OptimizationProblem()
@@ -871,9 +871,9 @@ class IccImu(object):
             refined_shift = scipy.optimize.fmin(objectiveFunction, np.array([shift]), maxiter=100)[0]
             self.timeOffset = float(refined_shift)
 
-        print "Temporal correction with respect to reference IMU "
-        print self.timeOffset, "[s]", ("" if self.estimateTimedelay else \
-                                       " (this offset is not accounted for in the calibration)")
+        print("Temporal correction with respect to reference IMU ")
+        print(self.timeOffset, "[s]", ("" if self.estimateTimedelay else \
+                                       " (this offset is not accounted for in the calibration)"))
 
         # Add constant gyro bias as design variable
         gyroBiasDv = aopt.EuclideanPointDv( np.zeros(3) )
@@ -901,8 +901,8 @@ class IccImu(object):
             sm.logFatal("Failed to obtain initial guess for the relative orientation!")
             sys.exit(-1)
 
-        print "Estimated imu to reference imu Rotation: "
-        print q_i_b_Dv.toRotationMatrix()
+        print("Estimated imu to reference imu Rotation: ")
+        print(q_i_b_Dv.toRotationMatrix())
 
         self.q_i_b_prior = sm.r2quat(q_i_b_Dv.toRotationMatrix())
         
@@ -917,16 +917,16 @@ class IccScaledMisalignedImu(IccImu):
 
         def printDetails(self, dest=sys.stdout):
             IccImu.ImuParameters.printDetails(self, dest)
-            print >> dest, "  Gyroscope: "
-            print >> dest, "    M:"
-            print >> dest, self.formatIndented("      ", np.array(self.data["gyroscopes"]["M"]))
-            print >> dest, "    A [(rad/s)/(m/s^2)]:"
-            print >> dest, self.formatIndented("      ", np.array(self.data["gyroscopes"]["A"]))
-            print >> dest, "    C_gyro_i:"
-            print >> dest, self.formatIndented("      ", np.array(self.data["gyroscopes"]["C_gyro_i"]))
-            print >> dest, "  Accelerometer: "
-            print >> dest, "    M:"
-            print >> dest, self.formatIndented("      ", np.array(self.data["accelerometers"]["M"]))
+            print("  Gyroscope: ", file=dest)
+            print("    M:", file=dest)
+            print(self.formatIndented("      ", np.array(self.data["gyroscopes"]["M"])), file=dest)
+            print("    A [(rad/s)/(m/s^2)]:", file=dest)
+            print(self.formatIndented("      ", np.array(self.data["gyroscopes"]["A"])), file=dest)
+            print("    C_gyro_i:", file=dest)
+            print(self.formatIndented("      ", np.array(self.data["gyroscopes"]["C_gyro_i"])), file=dest)
+            print("  Accelerometer: ", file=dest)
+            print("    M:", file=dest)
+            print(self.formatIndented("      ", np.array(self.data["accelerometers"]["M"])), file=dest)
 
         def setIntrisicsMatrices(self, M_accel, C_gyro_i, M_gyro, Ma_gyro):
             self.data["accelerometers"] = dict()
@@ -966,8 +966,8 @@ class IccScaledMisalignedImu(IccImu):
 
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
                                    accelNoiseScale=1.0):
-        print
-        print "Adding accelerometer error terms ({0})".format(self.dataset.topic)
+        print()
+        print("Adding accelerometer error terms ({0})".format(self.dataset.topic))
         
         #progress bar
         iProgress = sm.Progress2( len(self.imuData) )
@@ -1007,12 +1007,12 @@ class IccScaledMisalignedImu(IccImu):
             #update progress bar
             iProgress.sample()
 
-        print "\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped )
+        print("\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped ))
         self.accelErrors = accelErrors
 
     def addGyroscopeErrorTerms(self, problem, poseSplineDv, mSigma=0.0, gyroNoiseScale=1.0, g_w=None):
-        print
-        print "Adding gyroscope error terms ({0})".format(self.dataset.topic)
+        print()
+        print("Adding gyroscope error terms ({0})".format(self.dataset.topic))
         
         #progress bar
         iProgress = sm.Progress2( len(self.imuData) )
@@ -1056,7 +1056,7 @@ class IccScaledMisalignedImu(IccImu):
             #update progress bar
             iProgress.sample()
 
-        print "\r  Added {0} of {1} gyroscope error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped )           
+        print("\r  Added {0} of {1} gyroscope error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped ))           
         self.gyroErrors = gyroErrors
 
 class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
@@ -1069,15 +1069,15 @@ class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
 
         def printDetails(self, dest=sys.stdout):
             IccScaledMisalignedImu.ImuParameters.printDetails(self, dest)
-            print >> dest, "    rx_i [m]:"
-            print >> dest, self.formatIndented("      ", \
-                                               np.array(self.data["accelerometers"]["rx_i"]))
-            print >> dest, "    ry_i [m]:"
-            print >> dest, self.formatIndented("      ", \
-                                               np.array(self.data["accelerometers"]["ry_i"]))
-            print >> dest, "    rz_i [m]:"
-            print >> dest, self.formatIndented("      ", \
-                                               np.array(self.data["accelerometers"]["rz_i"]))
+            print("    rx_i [m]:", file=dest)
+            print(self.formatIndented("      ", \
+                                               np.array(self.data["accelerometers"]["rx_i"])), file=dest)
+            print("    ry_i [m]:", file=dest)
+            print(self.formatIndented("      ", \
+                                               np.array(self.data["accelerometers"]["ry_i"])), file=dest)
+            print("    rz_i [m]:", file=dest)
+            print(self.formatIndented("      ", \
+                                               np.array(self.data["accelerometers"]["rz_i"])), file=dest)
 
         def setAccelerometerLeverArms(self, rx_i, ry_i, rz_i):
             self.data["accelerometers"]["rx_i"] = rx_i.tolist()
@@ -1117,8 +1117,8 @@ class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
 
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
                                    accelNoiseScale=1.0):
-        print
-        print "Adding accelerometer error terms ({0})".format(self.dataset.topic)
+        print()
+        print("Adding accelerometer error terms ({0})".format(self.dataset.topic))
         
         #progress bar
         iProgress = sm.Progress2( len(self.imuData) )
@@ -1166,5 +1166,5 @@ class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
             #update progress bar
             iProgress.sample()
 
-        print "\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped )
+        print("\r  Added {0} of {1} accelerometer error terms (skipped {2} out-of-bounds measurements)".format( len(self.imuData)-num_skipped, len(self.imuData), num_skipped ))
         self.accelErrors = accelErrors
