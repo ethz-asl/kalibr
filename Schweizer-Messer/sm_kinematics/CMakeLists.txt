@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(sm_kinematics)
 
 find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common sm_eigen sm_boost sm_random)

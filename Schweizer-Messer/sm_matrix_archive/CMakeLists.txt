@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(sm_matrix_archive)
 
 find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common)

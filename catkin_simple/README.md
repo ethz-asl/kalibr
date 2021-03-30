@@ -7,7 +7,7 @@ This `catkin` package is designed to make the `CMakeLists.txt` of other `catkin`
 Here is an example of a package `foo` which depends on other catkin packages:
 
 ```cmake
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(foo)
 
 find_package(catkin_simple REQUIRED)
@@ -31,7 +31,7 @@ Lets break this down, line by line.
 First is the standard CMake header:
 
 ```cmake
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(foo)
 ```
 
