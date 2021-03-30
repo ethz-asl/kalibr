@@ -191,7 +191,7 @@ def main():
             cameraList.append(cam)
         else:
             raise RuntimeError( "Unknown camera model: {0}. Try {1}.".format(modelName, list(cameraModels.keys())) )
-        
+
     if parsed.verbose:
         obsdb.printTable()
     
@@ -403,7 +403,7 @@ def main():
                 pl.show()
             
             #write to file
-            bagtag = parsed.bagfile.translate(None, "<>:/\|?*").replace('.bag', '', 1)
+            bagtag = parsed.bagfile.translate("<>:/\|?*").replace('.bag', '', 1)
             resultFile = "camchain-" + bagtag + ".yaml"
             kcc.saveChainParametersYaml(calibrator, resultFile, graph)
             print("Results written to file: {0}".format(resultFile))

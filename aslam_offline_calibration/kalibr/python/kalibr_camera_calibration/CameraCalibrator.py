@@ -585,8 +585,8 @@ def printParameters(cself, dest=sys.stdout):
     #print cameras
     print("Camera-system parameters:", file=dest)
     for cidx, cam in enumerate(cself.cameras):
-        d = cam.geometry.projection().distortion().getParameters().flatten(1)
-        p = cam.geometry.projection().getParameters().flatten(1)
+        d = cam.geometry.projection().distortion().getParameters().flatten()
+        p = cam.geometry.projection().getParameters().flatten()
         dd = std_cameras[cidx][0:d.shape[0]]
         dp = std_cameras[cidx][d.shape[0]:]
         print("\tcam{0} ({1}):".format(cidx, cam.dataset.topic), file=dest) 
@@ -634,12 +634,12 @@ def printDebugEnd(cself):
             print(se[1])
         
         print()
-        p = cam.geometry.projection().getParameters().flatten(1)
+        p = cam.geometry.projection().getParameters().flatten()
         for temp in p:
             print(temp)
         
         print()
-        d = cam.geometry.projection().distortion().getParameters().flatten(1)
+        d = cam.geometry.projection().distortion().getParameters().flatten()
         for temp in d:
             print(temp)
             
@@ -693,7 +693,7 @@ def saveChainParametersYaml(cself, resultFile, graph):
         else:
             raise RuntimeError("Invalid camera model {}.".format(cameraModel))
         camParams.setResolution( [P.ru(), P.rv()] )
-        dist_coeffs = P.distortion().getParameters().flatten(1)
+        dist_coeffs = P.distortion().getParameters().flatten()
         camParams.setDistortion( distortionModel, dist_coeffs)
 
         chain.addCameraAtEnd(camParams)

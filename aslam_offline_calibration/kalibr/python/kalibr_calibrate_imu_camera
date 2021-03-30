@@ -212,7 +212,7 @@ def main():
     util.printResults(iCal, withCov=parsed.recover_cov)
 
     print()
-    bagtag = parsed.bagfile[0].translate(None, "<>:/\|?*").replace('.bag', '', 1)
+    bagtag = parsed.bagfile[0].translate("<>:/\|?*").replace('.bag', '', 1)
     yamlFilename = "camchain-imucam-" + bagtag + ".yaml"
     iCal.saveCamChainParametersYaml(yamlFilename)
     print("  Saving camera chain calibration to file: {0}".format(yamlFilename))
