@@ -12,6 +12,6 @@ if os.path.isfile(os.path.join(pathToSo,"libincremental_calibration_python.so"))
     # from mypyfile import *
     isCompiled = True
 else:
-    print "Warning: the package incremental_calibration_python is not compiled. Type 'rosmake incremental_calibration_python' if you need this."
+    print("Warning: the package incremental_calibration_python is not compiled. Type 'rosmake incremental_calibration_python' if you need this.")
     PACKAGE_IS_NOT_COMPILED = True;
 

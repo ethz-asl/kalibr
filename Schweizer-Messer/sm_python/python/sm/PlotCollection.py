@@ -52,12 +52,12 @@ class PlotCollection:
         """
         Show the window on screen
         """
-        if len(self.figureList.keys()) == 0:
+        if len(list(self.figureList.keys())) == 0:
             return
         app = wx.PySimpleApp()
         frame = wx.Frame(None,-1,self.frame_name, size=self.window_size)
         plotter = self.PlotNotebook(frame)
-        for name in self.figureList.keys():
+        for name in list(self.figureList.keys()):
             plotter.add(name, self.figureList[name])
         frame.Show()
         app.MainLoop()

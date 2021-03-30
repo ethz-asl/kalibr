@@ -11,5 +11,5 @@ if os.path.isfile(os.path.join(pathToSo,"libaslam_cv_python.so")):
     # from mypyfile import *
     isCompiled = True
 else:
-    print "Warning: the package aslam_cv_python is not compiled. Type 'rosmake aslam_cv_python' if you need this."
+    print("Warning: the package aslam_cv_python is not compiled. Type 'rosmake aslam_cv_python' if you need this.")
     PACKAGE_IS_NOT_COMPILED = True;

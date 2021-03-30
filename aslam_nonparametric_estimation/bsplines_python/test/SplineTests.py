@@ -17,7 +17,7 @@ class TestSplinesVsFitpack(unittest.TestCase):
         fspl = (knots,cp,3)
         
         for i in numpy.arange(2.0,4.0,0.1):
-            print "Eval at %f\n" % (i)
+            print("Eval at %f\n" % (i))
             f = fp.spalde(float(i),fspl)
             for j in range(0,3):
                 a = aspl.evalD(i,j)
@@ -36,7 +36,7 @@ class TestSplinesVsFitpack(unittest.TestCase):
             fspl = (knots,cp,3)
         
             for i in numpy.arange(2.0*dt,4.0*dt,0.1*dt):
-                print "Eval at %f\n" % (i)
+                print("Eval at %f\n" % (i))
                 f = fp.spalde(float(i),fspl)
                 for j in range(0,3):
                     a = aspl.evalD(i,j)
@@ -58,7 +58,7 @@ class TestSplinesVsFitpack(unittest.TestCase):
         
             for a in numpy.arange(2.0*dt,3.9*dt,0.1*dt):
                 for i in numpy.arange(2.1*dt,4.0*dt,0.1*dt):
-                    print "Eval at %f\n" % (i)
+                    print("Eval at %f\n" % (i))
                     f = fp.splint(a,float(i),fspl)
                     b = aspl.evalI(a,i)
                     assert abs(b - f) < 1e-10, "spline integral evaluated on [%f,%f] (%f != %f) was not right" % (a,i,float(b),f)

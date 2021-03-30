@@ -12,5 +12,5 @@ if os.path.isfile(os.path.join(pathToSo,"libaslam_cameras_april_python.so")):
     # from mypyfile import *
     isCompiled = True
 else:
-    print "Warning: the package aslam_cameras_april_python is not compiled."
+    print("Warning: the package aslam_cameras_april_python is not compiled.")
     PACKAGE_IS_NOT_COMPILED = True;

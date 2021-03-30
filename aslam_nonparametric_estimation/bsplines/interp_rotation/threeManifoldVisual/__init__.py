@@ -1,5 +1,5 @@
 import visual
-import thread
+import _thread
 import time
 import numpy
 
@@ -89,14 +89,14 @@ class Manifold :
                 if handler:
                     handler()
                 else:
-                    print "'" + s + "'"
-                    print self.__keyHandler
+                    print("'" + s + "'")
+                    print(self.__keyHandler)
             elif self.display.mouse.events:
                 ev = self.display.mouse.getevent()
                 if ev.press :
                     try :
                         p = ev.pick.point
-                        print p
+                        print(p)
                     except :
                         pass
             else:
@@ -124,5 +124,5 @@ class Manifold :
                     "down" : lambda : self.__step((0, 0, -1)),
                 }
                 
-            self.__thread = thread.start_new_thread(self.__interactionThread, ())
+            self.__thread = _thread.start_new_thread(self.__interactionThread, ())
             return self.__thread

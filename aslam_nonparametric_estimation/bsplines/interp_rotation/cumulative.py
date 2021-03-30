@@ -77,7 +77,7 @@ def cumQuat(bs,t,qc):
         tildeB = np.sum(bi[i+1:])
         diff = tildeB - cumulativeBi(int(ci[i]+1))
         if abs(diff) > 1e-9 :
-            print diff
+            print(diff)
         rval= qdot(rval, qexp(ldqi * tildeB))
         
 
@@ -112,7 +112,7 @@ if True:
     nm = np.sum(qval * qval,0)
     for i in range(len(nm)):
         if nm[i] - 1 > 1E-9 :
-            print qval[i]
+            print(qval[i])
     pl.figure(3)
     pl.clf()
     pl.plot(T,qval[0,:],'r-',linewidth=4)
