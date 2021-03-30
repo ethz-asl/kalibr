@@ -7,7 +7,7 @@ isCompiled = False
 pathToSo = os.path.dirname(os.path.realpath(__file__))
 if os.path.isfile(os.path.join(pathToSo,"libaslam_cameras_april_python.so")):    
     # Import the the C++ exports from your package library.
-    from libaslam_cameras_april_python import *
+    from .libaslam_cameras_april_python import *
     # Import other files in the directory
     # from mypyfile import *
     isCompiled = True

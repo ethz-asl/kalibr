@@ -2,7 +2,7 @@
 import numpy_eigen
 import sm
 # Import the the C++ exports from your package library.
-from libaslam_backend_python import *
+from .libaslam_backend_python import *
 # Import other files in the directory
 # from mypyfile import *
 
