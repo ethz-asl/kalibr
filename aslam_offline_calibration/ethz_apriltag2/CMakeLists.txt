@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0.2)
 
 project(ethz_apriltag2)
 
@@ -8,7 +8,6 @@ include_directories(${catkin_INCLUDE_DIRS})
 find_package(Eigen3 REQUIRED)
 
 catkin_package(
-    DEPENDS eigen opencv
     INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIRS}
     LIBRARIES ${PROJECT_NAME}
 )
