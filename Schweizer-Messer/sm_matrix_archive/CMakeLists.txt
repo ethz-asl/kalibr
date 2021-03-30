@@ -4,21 +4,18 @@ project(sm_matrix_archive)
 set(CMAKE_CXX_STANDARD 14)
 
 find_package(catkin REQUIRED COMPONENTS sm_common)
-include_directories(${catkin_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 
 find_package(Eigen3 REQUIRED)
-include_directories(include ${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 catkin_package(
   INCLUDE_DIRS include  ${catkin_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS sm_common
-  DEPENDS
 )
 add_definitions(-D__STRICT_ANSI__)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
+include_directories(include ${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 ##############
 ## Building ##
@@ -35,7 +32,6 @@ target_link_libraries(${PROJECT_NAME}
 ## Testing ##
 #############
 if(CATKIN_ENABLE_TESTING)
-
   # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
   add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
@@ -47,5 +43,4 @@ if(CATKIN_ENABLE_TESTING)
   if(TARGET ${PROJECT_NAME}-test)
     target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
   endif()
-
 endif()

@@ -32,11 +32,25 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} 
                       ${catkin_LIBRARIES} ${Boost_LIBRARIES} pthread)
 
+##################
+## Installation ##
+##################
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)
+
 #############
 ## Testing ##
 #############
 if(CATKIN_ENABLE_TESTING)
-
   # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
   add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
@@ -48,5 +62,4 @@ if(CATKIN_ENABLE_TESTING)
   if(TARGET ${PROJECT_NAME}-test)
     target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
   endif()
-
 endif()

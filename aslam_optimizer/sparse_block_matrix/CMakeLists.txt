@@ -37,7 +37,7 @@ if(CATKIN_ENABLE_TESTING)
     test/solver_tests.cpp
     test/sparse_block_matrix_tests.cpp
   )
-  target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${TBB_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${TBB_LIBRARIES} ${SUITESPARSE_LIBRARIES})
 endif()
 
 # Install
