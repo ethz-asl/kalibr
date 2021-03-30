@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(sm_matrix_archive)
 
-find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common)
+find_package(catkin REQUIRED COMPONENTS sm_common)
 include_directories(${catkin_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system filesystem)
 
-find_package(Eigen REQUIRED)
-include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+find_package(Eigen3 REQUIRED)
+include_directories(include ${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 catkin_package(
   INCLUDE_DIRS include  ${catkin_INCLUDE_DIRS}
