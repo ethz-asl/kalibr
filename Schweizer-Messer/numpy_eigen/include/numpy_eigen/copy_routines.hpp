@@ -57,10 +57,10 @@ struct CopyEigenToNumpyVector
   {
     // Assumes M is already initialized.
     for(int i = 0; i < M_->size(); i++)
-      {
-	// T * p = static_cast<T*>(PyArray_GETPTR1(P_, i));
-	// *p = static_cast<T>((*M_)(i));
-      }
+    {
+	    T * p = static_cast<T*>(PyArray_GETPTR1((PyArrayObject*)P_, i));
+	    *p = static_cast<T>((*M_)(i));
+    }
   }
 
 };
@@ -77,10 +77,10 @@ struct CopyNumpyToEigenVector
   {
     // Assumes M is already initialized.
     for(int i = 0; i < M_->size(); i++)
-      {
-	// T * p = static_cast<T*>(PyArray_GETPTR1(P_, i));
-	// (*M_)(i) = static_cast<scalar_t>(*p);
-      }
+    {
+      T * p = static_cast<T*>(PyArray_GETPTR1((PyArrayObject*)P_, i));
+      (*M_)(i) = static_cast<scalar_t>(*p);
+    }
   }
 
 };
