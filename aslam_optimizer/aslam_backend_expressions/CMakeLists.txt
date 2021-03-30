@@ -8,6 +8,7 @@ find_package(catkin_simple REQUIRED)
 
 catkin_simple()
 
+find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIRS})
 
 include_directories(include)

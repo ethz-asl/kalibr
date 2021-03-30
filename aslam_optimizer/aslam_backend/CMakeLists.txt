@@ -8,6 +8,7 @@ catkin_simple()
 
 find_package(Boost REQUIRED COMPONENTS system thread)
 
+find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIRS})
 
 #add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -O3)
