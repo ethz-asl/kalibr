@@ -209,7 +209,7 @@ namespace aslam {
     }
 
     double LinearSolver::getNumFlops() const {
-      return _cholmod.SPQR_xstat[0];
+      return _cholmod.SPQR_flopcount_bound;
     }
 
     double LinearSolver::getLinearSolverTime() const {
@@ -222,14 +222,14 @@ namespace aslam {
 
     double LinearSolver::getSymbolicFactorizationTime() const {
       if (_factor && _factor->QRsym)
-        return _cholmod.other1[1];
+        return _cholmod.SPQR_analyze_time;
       else
         return 0.0;
     }
 
     double LinearSolver::getNumericFactorizationTime() const {
       if (_factor && _factor->QRnum)
-        return _cholmod.other1[2];
+        return _cholmod.SPQR_analyze_time;
       else
         return 0.0;
     }
@@ -329,7 +329,7 @@ namespace aslam {
         _factor = SuiteSparseQR_symbolic<double>(SPQR_ORDERING_BEST,
           SPQR_DEFAULT_TOL, A_l, &_cholmod);
         const double t3 = Timestamp::now();
-        _cholmod.other1[1] = t3 - t2;
+        _cholmod.SPQR_analyze_time = t3 - t2;
         if (_factor == NULL) {
           cholmod_l_free_sparse(&A_l, &_cholmod);
           if (G_l)
@@ -344,7 +344,7 @@ namespace aslam {
       const int status = SuiteSparseQR_numeric<double>(qrTolerance, A_l,
         _factor, &_cholmod);
       const double t3 = Timestamp::now();
-      _cholmod.other1[2] = t3 - t2;
+      _cholmod.SPQR_analyze_time = t3 - t2;
       cholmod_l_free_sparse(&A_l, &_cholmod);
       if (!status) {
         if (G_l)
@@ -476,7 +476,7 @@ namespace aslam {
         _factor = SuiteSparseQR_symbolic<double>(SPQR_ORDERING_BEST,
           SPQR_DEFAULT_TOL, A_l, &_cholmod);
         const double t3 = Timestamp::now();
-        _cholmod.other1[1] = t3 - t2;
+        _cholmod.SPQR_analyze_time = t3 - t2;
         if (_factor == NULL) {
           cholmod_l_free_sparse(&A_l, &_cholmod);
           throw InvalidOperationException("SuiteSparseQR_symbolic failed",
@@ -489,7 +489,7 @@ namespace aslam {
       const int status = SuiteSparseQR_numeric<double>(qrTolerance, A_l,
         _factor, &_cholmod);
       const double t3 = Timestamp::now();
-      _cholmod.other1[2] = t3 - t2;
+      _cholmod.SPQR_analyze_time = t3 - t2;
       cholmod_l_free_sparse(&A_l, &_cholmod);
       if (!status)
         throw InvalidOperationException("SuiteSparseQR_numeric failed",

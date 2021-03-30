@@ -11,11 +11,6 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIRS})
 
-#add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -O3)
-
-#target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})
-#rosbuild_link_boost(${PROJECT_NAME} thread system)
-
 cs_add_library(${PROJECT_NAME}
   src/MEstimatorPolicies.cpp
   src/JacobianContainer.cpp
@@ -48,11 +43,14 @@ cs_add_library(${PROJECT_NAME}
   src/DogLegTrustRegionPolicy.cpp
   src/Optimizer2.cpp
 )
-
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+  ${Boost_LIBRARIES}
+  ${TBB_LIBRARIES}
+  ${CHOLMOD_LIBRARY}
+  ${SUITESPARSE_LIBRARIES}
+)
 
 if(CATKIN_ENABLE_TESTING)
-
   # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
   add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
   catkin_add_gtest(${PROJECT_NAME}_test
@@ -69,9 +67,7 @@ if(CATKIN_ENABLE_TESTING)
     test/ErrorTermTests.cpp
     )
   target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
-
 endif()
 
 cs_install()
 cs_export()
-

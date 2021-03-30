@@ -123,5 +123,3 @@ namespace {
 #include "implementation/sparse_helper.h"
 
 #endif
-
-
