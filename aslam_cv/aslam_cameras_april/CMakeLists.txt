@@ -29,7 +29,7 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${Boost
 add_library(${PROJECT_NAME} 
   src/GridCalibrationTargetAprilgrid.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 add_python_export_library(${PROJECT_NAME}_python python/aslam_cameras_april
   src/module.cpp
