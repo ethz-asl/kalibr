@@ -3,8 +3,13 @@ project(incremental_calibration_python)
 
 set(CMAKE_CXX_STANDARD 14)
 
-find_package(catkin_simple REQUIRED)
-catkin_simple()
+find_package(catkin REQUIRED COMPONENTS aslam_backend incremental_calibration sm_property_tree python_module numpy_eigen)
+
+catkin_package(
+  INCLUDE_DIRS include
+)
+
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_python_export_library(${PROJECT_NAME} src/incremental_calibration
   src/module.cpp
@@ -13,5 +18,6 @@ add_python_export_library(${PROJECT_NAME} src/incremental_calibration
   src/LinearSolver.cpp
 )
 
-cs_install()
-cs_export()
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)

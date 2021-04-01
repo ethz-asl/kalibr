@@ -1,24 +1,18 @@
 cmake_minimum_required(VERSION 3.0.2)
-
 project(ethz_apriltag2)
 
+add_definitions(-fPIC -O3)
+
 find_package(catkin REQUIRED)
-include_directories(${catkin_INCLUDE_DIRS})
-
-find_package(Eigen3 REQUIRED)
-
-catkin_package(
-    INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIRS}
-    LIBRARIES ${PROJECT_NAME}
-)
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake/)
-
 find_package(Eigen3 REQUIRED)
 find_package(OpenCV REQUIRED)
 
-add_definitions(-fPIC -O3)
-include_directories(include  ${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+catkin_package(
+  INCLUDE_DIRS include ${EIGEN3_INCLUDE_DIRS}
+  LIBRARIES ${PROJECT_NAME}
+)
+
+include_directories(include ${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 #library
 file(GLOB SOURCE_FILES "src/*.cc")
@@ -31,4 +25,17 @@ if(NOT APPLE)
   target_link_libraries(apriltags_demo ${PROJECT_NAME} v4l2)
 endif()
 
+##################
+## Installation ##
+##################
 
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)

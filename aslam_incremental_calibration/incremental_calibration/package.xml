@@ -11,7 +11,6 @@
   <author email="jerome.maye@mavt.ethz.ch">Jerome Maye</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>catkin_simple</buildtool_depend>
 
   <build_depend>sm_eigen</build_depend>
   <build_depend>aslam_backend</build_depend>

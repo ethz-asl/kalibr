@@ -7,7 +7,6 @@
   <maintainer email="paul.furgale@mavt.ethz.ch">Paul Furgale</maintainer>
   <license>New BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>catkin_simple</buildtool_depend>
 
   <build_depend>sm_common</build_depend>
   <build_depend>sm_python</build_depend>
@@ -28,5 +27,4 @@
   <build_depend>aslam_cv_python</build_depend>
   <build_depend>aslam_cv_backend</build_depend>
   <build_depend>aslam_time</build_depend>
-
 </package>

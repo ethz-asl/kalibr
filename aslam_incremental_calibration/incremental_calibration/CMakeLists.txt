@@ -3,12 +3,19 @@ project(incremental_calibration)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/../cmake/)
+find_package(catkin REQUIRED COMPONENTS sm_eigen aslam_backend)
+find_package(Boost REQUIRED COMPONENTS system thread)
+find_package(Eigen3 REQUIRED)
 
-find_package(catkin_simple REQUIRED)
-catkin_simple()
+catkin_package(
+  LIBRARIES ${PROJECT_NAME}
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS sm_eigen
+)
 
-cs_add_library(${PROJECT_NAME}
+include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+
+add_library(${PROJECT_NAME}
   src/base/Serializable.cpp
   src/base/Timestamp.cpp
   src/base/Condition.cpp
@@ -35,27 +42,35 @@ cs_add_library(${PROJECT_NAME}
   src/algorithms/marginalize.cpp
   src/algorithms/linalg.cpp
 )
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
-find_package(Boost REQUIRED COMPONENTS system thread)
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
+# if(CATKIN_ENABLE_TESTING)
+#   # Avoid clash with tr1::tuple:
+#   # https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
+#   add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
-if(CATKIN_ENABLE_TESTING)
+#   catkin_add_gtest(${PROJECT_NAME}_test
+#     test/test_main.cpp
+#     test/VectorDesignVariableTest.cpp
+#     test/AlgorithmsTest.cpp
+#     test/OptimizationProblemTest.cpp
+#     test/IncrementalOptimizationProblemTest.cpp
+#     test/LinearSolverTest.cpp
+#     )
+#   target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+# endif()
 
-  # Avoid clash with tr1::tuple:
-  # https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
-  add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
+##################
+## Installation ##
+##################
 
-  catkin_add_gtest(${PROJECT_NAME}_test
-    test/test_main.cpp
-    test/VectorDesignVariableTest.cpp
-    test/AlgorithmsTest.cpp
-    test/OptimizationProblemTest.cpp
-    test/IncrementalOptimizationProblemTest.cpp
-    test/LinearSolverTest.cpp
-    )
-  target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
-endif()
-
-cs_install()
-cs_export()
+## Mark cpp header files for installation
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)

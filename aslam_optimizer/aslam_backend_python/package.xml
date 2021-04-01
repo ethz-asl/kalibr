@@ -7,7 +7,6 @@
   <author>Paul Furgale</author>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>catkin_simple</buildtool_depend>
 
   <build_depend>aslam_backend</build_depend>
   <build_depend>aslam_backend_expressions</build_depend>
@@ -18,6 +17,4 @@
   <build_depend>sm_kinematics</build_depend>
   <build_depend>sm_timing</build_depend>
   <build_depend>suitesparse</build_depend>
-
-
 </package>

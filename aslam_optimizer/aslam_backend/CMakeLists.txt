@@ -3,15 +3,33 @@ project(aslam_backend)
 
 set(CMAKE_CXX_STANDARD 14)
 
-find_package(catkin_simple REQUIRED)
-catkin_simple()
-
+find_package(catkin REQUIRED COMPONENTS
+  sparse_block_matrix
+  sm_boost
+  sm_random
+  sm_timing
+  sm_logging
+  sm_property_tree
+)
 find_package(Boost REQUIRED COMPONENTS system thread)
-
 find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIRS})
 
-cs_add_library(${PROJECT_NAME}
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS
+    sparse_block_matrix
+    sm_boost
+    sm_random
+    sm_timing
+    sm_logging
+    sm_property_tree
+  DEPENDS Boost
+)
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
+
+add_library(${PROJECT_NAME}
   src/MEstimatorPolicies.cpp
   src/JacobianContainer.cpp
   src/DesignVariable.cpp
@@ -48,6 +66,7 @@ target_link_libraries(${PROJECT_NAME}
   ${TBB_LIBRARIES}
   ${CHOLMOD_LIBRARY}
   ${SUITESPARSE_LIBRARIES}
+  ${catkin_LIBRARIES}
 )
 
 if(CATKIN_ENABLE_TESTING)
@@ -69,5 +88,12 @@ if(CATKIN_ENABLE_TESTING)
   target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 endif()
 
-cs_install()
-cs_export()
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)

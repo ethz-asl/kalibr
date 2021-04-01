@@ -4,7 +4,6 @@ project(numpy_eigen)
 set(CMAKE_CXX_STANDARD 14)
 
 find_package(catkin REQUIRED COMPONENTS python_module)
-include_directories(${catkin_INCLUDE_DIRS})
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(Eigen3 REQUIRED)
 
@@ -15,9 +14,10 @@ include_directories(include ${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 include_directories("${PROJECT_SOURCE_DIR}/include/numpy_eigen")
 
 catkin_package(
-  INCLUDE_DIRS include  ${catkin_INCLUDE_DIRS}
+  INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
-  DEPENDS
+  DEPENDS Boost
+  CFG_EXTRAS numpy_eigen-extras.cmake
 )
 add_definitions(-D__STRICT_ANSI__)
 
@@ -51,8 +51,27 @@ add_python_export_library(${PROJECT_NAME}_test
 ## Testing ##
 #############
 if(CATKIN_ENABLE_TESTING)
-
   ## Add nosetest based cpp test target.
   catkin_add_nosetests(test/numpy_eigen_tests.py)
-
 endif()
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+##################
+## Installation ##
+##################
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)

@@ -9,7 +9,7 @@ find_package(Boost REQUIRED COMPONENTS system filesystem)
 find_package(Eigen3 REQUIRED)
 
 catkin_package(
-  INCLUDE_DIRS include  ${catkin_INCLUDE_DIRS}
+  INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS sm_common
 )
@@ -27,6 +27,21 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} 
                       ${catkin_LIBRARIES} ${Boost_LIBRARIES} pthread)
+
+##################
+## Installation ##
+##################
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)
 
 #############
 ## Testing ##
