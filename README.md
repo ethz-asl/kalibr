@@ -1,6 +1,6 @@
 ![Kalibr](https://raw.githubusercontent.com/wiki/ethz-asl/kalibr/images/kalibr_small.png)
 
-*Ubuntu 14.04+ROS indigo*: [![Build Status](https://jenkins.asl.ethz.ch/buildStatus/icon?job=kalibr_weekly/label=ubuntu-trusty)](https://jenkins.asl.ethz.ch/job/kalibr_weekly/label=ubuntu-trusty/) *Ubuntu 16.04+ROS kinetic*: [![Build Status](https://jenkins.asl.ethz.ch/buildStatus/icon?job=kalibr_weekly/label=ubuntu-trusty)](https://jenkins.asl.ethz.ch/job/kalibr_weekly/label=ubuntu-xenial/)
+<!--*Ubuntu 14.04+ROS indigo*: [![Build Status](https://jenkins.asl.ethz.ch/buildStatus/icon?job=kalibr_weekly/label=ubuntu-trusty)](https://jenkins.asl.ethz.ch/job/kalibr_weekly/label=ubuntu-trusty/) *Ubuntu 16.04+ROS kinetic*: [![Build Status](https://jenkins.asl.ethz.ch/buildStatus/icon?job=kalibr_weekly/label=ubuntu-trusty)](https://jenkins.asl.ethz.ch/job/kalibr_weekly/label=ubuntu-xenial/)-->
 
 ## Introduction
 Kalibr is a toolbox that solves the following calibration problems:
@@ -16,6 +16,16 @@ Kalibr is a toolbox that solves the following calibration problems:
 **Please find more information on the [wiki pages](https://github.com/ethz-asl/kalibr/wiki) of this repository.**
 
 **For questions or comments, please open an issue on Github.**
+
+## Installation
+
+### Ubuntu 20.04
+
+We've upgraded and fixed kalibr at ORI for 20.04. Please use our fork: `git clone https://github.com/ori-drs/kalibr.git --branch noetic-devel`.
+
+- Use `rosdep` to install almost all required dependencies: `rosdep install --from-paths ./ -iry`.
+- Then install the two missing runtime dependencies: `sudo apt install python3-wxgtk4.0 python3-igraph`
+- Unittests are currently failing on 20.04 and thus deactivated on the buildserver.
 
 ## Tutorial: IMU-camera calibration
 A video tutorial for the IMU-camera calibration can be found here:
