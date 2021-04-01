@@ -230,4 +230,4 @@ class IccCalibrator(object):
         try:
             chain.writeYaml(resultFile)
         except:
-            "ERROR: Could not write parameters to file: {0}\n".format(resultFile))
+            raise RuntimeError("ERROR: Could not write parameters to file: {0}\n".format(resultFile))
