@@ -6,7 +6,7 @@ import aslam_backend as aopt
 import bsplines
 import kalibr_common as kc
 import kalibr_errorterms as ket
-from . import IccCalibrator as ic
+from . import icc_calibrator as ic
 
 import cv2
 import sys
