@@ -265,7 +265,7 @@ def printResultTxt(cself, stream=sys.stdout):
         cam.targetConfig.printDetails(stream)
         print("", file=stream)
     
-	print("", file=stream)
+    print("", file=stream)
     print("", file=stream)
     print("IMU configuration", file=stream)
     print("=================", file=stream)

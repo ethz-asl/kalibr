@@ -199,7 +199,7 @@ def plotVectorOverTime(times, values, title="", ylabel="", label="", fno=1, clea
         pl.grid('on')
         pl.xlabel("time (s)")
         pl.ylabel(ylabel)
-        if label is not "":
+        if label != "":
             pl.legend()
 
 def plotReprojectionScatter(cself, cam_id, fno=1, clearFigure=True, noShow=False, title=""):
