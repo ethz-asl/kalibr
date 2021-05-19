@@ -111,18 +111,18 @@ def drawImage(resolution, num_rectangles, line_thickness):
       h_offset = i*resolution[0] / 2 / (num_rectangles + 1) 
       v_offset = i*resolution[1] / 2 / (num_rectangles + 1)
       # Draw lines.
+      for t in range(0, int(line_thickness)):
+        for i in range(int(-h_offset), int(h_offset)):
+            raw_image[int(resolution[1] / 2 - v_offset - t), 
+                int(resolution[0] / 2 + i)] = 255
+            raw_image[int(resolution[1] / 2 + v_offset + t),
+                int(resolution[0] / 2 + i)] = 255
       for t in range(0, line_thickness):
-        for i in range(-h_offset, h_offset):
-            raw_image[resolution[1] / 2 - v_offset - t, 
-                resolution[0] / 2 + i] = 255;
-            raw_image[resolution[1] / 2 + v_offset + t,
-                resolution[0] / 2 + i] = 255;
-      for t in range(0, line_thickness):
-        for j in range(-v_offset, v_offset):
-            raw_image[resolution[1] / 2 + j,
-                resolution[0] / 2 - h_offset - t] = 255
-            raw_image[resolution[1] / 2 + j, 
-                resolution[0] / 2 + h_offset + t] = 255
+        for j in range(int(-v_offset), int(v_offset)):
+            raw_image[int(resolution[1] / 2 + j),
+                int(resolution[0] / 2 - h_offset - t)] = 255
+            raw_image[int(resolution[1] / 2 + j), 
+                int(resolution[0] / 2 + h_offset + t)] = 255
     return raw_image
 
 def imshow(image, color, alpha = 1):
