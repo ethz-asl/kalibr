@@ -41,6 +41,7 @@ class DesignVariableGenericVector : public DesignVariable, public GenericMatrixE
     SM_ASSERT_EQ(std::runtime_error, size, D, "update size must match the vector dimension.")
     _p_v = this->_currentValue;
     this->_currentValue += Eigen::Map<const Eigen::Matrix<double, D, 1> >(dp).template cast<Scalar_>();
+    std::cout << this->_currentValue;
   }
   /// \brief what is the number of dimensions of the perturbation variable.
   virtual int minimalDimensionsImplementation() const {

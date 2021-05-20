@@ -1,4 +1,5 @@
 #include <opencv2/core/eigen.hpp>
+#include <opencv2/calib3d.hpp>
 #include <Eigen/StdVector>
 #include <iostream>
 #include <cstdlib>
@@ -839,14 +840,20 @@ bool PinholeProjection<DISTORTION_T>::estimateTransformation(
   std::vector<cv::Point3f> Ps;
 
   // Get the observed corners in the image and target frame
+  // obs.getCornersImageFrameDouble(Ms);
+  // obs.getCornersTargetFrameDouble(Ps);
   obs.getCornersImageFrame(Ms);
   obs.getCornersTargetFrame(Ps);
 
   // Convert all target corners to a fakey pinhole view.
   size_t count = 0;
+  // std::cout << "point size: " << Ms.size() << std::endl;
   for (size_t i = 0; i < Ms.size(); ++i) {
     Eigen::Vector3d targetPoint(Ps[i].x, Ps[i].y, Ps[i].z);
     Eigen::Vector2d imagePoint(Ms[i].x, Ms[i].y);
+    // std::cout << "target point: " << Ps[i].x << " " << Ps[i].y << " " << Ps[i].z << std::endl;
+    // std::cout << "image point: " << Ms[i].x << " " << Ms[i].y << std::endl;
+    // 消除内参影响
     Eigen::Vector3d backProjection;
 
     if (keypointToEuclidean(imagePoint, backProjection)
@@ -862,21 +869,39 @@ bool PinholeProjection<DISTORTION_T>::estimateTransformation(
       Ms.at(count).y = y / z;
       ++count;
     }
+
   }
 
+std::cout << "count " << count << std::endl;
   Ps.resize(count);
   Ms.resize(count);
 
-  std::vector<double> distCoeffs(4, 0.0);
+  std::vector<float> distCoeffs(4, 0.0);
 
+  // cv::Mat rvec(3, 1, cv::DataType<double>::type);
+  // cv::Mat tvec(3, 1, cv::DataType<double>::type);
   cv::Mat rvec(3, 1, CV_64F);
   cv::Mat tvec(3, 1, CV_64F);
 
   if (Ps.size() < 4)
     return false;
+  // RANSAC parameters
+// int iterationsCount = 100; // number of Ransac iterations.
+// float reprojectionError = 0.5; // maximum allowed distance to consider it an inlier.
+// double confidence = 0.95; // ransac successful confidence.
+
+// cv::Mat inliers;
 
   // Call the OpenCV pnp function.
   cv::solvePnP(Ps, Ms, cv::Mat::eye(3, 3, CV_64F), distCoeffs, rvec, tvec);
+
+  // cv::solvePnPRansac(Ps, Ms, cv::Mat::eye(3, 3, CV_64F), distCoeffs, rvec, tvec, false, iterationsCount, reprojectionError, confidence, inliers, cv::SOLVEPNP_EPNP);
+  // for (int i = 0; i < inliers.cols; ++i) {
+  //   for (int j = 0; j < inliers.rows; ++j) {
+  //     std::cout << inliers.at<int>(i, j) << ' ';
+  //   }
+  // }
+  std::cout << std::endl;
 
   // convert the rvec/tvec to a transformation
   cv::Mat C_camera_model = cv::Mat::eye(3, 3, CV_64F);
@@ -888,7 +913,7 @@ bool PinholeProjection<DISTORTION_T>::estimateTransformation(
       T_camera_model(r, c) = C_camera_model.at<double>(r, c);
     }
   }
-
+  // std::cout << T_camera_model << std::endl;
   out_T_t_c.set(T_camera_model.inverse());
   return true;
 }

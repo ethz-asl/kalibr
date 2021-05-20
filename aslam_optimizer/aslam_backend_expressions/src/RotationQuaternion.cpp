@@ -33,6 +33,7 @@ namespace aslam {
       Eigen::Map<const Eigen::Vector3d> dpv(dp);
       _q = sm::kinematics::updateQuat(_q, dpv);
       _C = sm::kinematics::quat2r(_q);
+      std::cout << "m";
     }
     
     int RotationQuaternion::minimalDimensionsImplementation() const

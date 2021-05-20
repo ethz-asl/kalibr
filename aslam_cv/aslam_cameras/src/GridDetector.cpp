@@ -8,219 +8,281 @@
 #include <sm/logging.hpp>
 #include <aslam/cameras/GridDetector.hpp>
 
-namespace aslam {
-namespace cameras {
-
-//serialization constructor (don't use!)
-GridDetector::GridDetector() {
-}
-
-GridDetector::GridDetector(boost::shared_ptr<CameraGeometryBase> geometry,
-                           GridCalibrationTargetBase::Ptr target,
-                           const GridDetector::GridDetectorOptions &options)
-    : _geometry(geometry),
-      _target(target),
-      _options(options) {
-  SM_ASSERT_TRUE(Exception, _geometry.get() != NULL,
-                 "Unable to initialize with null camera geometry");
-  SM_ASSERT_TRUE(Exception, _target.get() != NULL,
-                 "Unable to initialize with null calibration target");
-
-  initializeDetector();
-}
-
-void GridDetector::initializeDetector()
+namespace aslam
 {
-  if (_options.plotCornerReprojection) {
-    cv::namedWindow("Corner reprojection", cv::WINDOW_NORMAL);
-  }
-}
-
-GridDetector::~GridDetector() {
-
-}
-
-void GridDetector::initCameraGeometry(boost::shared_ptr<CameraGeometryBase> geometry) {
-  SM_ASSERT_TRUE(Exception, geometry.get() != NULL, "Unable to initialize with null camera geometry");
-  _geometry = geometry;
-}
-
-bool GridDetector::initCameraGeometryFromObservation(const cv::Mat &image) {
-  boost::shared_ptr<std::vector<cv::Mat> > images_ptr = boost::make_shared<std::vector<cv::Mat>>();
-  images_ptr->push_back(image);
-
-  return initCameraGeometryFromObservations(images_ptr);
-}
-
-bool GridDetector::initCameraGeometryFromObservations(boost::shared_ptr<std::vector<cv::Mat> > images_ptr) {
-
-  std::vector<cv::Mat>& images = *images_ptr;
-
-  SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
-  SM_ASSERT_TRUE(Exception, images.size() != 0, "Need min. one image");
-
-  std::vector<GridCalibrationTargetObservation> observations;
-
-  for(unsigned int i=0; i<images.size(); i++)
+  namespace cameras
   {
-    GridCalibrationTargetObservation obs(_target);
 
-    //detect calibration target
-    bool success = findTargetNoTransformation(images[i], obs);
-
-    //delete image copy (save memory)
-    obs.clearImage();
-
-    //append
-    if(success)
-      observations.push_back(obs);
-  }
-
-  //initialize the intrinsics
-  if(observations.size() > 0)
-    return _geometry->initializeIntrinsics(observations);
-
-  return false;
-}
-
-bool GridDetector::findTarget(const cv::Mat & image,
-                              GridCalibrationTargetObservation & outObservation) const {
-  return findTarget(image, aslam::Time(0, 0), outObservation);
-}
-
-bool GridDetector::findTargetNoTransformation(const cv::Mat & image, const aslam::Time & stamp,
-    GridCalibrationTargetObservation & outObservation) const {
-  bool success = false;
-
-  // Extract the calibration target corner points
-  Eigen::MatrixXd cornerPoints;
-  std::vector<bool> validCorners;
-  success = _target->computeObservation(image, cornerPoints, validCorners);
-
-  // Set the image, target, and timestamp regardless of success.
-  outObservation.setTarget(_target);
-  outObservation.setImage(image);
-  outObservation.setTime(stamp);
-
-  // Set the observed corners in the observation
-  for (int i = 0; i < cornerPoints.rows(); i++) {
-    if (validCorners[i])
-      outObservation.updateImagePoint(i, cornerPoints.row(i).transpose());
-  }
-
-  return success;
-}
-
-bool GridDetector::findTarget(const cv::Mat & image, const aslam::Time & stamp,
-    GridCalibrationTargetObservation & outObservation) const{
-  sm::kinematics::Transformation trafo;
-
-  // find calibration target corners
-  bool success = findTargetNoTransformation(image, stamp, outObservation);
-
-  // calculate trafo cam-target
-  if (success) {
-    // also estimate the transformation:
-    success = _geometry->estimateTransformation(outObservation, trafo);
-
-    if (success)
-      outObservation.set_T_t_c(trafo);
-    else
-      SM_DEBUG_STREAM("estimateTransformation() failed");
-  }
-
-  //remove corners with a reprojection error above a threshold
-  //(remove detection outliers)
-  if(_options.filterCornerOutliers && success)
-  {
-    //calculate reprojection errors
-    std::vector<cv::Point2f> corners_reproj;
-    std::vector<cv::Point2f> corners_detected;
-    outObservation.getCornerReprojection(_geometry, corners_reproj);
-    unsigned int numCorners = outObservation.getCornersImageFrame(corners_detected);
-
-    //calculate error norm
-    Eigen::MatrixXd reprojection_errors_norm = Eigen::MatrixXd::Zero(numCorners,1);
-
-    for(unsigned int i=0; i<numCorners; i++ )
+    //serialization constructor (don't use!)
+    GridDetector::GridDetector()
     {
-      cv::Point2f reprojection_err = corners_detected[i] - corners_reproj[i];
-
-      reprojection_errors_norm(i,0) = sqrt(reprojection_err.x*reprojection_err.x +
-                                           reprojection_err.y*reprojection_err.y);
     }
 
-    //calculate statistics
-    double mean = reprojection_errors_norm.mean();
-    double std = 0.0;
-    for(unsigned int i=0; i<numCorners; i++)
+    GridDetector::GridDetector(boost::shared_ptr<CameraGeometryBase> geometry,
+                               GridCalibrationTargetBase::Ptr target,
+                               const GridDetector::GridDetectorOptions &options)
+        : _geometry(geometry),
+          _target(target),
+          _options(options)
     {
-      double temp = reprojection_errors_norm(i,0)-mean;
-      std += temp*temp;
+      SM_ASSERT_TRUE(Exception, _geometry.get() != NULL,
+                     "Unable to initialize with null camera geometry");
+      SM_ASSERT_TRUE(Exception, _target.get() != NULL,
+                     "Unable to initialize with null calibration target");
+
+      initializeDetector();
     }
-    std /= (double)numCorners;
-    std = sqrt(std);
 
-    //disable outlier corners
-    std::vector<unsigned int> cornerIdx;
-    outObservation.getCornersIdx(cornerIdx);
-
-    unsigned int removeCount = 0;
-    for(unsigned int i=0; i<corners_detected.size(); i++ )
+    void GridDetector::initializeDetector()
     {
-      if( reprojection_errors_norm(i,0) > mean + _options.filterCornerSigmaThreshold * std &&
-          reprojection_errors_norm(i,0) > _options.filterCornerMinReprojError)
+      if (_options.plotCornerReprojection)
       {
-        outObservation.removeImagePoint( cornerIdx[i] );
-        removeCount++;
-        SM_DEBUG_STREAM("removed target point with reprojection error of " << reprojection_errors_norm(i,0) << " (mean: " << mean << ", std: " << std << ")\n";);
+        cv::namedWindow("Corner reprojection", cv::WINDOW_NORMAL);
       }
     }
 
-    if(removeCount>0)
-      SM_DEBUG_STREAM("removed " << removeCount << " of " << numCorners << " calibration target corner outliers\n";);
-  }
-
-
-  // show plot of reprojected corners
-  if (_options.plotCornerReprojection) {
-    cv::Mat imageCopy1 = image.clone();
-    cv::cvtColor(imageCopy1, imageCopy1, CV_GRAY2RGB);
-
-    if (success) {
-      //calculate reprojection
-      std::vector<cv::Point2f> reprojs;
-      outObservation.getCornerReprojection(_geometry, reprojs);
-
-      for (unsigned int i = 0; i < reprojs.size(); i++)
-        cv::circle(imageCopy1, reprojs[i], 3, CV_RGB(255,0,0), 1);
-
-
-    } else {
-      cv::putText(imageCopy1, "Detection failed! (frame not used)",
-                  cv::Point(50, 50), CV_FONT_HERSHEY_SIMPLEX, 0.8,
-                  CV_RGB(255,0,0), 3, 8, false);
+    GridDetector::~GridDetector()
+    {
     }
 
-    cv::imshow("Corner reprojection", imageCopy1);  // OpenCV call
-    if (_options.imageStepping) {
-      cv::waitKey(0);
-    } else {
-      cv::waitKey(1);
+    void GridDetector::initCameraGeometry(boost::shared_ptr<CameraGeometryBase> geometry)
+    {
+      SM_ASSERT_TRUE(Exception, geometry.get() != NULL, "Unable to initialize with null camera geometry");
+      _geometry = geometry;
     }
-  }
 
-  return success;
-}
+    bool GridDetector::initCameraGeometryFromObservation(const cv::Mat &image)
+    {
+      boost::shared_ptr<std::vector<cv::Mat>> images_ptr = boost::make_shared<std::vector<cv::Mat>>();
+      images_ptr->push_back(image);
 
-/// \brief Find the target but don't estimate the transformation.
-bool GridDetector::findTargetNoTransformation(const cv::Mat & image,
-                                              GridCalibrationTargetObservation & outObservation) const {
-  return findTargetNoTransformation(image, aslam::Time(0, 0), outObservation);
-}
+      return initCameraGeometryFromObservations(images_ptr);
+    }
 
-}  // namespace cameras
-}  // namespace aslam
+    bool GridDetector::initCameraGeometryFromObservations(boost::shared_ptr<std::vector<cv::Mat>> images_ptr)
+    {
+
+      std::vector<cv::Mat> &images = *images_ptr;
+
+      SM_DEFINE_EXCEPTION(Exception, std::runtime_error);
+      SM_ASSERT_TRUE(Exception, images.size() != 0, "Need min. one image");
+
+      std::vector<GridCalibrationTargetObservation> observations;
+
+      for (unsigned int i = 0; i < images.size(); i++)
+      {
+        GridCalibrationTargetObservation obs(_target);
+
+        //detect calibration target
+        bool success = findTargetNoTransformation(images[i], obs);
+
+        //delete image copy (save memory)
+        obs.clearImage();
+
+        //append
+        if (success)
+          observations.push_back(obs);
+      }
+
+      //initialize the intrinsics
+      if (observations.size() > 0)
+        return _geometry->initializeIntrinsics(observations);
+
+      return false;
+    }
+
+    bool GridDetector::findTarget(const cv::Mat &image,
+                                  GridCalibrationTargetObservation &outObservation) const
+    {
+      return findTarget(image, aslam::Time(0, 0), outObservation);
+    }
+
+    bool GridDetector::findTargetNoTransformation(const cv::Mat &image, const aslam::Time &stamp,
+                                                  GridCalibrationTargetObservation &outObservation) const
+    {
+      bool success = false;
+
+      // Extract the calibration target corner points
+      Eigen::MatrixXd cornerPoints;
+      std::vector<bool> validCorners;
+      success = _target->computeObservation(image, cornerPoints, validCorners);
+      // std::cout << "success: " << success;
+
+      // Set the image, target, and timestamp regardless of success.
+      outObservation.setTarget(_target);
+      outObservation.setImage(image);
+      outObservation.setTime(stamp);
+
+      // Set the observed corners in the observation
+      for (int i = 0; i < cornerPoints.rows(); i++)
+      {
+        if (validCorners[i])
+          outObservation.updateImagePoint(i, cornerPoints.row(i).transpose());
+      }
+
+      return success;
+    }
+
+    bool GridDetector::findTarget(const cv::Mat &image, const aslam::Time &stamp,
+                                  GridCalibrationTargetObservation &outObservation) const
+    {
+      sm::kinematics::Transformation trafo;
+
+      // find calibration target corners
+      bool success = findTargetNoTransformation(image, stamp, outObservation);
+
+      // calculate trafo cam-target
+      if (success)
+      {
+        // also estimate the transformation:
+        success = _geometry->estimateTransformation(outObservation, trafo);
+
+        if (success)
+          outObservation.set_T_t_c(trafo);
+        else
+          SM_DEBUG_STREAM("estimateTransformation() failed");
+      }
+
+      //remove corners with a reprojection error above a threshold
+      //(remove detection outliers)
+      if (_options.filterCornerOutliers && success)
+      {
+        //calculate reprojection errors
+        std::vector<cv::Point2f> corners_reproj;
+        std::vector<cv::Point2f> corners_detected;
+        std::vector<cv::Point3f> corners_targetframe;
+        outObservation.getCornerReprojection(_geometry, corners_reproj);
+        unsigned int numCorners = outObservation.getCornersImageFrame(corners_detected);
+        outObservation.getCornersTargetFrame(corners_targetframe);
+
+        //calculate error norm
+        Eigen::MatrixXd reprojection_errors_norm = Eigen::MatrixXd::Zero(numCorners, 1);
+        
+        Eigen::MatrixXd reprojection_errors_x = Eigen::MatrixXd::Zero(numCorners, 1);
+        Eigen::MatrixXd reprojection_errors_y = Eigen::MatrixXd::Zero(numCorners, 1);
+
+
+
+        for (unsigned int i = 0; i < numCorners; i++)
+        {
+          // std::cout << corners_detected[i].x << " " << corners_detected[i].y << std::endl;
+          cv::Point2f reprojection_err = corners_detected[i] - corners_reproj[i];
+          // const int next = (i + 1) == numCorners ? i : i + 1;
+          // std::cout << "x diff: " << corners_detected[next].x - corners_detected[i].x << " detect: " << corners_detected[i].x << " y: " << corners_detected[i].y << " reproj: " << corners_reproj[i].x << " y: " << corners_reproj[i].y << " target: " << corners_targetframe[i].x << " " << corners_targetframe[i].y << " error x: " << reprojection_err.x << " y: " << reprojection_err.y << std::endl;
+          reprojection_errors_x(i, 0) = std::abs(reprojection_err.x);
+          reprojection_errors_y(i, 0) = std::abs(reprojection_err.y);
+          // std::cout << "detected: " << corners_detected[i].x << " " << corners_detected[i].y << " reproj: " << corners_reproj[i].x << " " << corners_reproj[i].y << std::endl;
+          reprojection_errors_norm(i, 0) = sqrt(reprojection_err.x * reprojection_err.x +
+                                                reprojection_err.y * reprojection_err.y);
+        }
+        double mean_x = reprojection_errors_x.mean();
+        double mean_y = reprojection_errors_y.mean();
+        double std_x = 0;
+        double std_y = 0;
+        for (int i = 0; i < numCorners; ++i) {
+          double tmp_x = reprojection_errors_x(i, 0) - mean_x;
+          std_x += tmp_x * tmp_x;
+          double tmp_y = reprojection_errors_y(i, 0) - mean_y;
+          std_y += tmp_y * tmp_y;
+        }
+        std_x /= (double)numCorners;
+        std_y /= (double)numCorners;
+
+        //calculate statistics
+        double mean = reprojection_errors_norm.mean();
+        double std = 0.0;
+        for (unsigned int i = 0; i < numCorners; i++)
+        {
+          double temp = reprojection_errors_norm(i, 0) - mean;
+          std += temp * temp;
+        }
+        std /= (double)numCorners;
+        std = sqrt(std);
+        
+        // std::cout << "x mean: " << mean_x << " , x stddev: " << std_x << std::endl;
+        // std::cout << "y mean: " << mean_y << " , y stddev: " << std_y << std::endl;
+        // std::cout << "mean: " << mean << " , stddev: " << std << std::endl;
+
+        //disable outlier corners
+        std::vector<unsigned int> cornerIdx;
+        outObservation.getCornersIdx(cornerIdx);
+
+        unsigned int removeCount = 0;
+        for (unsigned int i = 0; i < corners_detected.size(); i++)
+        {
+          if (reprojection_errors_norm(i, 0) > mean + _options.filterCornerSigmaThreshold * std &&
+              reprojection_errors_norm(i, 0) > _options.filterCornerMinReprojError)
+          {
+            outObservation.removeImagePoint(cornerIdx[i]);
+            removeCount++;
+            SM_DEBUG_STREAM("removed target point with reprojection error of " << reprojection_errors_norm(i, 0) << " (mean: " << mean << ", std: " << std << ")\n";);
+          }
+        }
+
+        if (removeCount > 0)
+          SM_DEBUG_STREAM("removed " << removeCount << " of " << numCorners << " calibration target corner outliers\n";);
+      }
+
+      // show plot of reprojected corners
+      if (_options.plotCornerReprojection)
+      {
+        cv::Mat imageCopy1 = image.clone();
+        cv::cvtColor(imageCopy1, imageCopy1, CV_GRAY2RGB);
+
+        if (success)
+        {
+          //calculate reprojection
+          std::vector<cv::Point2f> reprojs;
+          outObservation.getCornerReprojection(_geometry, reprojs);
+
+          // for (unsigned int i = 0; i < numCorners; i++)
+          // {
+          //   // std::cout << "new detected: " << corners_detected[i].x << " " << corners_detected[i].y << " reproj: " << reprojs[i].x << " " << reprojs[i].y << std::endl;
+          // }
+
+          for (unsigned int i = 0; i < reprojs.size(); i++)
+            cv::circle(imageCopy1, reprojs[i], 3, CV_RGB(255, 0, 0), 1);
+        }
+        else
+        {
+          cv::putText(imageCopy1, "Detection failed! (frame not used) Grid Detector",
+                      cv::Point(50, 50), CV_FONT_HERSHEY_SIMPLEX, 0.8,
+                      CV_RGB(255, 0, 0), 3, 8, false);
+        }
+        // std::vector<cv::Point2f> corners_detected;
+        // unsigned int numCorners = outObservation.getCornersImageFrame(corners_detected);
+        // std::vector<cv::Point3f> corners_target;
+        // outObservation.getCornersTargetFrame(corners_target);
+
+        // for (unsigned int i = 0; i < numCorners; i++)
+        // {
+        //   // std::cout << "new detected: " << corners_detected[i].x << " " << corners_detected[i].y << " reproj: " << reprojs[i].x << " " << reprojs[i].y << std::endl;
+        //   cv::line(imageCopy1, cv::Point2f(corners_detected[i].x, corners_detected[i].y), cv::Point2f((corners_target[i].x * 250) + 200, (corners_target[i].y * 250) + 200), cv::Scalar(255, 0, 0, 0));
+        // }
+
+        cv::imshow("Corner reprojection", imageCopy1); // OpenCV call
+        if (_options.imageStepping)
+        {
+          cv::waitKey(0);
+        }
+        else
+        {
+          cv::waitKey(1);
+        }
+      }
+
+      return success;
+    }
+
+    /// \brief Find the target but don't estimate the transformation.
+    bool GridDetector::findTargetNoTransformation(const cv::Mat &image,
+                                                  GridCalibrationTargetObservation &outObservation) const
+    {
+      return findTargetNoTransformation(image, aslam::Time(0, 0), outObservation);
+    }
+
+  } // namespace cameras
+} // namespace aslam
 
 //export explicit instantions for all included archives
 #include <sm/boost/serialization.hpp>

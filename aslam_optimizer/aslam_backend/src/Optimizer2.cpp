@@ -298,6 +298,7 @@ namespace aslam {
                     dxS *= d->scaling();
                     if(dbd > 0)
                         d->update(&dxS[0], dbd);
+                    
                     startIdx += dbd;
                 }
                 // Track the maximum delta

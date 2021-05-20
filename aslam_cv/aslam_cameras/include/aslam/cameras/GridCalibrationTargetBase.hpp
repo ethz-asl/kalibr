@@ -44,6 +44,7 @@ class GridCalibrationTargetBase {
 
   /// \brief get the number of points of the full grid
   size_t size() const {
+    // std::cout << "row: " << _rows << " col: " << _cols << std::endl;
     return _rows * _cols;
   };
 

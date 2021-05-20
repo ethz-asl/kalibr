@@ -36,6 +36,65 @@ void GridCalibrationTargetObservation::setTarget(
 }
 
 /// \brief get all (observed) corners in image coordinates
+// In real meter unit, left up side is (0, 0) using the tagSize and tagSpace.
+unsigned int GridCalibrationTargetObservation::getCornersTargetFrameDouble(
+    std::vector<cv::Point3d> &outCornerList) const {
+  SM_ASSERT_TRUE(Exception, _target.get() != NULL, "The target is not set");
+
+  //max. number of corner in the grid
+  unsigned int numCorners = _target->size();
+
+  // output the points
+  unsigned int cntCorners = 0;
+  outCornerList.clear();
+  for (unsigned int i = 0; i < numCorners; i++) {
+    // add only if the gridpoint which were observed in the image
+    if (_success[i]) {
+      //convert to cv:Point2f and store
+      cv::Point3d corner(_target->point(i)[0], _target->point(i)[1], 0.0);
+      outCornerList.push_back(corner);
+
+      //count the observed corners
+      cntCorners += 1;
+    }
+  }
+  return cntCorners;
+}
+
+/// \brief get all (observed) corners in target frame coordinates
+///        returns the number of observed corners
+// In pixel unit.
+unsigned int GridCalibrationTargetObservation::getCornersImageFrameDouble(
+    std::vector<cv::Point2d> &outCornerList) const {
+  SM_ASSERT_TRUE(Exception, _target.get() != NULL, "The target is not set");
+
+  //max. number of corner in the grid
+  unsigned int numCorners = _target->size();
+
+  // output the points
+  unsigned int cntCorners = 0;
+  outCornerList.clear();
+  for (unsigned int i = 0; i < numCorners; i++) {
+    // add only if the gridpoint was observed in the image
+    if (_success[i]) {
+      //get points
+      Eigen::Vector2d cornerEigen;
+      imagePoint(i, cornerEigen);
+
+      //convert to cv:Point2f and store
+      cv::Point2d corner(cornerEigen(0), cornerEigen(1));
+      outCornerList.push_back(corner);
+
+      //count the observed corners
+      cntCorners += 1;
+    }
+  }
+
+  return cntCorners;
+}
+
+/// \brief get all (observed) corners in image coordinates
+// In real meter unit, left up side is (0, 0) using the tagSize and tagSpace.
 unsigned int GridCalibrationTargetObservation::getCornersTargetFrame(
     std::vector<cv::Point3f> &outCornerList) const {
   SM_ASSERT_TRUE(Exception, _target.get() != NULL, "The target is not set");
@@ -62,6 +121,7 @@ unsigned int GridCalibrationTargetObservation::getCornersTargetFrame(
 
 /// \brief get all (observed) corners in target frame coordinates
 ///        returns the number of observed corners
+// In pixel unit.
 unsigned int GridCalibrationTargetObservation::getCornersImageFrame(
     std::vector<cv::Point2f> &outCornerList) const {
   SM_ASSERT_TRUE(Exception, _target.get() != NULL, "The target is not set");

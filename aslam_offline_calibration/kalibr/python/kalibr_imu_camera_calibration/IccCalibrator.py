@@ -72,7 +72,7 @@ class IccCalibrator(object):
                       blakeZisserCam=-1,
                       huberAccel=-1,
                       huberGyro=-1,
-                      noTimeCalibration=False,
+                      noTimeCalibration=True,
                       noChainExtrinsics=True,
                       maxIterations=20,
                       gyroNoiseScale=1.0,
@@ -158,7 +158,7 @@ class IccCalibrator(object):
             options.nThreads = max(1,multiprocessing.cpu_count()-1)
             options.convergenceDeltaX = 1e-5
             options.convergenceDeltaJ = 1e-2
-            options.maxIterations = maxIterations
+            options.maxIterations = 500
             options.trustRegionPolicy = aopt.LevenbergMarquardtTrustRegionPolicy(options.levenbergMarquardtLambdaInit)
             options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()
 

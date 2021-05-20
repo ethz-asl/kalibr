@@ -213,6 +213,7 @@ namespace bsplines {
 
     int BSpline::numCoefficientsRequired(int numTimeSegments) const
     {
+      // std::cout << numTimeSegments << " splineOrder_: " << splineOrder_ << std::endl; // 1, 6
       return numTimeSegments + splineOrder_ - 1;
     }   
 

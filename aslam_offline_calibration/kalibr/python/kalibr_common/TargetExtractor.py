@@ -32,7 +32,7 @@ def extractCornersFromDataset(dataset, detector, multithreading=False, numProces
     print "Extracting calibration target corners"    
     targetObservations = []
     numImages = dataset.numImages()
-    
+    # print multithreading
     # prepare progess bar
     iProgress = sm.Progress2(numImages)
     iProgress.sample()
