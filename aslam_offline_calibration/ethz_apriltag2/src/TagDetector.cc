@@ -245,7 +245,7 @@ namespace AprilTags {
     for (int x = 0; x+1 < fimSeg.getWidth(); x++) {
       if (uf.getSetSize(y*fimSeg.getWidth()+x) < Segment::minimumSegmentSize)
 	continue;
-
+      // uf的作用就是找到每个点对应的cluster
       int rep = (int) uf.getRepresentative(y*fimSeg.getWidth()+x);
      
       map<int, vector<XYWeight> >::iterator it = clusters.find(rep);

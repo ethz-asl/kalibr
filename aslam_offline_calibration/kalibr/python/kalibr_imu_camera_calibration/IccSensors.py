@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import sm
 import aslam_cv as acv
 import aslam_cameras_april as acv_april
@@ -121,11 +122,20 @@ class IccCamera():
         problem = aopt.OptimizationProblem()
 
         # Add the rotation as design variable
-        q_i_c_Dv = aopt.RotationQuaternionDv(  self.T_extrinsic.q() )
+        # q_i_c_Dv = aopt.RotationQuaternionDv(  self.T_extrinsic.q() )
+        
+        # q_gt = np.array([-0.507615, 0.503544, -0.496673, 0.492023])
+        q_gt = self.T_extrinsic.q()
+        q_i_c_Dv = aopt.RotationQuaternionDv(  q_gt )
+
+        print ("initial q: ", q_gt)
         q_i_c_Dv.setActive( True )
         problem.addDesignVariable(q_i_c_Dv)
 
         # Add the gyro bias as design variable
+        # 用我们的bias标定值做初值,结果没区别。
+        pony_gyro_bias = np.array([0.00047382, 0.000243329, 0.000121098])
+        # gyroBiasDv = aopt.EuclideanPointDv(pony_gyro_bias)
         gyroBiasDv = aopt.EuclideanPointDv( np.zeros(3) )
         gyroBiasDv.setActive( True )
         problem.addDesignVariable(gyroBiasDv)
@@ -143,6 +153,7 @@ class IccCamera():
                 #get the vision predicted omega and measured omega (IMU)
                 omega_predicted = R_i_c * aopt.EuclideanExpression( np.matrix( poseSpline.angularVelocityBodyFrame( tk ) ).transpose() )
                 omega_measured = im.omega
+                # print (omega_predicted.toEuclidean() + bias.toEuclidean(), " ", omega_measured, " ", '\n')
                 
                 #error term
                 gerr = ket.GyroscopeError(omega_measured, im.omegaInvR, omega_predicted, bias)
@@ -156,12 +167,15 @@ class IccCamera():
         
         #define the optimization 
         options = aopt.Optimizer2Options()
-        options.verbose = False
+        options.verbose = True
+        #options.doLevenbergMarquardt = True
         options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()
+        #options.levenbergMarquardtLambdaInit = 10.0
         options.nThreads = 2
         options.convergenceDeltaX = 1e-4
         options.convergenceDeltaJ = 1
-        options.maxIterations = 50
+        #options.trustRegionPolicy = aopt.LevenbergMarquardtTrustRegionPolicy(options.levenbergMarquardtLambdaInit)
+        options.maxIterations = 1000
 
         #run the optimization
         optimizer = aopt.Optimizer2(options)
@@ -176,14 +190,34 @@ class IccCamera():
 
         #overwrite the external rotation prior (keep the external translation prior)
         R_i_c = q_i_c_Dv.toRotationMatrix().transpose()
+
+        print("R_c_i: ", R_i_c)
+        q0 = 1.0/2 * math.sqrt(1 + R_i_c[0][0] + R_i_c[1][1] + R_i_c[2][2])
+        q1 = 1.0/(4 * q0) * (R_i_c[1][2] - R_i_c[2][1])
+        q2 = 1.0/(4 * q0) * (R_i_c[2][0] - R_i_c[0][2])
+        q3 = 1.0/(4 * q0) * (R_i_c[0][1] - R_i_c[1][0])
+
+        print("R_c_i quaternion: ", q0, ", ", q1, ", ", q2, ", ", q3)
+
+        roll = math.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
+        pitch = math.asin(2 * (q0 * q2 - q1 * q3))
+        yaw = math.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
+
+        print("R_c_i Euler: roll: ", roll, ", pitch: ", pitch, ", yaw: ", yaw)
+
         self.T_extrinsic = sm.Transformation( sm.rt2Transform( R_i_c, self.T_extrinsic.t() ) )
 
         #estimate gravity in the world coordinate frame as the mean specific force
+        num = 0
         a_w = []
         for im in imu.imuData:
             tk = im.stamp.toSec()
             if tk > poseSpline.t_min() and tk < poseSpline.t_max():
-                a_w.append(np.dot(poseSpline.orientation(tk), np.dot(R_i_c, - im.alpha)))
+                a_w.append(np.dot(poseSpline.orientation(tk), np.dot(R_i_c, - im.alpha))) # R imu to camera
+                num = num + 1
+                if num < 100:
+                    print (self.T_extrinsic.q(), " ", im.alpha, " ", np.dot(R_i_c, - im.alpha), " ", np.dot(poseSpline.orientation(tk), np.dot(R_i_c, - im.alpha)), '\n')
+        
         mean_a_w = np.mean(np.asarray(a_w).T, axis=1)
         self.gravity_w = mean_a_w / np.linalg.norm(mean_a_w) * 9.80655
         print "Gravity was intialized to", self.gravity_w, "[m/s^2]" 
@@ -273,13 +307,28 @@ class IccCamera():
         
     #initialize a pose spline using camera poses (pose spline = T_wb)
     def initPoseSplineFromCamera(self, splineOrder=6, poseKnotsPerSecond=100, timeOffsetPadding=0.02):
-        T_c_b = self.T_extrinsic.T()        
+        T_c_b = self.T_extrinsic.T()
+        print ("init T_c_b ", self.T_extrinsic.q(), " ", self.T_extrinsic.t(), '\n')        
         pose = bsplines.BSplinePose(splineOrder, sm.RotationVector() )
                 
         # Get the checkerboard times.
         times = np.array([obs.time().toSec()+self.timeshiftCamToImuPrior for obs in self.targetObservations ])                 
         curve = np.matrix([ pose.transformationToCurveValue( np.dot(obs.T_t_c().T(), T_c_b) ) for obs in self.targetObservations]).T
-        
+        m = 0
+        with open('/var/pony/cache/test_0513_camera_all.txt','w') as f:
+            for obs in self.targetObservations:
+                q0 = obs.T_t_c().q()[3]
+                q1 = obs.T_t_c().q()[0]
+                q2 = obs.T_t_c().q()[1]
+                q3 = obs.T_t_c().q()[2]
+                roll = math.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
+                pitch = math.asin(2 * (q0 * q2 - q1 * q3))
+                yaw = math.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
+                # print ("roll " + str(roll) + " pitch " + str(pitch) + " yaw " + str(yaw) + '\n')
+                f.write(str(obs.time().toNSec()) + " " + str(roll) + " " + str(pitch) + " " + str(yaw) + " " + ' '.join(str(e) for e in obs.T_t_c().t()) + '\n')
+                #f.write("roll " + str(roll) + " pitch " + str(pitch) + " yaw " + str(yaw) + '\n')
+                # f.write(' '.join(str(e) for e in obs.T_t_c().t()) + '\n')
+
         if np.isnan(curve).any():
             raise RuntimeError("Nans in curve values")
             sys.exit(0)
@@ -324,7 +373,8 @@ class IccCamera():
         self.cameraTimeToImuTimeDv = aopt.Scalar(0.0)
         self.cameraTimeToImuTimeDv.setActive( not noTimeCalibration )
         problem.addDesignVariable(self.cameraTimeToImuTimeDv, ic.CALIBRATION_GROUP_ID)
-        
+
+    # T_cN_b is T_c_to_imu when one camera and one imu.   
     def addCameraErrorTerms(self, problem, poseSplineDv, T_cN_b, blakeZissermanDf=0.0, timeOffsetPadding=0.0):
         print
         print "Adding camera error terms ({0})".format(self.dataset.topic)
@@ -610,7 +660,7 @@ class IccImu(object):
         def __init__(self, stamp, omega, alpha, Rgyro, Raccel):
             self.omega = omega
             self.alpha = alpha
-            self.omegaR = Rgyro
+            self.omegaR = Rgyro # weight
             self.omegaInvR = np.linalg.inv(Rgyro)
             self.alphaR = Raccel
             self.alphaInvR = np.linalg.inv(Raccel)
@@ -686,13 +736,13 @@ class IccImu(object):
         for im in self.imuData:
             tk = im.stamp.toSec() + self.timeOffset
             if tk > poseSplineDv.spline().t_min() and tk < poseSplineDv.spline().t_max():
-                C_b_w = poseSplineDv.orientation(tk).inverse()
-                a_w = poseSplineDv.linearAcceleration(tk)
+                C_b_w = poseSplineDv.orientation(tk).inverse() #imu to world
+                a_w = poseSplineDv.linearAcceleration(tk) # translation求导
                 b_i = self.accelBiasDv.toEuclideanExpression(tk,0)
-                w_b = poseSplineDv.angularVelocityBodyFrame(tk)
-                w_dot_b = poseSplineDv.angularAccelerationBodyFrame(tk)
-                C_i_b = self.q_i_b_Dv.toExpression()
-                r_b = self.r_b_Dv.toExpression()
+                w_b = poseSplineDv.angularVelocityBodyFrame(tk) # rotation求导
+                w_dot_b = poseSplineDv.angularAccelerationBodyFrame(tk) #rotation求二阶导
+                C_i_b = self.q_i_b_Dv.toExpression() # 一个imu，没有。
+                r_b = self.r_b_Dv.toExpression() #一个imu, 没有。
                 a = C_i_b * (C_b_w * (a_w - g_w) + \
                              w_dot_b.cross(r_b) + w_b.cross(w_b.cross(r_b)))
                 aerr = ket.EuclideanError(im.alpha, im.alphaInvR * weight, a + b_i)

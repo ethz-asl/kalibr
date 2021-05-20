@@ -313,6 +313,20 @@ namespace sm { namespace kinematics {
             retq[1] = q[1]*ca+dq3[0]*q[2]+dq3[1]*q[3]-dq3[2]*q[0];
             retq[2] = q[2]*ca-dq3[0]*q[1]+dq3[1]*q[0]+dq3[2]*q[3];
             retq[3] = q[3]*ca-dq3[0]*q[0]-dq3[1]*q[1]-dq3[2]*q[2];
+            // origin is camera to imu. transfer to imu to camera
+            double q0 = retq[3];
+            double q1 = -retq[0];
+            double q2 = -retq[1];
+            double q3 = -retq[2];
+
+
+            double roll = std::atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2));
+            double pitch = std::asin(2 * (q0 * q2 - q1 * q3));
+            double yaw = std::atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3));
+
+            std::cout << "R_c_i: " << q0 << " " << q1 << " " << q2 << " " << q3 << std::endl;
+
+            std::cout << "R_c_i Euler: roll: " << roll << ", pitch: " << pitch << ", yaw: " << yaw << std::endl;
 
             return retq;
         }

@@ -6,6 +6,7 @@ import sys
 import subprocess
 import yaml
 import time
+import math
 from matplotlib.backends.backend_pdf import PdfPages
 import StringIO
 import matplotlib.patches as patches
@@ -57,9 +58,19 @@ def printResults(cself, withCov=False):
 
         print
         print "Transformation T_cam{0}_imu0 (imu0 to cam{0}, T_ci): ".format(camNr)
-        if withCov and camNr==0:
-            print "\t quaternion: ", T_cam_b.q(), " +- ", cself.std_trafo_ic[0:3]
-            print "\t translation: ", T_cam_b.t(), " +- ", cself.std_trafo_ic[3:]
+    
+        # if withCov and camNr==0:
+        print "\t quaternion: ", T_cam_b.q(), " +- "#, cself.std_trafo_ic[0:3]
+        print "\t translation: ", T_cam_b.t(), " +- "#, cself.std_trafo_ic[3:]
+        q0 = T_cam_b.q()[3]
+        q1 = T_cam_b.q()[0]
+        q2 = T_cam_b.q()[1]
+        q3 = T_cam_b.q()[2]
+        roll = math.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
+        pitch = math.asin(2 * (q0 * q2 - q1 * q3))
+        yaw = math.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
+
+        print("T_ci Euler: roll: ", roll, ", pitch: ", pitch, ", yaw: ", yaw)
         print T_cam_b.T()
         
         if not cself.noTimeCalibration:

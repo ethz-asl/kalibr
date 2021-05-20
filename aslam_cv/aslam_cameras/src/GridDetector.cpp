@@ -141,14 +141,32 @@ bool GridDetector::findTarget(const cv::Mat & image, const aslam::Time & stamp,
 
     //calculate error norm
     Eigen::MatrixXd reprojection_errors_norm = Eigen::MatrixXd::Zero(numCorners,1);
+    Eigen::MatrixXd reprojection_errors_x = Eigen::MatrixXd::Zero(numCorners, 1);
+    Eigen::MatrixXd reprojection_errors_y = Eigen::MatrixXd::Zero(numCorners, 1);
 
     for(unsigned int i=0; i<numCorners; i++ )
     {
       cv::Point2f reprojection_err = corners_detected[i] - corners_reproj[i];
-
+      // const int next = (i + 1) == numCorners ? i : i + 1;
+      // std::cout << "x diff: " << corners_detected[next].x - corners_detected[i].x << " detect: " << corners_detected[i].x << " y: " << corners_detected[i].y << " reproj: " << corners_reproj[i].x << " y: " << corners_reproj[i].y << " target: " << corners_targetframe[i].x << " " << corners_targetframe[i].y << " error x: " << reprojection_err.x << " y: " << reprojection_err.y << std::endl;
+      reprojection_errors_x(i, 0) = std::abs(reprojection_err.x);
+      reprojection_errors_y(i, 0) = std::abs(reprojection_err.y);
+      // std::cout << "detected: " << corners_detected[i].x << " " << corners_detected[i].y << " reproj: " << corners_reproj[i].x << " " << corners_reproj[i].y << std::endl;
       reprojection_errors_norm(i,0) = sqrt(reprojection_err.x*reprojection_err.x +
                                            reprojection_err.y*reprojection_err.y);
     }
+    double mean_x = reprojection_errors_x.mean();
+    double mean_y = reprojection_errors_y.mean();
+    double std_x = 0;
+    double std_y = 0;
+    for (int i = 0; i < numCorners; ++i) {
+      double tmp_x = reprojection_errors_x(i, 0) - mean_x;
+      std_x += tmp_x * tmp_x;
+      double tmp_y = reprojection_errors_y(i, 0) - mean_y;
+      std_y += tmp_y * tmp_y;
+    }
+    std_x /= (double)numCorners;
+    std_y /= (double)numCorners;
 
     //calculate statistics
     double mean = reprojection_errors_norm.mean();
@@ -160,6 +178,9 @@ bool GridDetector::findTarget(const cv::Mat & image, const aslam::Time & stamp,
     }
     std /= (double)numCorners;
     std = sqrt(std);
+    // std::cout << "x mean: " << mean_x << " , x stddev: " << std_x << std::endl;
+    // std::cout << "y mean: " << mean_y << " , y stddev: " << std_y << std::endl;
+    // std::cout << "mean: " << mean << " , stddev: " << std << std::endl;
 
     //disable outlier corners
     std::vector<unsigned int> cornerIdx;
@@ -197,7 +218,7 @@ bool GridDetector::findTarget(const cv::Mat & image, const aslam::Time & stamp,
 
 
     } else {
-      cv::putText(imageCopy1, "Detection failed! (frame not used)",
+      cv::putText(imageCopy1, "Detection failed! (frame not used) Grid detector",
                   cv::Point(50, 50), CV_FONT_HERSHEY_SIMPLEX, 0.8,
                   CV_RGB(255,0,0), 3, 8, false);
     }

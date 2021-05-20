@@ -105,6 +105,10 @@ void TagFamily::decode(TagDetection& det, unsigned long long rCode) const {
   }
   det.id = bestId;
   det.hammingDistance = bestHamming;
+  // if (bestHamming <= 1)
+  // {
+  //   std::cout << "id: " << bestId << " hamming distance: " << bestHamming << "errorBit: " << errorRecoveryBits << std::endl;
+  // }
   det.rotation = bestRotation;
   det.good = (det.hammingDistance <= errorRecoveryBits);
   det.obsCode = rCode;

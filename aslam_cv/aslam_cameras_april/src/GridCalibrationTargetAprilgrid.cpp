@@ -78,17 +78,23 @@ void GridCalibrationTargetAprilgrid::createGridPoints() {
   //unsigned int numTags = size()/4;
   //unsigned int colsTags = _cols/2;
 
-  for (unsigned r = 0; r < _rows; r++) {
-    for (unsigned c = 0; c < _cols; c++) {
+  // const int row = _rows;
+  // const int col = _cols;
+
+  const int row = 6;
+  const int col = 6;
+
+  for (unsigned r = 0; r < row; r++)
+  {
+    for (unsigned c = 0; c < col; c++)
+    {
       Eigen::Matrix<double, 1, 3> point;
 
-      point(0) = (int) (c / 2) * (1 + _tagSpacing) * _tagSize
-          + (c % 2) * _tagSize;
-      point(1) = (int) (r / 2) * (1 + _tagSpacing) * _tagSize
-          + (r % 2) * _tagSize;
+      point(0) = (int)(c / 2) * (1 + _tagSpacing) * _tagSize + (c % 2) * _tagSize;
+      point(1) = (int)(r / 2) * (1 + _tagSpacing) * _tagSize + (r % 2) * _tagSize;
       point(2) = 0.0;
-
-      _points.row(r * _cols + c) = point;
+      // GridCalibrationTargetObservation里的target_的points_
+      _points.row(r * col + c) = point;
     }
   }
 }
@@ -127,8 +133,14 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
       remove |= true;
 
     //also remove if the tag ID is out-of-range for this grid (faulty detection)
-    if (iter->id >= (int) size() / 4)
+    if (iter->id > 152 || iter->id < 144)
+    {
       remove |= true;
+      if (remove)
+      {
+        // std::cout << "remove due to out of range" << iter->id << std::endl;
+      }
+    }
 
     // delete flagged tags
     if (remove) {
@@ -143,7 +155,8 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
   }
 
   //did we find enough tags?
-  if (detections.size() < _options.minTagsForValidObs) {
+  std::cout << "final detection size: " << detections.size() << std::endl;
+  if (detections.size() < 9) {
     success = false;
 
     //immediate exit if we dont need to show video for debugging...
@@ -155,6 +168,9 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
   //sort detections by tagId
   std::sort(detections.begin(), detections.end(),
             AprilTags::TagDetection::sortByIdCompare);
+  // for (int i = 0; i < detections.size(); ++i) {
+  //   std::cout << "index: " << i << " tag_id: " << detections[i].id << std::endl;
+  // }
 
   // check for duplicate tagIds (--> if found: wild Apriltags in image not belonging to calibration target)
   // (only if we have more than 1 tag...)
@@ -205,8 +221,11 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
 
   for (unsigned i = 0; i < detections.size(); i++) {
     for (unsigned j = 0; j < 4; j++) {
-      tagCorners.at<float>(4 * i + j, 0) = detections[i].p[j].first;
-      tagCorners.at<float>(4 * i + j, 1) = detections[i].p[j].second;
+      const int index = i / 3 * 3 + 3 - i%3 - 1;
+      // const int index = i;
+      tagCorners.at<float>(4 * i + j, 0) = detections[index].p[j].first;
+      tagCorners.at<float>(4 * i + j, 1) = detections[index].p[j].second;
+      // std::cout << i << " " << index << " " << j << " x,y: " << detections[index].p[j].first << " " << detections[index].p[j].second << std::endl;
     }
   }
 
@@ -280,13 +299,17 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
 
   for (unsigned int i = 0; i < detections.size(); i++) {
     // get the tag id
-    unsigned int tagId = detections[i].id;
+    // 因为tag id不连续且不是从0开始，所以用index代替id！
+    unsigned int tagId = i;
+    // unsigned int tagId = detections[i].id;
 
     // calculate the grid idx for all four tag corners given the tagId and cols
-    unsigned int baseId = (int) (tagId / (_cols / 2)) * _cols * 2
-        + (tagId % (_cols / 2)) * 2;
-    unsigned int pIdx[] = { baseId, baseId + 1, baseId + (unsigned int) _cols
-        + 1, baseId + (unsigned int) _cols };
+    // const int col = _cols;
+    const int col = 6;
+    unsigned int baseId = (int) (tagId / (col / 2)) * col * 2
+        + (tagId % (col / 2)) * 2;
+    unsigned int pIdx[] = { baseId, baseId + 1, baseId + (unsigned int) col
+        + 1, baseId + (unsigned int) col };
 
     // add four points per tag
     for (int j = 0; j < 4; j++) {
@@ -304,6 +327,7 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
           + (corner_y - cornerRaw_y) * (corner_y - cornerRaw_y);
 
       //add all points, but only set active if the point has not moved to far in the subpix refinement
+      // for _points_ in GridCalibrationTargetObservation
       outImagePoints.row(pIdx[j]) = Eigen::Matrix<double, 1, 2>(corner_x,
                                                                 corner_y);
 

@@ -22,7 +22,7 @@ int Edge::edgeCost(float  theta0, float theta1, float mag1) {
   const float normErr = thetaErr / maxEdgeCost;
   return (int) (normErr*WEIGHT_SCALE);
 }
-
+// 如果相邻pixel的theta差别不大，则连起来。
 void Edge::calcEdges(float theta0, int x, int y,
 		     const FloatImage& theta, const FloatImage& mag,
 		     std::vector<Edge> &edges, size_t &nEdges) {
