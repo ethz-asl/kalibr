@@ -129,6 +129,10 @@ class BagImageDatasetReader(object):
         self.uncompress = uncompress
       img_data = np.reshape(self.uncompress(np.fromstring(
           data.data, dtype='uint8')), (data.height, data.width), order="C")
+    elif data._type == 'sensor_msgs/CompressedImage':
+      img_data = np.array(self.CVB.compressed_imgmsg_to_cv2(data))
+      if len(img_data.shape) > 2 and img_data.shape[2] == 3:
+        img_data = cv2.cvtColor(img_data, cv2.COLOR_RGB2GRAY)
     elif data.encoding == "16UC1" or data.encoding == "mono16":
       image_16u = np.array(self.CVB.imgmsg_to_cv2(data))
       img_data = (image_16u / 256).astype("uint8")
