@@ -94,8 +94,8 @@ def distort(image, distortion_model, distortion_coeffs, focal_lengths,
             distortion_coeffs)
         distorted = denormalize(distorted_normalized, focal_lengths, 
             principal_point)
-        if (int(distorted[0]) < 0 or int(distorted[0]) > image.shape[0] or
-            int(distorted[1]) < 0 or int(distorted[1]) > image.shape[1]):
+        if (int(distorted[0]) < 0 or int(distorted[0]) >= image.shape[0] or
+            int(distorted[1]) < 0 or int(distorted[1]) >= image.shape[1]):
           continue
         distorted_image[int(distorted[0]), int(distorted[1])] = image[i,j]
     return distorted_image
