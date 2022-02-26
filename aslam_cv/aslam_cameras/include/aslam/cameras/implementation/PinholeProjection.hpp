@@ -774,7 +774,8 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
           continue;
 
          double f_guess = cv::norm(ipts.at(0) - ipts.at(1)) / M_PI;
-         f_guesses.push_back(f_guess);
+         if(std::isfinite(f_guess))
+            f_guesses.push_back(f_guess);
       }
     }
   }
