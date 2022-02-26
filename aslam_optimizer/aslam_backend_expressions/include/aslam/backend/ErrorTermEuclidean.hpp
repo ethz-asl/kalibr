@@ -38,10 +38,10 @@ namespace aslam {
       /// This is the interface required by ErrorTermFs<>
 
       /// \brief evaluate the error term and return the weighted squared error e^T invR e
-      virtual double evaluateErrorImplementation();
+      double evaluateErrorImplementation() override;
 
       /// \brief evaluate the jacobian
-      virtual void evaluateJacobiansImplementation(JacobianContainer & J);
+      void evaluateJacobiansImplementation(JacobianContainer & J) const override;
 
     private:
       aslam::backend::EuclideanExpression _t;

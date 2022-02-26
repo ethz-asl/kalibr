@@ -59,7 +59,7 @@ namespace aslam {
 
 
   /// \brief evaluate the jacobians
-  void ErrorTermEuclidean::evaluateJacobiansImplementation(JacobianContainer & _jacobians)
+  void ErrorTermEuclidean::evaluateJacobiansImplementation(JacobianContainer & _jacobians) const
   {
      _t.evaluateJacobians(_jacobians);
   }
