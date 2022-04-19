@@ -17,5 +17,6 @@ jobs:
           mv $REPO/ src/ && mkdir $REPO/ && mv src/ $REPO/ && cd $REPO/
       - name: Build Docker
         run: |
+          export REPO=$(basename $GITHUB_REPOSITORY) &&
           docker build -t kalibr -f $GITHUB_WORKSPACE/src/$REPO/Dockerfile_ros1_20_04 .
 
