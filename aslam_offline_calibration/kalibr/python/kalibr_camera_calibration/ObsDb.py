@@ -1,3 +1,4 @@
+from __future__ import print_function #handle print in 2.x python
 import sm
 import aslam_backend as aopt
 
@@ -146,7 +147,7 @@ class ObservationDatabase(object):
         print("timestamp \t", end=' ')        
         for cam_id in range(0, self.numCameras()):
             print("cam{0} \t".format(cam_id), end=' ')
-        print()
+        print("")
         
         #sort for time
         times_sorted = np.sort(list(self.targetViews.keys()))
@@ -160,5 +161,5 @@ class ObservationDatabase(object):
                 except KeyError:
                     numCorners = "-"
                 print("\t", numCorners, end=' ')
-            print()
+            print("")
 

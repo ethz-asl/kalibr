@@ -20,6 +20,11 @@ class BagImageDatasetReaderIterator(object):
   def __iter__(self):
     return self
 
+  def next(self):
+    # required for python 2.x compatibility
+    idx = next(self.iter)
+    return self.dataset.getImage(idx)
+
   def __next__(self):
     idx = next(self.iter)
     return self.dataset.getImage(idx)

@@ -69,8 +69,8 @@ if parsed.image_topics is not None:
         iProgress.sample()
       
       print("\r      done.                                                          ")
-      print()
-print()
+      print("")
+print("")
 
 #extract imu data
 if parsed.imu_topics is not None:
@@ -93,4 +93,4 @@ if parsed.imu_topics is not None:
             spamwriter.writerow([timestamp_int, omega[0],omega[1],omega[2], alpha[0],alpha[1],alpha[2] ])
             iProgress.sample()
           print("\r      done.                                                          ")
-          print()
+          print("")

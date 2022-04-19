@@ -3,7 +3,10 @@ import sm
 import numpy as np
 import sys
 import multiprocessing
-import queue
+try:
+   import queue
+except ImportError:
+   import Queue as queue # python 2.x
 import time
 import copy
 import cv2

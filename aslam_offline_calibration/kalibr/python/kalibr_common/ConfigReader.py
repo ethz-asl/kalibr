@@ -1,3 +1,4 @@
+from __future__ import print_function #handle print in 2.x python
 import yaml
 import sys
 import numpy as np

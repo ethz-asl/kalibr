@@ -1,3 +1,4 @@
+from __future__ import print_function #handle print in 2.x python
 from sm import PlotCollection
 from . import IccPlots as plots
 import numpy as np
@@ -8,6 +9,12 @@ import yaml
 import time
 from matplotlib.backends.backend_pdf import PdfPages
 import io
+try:
+    # Python 2
+    from cStringIO import StringIO
+except ImportError:
+    # Python 3
+    from io import StringIO
 import matplotlib.patches as patches
 
 def printErrorStatistics(cself, dest=sys.stdout):
@@ -46,7 +53,7 @@ def printErrorStatistics(cself, dest=sys.stdout):
         print("Accelerometer error (imu{0}) [m/s^2]: mean {1}, median {2}, std: {3}".format(iidx, np.mean(e2), np.median(e2), np.std(e2)), file=dest)
 
 def printGravity(cself):
-    print()
+    print("")
     print("Gravity vector: (in target coordinates): [m/s^2]")
     print(cself.gravityDv.toEuclidean())
 
@@ -55,7 +62,7 @@ def printResults(cself, withCov=False):
     for camNr in range(0,nCams):
         T_cam_b = cself.CameraChain.getResultTrafoImuToCam(camNr)
 
-        print()
+        print("")
         print("Transformation T_cam{0}_imu0 (imu0 to cam{0}, T_ci): ".format(camNr))
         if withCov and camNr==0:
             print("\t quaternion: ", T_cam_b.q(), " +- ", cself.std_trafo_ic[0:3])
@@ -63,16 +70,16 @@ def printResults(cself, withCov=False):
         print(T_cam_b.T())
         
         if not cself.noTimeCalibration:
-            print()
+            print("")
             print("cam{0} to imu0 time: [s] (t_imu = t_cam + shift)".format(camNr))
             print(cself.CameraChain.getResultTimeShift(camNr), end=' ')
             
             if withCov:
                 print(" +- ", cself.std_times[camNr])
             else:
-                print()
+                print("")
 
-    print()
+    print("")
     for (imuNr, imu) in enumerate(cself.ImuList):
         print("IMU{0}:\n".format(imuNr), "----------------------------")
         imu.getImuConfig().printDetails()
@@ -88,7 +95,7 @@ def printBaselines(self):
             else:
                 isFixed = ""
             
-            print()
+            print("")
             print("Baseline (cam{0} to cam{1}): [m] {2}".format(camNr, camNr+1, isFixed))
             print(T.T())
             print(baseline, "[m]")
@@ -100,10 +107,10 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True):
     offset = 3010
     
     #Output calibration results in text form.
-    sstream = io.StringIO()
+    sstream = StringIO()
     printResultTxt(cself, sstream)
     
-    text = [line for line in io.StringIO(sstream.getvalue())]
+    text = [line for line in StringIO(sstream.getvalue())]
     linesPerPage = 40
     
     while True:

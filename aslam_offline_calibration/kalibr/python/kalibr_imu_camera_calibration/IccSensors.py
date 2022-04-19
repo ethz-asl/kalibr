@@ -1,3 +1,4 @@
+from __future__ import print_function #handle print in 2.x python
 import sm
 import aslam_cv as acv
 import aslam_cameras_april as acv_april
@@ -114,7 +115,7 @@ class IccCamera():
         self.detector = acv.GridDetector(self.camera.geometry, grid, options)        
 
     def findOrientationPriorCameraToImu(self, imu):
-        print()
+        print("")
         print("Estimating imu-camera rotation prior")
         
         # build the problem
@@ -308,7 +309,7 @@ class IccCamera():
         seconds = times[-1] - times[0]
         knots = int(round(seconds * poseKnotsPerSecond))
         
-        print()
+        print("")
         print("Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, poseKnotsPerSecond, seconds))
         pose.initPoseSplineSparse(times, curve, knots, 1e-4)
         return pose
@@ -326,7 +327,7 @@ class IccCamera():
         problem.addDesignVariable(self.cameraTimeToImuTimeDv, ic.CALIBRATION_GROUP_ID)
         
     def addCameraErrorTerms(self, problem, poseSplineDv, T_cN_b, blakeZissermanDf=0.0, timeOffsetPadding=0.0):
-        print()
+        print("")
         print("Adding camera error terms ({0})".format(self.dataset.topic))
         
         #progress bar
@@ -666,7 +667,7 @@ class IccImu(object):
 
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
                                    accelNoiseScale=1.0):
-        print()
+        print("")
         print("Adding accelerometer error terms ({0})".format(self.dataset.topic))
         
         #progress bar
@@ -710,7 +711,7 @@ class IccImu(object):
 
     def addGyroscopeErrorTerms(self, problem, poseSplineDv, mSigma=0.0, gyroNoiseScale=1.0, \
                                g_w=None):
-        print()
+        print("")
         print("Adding gyroscope error terms ({0})".format(self.dataset.topic))
         
         #progress bar
@@ -752,7 +753,7 @@ class IccImu(object):
         seconds = end - start;
         knots = int(round(seconds * biasKnotsPerSecond))
         
-        print()
+        print("")
         print("Initializing the bias splines with %d knots" % (knots))
         
         #initialize the bias splines
@@ -778,7 +779,7 @@ class IccImu(object):
                                         self.r_b_Dv.toEuclidean()))
 
     def findOrientationPrior(self, referenceImu):
-        print()
+        print("")
         print("Estimating imu-imu rotation initial guess.")
         
         # build the problem
@@ -966,7 +967,7 @@ class IccScaledMisalignedImu(IccImu):
 
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
                                    accelNoiseScale=1.0):
-        print()
+        print("")
         print("Adding accelerometer error terms ({0})".format(self.dataset.topic))
         
         #progress bar
@@ -1011,7 +1012,7 @@ class IccScaledMisalignedImu(IccImu):
         self.accelErrors = accelErrors
 
     def addGyroscopeErrorTerms(self, problem, poseSplineDv, mSigma=0.0, gyroNoiseScale=1.0, g_w=None):
-        print()
+        print("")
         print("Adding gyroscope error terms ({0})".format(self.dataset.topic))
         
         #progress bar
@@ -1117,7 +1118,7 @@ class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
 
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
                                    accelNoiseScale=1.0):
-        print()
+        print("")
         print("Adding accelerometer error terms ({0})".format(self.dataset.topic))
         
         #progress bar

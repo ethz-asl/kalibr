@@ -14,7 +14,7 @@ import os
 np.set_printoptions(suppress=True)
 
 def signal_exit(signal, frame):
-    print()
+    print("")
     sm.logWarn("Shutting down! (CTRL+C)")
     sys.exit(1)
 
@@ -183,7 +183,7 @@ def main():
         if imu is not imus[0]:
             imu.findOrientationPrior(imus[0])
 
-    print()
+    print("")
     print("Building the problem")
     iCal.buildProblem(splineOrder=6, 
                       poseKnotsPerSecond=100, 
@@ -199,28 +199,28 @@ def main():
                       timeOffsetPadding=parsed.timeoffset_padding,
                       verbose = parsed.verbose)
 
-    print()
+    print("")
     print("Before Optimization")
     print("===================")
     util.printErrorStatistics(iCal)
     
-    print()
+    print("")
     print("Optimizing...")
     iCal.optimize(maxIterations=parsed.max_iter, recoverCov=parsed.recover_cov)
 
-    print()
+    print("")
     print("After Optimization (Results)")
     print("==================")
     util.printErrorStatistics(iCal)
     util.printResults(iCal, withCov=parsed.recover_cov)
 
-    print()
+    print("")
     bagtag = os.path.splitext(parsed.bagfile[0])[0]
     yamlFilename = bagtag + "-camchain-imucam.yaml"
     iCal.saveCamChainParametersYaml(yamlFilename)
     print("  Saving camera chain calibration to file: {0}".format(yamlFilename))
 
-    print()
+    print("")
     yamlFilename = bagtag + "-imu.yaml"
     iCal.saveImuSetParametersYaml(yamlFilename)
     print("  Saving imu calibration to file: {0}".format(yamlFilename))
@@ -233,14 +233,14 @@ def main():
     reportFile = bagtag + "-report-imucam.pdf"
     util.generateReport(iCal, filename=reportFile, showOnScreen=not parsed.dontShowReport)
     print("  Report written to {0}".format(reportFile))
-    print()
+    print("")
     
     if parsed.exportPoses:
         print("Exporting poses...")
         posesFile = bagtag + "-poses-imucam-imu0.csv"
         util.exportPoses(iCal, filename=posesFile)
         print("Poses written to {0}".format(posesFile))
-        print()
+        print("")
 
 if __name__ == "__main__":
     main()

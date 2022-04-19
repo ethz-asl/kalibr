@@ -15,6 +15,10 @@ class BagImuDatasetReaderIterator(object):
         self.iter = self.indices.__iter__()
     def __iter__(self):
         return self
+    def next(self):
+        # required for python 2.x compatibility
+        idx = next(self.iter)
+        return self.dataset.getMessage(idx)
     def __next__(self):
         idx = next(self.iter)
         return self.dataset.getMessage(idx)

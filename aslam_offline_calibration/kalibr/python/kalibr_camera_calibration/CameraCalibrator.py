@@ -1,3 +1,4 @@
+from __future__ import print_function #handle print in 2.x python
 import sm
 from sm import PlotCollection
 from kalibr_common import ConfigReader as cr
@@ -616,14 +617,14 @@ def printParameters(cself, dest=sys.stdout):
 
 
 def printDebugEnd(cself):
-    print()
-    print()
+    print("")
+    print("")
     
     for cidx, cam in enumerate(cself.cameras):
         print("cam{0}".format(cidx))
         print("----------")
-        print()
-        print()
+        print("")
+        print("")
         
         corners, reprojs, rerrs = getReprojectionErrors(cself, cidx)        
         if len(rerrs)>0:
@@ -633,12 +634,12 @@ def printDebugEnd(cself):
             print(se[0])
             print(se[1])
         
-        print()
+        print("")
         p = cam.geometry.projection().getParameters().flatten()
         for temp in p:
             print(temp)
         
-        print()
+        print("")
         d = cam.geometry.projection().distortion().getParameters().flatten()
         for temp in d:
             print(temp)
@@ -652,8 +653,8 @@ def printDebugEnd(cself):
             for temp in T.q():
                 print(temp)
     
-    print()
-    print()
+    print("")
+    print("")
 
 def saveChainParametersYaml(cself, resultFile, graph):
     cameraModels = {acvb.DistortedPinhole: 'pinhole',

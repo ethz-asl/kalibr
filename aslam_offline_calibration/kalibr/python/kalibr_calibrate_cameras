@@ -274,13 +274,13 @@ def main():
                 
                 #display process
                 if (verbose or (view_id % 25) == 0) and calibrator.estimator.getNumBatches()>0 and view_id>1:
-                    print()
+                    print("")
                     print("------------------------------------------------------------------")
-                    print()
+                    print("")
                     print("Processed {0} of {1} views with {2} views used".format(view_id+1, numViews, calibrator.estimator.getNumBatches()))
-                    print()
+                    print("")
                     kcc.printParameters(calibrator)
-                    print()
+                    print("")
                     print("------------------------------------------------------------------")
                     
                 #calibration progress
@@ -305,13 +305,13 @@ def main():
                     if initOutlierRejection:
                         #check all views after the min. number of batches has been reached
                         batches_to_check=list(range(0, calibrator.estimator.getNumBatches()))
-                        print();print()
+                        print("");print("")
                         print("Filtering outliers in all batches...")
                         initOutlierRejection=False
                         progress_filter = sm.Progress2(len(batches_to_check)); progress_filter.sample()
                     elif runEndFiltering:
                         #check all batches again after all views have been processed
-                        print();print()
+                        print("");print("")
                         print("All views have been processed.\n\nStarting final outlier filtering...")
                         batches_to_check=list(range(0, calibrator.estimator.getNumBatches()))
                         progress_filter = sm.Progress2(len(batches_to_check)); progress_filter.sample()
@@ -385,15 +385,15 @@ def main():
                             progress_filter.sample()
                             
             #final output
-            print()
-            print()
+            print("")
+            print("")
             print("..................................................................")
-            print()
+            print("")
             print("Calibration complete.")
-            print()
+            print("")
             if parsed.removeOutliers:
                 sm.logWarn("Removed {0} outlier corners.".format(len(removedOutlierCorners)) )             
-            print()
+            print("")
             print("Processed {0} images with {1} images used".format(numViews, calibrator.estimator.getNumBatches()))
             kcc.printParameters(calibrator)
             
