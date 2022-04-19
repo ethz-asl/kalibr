@@ -7,7 +7,8 @@ from kalibr_imu_camera_calibration import *
 import numpy as np
 import argparse
 import signal
-import sys   
+import sys
+import os
 
 # make numpy print prettier
 np.set_printoptions(suppress=True)
@@ -214,29 +215,29 @@ def main():
     util.printResults(iCal, withCov=parsed.recover_cov)
 
     print()
-    bagtag = parsed.bagfile[0].translate("<>:/\|?*").replace('.bag', '', 1)
-    yamlFilename = "camchain-imucam-" + bagtag + ".yaml"
+    bagtag = os.path.splitext(parsed.bagfile[0])[0]
+    yamlFilename = bagtag + "-camchain-imucam.yaml"
     iCal.saveCamChainParametersYaml(yamlFilename)
     print("  Saving camera chain calibration to file: {0}".format(yamlFilename))
 
     print()
-    yamlFilename = "imu-" + bagtag + ".yaml"
+    yamlFilename = bagtag + "-imu.yaml"
     iCal.saveImuSetParametersYaml(yamlFilename)
     print("  Saving imu calibration to file: {0}".format(yamlFilename))
 
-    resultFileTxt = "results-imucam-" + bagtag + ".txt"
+    resultFileTxt = bagtag + "-results-imucam.txt"
     util.saveResultTxt(iCal, filename=resultFileTxt)
     print("  Detailed results written to file: {0}".format(resultFileTxt))
     
     print("Generating result report...")    
-    reportFile = "report-imucam-" + bagtag + ".pdf"
+    reportFile = bagtag + "-report-imucam.pdf"
     util.generateReport(iCal, filename=reportFile, showOnScreen=not parsed.dontShowReport)
     print("  Report written to {0}".format(reportFile))
     print()
     
     if parsed.exportPoses:
         print("Exporting poses...")
-        posesFile = "poses-imucam-imu0-" + bagtag + ".csv"
+        posesFile = bagtag + "-poses-imucam-imu0.csv"
         util.exportPoses(iCal, filename=posesFile)
         print("Poses written to {0}".format(posesFile))
         print()
