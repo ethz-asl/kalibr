@@ -1,0 +1,21 @@
+name: Docker
+
+# This determines when this workflow is run
+on: [push, pull_request] # on all pushes and PRs
+
+jobs:
+  build_2004:
+    name: "ROS1 Ubuntu 20.04"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v2
+      - name: Create Workspace
+        run: |
+          export REPO=$(basename $GITHUB_REPOSITORY) &&
+          cd $GITHUB_WORKSPACE/.. && mkdir src/ &&
+          mv $REPO/ src/ && mkdir $REPO/ && mv src/ $REPO/ && cd $REPO/
+      - name: Build Docker
+        run: |
+          docker build -t kalibr -f $GITHUB_WORKSPACE/src/$REPO/Dockerfile_ros1_20_04 .
+
