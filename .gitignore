@@ -45,5 +45,5 @@ CMakeLists.txt.user
 # MacOS Desktop Services Store
 .DS_Store
 
-# backup files
-*~
+# IDE
+.idea/
