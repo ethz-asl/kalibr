@@ -19,7 +19,6 @@ import argparse
 import sys
 import random
 import signal
-import glob
 
 #available models
 cameraModels = { 'pinhole-radtan': acvb.DistortedPinhole,
@@ -90,52 +89,41 @@ def parseArgs():
     except:
         sys.exit(2)
     
-    #some checks
-    if len(parsed.topics) != len(parsed.models):
-        sm.logError("Please specify exactly one camera model (--models) for each topic (--topics).")
-        sys.exit(2)
-        
-    if parsed.minViewOutlier<1:
-        sm.logError("Please specify a positive integer (--min-views-outlier).")
-        sys.exit(2)
-    
-    #there is a with the gtk plot widget, so we cant plot if we have opencv windows open...
-    #--> disable the plots in these special situations
-    if parsed.showextraction or parsed.verbose:
-        parsed.dontShowReport = True
-    
     return parsed
 
 
 class FeatureExtractor():
     def __init__(self, targetYaml, modelName):
-        modelName = parsed.models[cam_id]
-        print "\tCamera model:\t  {0}".format(modelName)
         if modelName in cameraModels:        
             cameraModel = cameraModels[modelName]
-            targetConfig = kc.CalibrationTargetParameters(parsed.targetYaml)
+            targetConfig = kc.CalibrationTargetParameters(targetYaml)
             self.cam = kcc.CameraGeometry(cameraModel, targetConfig, dataset=None)
         self.timestamp = 0
 
     def get_features(self, image):
-        success, obs = self.cam.ctarget.detector.findTargetNoTransformation(self.timestamp++, np.array(image))
+        success, obs = self.cam.ctarget.detector.findTargetNoTransformation(self.timestamp, np.array(image))
+        self.timestamp += 1
         features = obs.getCornersImageFrame()
         return features
-    
+
+
 def main():
     parsed = parseArgs()
     #register signal handler
     signal.signal(signal.SIGINT, signal_exit)
 
+    # create feture extractor
     feat_extractor = FeatureExtractor(parsed.targetYaml, parsed.models[0])
 
     # read image loop
-    for imgname in glob.glob(parsed.imgdir):
-        image = cv2.imread(imgname)
-        cv2.imshow("test", image)
+    for imgname in os.listdir(parsed.imgdir):
+        imgname_fullpath = os.path.join(parsed.imgdir, imgname)
+        print('image name={}').format(imgname_fullpath)
+        image = cv2.imread(imgname_fullpath, cv2.IMREAD_GRAYSCALE)
+        print("original image type={}").format(image.dtype)
+        print("image size={}").format(image.shape)
         features = feat_extractor.get_features(image)
         print('features={}'.format(features))
-
 
 
 if __name__ == "__main__":
