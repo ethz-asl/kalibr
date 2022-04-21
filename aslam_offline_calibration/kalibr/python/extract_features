@@ -98,11 +98,10 @@ class FeatureExtractor():
             cameraModel = cameraModels[modelName]
             targetConfig = kc.CalibrationTargetParameters(targetYaml)
             self.cam = kcc.CameraGeometry(cameraModel, targetConfig, dataset=None)
-        self.timestamp = 0
 
     def get_features(self, image):
-        success, obs = self.cam.ctarget.detector.findTargetNoTransformation(self.timestamp, np.array(image))
-        self.timestamp += 1
+        timestamp = acv.Time.now()
+        success, obs = self.cam.ctarget.detector.findTargetNoTransformation(timestamp, np.array(image))
         features = obs.getCornersImageFrame()
         return features
 
