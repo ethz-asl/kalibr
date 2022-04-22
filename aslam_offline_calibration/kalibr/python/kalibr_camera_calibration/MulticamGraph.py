@@ -85,9 +85,11 @@ class MulticamCalibrationGraph(object):
     #check if all cams are connected through observations
     def isGraphConnected(self):
         if self.numCams == 1:
-            # Since igraph 0.8, adhesion correctly returns 0 for the non-connected one cam case.
-            # which evaluates to false later on. So we skip the check and return true in the one camera case.
+            # Since igraph 0.8, adhesion correctly returns 0 instead of -2147483648 for a graph with a single vertex.
+            # As 0 evaluates to False later in the process, kalibr exits with the cameras unconnected error.
+            # So we skip the check and return true in the one camera case.
             # https://github.com/ethz-asl/kalibr/issues/364
+            # https://github.com/ethz-asl/kalibr/pull/358
             return True
         else:
             #check if all vertices are connected
