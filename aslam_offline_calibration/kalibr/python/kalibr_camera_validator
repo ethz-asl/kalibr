@@ -378,7 +378,6 @@ class MonoCameraValidator(object):
         
         self.topic = camConfig.getRosTopic()
         self.windowName = "Camera: {0}".format(self.topic)
-        cv2.namedWindow(self.windowName, 1)
     
         #register the cam topic to the message synchronizer
         self.image_sub = message_filters.Subscriber(self.topic, Image)
