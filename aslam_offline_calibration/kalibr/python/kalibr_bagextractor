@@ -84,7 +84,7 @@ if parsed.imu_topics is not None:
         iProgress.reset(numMsg)
         iProgress.sample()
 
-        with open( "{0}/{1}".format(parsed.output_folder, filename), 'wb') as imufile:
+        with open( "{0}/{1}".format(parsed.output_folder, filename), 'w') as imufile:
           spamwriter = csv.writer(imufile, delimiter=',')
           spamwriter.writerow(["timestamp", "omega_x", "omega_y", "omega_z", "alpha_x", "alpha_y", "alpha_z"])
       
