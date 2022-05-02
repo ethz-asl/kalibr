@@ -77,7 +77,7 @@ def loadImageToRosMsg(filename):
     rosimage.width = image_np.shape[1]
     rosimage.step = rosimage.width  #only with mono8! (step = width * byteperpixel * numChannels)
     rosimage.encoding = "mono8"
-    rosimage.data = image_np.tostring()
+    rosimage.data = image_np.tobytes()
     
     return rosimage, timestamp
 
@@ -113,7 +113,7 @@ try:
     imufiles = getImuCsvFiles(parsed.folder)
     for imufile in imufiles:
         topic = os.path.splitext(os.path.basename(imufile))[0]
-        with open(imufile, 'rb') as csvfile:
+        with open(imufile, 'r') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             headers = next(reader, None)
             for row in reader:
