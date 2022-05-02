@@ -17,49 +17,6 @@ Kalibr is a toolbox that solves the following calibration problems:
 
 **For questions or comments, please open an issue on Github.**
 
-## Installation
-
-### Ubuntu 20.04
-
-We've upgraded and fixed kalibr at ORI for 20.04. Please use our fork: `git clone https://github.com/ori-drs/kalibr.git --branch noetic-devel`.
-
-- Use `rosdep` to install almost all required dependencies: `rosdep install --from-paths ./ -iry`.
-- Then install the two missing runtime dependencies: `sudo apt install python3-wxgtk4.0 python3-igraph`
-- Unittests are currently failing on 20.04 and thus deactivated on the buildserver.
-
-
-### Docker
-
-First make sure that you have install docker on your system using the official Docker [Get Docker](https://docs.docker.com/get-docker/) guide.
-We can then build the docker container using:
-```
-cd <workspace>/src/kalibr
-docker build -t kalibr -f Dockerfile_ros1_20_04 .
-```
-
-Then after building we can first download an example dataset and then perform following to calibrate.
-```
-cd <workspace>
-mkdir example && cd example
-wget http://robotics.ethz.ch/~asl-datasets/ijrr_euroc_mav_dataset/calibration_datasets/cam_april/april_6x6.yaml
-wget http://robotics.ethz.ch/~asl-datasets/ijrr_euroc_mav_dataset/calibration_datasets/cam_april/cam_april.bag
-```
-
-We can now mount the data folder in the container `/data` path and enter the command prompt.
-Some more details can be found on the [ROS wiki](http://wiki.ros.org/docker/Tutorials/GUI) for Docker.
-```
-FOLDER=$(pwd)
-xhost +local:root
-docker run -it -e "DISPLAY" -e "QT_X11_NO_MITSHM=1" \
-    -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-    -v "$FOLDER:/data" \
-    kalibr
-source devel/setup.bash
-rosrun kalibr kalibr_calibrate_cameras \
-    --bag /data/cam_april.bag --target /data/april_6x6.yaml \
-    --models pinhole-radtan pinhole-radtan \
-    --topics /cam0/image_raw /cam1/image_raw
-```
 
 
 ## Tutorial: IMU-camera calibration
