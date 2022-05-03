@@ -68,12 +68,14 @@ class CameraChainValidator(object):
         
         #initialize the cameras in the chain
         self.G = igraph.Graph(self.numCameras)
-        self.monovalidators=[]
+        self.monovalidators = []
         for cidx in range(0, self.numCameras):
             camConfig = chainConfig.getCameraParameters(cidx)
             
             #create a mono instance for each cam (detection and mono view)
             monovalidator = MonoCameraValidator(camConfig, targetParams)
+            cv2.namedWindow(monovalidator.windowName, cv2.WINDOW_NORMAL)
+            cv2.resizeWindow(monovalidator.windowName, (640, 480))
             self.monovalidators.append(monovalidator)
             
             #add edges to overlap graph
@@ -89,15 +91,23 @@ class CameraChainValidator(object):
         for edge in self.G.es:
             cidx_src = edge.source
             cidx_dest = edge.target
-
-            edge["rect_map"]=dict();edge["R"]=dict();edge["A"]=dict();
-            
+            edge["rect_map"] = dict()
+            edge["R"] = dict()
+            edge["A"] = dict()
             edge["rect_map"][cidx_src], \
             edge["rect_map"][cidx_dest], \
             edge["R"][cidx_src], \
             edge["R"][cidx_dest], \
             edge["A"][cidx_src], \
             edge["A"][cidx_dest] = self.prepareStereoRectificationMaps(cidx_src, cidx_dest)
+
+        # generate the windows
+        for edge in self.G.es:
+            cidx_src = edge.source
+            cidx_dest = edge.target
+            windowName = "Rectified view (cam{0} and cam{1})".format(cidx_src, cidx_dest)
+            cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+            cv2.resizeWindow(windowName, (2*640, 480))
                 
         #register the callback for the synchronized images
         sync_sub = message_filters.ApproximateTimeSynchronizer([val.image_sub for val in self.monovalidators], 10, 0.02)
@@ -115,7 +125,7 @@ class CameraChainValidator(object):
         self.timeLast = timeNow
          
         #process the images of all cameras
-        self.observations=[]; 
+        self.observations=[]
         for cam_nr, msg in enumerate(cam_msgs):
           
             #convert image to numpy
@@ -190,11 +200,7 @@ class CameraChainValidator(object):
         return np_rect_image
 
     def generatePairView(self, camAnr, camBnr):
-        #prepare the window
-        windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
-        cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(windowName, (640, 480))
-            
+
         #get the mono validators for each cam
         camA = self.monovalidators[camAnr]
         camB = self.monovalidators[camBnr]
@@ -242,7 +248,7 @@ class CameraChainValidator(object):
                 reproj_errs = np.hstack((reproj_errs, reprojErr_B.flatten()))     
                 
             reproj_errs = reproj_errs[2:]
-            reproj_errs = reproj_errs.reshape(2, reproj_errs.shape[0]/2)
+            reproj_errs = reproj_errs.reshape(2, int(reproj_errs.shape[0]/2.0))
                     
         #rectify the undistorted images
         edge_idx = self.G.get_eid(camAnr, camBnr)
@@ -258,7 +264,7 @@ class CameraChainValidator(object):
         np_image_rect = cv2.cvtColor(np_image_rect, cv2.COLOR_GRAY2BGR)
         n=10
         for i in range(0,n):
-            y = np_image_rect.shape[0]*i/n
+            y = int(np_image_rect.shape[0]*i/n)
             cv2.line(np_image_rect, (0,y), (2*np_image_rect.shape[1],y),(0,255,0));
     
     
@@ -294,7 +300,8 @@ class CameraChainValidator(object):
         else:
  
             cv2.putText(np_image_rect, "Detection failed...", (int(np_image_rect.shape[0]/2.0),int(np_image_rect.shape[1]/5.0)), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
-            
+
+        windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
         cv2.imshow(windowName, np_image_rect)
     
     
@@ -400,8 +407,7 @@ class MonoCameraValidator(object):
         
     
     def generateMonoview(self, np_image, observation, obs_valid):
-        cv2.namedWindow(self.windowName, cv2.WINDOW_NORMAL)
-        cv2.resizeWindow(self.windowName, (640, 480))
+
         np_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2BGR)
 
         if obs_valid:

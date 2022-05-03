@@ -50,7 +50,9 @@ if __name__ == "__main__":
     rospy.init_node('kalibr_camera_focus', anonymous=True)
 
     for topic in parsed.topics:
-        camval = CameraFocus(topic) 
+        camval = CameraFocus(topic)
+        cv2.namedWindow(camval.windowNameOrig, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(camval.windowNameOrig, (640, 480))
 
     try:
         rospy.spin()
