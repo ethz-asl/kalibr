@@ -220,7 +220,7 @@ class ParametersBase(object):
         
         try:
             with open(filename, 'w') as outfile:
-                outfile.write( yaml.dump(self.data) )
+                outfile.write( yaml.dump(self.data, default_flow_style=None, width=2147483647) )
         except:
             self.raiseError( "Could not write configuration to {0}".format(self.yamlFile) )
 
