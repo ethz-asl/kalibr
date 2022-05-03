@@ -11,12 +11,11 @@
   <author email="jerome.maye@mavt.ethz.ch">Jerome Maye</author>
 
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>catkin_simple</buildtool_depend>
 
   <build_depend>sm_eigen</build_depend>
   <build_depend>aslam_backend</build_depend>
   <build_depend>suitesparse</build_depend>
-  <build_depend>TBB</build_depend>
+  <build_depend>tbb</build_depend>
 
   <run_depend>sm_eigen</run_depend>
   <run_depend>aslam_backend</run_depend>

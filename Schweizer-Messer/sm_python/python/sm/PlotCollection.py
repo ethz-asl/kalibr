@@ -1,11 +1,11 @@
-import wxversion
-wxversion.ensureMinimal('2.8')
+# import wxversion
+# wxversion.ensureMinimal('2.8')
 
 import wx
 import wx.aui
 import matplotlib as mpl
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as Canvas
-from matplotlib.backends.backend_wxagg import NavigationToolbar2Wx as Toolbar
+from matplotlib.backends.backend_wx import NavigationToolbar2Wx as Toolbar
 import collections
 
 class PlotCollection:
@@ -52,12 +52,12 @@ class PlotCollection:
         """
         Show the window on screen
         """
-        if len(self.figureList.keys()) == 0:
+        if len(list(self.figureList.keys())) == 0:
             return
-        app = wx.PySimpleApp()
+        app = wx.App()
         frame = wx.Frame(None,-1,self.frame_name, size=self.window_size)
         plotter = self.PlotNotebook(frame)
-        for name in self.figureList.keys():
+        for name in list(self.figureList.keys()):
             plotter.add(name, self.figureList[name])
         frame.Show()
         app.MainLoop()

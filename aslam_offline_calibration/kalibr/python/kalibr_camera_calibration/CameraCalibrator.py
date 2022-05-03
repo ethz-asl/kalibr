@@ -1,3 +1,4 @@
+from __future__ import print_function #handle print in 2.x python
 import sm
 from sm import PlotCollection
 from kalibr_common import ConfigReader as cr
@@ -385,7 +386,7 @@ def getReprojectionErrors(cself, cam_id):
     
     gc.disable() #append speed up
     for view_id, view in enumerate(cself.views):
-        if cam_id in view.rerrs.keys():
+        if cam_id in list(view.rerrs.keys()):
             view_corners=list(); view_reprojections=list(); view_reprojection_errs=list()
             for rerr in view.rerrs[cam_id]:
                 #add if the corners was observed
@@ -457,7 +458,7 @@ def plotAzumithalError(cself, cam_id, fno=1, clearFigure=True, stats=None, noSho
     if stats is None:
         stats = getAllPointStatistics(cself, cam_id)
     angleError = np.array([ [ np.degrees(s.azumithalAngle), math.sqrt(s.squaredError)] for s in stats ])
-    # sort by azumithal angle
+    # sort by azimuthal angle
     sae = angleError[ angleError[:,0].argsort() ]
     # Now plot
     f = pl.figure(fno)
@@ -468,12 +469,12 @@ def plotAzumithalError(cself, cam_id, fno=1, clearFigure=True, stats=None, noSho
     pl.subplot(121)
     pl.plot(sae[:,0],sae[:,1],'bx-')
     pl.grid('on')
-    pl.xlabel('azumithal angle (deg)')
+    pl.xlabel('azimuthal angle (deg)')
     pl.ylabel('reprojection error (pixels)')
     pl.subplot(122)
     pl.hist(sae[:,0])
     pl.grid('on')
-    pl.xlabel('azumithal angle (deg)')
+    pl.xlabel('azimuthal angle (deg)')
     pl.ylabel('count')
     if not noShow:
         pl.show()
@@ -583,77 +584,77 @@ def printParameters(cself, dest=sys.stdout):
     std_baselines, std_cameras = recoverCovariance(cself)
 
     #print cameras
-    print >> dest, "Camera-system parameters:"
+    print("Camera-system parameters:", file=dest)
     for cidx, cam in enumerate(cself.cameras):
-        d = cam.geometry.projection().distortion().getParameters().flatten(1)
-        p = cam.geometry.projection().getParameters().flatten(1)
+        d = cam.geometry.projection().distortion().getParameters().flatten()
+        p = cam.geometry.projection().getParameters().flatten()
         dd = std_cameras[cidx][0:d.shape[0]]
         dp = std_cameras[cidx][d.shape[0]:]
-        print >> dest, "\tcam{0} ({1}):".format(cidx, cam.dataset.topic) 
-        print >> dest, "\t type: %s" % ( type(cam.geometry) ) 
-        print >> dest, "\t distortion: %s +- %s" % (d, np.array(dd))
-        print >> dest, "\t projection: %s +- %s" % (p, np.array(dp))
+        print("\tcam{0} ({1}):".format(cidx, cam.dataset.topic), file=dest) 
+        print("\t type: %s" % ( type(cam.geometry) ), file=dest) 
+        print("\t distortion: %s +- %s" % (d, np.array(dd)), file=dest)
+        print("\t projection: %s +- %s" % (p, np.array(dp)), file=dest)
         
         #reproj error statistics
         corners, reprojs, rerrs = getReprojectionErrors(cself, cidx)        
         if len(rerrs)>0:
             me, se = getReprojectionErrorStatistics(rerrs)
             try:
-              print >> dest, "\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1])
+              print("\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1]), file=dest)
             except:
-              print >> dest, "\t Failed printing the reprojection error."
-            print >> dest
+              print("\t Failed printing the reprojection error.", file=dest)
+            print(file=dest)
 
     #print baselines
     for bidx, baseline in enumerate(cself.baselines):
         T = sm.Transformation( baseline.T() )
         dq = std_baselines[bidx][0:3]
         dt = std_baselines[bidx][3:6]
-        print >> dest, "\tbaseline T_{1}_{0}:".format(bidx, bidx+1) 
-        print >> dest, "\t q: %s +- %s" % (T.q(), np.array(dq))
-        print >> dest, "\t t: %s +- %s" % (T.t(), np.array(dt))
-        print >> dest
+        print("\tbaseline T_{1}_{0}:".format(bidx, bidx+1), file=dest) 
+        print("\t q: %s +- %s" % (T.q(), np.array(dq)), file=dest)
+        print("\t t: %s +- %s" % (T.t(), np.array(dt)), file=dest)
+        print(file=dest)
 
 
 def printDebugEnd(cself):
-    print
-    print
+    print("")
+    print("")
     
     for cidx, cam in enumerate(cself.cameras):
-        print "cam{0}".format(cidx)
-        print "----------"
-        print
-        print
+        print("cam{0}".format(cidx))
+        print("----------")
+        print("")
+        print("")
         
         corners, reprojs, rerrs = getReprojectionErrors(cself, cidx)        
         if len(rerrs)>0:
             me, se = getReprojectionErrorStatistics(rerrs)
-            print me[0]
-            print me[1]
-            print se[0]
-            print se[1]
+            print(me[0])
+            print(me[1])
+            print(se[0])
+            print(se[1])
         
-        print
-        p = cam.geometry.projection().getParameters().flatten(1)
+        print("")
+        p = cam.geometry.projection().getParameters().flatten()
         for temp in p:
-            print temp
+            print(temp)
         
-        print
-        d = cam.geometry.projection().distortion().getParameters().flatten(1)
+        print("")
+        d = cam.geometry.projection().distortion().getParameters().flatten()
         for temp in d:
-            print temp
+            print(temp)
             
         if cidx>0:
             bidx=cidx-1
             T = sm.Transformation( cself.baselines[bidx].T() )
             for temp in T.t():
-                print temp
+                print(temp)
     
             for temp in T.q():
-                print temp
+                print(temp)
     
-    print
-    print
+    print("")
+    print("")
 
 def saveChainParametersYaml(cself, resultFile, graph):
     cameraModels = {acvb.DistortedPinhole: 'pinhole',
@@ -693,7 +694,7 @@ def saveChainParametersYaml(cself, resultFile, graph):
         else:
             raise RuntimeError("Invalid camera model {}.".format(cameraModel))
         camParams.setResolution( [P.ru(), P.rv()] )
-        dist_coeffs = P.distortion().getParameters().flatten(1)
+        dist_coeffs = P.distortion().getParameters().flatten()
         camParams.setDistortion( distortionModel, dist_coeffs)
 
         chain.addCameraAtEnd(camParams)
@@ -771,7 +772,7 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True, graph=None, 
         plotter.add_figure(title, f)
         figs.append(f)
         f = pl.figure(cidx*10+2)
-        title="cam{0}: azimutal error".format(cidx)
+        title="cam{0}: azimuthal error".format(cidx)
         plotAzumithalError(cself, cidx, fno=f.number, noShow=True, title=title)
         plotter.add_figure(title, f)
         figs.append(f)
@@ -795,7 +796,7 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True, graph=None, 
     for fig in figs:
         pdf.savefig(fig)
     pdf.close()
-    print "Report written to: {0}".format(filename)
+    print("Report written to: {0}".format(filename))
     
     if showOnScreen:
         plotter.show()  
@@ -821,7 +822,7 @@ def plotCorners(gridobs, fno=1, cornerlist=None, clearFigure=True, plotImage=Tru
             if valid:
                 P.append(y)
             else:
-                print "Tried to plot unobserved corner"       
+                print("Tried to plot unobserved corner")       
         P=np.array(P)
     else:
         #get all points
@@ -870,15 +871,15 @@ def plotCameraRig(baselines, fno=1, clearFigure=True, title=""):
    
 def saveResultTxt(cself, filename="camera_calibration_result.txt"):
     f1=open(filename, 'w')
-    print >> f1, "Calibration results "
-    print >> f1, "===================="
+    print("Calibration results ", file=f1)
+    print("====================", file=f1)
     
     printParameters(cself, f1)
-    print >> f1, ""
-    print >> f1, ""
-    print >> f1, "Target configuration"
-    print >> f1, "===================="
-    print >> f1, ""
+    print("", file=f1)
+    print("", file=f1)
+    print("Target configuration", file=f1)
+    print("====================", file=f1)
+    print("", file=f1)
 
     cself.cameras[0].ctarget.targetConfig.printDetails(f1)
     

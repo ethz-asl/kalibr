@@ -1,14 +1,35 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(aslam_cv_python)
 
-find_package(catkin_simple REQUIRED)
-catkin_simple()
+set(CMAKE_CXX_STANDARD 14)
 
-add_definitions( -fPIC -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x)
+find_package(Boost REQUIRED COMPONENTS serialization) 
+find_package(catkin REQUIRED COMPONENTS
+  sm_common
+  sm_eigen
+  sm_kinematics
+  sm_python
+  sm_opencv
+  opencv2_catkin
+  python_module
+  aslam_cv_serialization
+  aslam_imgproc
+  aslam_cameras
+  aslam_time
+  aslam_cv_serialization
+)
+
+catkin_package(
+  INCLUDE_DIRS include
+)
+
+add_definitions(-fPIC -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long)
 
 if(APPLE)
   add_definitions( -ftemplate-depth-1024)
 endif()
+
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 add_python_export_library(${PROJECT_NAME} python/aslam_cv
   src/module.cpp
@@ -35,8 +56,12 @@ add_python_export_library(${PROJECT_NAME} python/aslam_cv
   src/OmniUndistorter.cpp
   src/PinholeUndistorter.cpp
 )
-
-find_package(Boost REQUIRED COMPONENTS serialization) 
+target_compile_options(${PROJECT_NAME} PUBLIC "-Wno-deprecated-copy") # TODO: Fix...
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
-cs_install()
-cs_export()
+
+##################
+## Installation ##
+##################
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)

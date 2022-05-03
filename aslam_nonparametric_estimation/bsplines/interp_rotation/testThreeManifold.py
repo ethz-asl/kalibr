@@ -109,7 +109,7 @@ for t in T :
         samples.append(geometry.exp(ebs.eval(t), v))
     else :
         samples.append(p)
-        print "sample ", t, " -> ", p
+        print("sample ", t, " -> ", p)
         v = direction
         p = geometry.exp(p, v)
 
@@ -151,7 +151,7 @@ if isinstance(geometry, UnitQuaternionManifold):
         else:
             fitCP[i] = fitCP[i] / norm
 
-print fitCP
+print(fitCP)
 
 fitebs.setControlVertices(fitCP)
 fitspline = [ fitebs.eval(t) for t in numpy.arange(time_min, time_max+ 1e-9, 0.01)]
@@ -173,14 +173,14 @@ class Pointer :
         if isinstance(fitebs, UnitQuaternionBSpline):
             if ShowAngularDerivative :
                 v = fitebs.getEvaluatorAt(tpos).evalAngularVelocity()
-                print v
+                print(v)
             else:
                 v = fitebs.evalD(tpos, 1)
                 v = geometry.product(geometry.inv(p), v) # pull the vector back to identity
             v = geometry.exp(p, v[0 : 3]) # go in its direction starting from p 
             self._curve.setPos([ p, v ])
         else:
-            print fitebs
+            print(fitebs)
 
 pointer = Pointer()
 
