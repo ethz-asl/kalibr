@@ -192,7 +192,8 @@ class CameraChainValidator(object):
     def generatePairView(self, camAnr, camBnr):
         #prepare the window
         windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
-        cv2.namedWindow(windowName, cv2.WINDOW_AUTOSIZE)
+        cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(windowName, (640, 480))
             
         #get the mono validators for each cam
         camA = self.monovalidators[camAnr]
@@ -292,7 +293,7 @@ class CameraChainValidator(object):
                 cv2.putText(np_image_rect, "{0: .4f}".format(err_val), (x+100,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
         else:
  
-            cv2.putText(np_image_rect, "Detection failed...", (np_image_rect.shape[0]/2,np_image_rect.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
+            cv2.putText(np_image_rect, "Detection failed...", (int(np_image_rect.shape[0]/2.0),int(np_image_rect.shape[1]/5.0)), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
             
         cv2.imshow(windowName, np_image_rect)
     
@@ -399,7 +400,8 @@ class MonoCameraValidator(object):
         
     
     def generateMonoview(self, np_image, observation, obs_valid):
-        cv2.namedWindow(self.windowName, cv2.WINDOW_AUTOSIZE)
+        cv2.namedWindow(self.windowName, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(self.windowName, (640, 480))
         np_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2BGR)
 
         if obs_valid:
@@ -451,7 +453,7 @@ class MonoCameraValidator(object):
                 cv2.circle(np_image, (px_fix, py_fix), radius=radius_fix, color=(255,255,0), thickness=thickness, shift=shift, lineType=cv2.LINE_AA)
 
         else:
-            cv2.putText(np_image, "Detection failed...", (np_image.shape[0]/2,np_image.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.5, color=(0, 0, 255), thickness=2)
+            cv2.putText(np_image, "Detection failed...", (int(np_image.shape[0]/2.0),int(np_image.shape[1]/5.0)), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.5, color=(0, 0, 255), thickness=2)
 
         cv2.imshow(self.windowName, np_image)
         cv2.waitKey(1)
@@ -469,6 +471,9 @@ if __name__ == "__main__":
     else:
         sm.setLoggingLevel(sm.LoggingLevel.Info)
 
+    # init the node
+    rospy.init_node('kalibr_camera_validator', anonymous=True)
+
     #load the configuration yamls
     targetConfig = kc.ConfigReader.CalibrationTargetParameters(parsed.targetYaml)
     
@@ -480,7 +485,6 @@ if __name__ == "__main__":
     chain_validator = CameraChainValidator(camchain, targetConfig)
     
     #ros message loops
-    rospy.init_node('kalibr_validator', anonymous=True)
     try:
         rospy.spin()
     except KeyboardInterrupt:

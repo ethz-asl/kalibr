@@ -47,10 +47,11 @@ if __name__ == "__main__":
     parser.add_argument('--topic', nargs='+', dest='topics', help='camera topic', required=True)
     parsed = parser.parse_args()
 
+    rospy.init_node('kalibr_camera_focus', anonymous=True)
+
     for topic in parsed.topics:
         camval = CameraFocus(topic) 
-    
-    rospy.init_node('kalibr_validator', anonymous=True)
+
     try:
         rospy.spin()
     except KeyboardInterrupt:
