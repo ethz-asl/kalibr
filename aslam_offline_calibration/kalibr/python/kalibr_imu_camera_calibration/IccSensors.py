@@ -7,7 +7,8 @@ import aslam_backend as aopt
 import bsplines
 import kalibr_common as kc
 import kalibr_errorterms as ket
-from . import icc_calibrator as ic
+from . import IccCalibrator as ic
+from .IccCalibrator import *
 
 import cv2
 import sys
@@ -314,7 +315,7 @@ class IccCamera():
         pose.initPoseSplineSparse(times, curve, knots, 1e-4)
         return pose
     
-    def addDesignVariables(self, problem, noExtrinsics=True, noTimeCalibration=True, baselinedv_group_id=ic.HELPER_GROUP_ID):
+    def addDesignVariables(self, problem, noExtrinsics=True, noTimeCalibration=True, baselinedv_group_id=HELPER_GROUP_ID):
         # Add the calibration design variables.
         active = not noExtrinsics
         self.T_c_b_Dv = aopt.TransformationDv(self.T_extrinsic, rotationActive=active, translationActive=active)
@@ -324,7 +325,7 @@ class IccCamera():
         # Add the time delay design variable.
         self.cameraTimeToImuTimeDv = aopt.Scalar(0.0)
         self.cameraTimeToImuTimeDv.setActive( not noTimeCalibration )
-        problem.addDesignVariable(self.cameraTimeToImuTimeDv, ic.CALIBRATION_GROUP_ID)
+        problem.addDesignVariable(self.cameraTimeToImuTimeDv, CALIBRATION_GROUP_ID)
         
     def addCameraErrorTerms(self, problem, poseSplineDv, T_cN_b, blakeZissermanDf=0.0, timeOffsetPadding=0.0):
         print("")
@@ -521,10 +522,10 @@ class IccCameraChain():
             #the first "baseline" dv is between the imu and cam0
             if camNr == 0:
                 noExtrinsics = False
-                baselinedv_group_id = ic.CALIBRATION_GROUP_ID
+                baselinedv_group_id = CALIBRATION_GROUP_ID
             else:
                 noExtrinsics = noChainExtrinsics
-                baselinedv_group_id = ic.HELPER_GROUP_ID
+                baselinedv_group_id = HELPER_GROUP_ID
             cam.addDesignVariables(problem, noExtrinsics, noTimeCalibration, baselinedv_group_id=baselinedv_group_id)
     
     #add the reprojection error terms for all cameras in the chain
@@ -649,16 +650,16 @@ class IccImu(object):
         self.gyroBiasDv = asp.EuclideanBSplineDesignVariable( self.gyroBias )
         self.accelBiasDv = asp.EuclideanBSplineDesignVariable( self.accelBias )
         
-        ic.addSplineDesignVariables(problem, self.gyroBiasDv, setActive=True, \
-                                    group_id=ic.HELPER_GROUP_ID)
-        ic.addSplineDesignVariables(problem, self.accelBiasDv, setActive=True, \
-                                    group_id=ic.HELPER_GROUP_ID)
+        addSplineDesignVariables(problem, self.gyroBiasDv, setActive=True,
+                                    group_id=HELPER_GROUP_ID)
+        addSplineDesignVariables(problem, self.accelBiasDv, setActive=True,
+                                    group_id=HELPER_GROUP_ID)
 
         self.q_i_b_Dv = aopt.RotationQuaternionDv(self.q_i_b_prior)
-        problem.addDesignVariable(self.q_i_b_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.q_i_b_Dv, HELPER_GROUP_ID)
         self.q_i_b_Dv.setActive(False)
         self.r_b_Dv = aopt.EuclideanPointDv(np.array([0., 0., 0.]))
-        problem.addDesignVariable(self.r_b_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.r_b_Dv, HELPER_GROUP_ID)
         self.r_b_Dv.setActive(False)
 
         if not self.isReferenceImu:
@@ -948,21 +949,21 @@ class IccScaledMisalignedImu(IccImu):
         IccImu.addDesignVariables(self, problem)
 
         self.q_gyro_i_Dv = aopt.RotationQuaternionDv(np.array([0., 0., 0., 1.]))
-        problem.addDesignVariable(self.q_gyro_i_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.q_gyro_i_Dv, HELPER_GROUP_ID)
         self.q_gyro_i_Dv.setActive(True)
 
         self.M_accel_Dv = aopt.MatrixBasicDv(np.eye(3), np.array([[1, 0, 0],[1, 1, 0],[1, 1, 1]], \
                                                                  dtype=int))
-        problem.addDesignVariable(self.M_accel_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.M_accel_Dv, HELPER_GROUP_ID)
         self.M_accel_Dv.setActive(True)
         
         self.M_gyro_Dv = aopt.MatrixBasicDv(np.eye(3), np.array([[1, 0, 0],[1, 1, 0],[1, 1, 1]], \
                                                                 dtype=int))
-        problem.addDesignVariable(self.M_gyro_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.M_gyro_Dv, HELPER_GROUP_ID)
         self.M_gyro_Dv.setActive(True)
         
         self.M_accel_gyro_Dv = aopt.MatrixBasicDv(np.zeros((3,3)),np.ones((3,3),dtype=int))
-        problem.addDesignVariable(self.M_accel_gyro_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.M_accel_gyro_Dv, HELPER_GROUP_ID)
         self.M_accel_gyro_Dv.setActive(True)
 
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
@@ -1095,25 +1096,25 @@ class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
         IccScaledMisalignedImu.addDesignVariables(self, problem)
 
         self.rx_i_Dv = aopt.EuclideanPointDv(np.array([0., 0., 0.]))
-        problem.addDesignVariable(self.rx_i_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.rx_i_Dv, HELPER_GROUP_ID)
         self.rx_i_Dv.setActive(False)
         
         self.ry_i_Dv = aopt.EuclideanPointDv(np.array([0., 0., 0.]))
-        problem.addDesignVariable(self.ry_i_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.ry_i_Dv, HELPER_GROUP_ID)
         self.ry_i_Dv.setActive(True)
 
         self.rz_i_Dv = aopt.EuclideanPointDv(np.array([0., 0., 0.]))
-        problem.addDesignVariable(self.rz_i_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.rz_i_Dv, HELPER_GROUP_ID)
         self.rz_i_Dv.setActive(True)
 
         self.Ix_Dv = aopt.MatrixBasicDv(np.diag([1.,0.,0.]), np.zeros((3,3),dtype=int))
-        problem.addDesignVariable(self.Ix_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.Ix_Dv, HELPER_GROUP_ID)
         self.Ix_Dv.setActive(False)
         self.Iy_Dv = aopt.MatrixBasicDv(np.diag([0.,1.,0.]), np.zeros((3,3),dtype=int))
-        problem.addDesignVariable(self.Iy_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.Iy_Dv, HELPER_GROUP_ID)
         self.Iy_Dv.setActive(False)
         self.Iz_Dv = aopt.MatrixBasicDv(np.diag([0.,0.,1.]), np.zeros((3,3),dtype=int))
-        problem.addDesignVariable(self.Iz_Dv, ic.HELPER_GROUP_ID)
+        problem.addDesignVariable(self.Iz_Dv, HELPER_GROUP_ID)
         self.Iz_Dv.setActive(False)
 
     def addAccelerometerErrorTerms(self, problem, poseSplineDv, g_w, mSigma=0.0, \
