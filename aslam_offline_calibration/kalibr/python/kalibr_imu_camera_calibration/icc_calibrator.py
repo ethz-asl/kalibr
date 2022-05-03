@@ -160,18 +160,19 @@ class IccCalibrator(object):
             options.convergenceDeltaJ = 1e-2
             options.maxIterations = maxIterations
             options.trustRegionPolicy = aopt.LevenbergMarquardtTrustRegionPolicy(options.levenbergMarquardtLambdaInit)
-            options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()
+            options.linearSolver = aopt.BlockCholeskyLinearSystemSolver() #does not have multi-threading support
 
         #run the optimization
         self.optimizer = aopt.Optimizer2(options)
         self.optimizer.setProblem(self.problem)
 
         optimizationFailed=False
-        try: 
+        try:
             retval = self.optimizer.optimize()
             if retval.linearSolverFailure:
                 optimizationFailed = True
-        except:
+        except Exception as e:
+            sm.logError(str(e))
             optimizationFailed = True
 
         if optimizationFailed:

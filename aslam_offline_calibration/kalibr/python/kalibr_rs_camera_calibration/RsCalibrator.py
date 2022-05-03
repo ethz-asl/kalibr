@@ -430,8 +430,9 @@ class RsCalibrator(object):
         # verbose and choldmod solving with schur complement trick
         options = aopt.Optimizer2Options()
         options.verbose = True
-        options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()
+        options.nThreads = max(1,multiprocessing.cpu_count()-1)
         options.doSchurComplement = True
+        options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()  #does not have multi-threading support
 
         # stopping criteria
         options.maxIterations = maxIt

@@ -14,6 +14,7 @@ import kalibr_camera_calibration as kcc
 import cv2
 import os
 import numpy as np
+import multiprocessing
 import pylab as pl
 import argparse
 import sys
@@ -245,6 +246,7 @@ def main():
             
             optimizerOptions = calibrator.estimator.getOptimizerOptions()
             optimizerOptions.maxIterations = 50
+            optimizerOptions.nThreads = max(1,multiprocessing.cpu_count()-1)
             optimizerOptions.verbose = parsed.verbose
             verbose = parsed.verbose
         

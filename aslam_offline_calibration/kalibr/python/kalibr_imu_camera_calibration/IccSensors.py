@@ -158,7 +158,7 @@ class IccCamera():
         #define the optimization 
         options = aopt.Optimizer2Options()
         options.verbose = False
-        options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()
+        options.linearSolver = aopt.BlockCholeskyLinearSystemSolver() #does not have multi-threading support
         options.nThreads = 2
         options.convergenceDeltaX = 1e-4
         options.convergenceDeltaJ = 1
@@ -826,7 +826,7 @@ class IccImu(object):
         #define the optimization 
         options = aopt.Optimizer2Options()
         options.verbose = False
-        options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()
+        options.linearSolver = aopt.BlockCholeskyLinearSystemSolver() #does not have multi-threading support
         options.nThreads = 2
         options.convergenceDeltaX = 1e-4
         options.convergenceDeltaJ = 1

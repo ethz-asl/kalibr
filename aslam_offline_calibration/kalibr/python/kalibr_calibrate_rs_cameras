@@ -120,22 +120,6 @@ def __parseArgs():
 
     return parsed
 
-# perform corner extraction from bagfile
-# returns the observations
-def __extractObservations(cameraGeometry, verbose=False):
-
-    # extract the targets
-    multithreading = False #not verbose
-    observations = kc.extractCornersFromDataset(
-        cameraGeometry.dataset,
-        cameraGeometry.ctarget.detector,
-        multithreading=multithreading,
-        # transformation estimation will fail with rs cameras and significant distortions
-        noTransformation=True
-    )
-
-    return observations
-
 def main():
     parsed = __parseArgs()
 
@@ -157,8 +141,15 @@ def main():
     cameraModel = cameraModels[parsed.model]
     cameraGeometry = kcc.CameraGeometry(cameraModel, targetConfig, dataset, verbose=(parsed.verbose or parsed.showextraction))
 
-    # extract observations
-    observations = __extractObservations(cameraGeometry,(parsed.verbose or parsed.showextraction))
+    # extract observations of the targets
+    multithreading = not (parsed.verbose or parsed.showextraction)
+    observations = kc.extractCornersFromDataset(
+        cameraGeometry.dataset,
+        cameraGeometry.ctarget.detector,
+        multithreading=multithreading,
+        # transformation estimation will fail with rs cameras and significant distortions
+        noTransformation=True
+    )
 
     # Calibration Configuration
     config = rscc.RsCalibratorConfiguration()
