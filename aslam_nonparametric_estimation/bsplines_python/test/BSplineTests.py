@@ -509,7 +509,7 @@ class TestBSplines(BSplineTestCase):
                 
                 for a in numpy.arange(aspl.t_min(),aspl.t_max()-1e-15,0.4*dt):
                     for i in numpy.arange(aspl.t_min(), aspl.t_max()-1e-15, 0.4*dt):
-                        print "Eval at %f\n" % (i)
+                        print("Eval at %f\n" % (i))
                         f = fp.splint(a,float(i),fspl)
                         b = aspl.evalI(a,i)
                         self.assertAlmostEqual(b, f, msg="order %d spline integral evaluated on [%f,%f] (%f != %f) was not right" % (order, a,i,float(b),f))
@@ -531,7 +531,7 @@ class TestBSplines(BSplineTestCase):
             
             for a in numpy.arange(aspl.t_min(),aspl.t_max()-1e-15,0.4):
                 for i in numpy.arange(aspl.t_min(), aspl.t_max()-1e-15, 0.4):
-                    print "Eval at %f\n" % (i)
+                    print("Eval at %f\n" % (i))
                     f = fp.splint(a,float(i),fspl)
                     b = aspl.evalI(a,i)
                     self.assertAlmostEqual(b, f, msg="order %d spline integral evaluated on [%f,%f] (%f != %f) was not right" % (order, a,i,float(b),f))
@@ -558,7 +558,7 @@ class TestBSplines(BSplineTestCase):
             
             for a in numpy.arange(aspl.t_min(),aspl.t_max()-1e-15,0.4):
                 for i in numpy.arange(aspl.t_min(), aspl.t_max()-1e-15, 0.4):
-                    print "Eval at %f\n" % (i)
+                    print("Eval at %f\n" % (i))
                     f = fp.splint(a,float(i),fspl)
                     b = aspl.evalI(a,i)
                     self.assertAlmostEqual(b, f, msg="order %d spline integral evaluated on [%f,%f] (%f != %f) was not right" % (order, a,i,float(b),f))
@@ -574,7 +574,7 @@ class TestBSplines(BSplineTestCase):
                 for DO in range(0,order):
                     w = numpy.random.random(dim);
                     W = numpy.diag(w);
-                    ef = lambda(t): numpy.dot(numpy.asmatrix(aspl.Phi(t,DO)).T , numpy.dot(W, numpy.asmatrix(aspl.Phi(t,DO))))
+                    ef = lambda t: numpy.dot(numpy.asmatrix(aspl.Phi(t,DO)).T , numpy.dot(W, numpy.asmatrix(aspl.Phi(t,DO))))
                     # for each segment
                     for s in range(0,aspl.numValidTimeSegments()):
                         interval = aspl.timeInterval(s)
@@ -583,7 +583,7 @@ class TestBSplines(BSplineTestCase):
                         Eest = numpy.zeros(E.shape)
                         for r in range(0,E.shape[0]):
                             for c in range(0,E.shape[1]):
-                                efrc = lambda(t): ef(t)[r,c]
+                                efrc = lambda t: ef(t)[r,c]
                                 A = si.quad(efrc,interval[0],interval[1])
                                 Eest[r,c] = A[0]
                         #print E
@@ -601,7 +601,7 @@ class TestBSplines(BSplineTestCase):
                 for DO in range(0,order):
                     W = numpy.random.random([dim,dim]);
                     W = numpy.dot(W.T,W) + numpy.eye(dim)
-                    ef = lambda(t): numpy.dot(numpy.asmatrix(aspl.Phi(t,DO)).T , numpy.dot(W, numpy.asmatrix(aspl.Phi(t,DO))))
+                    ef = lambda t: numpy.dot(numpy.asmatrix(aspl.Phi(t,DO)).T , numpy.dot(W, numpy.asmatrix(aspl.Phi(t,DO))))
                     # for each segment
                     for s in range(0,aspl.numValidTimeSegments()):
                         interval = aspl.timeInterval(s)
@@ -610,7 +610,7 @@ class TestBSplines(BSplineTestCase):
                         Eest = numpy.zeros(E.shape)
                         for r in range(0,E.shape[0]):
                             for c in range(0,E.shape[1]):
-                                efrc = lambda(t): ef(t)[r,c]
+                                efrc = lambda t: ef(t)[r,c]
                                 A = si.quad(efrc,interval[0],interval[1])
                                 Eest[r,c] = A[0]
                         #print E
@@ -638,7 +638,7 @@ class TestBSplines(BSplineTestCase):
                             XX[numpy.ix_(S,S)] = numpy.dot(numpy.asmatrix(self.aspl.Phi(t,DO)).T , numpy.dot(W, numpy.asmatrix(self.aspl.Phi(t,DO))))
                             return XX
                     ch = CurveHelper(aspl)
-                    ef = lambda(t): ch.quad(t)
+                    ef = lambda t: ch.quad(t)
                     # si.quad can't do matrices...blerg.
                     E = aspl.curveQuadraticIntegral(W,DO)
                     Eest = numpy.zeros(E.shape)
@@ -651,7 +651,7 @@ class TestBSplines(BSplineTestCase):
                     pts = pts[pts < interval[1]]
                     for r in range(0,E.shape[0]):
                         for c in range(0,E.shape[1]):
-                            efrc = lambda(t): ef(t)[r,c]
+                            efrc = lambda t: ef(t)[r,c]
                             
                             A = si.quad(efrc,interval[0],interval[1], points=pts)
                             Eest[r,c] = A[0]

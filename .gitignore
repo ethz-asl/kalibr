@@ -44,3 +44,9 @@ CMakeLists.txt.user
 
 # MacOS Desktop Services Store
 .DS_Store
+
+# Jetbrains Clion
+cmake-build-*
+.idea
+build
+Build

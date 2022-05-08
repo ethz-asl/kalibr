@@ -11,9 +11,9 @@ import multiprocessing
 import sys
 import gc
 import math
-from ReprojectionErrorKnotSequenceUpdateStrategy import *
-from RsPlot import plotSpline
-from RsPlot import plotSplineValues
+from .ReprojectionErrorKnotSequenceUpdateStrategy import *
+from .RsPlot import plotSpline
+from .RsPlot import plotSplineValues
 import pylab as pl
 import pdb
 
@@ -253,8 +253,8 @@ class RsCalibrator(object):
         else:
             knots = int(round(seconds * framerate/3))
 
-        print
-        print "Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, 100, seconds)
+        print("")
+        print("Initializing a pose spline with %d knots (%f knots per second over %f seconds)" % ( knots, 100, seconds))
         poseSpline.initPoseSplineSparse(times, curve, knots, 1e-4)
 
         return poseSpline
@@ -324,7 +324,6 @@ class RsCalibrator(object):
                 #####
                 # add an error term for every observed corner
                 for index, point in enumerate(observation.getCornersImageFrame()):
-
                     # keypoint time offset by line delay as expression type
                     keypoint_time = self.__camera_dv.keypointTime(frame.time(), point)
 
@@ -425,14 +424,15 @@ class RsCalibrator(object):
     def __runOptimization(self, problem ,deltaJ, deltaX, maxIt):
         """Run the given optimization problem problem"""
 
-        print "run new optimisation with initial values:"
+        print("run new optimisation with initial values:")
         self.__printResults()
 
         # verbose and choldmod solving with schur complement trick
         options = aopt.Optimizer2Options()
         options.verbose = True
-        options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()
+        options.nThreads = max(1,multiprocessing.cpu_count()-1)
         options.doSchurComplement = True
+        options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()  #does not have multi-threading support
 
         # stopping criteria
         options.maxIterations = maxIt
@@ -456,11 +456,11 @@ class RsCalibrator(object):
         shutter = self.__camera_dv.shutterDesignVariable().value()
         proj = self.__camera_dv.projectionDesignVariable().value()
         dist = self.__camera_dv.distortionDesignVariable().value()
-        print
+        print("")
         if (self.__isRollingShutter()):
-            print "LineDelay:"
-            print shutter.lineDelay()
-        print "Intrinsics:"
-        print proj.getParameters().flatten()
-        print "Distortion:"
-        print dist.getParameters().flatten()
+            print("LineDelay:")
+            print(shutter.lineDelay())
+        print("Intrinsics:")
+        print(proj.getParameters().flatten())
+        print("Distortion:")
+        print(dist.getParameters().flatten())

@@ -1,16 +1,32 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(aslam_cameras)
 
-find_package(catkin_simple REQUIRED)
+ADD_DEFINITIONS(-DASLAM_USE_ROS)
 
-catkin_simple()
-
-ADD_DEFINITIONS(-DASLAM_USE_ROS )
-
+find_package(catkin REQUIRED COMPONENTS
+  sm_common
+  sm_eigen
+  sm_boost
+  sm_kinematics
+  sm_logging
+  aslam_time
+  sm_opencv
+  sm_property_tree
+  opencv2_catkin
+  sm_random
+)
 find_package(Boost REQUIRED COMPONENTS system serialization filesystem)
+find_package(Eigen3 REQUIRED)
 
-#common commands for building c++ executables and libraries
-cs_add_library(${PROJECT_NAME} 
+catkin_package(
+  LIBRARIES ${PROJECT_NAME}
+  INCLUDE_DIRS include
+  DEPENDS Boost
+)
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
+
+add_library(${PROJECT_NAME} 
   src/CameraGeometryBase.cpp
   src/GlobalShutter.cpp
   src/RollingShutter.cpp
@@ -32,15 +48,13 @@ cs_add_library(${PROJECT_NAME}
   src/BackProjection.cpp
   src/Landmark.cpp
   src/Image.cpp
-  )
-
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_compile_options(${PROJECT_NAME} PUBLIC "-Wno-deprecated-copy") # TODO: Fix...
 
 if(CATKIN_ENABLE_TESTING)
-
   # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
   add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
-
 
   catkin_add_gtest(${PROJECT_NAME}_tests
     test/test_main.cpp
@@ -55,14 +69,23 @@ if(CATKIN_ENABLE_TESTING)
     test/testFrame.cpp
     test/GridCalibration.cpp
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test
-    )
-
-
+  )
   SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS} -lpthread")
 
-  target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${Boost_LIBRARIES})
-
+  target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME})
 endif()
 
-cs_install()
-cs_export()
+##################
+## Installation ##
+##################
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)

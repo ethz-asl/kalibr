@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-print "importing libraries"
+print("importing libraries")
 import rospy
 import cv2
-import cv
 import numpy as np
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -12,7 +11,6 @@ class CameraFocus:
     def __init__(self, topic):
         self.topic = topic
         self.windowNameOrig = "Camera: {0}".format(self.topic)
-        cv2.namedWindow(self.windowNameOrig, 2)
         self.bridge = CvBridge()
         self.image_sub = rospy.Subscriber(self.topic, Image, self.callback)
     
@@ -21,8 +19,8 @@ class CameraFocus:
         try:
             cv_image = self.bridge.imgmsg_to_cv2(msg)
             np_image= np.array(cv_image)
-        except CvBridgeError, e:
-            print "Could not convert ros message to opencv image: ", e
+        except CvBridgeError as e:
+            print("Could not convert ros message to opencv image: ", e)
             return
     
         #calculate the fft magnitude
@@ -49,13 +47,16 @@ if __name__ == "__main__":
     parser.add_argument('--topic', nargs='+', dest='topics', help='camera topic', required=True)
     parsed = parser.parse_args()
 
+    rospy.init_node('kalibr_camera_focus', anonymous=True)
+
     for topic in parsed.topics:
-        camval = CameraFocus(topic) 
-    
-    rospy.init_node('kalibr_validator', anonymous=True)
+        camval = CameraFocus(topic)
+        cv2.namedWindow(camval.windowNameOrig, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(camval.windowNameOrig, (640, 480))
+
     try:
         rospy.spin()
     except KeyboardInterrupt:
-        print "Shutting down" 
-    
-    cv.DestroyAllWindows()
+        print("Shutting down") 
+
+    cv2.destroyAllWindows()

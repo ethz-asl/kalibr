@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="3">
   <name>aslam_backend_expressions</name>
   <version>0.0.1</version>
   <description>aslam_backend_expressions</description>
@@ -7,9 +7,6 @@
   <maintainer email="Paul.Furgale@mavt.ethz.ch">Paul Furgale</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>catkin_simple</buildtool_depend>
-  
-  <!-- List dependencies to system libs and other catkin packages here. -->
 
   <build_depend>aslam_backend</build_depend>
   <build_depend>sm_boost</build_depend>
@@ -20,8 +17,5 @@
   <build_depend>suitesparse</build_depend>
   <build_depend>sm_timing</build_depend>
 
+  <build_export_depend>sparse_block_matrix</build_export_depend>
 </package>
-
-
-
-

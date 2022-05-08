@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-print "importing libraries"
+print("importing libraries")
 
 import kalibr_common as kc
 
@@ -35,7 +35,7 @@ if len(sys.argv)<2:
 parsed = parser.parse_args()
 
 if parsed.image_topics is None and parsed.imu_topics is None:
-    print "ERROR: Need at least one camera or IMU topic."
+    print("ERROR: Need at least one camera or IMU topic.")
     sys.exit(-1)
 
 #create output folder
@@ -55,7 +55,7 @@ if parsed.image_topics is not None:
       
       numImages = dataset.numImages()
       #progress bar
-      print "Extracting {0} images from topic {1}".format(numImages, dataset.topic)
+      print("Extracting {0} images from topic {1}".format(numImages, dataset.topic))
       iProgress.reset(numImages)
       iProgress.sample()
       
@@ -68,9 +68,9 @@ if parsed.image_topics is not None:
         
         iProgress.sample()
       
-      print "\r      done.                                                          "
-      print
-print
+      print("\r      done.                                                          ")
+      print("")
+print("")
 
 #extract imu data
 if parsed.imu_topics is not None:
@@ -80,11 +80,11 @@ if parsed.imu_topics is not None:
         
         #progress bar
         numMsg = dataset.numMessages()
-        print "Extracting {0} IMU messages from topic {1}".format(numMsg, dataset.topic)
+        print("Extracting {0} IMU messages from topic {1}".format(numMsg, dataset.topic))
         iProgress.reset(numMsg)
         iProgress.sample()
 
-        with open( "{0}/{1}".format(parsed.output_folder, filename), 'wb') as imufile:
+        with open( "{0}/{1}".format(parsed.output_folder, filename), 'w') as imufile:
           spamwriter = csv.writer(imufile, delimiter=',')
           spamwriter.writerow(["timestamp", "omega_x", "omega_y", "omega_z", "alpha_x", "alpha_y", "alpha_z"])
       
@@ -92,5 +92,5 @@ if parsed.imu_topics is not None:
             timestamp_int = int(timestamp.toSec()*1e9)
             spamwriter.writerow([timestamp_int, omega[0],omega[1],omega[2], alpha[0],alpha[1],alpha[2] ])
             iProgress.sample()
-          print "\r      done.                                                          "
-          print
+          print("\r      done.                                                          ")
+          print("")

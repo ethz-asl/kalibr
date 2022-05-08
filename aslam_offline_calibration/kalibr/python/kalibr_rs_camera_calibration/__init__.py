@@ -1,1 +1,1 @@
-from RsCalibrator import *
+from .RsCalibrator import *

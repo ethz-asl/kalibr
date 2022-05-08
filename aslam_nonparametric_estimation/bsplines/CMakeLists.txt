@@ -1,15 +1,33 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(bsplines)
 
-find_package(catkin_simple REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  sm_common
+  sm_timing
+  sm_eigen
+  sm_kinematics
+  sparse_block_matrix
+)
 
-catkin_simple()
+catkin_package(
+  LIBRARIES ${PROJECT_NAME}
+  INCLUDE_DIRS include
+)
 
-cs_add_library(${PROJECT_NAME} 
+include_directories(include ${catkin_INCLUDE_DIRS})
+
+add_library(${PROJECT_NAME} 
   src/BSpline.cpp
   src/BSplinePose.cpp
 )
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
-cs_install()
-cs_export()
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)

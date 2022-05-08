@@ -40,7 +40,7 @@ TEST(SplineErrorTestSuite, testSimpleSplineError)
     {
         using namespace aslam::backend;
         BSplineDesignVariable<1> initSpline = generateRandomBSpline();
-        Eigen::VectorXd values(1.0);
+        Eigen::VectorXd values(1);
 
         VectorExpression<1> splineExpression =  initSpline.toExpression(5.0,0);
         SimpleSplineError<BSplineDesignVariable<1> > e(&initSpline, &splineExpression, values, 5.0);
@@ -60,5 +60,3 @@ TEST(SplineErrorTestSuite, testSimpleSplineError)
         FAIL() << e.what();
     }
 }
-
-
