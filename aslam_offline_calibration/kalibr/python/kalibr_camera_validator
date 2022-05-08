@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import String
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 import message_filters
 
@@ -128,15 +128,19 @@ class CameraChainValidator(object):
         self.observations=[]
         for cam_nr, msg in enumerate(cam_msgs):
           
-            #convert image to numpy
+            #convert image to gray single channel numpy array
             try:
-                if (msg.encoding == "rgb8" or msg.encoding == "bgra8"):
-                  cv_image = np.squeeze(np.array(self.bridge.imgmsg_to_cv2(msg, "mono8")))
+                if msg._type == 'sensor_msgs/CompressedImage':
+                    np_image = np.array(self.bridge.compressed_imgmsg_to_cv2(msg))
+                    if len(np_image.shape) > 2 and np_image.shape[2] == 3:
+                        np_image = cv2.cvtColor(np_image, cv2.COLOR_BGR2GRAY)
+                elif msg.encoding == "rgb8" or msg.encoding == "bgra8":
+                    np_image = np.array(self.bridge.imgmsg_to_cv2(msg, "mono8"))
                 else:
-                  cv_image = self.bridge.imgmsg_to_cv2(msg)
-                np_image = np.array(cv_image)
+                    np_image = np.array(self.bridge.imgmsg_to_cv2(msg))
             except CvBridgeError as e:
-                print(e)
+                print("Could not convert ros message to opencv image: ", e)
+                continue
             
             #get the corresponding monovalidator instance
             validator = self.monovalidators[cam_nr]
@@ -382,13 +386,16 @@ class MonoCameraValidator(object):
         
         #print details
         print("Camera {0}:".format(camConfig.getRosTopic()))
-        camConfig.printDetails();    
+        camConfig.printDetails()
         
         self.topic = camConfig.getRosTopic()
         self.windowName = "Camera: {0}".format(self.topic)
     
         #register the cam topic to the message synchronizer
-        self.image_sub = message_filters.Subscriber(self.topic, Image)
+        if "compressed" in self.topic:
+            self.image_sub = message_filters.Subscriber(self.topic, CompressedImage)
+        else:
+            self.image_sub = message_filters.Subscriber(self.topic, Image)
         
         #create image undistorter
         alpha = 1.0
