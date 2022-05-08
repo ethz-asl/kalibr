@@ -505,7 +505,7 @@ void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointIntrinsicsJacobian
 template<typename DISTORTION_T>
 template<typename DERIVED_P, typename DERIVED_JD>
 void DoubleSphereProjection<DISTORTION_T>::euclideanToKeypointDistortionJacobian(
-    const Eigen::MatrixBase<DERIVED_P> & p,
+    const Eigen::MatrixBase<DERIVED_P> & /*p*/,
     const Eigen::MatrixBase<DERIVED_JD> & outJd) const {
 
   EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE_OR_DYNAMIC(

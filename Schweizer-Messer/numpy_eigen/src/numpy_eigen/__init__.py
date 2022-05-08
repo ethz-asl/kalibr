@@ -1,3 +1,3 @@
 import os
 
-from libnumpy_eigen import *
+from .libnumpy_eigen import *

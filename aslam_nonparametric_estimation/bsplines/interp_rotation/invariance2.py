@@ -175,4 +175,4 @@ if True:
     C1 = cexp(b * clog( np.dot(R.T, np.dot( C, R))))
     C2 = np.dot( R.T, np.dot( cexp(b * clog(C) ), R))
 
-    print C1 - C2
+    print(C1 - C2)

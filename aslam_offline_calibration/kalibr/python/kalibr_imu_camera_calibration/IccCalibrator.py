@@ -1,6 +1,6 @@
 import aslam_backend as aopt
 import aslam_splines as asp
-import IccUtil as util
+from . import IccUtil as util
 import incremental_calibration as inc
 import kalibr_common as kc
 import sm
@@ -80,19 +80,19 @@ class IccCalibrator(object):
                       timeOffsetPadding=0.02,
                       verbose=False  ):
 
-        print "\tSpline order: %d" % (splineOrder)
-        print "\tPose knots per second: %d" % (poseKnotsPerSecond)
-        print "\tDo pose motion regularization: %s" % (doPoseMotionError)
-        print "\t\txddot translation variance: %f" % (mrTranslationVariance)
-        print "\t\txddot rotation variance: %f" % (mrRotationVariance)
-        print "\tBias knots per second: %d" % (biasKnotsPerSecond)
-        print "\tDo bias motion regularization: %s" % (doBiasMotionError)
-        print "\tBlake-Zisserman on reprojection errors %s" % blakeZisserCam
-        print "\tAcceleration Huber width (sigma): %f" % (huberAccel)
-        print "\tGyroscope Huber width (sigma): %f" % (huberGyro)
-        print "\tDo time calibration: %s" % (not noTimeCalibration)
-        print "\tMax iterations: %d" % (maxIterations)
-        print "\tTime offset padding: %f" % (timeOffsetPadding)
+        print("\tSpline order: %d" % (splineOrder))
+        print("\tPose knots per second: %d" % (poseKnotsPerSecond))
+        print("\tDo pose motion regularization: %s" % (doPoseMotionError))
+        print("\t\txddot translation variance: %f" % (mrTranslationVariance))
+        print("\t\txddot rotation variance: %f" % (mrRotationVariance))
+        print("\tBias knots per second: %d" % (biasKnotsPerSecond))
+        print("\tDo bias motion regularization: %s" % (doBiasMotionError))
+        print("\tBlake-Zisserman on reprojection errors %s" % blakeZisserCam)
+        print("\tAcceleration Huber width (sigma): %f" % (huberAccel))
+        print("\tGyroscope Huber width (sigma): %f" % (huberGyro))
+        print("\tDo time calibration: %s" % (not noTimeCalibration))
+        print("\tMax iterations: %d" % (maxIterations))
+        print("\tTime offset padding: %f" % (timeOffsetPadding))
 
 
         ############################################
@@ -160,18 +160,19 @@ class IccCalibrator(object):
             options.convergenceDeltaJ = 1e-2
             options.maxIterations = maxIterations
             options.trustRegionPolicy = aopt.LevenbergMarquardtTrustRegionPolicy(options.levenbergMarquardtLambdaInit)
-            options.linearSolver = aopt.BlockCholeskyLinearSystemSolver()
+            options.linearSolver = aopt.BlockCholeskyLinearSystemSolver() #does not have multi-threading support
 
         #run the optimization
         self.optimizer = aopt.Optimizer2(options)
         self.optimizer.setProblem(self.problem)
 
         optimizationFailed=False
-        try: 
+        try:
             retval = self.optimizer.optimize()
             if retval.linearSolverFailure:
                 optimizationFailed = True
-        except:
+        except Exception as e:
+            sm.logError(str(e))
             optimizationFailed = True
 
         if optimizationFailed:
@@ -191,7 +192,7 @@ class IccCalibrator(object):
         #            1. transformation imu-cam0 --> 6
         #            2. camera time2imu --> 1*numCams (only if enabled)
         
-        print "Recovering covariance..."
+        print("Recovering covariance...")
         estimator = inc.IncrementalEstimator(CALIBRATION_GROUP_ID)
         rval = estimator.addBatch(self.problem, True)    
         est_stds = np.sqrt(estimator.getSigma2Theta().diagonal())
@@ -230,5 +231,4 @@ class IccCalibrator(object):
         try:
             chain.writeYaml(resultFile)
         except:
-            print "ERROR: Could not write parameters to file: {0}\n".format(resultFile)
-            
+            raise RuntimeError("ERROR: Could not write parameters to file: {0}\n".format(resultFile))

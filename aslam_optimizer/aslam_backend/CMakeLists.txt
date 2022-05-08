@@ -1,19 +1,35 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(aslam_backend)
 
-find_package(catkin_simple REQUIRED)
-catkin_simple()
+set(CMAKE_CXX_STANDARD 14)
 
+find_package(catkin REQUIRED COMPONENTS
+  sparse_block_matrix
+  sm_boost
+  sm_random
+  sm_timing
+  sm_logging
+  sm_property_tree
+)
 find_package(Boost REQUIRED COMPONENTS system thread)
+find_package(Eigen3 REQUIRED)
 
-include_directories(${Eigen_INCLUDE_DIRS})
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS
+    sparse_block_matrix
+    sm_boost
+    sm_random
+    sm_timing
+    sm_logging
+    sm_property_tree
+  DEPENDS Boost
+)
 
-#add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x -O3)
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
 
-#target_link_libraries(${PROJECT_NAME} ${CHOLMOD_LIBRARIES} ${EXTRA_LIBS}  ${CSPARSE_LIBRARY})
-#rosbuild_link_boost(${PROJECT_NAME} thread system)
-
-cs_add_library(${PROJECT_NAME}
+add_library(${PROJECT_NAME}
   src/MEstimatorPolicies.cpp
   src/JacobianContainer.cpp
   src/DesignVariable.cpp
@@ -45,11 +61,15 @@ cs_add_library(${PROJECT_NAME}
   src/DogLegTrustRegionPolicy.cpp
   src/Optimizer2.cpp
 )
-
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
+target_link_libraries(${PROJECT_NAME}
+  ${Boost_LIBRARIES}
+  ${TBB_LIBRARIES}
+  ${CHOLMOD_LIBRARY}
+  ${SUITESPARSE_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
 
 if(CATKIN_ENABLE_TESTING)
-
   # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
   add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
   catkin_add_gtest(${PROJECT_NAME}_test
@@ -66,9 +86,14 @@ if(CATKIN_ENABLE_TESTING)
     test/ErrorTermTests.cpp
     )
   target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
-
 endif()
 
-cs_install()
-cs_export()
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)

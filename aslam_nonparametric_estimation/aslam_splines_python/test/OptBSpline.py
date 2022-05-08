@@ -67,7 +67,7 @@ def numericJacobian(spline, t, knots):
     for i in range(0, order):
         vI = i + iStart;
         orgCV = numpy.matrix(vertices[vI]);
-        jacobian[:, i] = scipy.misc.derivative(lambda(cV) : evalSplineWithUpdatedCVs(spline, vertices, vI, cV, orgCV, t), orgCV);
+        jacobian[:, i] = scipy.misc.derivative(lambda cV : evalSplineWithUpdatedCVs(spline, vertices, vI, cV, orgCV, t), orgCV);
         vertices[vI] = orgCV;
         
     spline.setControlVertices(vertices)

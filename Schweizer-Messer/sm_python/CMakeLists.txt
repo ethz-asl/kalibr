@@ -1,27 +1,25 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(sm_python)
 
-#catkin_python_setup()
+set(CMAKE_CXX_STANDARD 14)
 
-find_package(catkin REQUIRED COMPONENTS cmake_modules sm_common numpy_eigen sm_kinematics 
-                                        sm_timing sm_logging sm_matrix_archive
-                                        sm_property_tree python_module)
-include_directories(${catkin_INCLUDE_DIRS})
-find_package(Eigen REQUIRED)
 
-include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+find_package(catkin REQUIRED COMPONENTS sm_common numpy_eigen sm_kinematics 
+sm_timing sm_logging sm_matrix_archive
+sm_property_tree python_module numpy_eigen
+)
+find_package(Eigen3 REQUIRED)
 
+catkin_python_setup()
 
 catkin_package(
-  INCLUDE_DIRS include  ${catkin_INCLUDE_DIRS}
-  LIBRARIES ${PROJECT_NAME}
+  INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
   CATKIN_DEPENDS sm_common numpy_eigen sm_kinematics sm_timing sm_logging
-                 sm_matrix_archive sm_property_tree python_module
-  DEPENDS
+  sm_matrix_archive sm_property_tree python_module
 )
-add_definitions(-std=c++0x -D__STRICT_ANSI__)
-
-include_directories(include)
+add_definitions(-D__STRICT_ANSI__)
+  
+include_directories(include ${EIGEN3_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 # Set up the python exports.
 SET(PY_PROJECT_NAME sm_python)
@@ -52,5 +50,11 @@ add_python_export_library(${PY_PROJECT_NAME} ${PY_PACKAGE_DIR}
   src/exportNsecTime.cpp
   src/random.cpp
 )
+target_link_libraries(${PY_PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-target_link_libraries(${PY_PROJECT_NAME} ${Boost_LIBRARIES})
+##################
+## Installation ##
+##################
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)

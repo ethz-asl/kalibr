@@ -9,7 +9,6 @@
 email="paul.furgale@mavt.ethz.ch">Paul Furgale</maintainer>
   <license>BSD</license>
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>catkin_simple</buildtool_depend>
 
   <build_depend>sm_common</build_depend>
   <build_depend>sm_eigen</build_depend>
@@ -20,7 +19,6 @@ email="paul.furgale@mavt.ethz.ch">Paul Furgale</maintainer>
   <build_depend>sm_opencv</build_depend>
   <build_depend>sm_property_tree</build_depend>
   <build_depend>opencv2_catkin</build_depend>
-  <build_depend>eigen_catkin</build_depend>
   <build_depend>sm_random</build_depend>
 </package>
 

@@ -35,7 +35,7 @@ def getLocalCumulativeBi(bs, t, i):
 c = -1
 
 for i in range(0, 3) :
-    print i
+    print(i)
 #    val = np.array( [ getLocalCumulativeBi(bs, t, i) for t in T ] )
 #    pl.plot(T,val)
 #    val = np.array( [ getLocalCumulativeBi(bs, t+c, i+c) if (t + c) < 8 and (t+c >0) else 0 for t in T ] )

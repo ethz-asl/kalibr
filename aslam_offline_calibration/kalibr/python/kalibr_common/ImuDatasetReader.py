@@ -16,7 +16,11 @@ class BagImuDatasetReaderIterator(object):
     def __iter__(self):
         return self
     def next(self):
-        idx = self.iter.next()
+        # required for python 2.x compatibility
+        idx = next(self.iter)
+        return self.dataset.getMessage(idx)
+    def __next__(self):
+        idx = next(self.iter)
         return self.dataset.getMessage(idx)
 
 class BagImuDatasetReader(object):
@@ -34,7 +38,7 @@ class BagImuDatasetReader(object):
         indices = self.bag._get_indexes(conx)
         
         try:
-            self.index = indices.next()
+            self.index = next(indices)
         except:
             raise RuntimeError("Could not find topic {0} in {1}.".format(imutopic, self.bagfile))
         
@@ -73,8 +77,8 @@ class BagImuDatasetReader(object):
 
         bagstart = min(timestamps)
         baglength = max(timestamps)-bagstart
-        print "bagstart",bagstart
-        print "baglength",baglength
+        print("bagstart", bagstart)
+        print("baglength", baglength)
         #some value checking
         if bag_from_to[0]>=bag_from_to[1]:
             raise RuntimeError("Bag start time must be bigger than end time.".format(bag_from_to[0]))

@@ -188,7 +188,9 @@ void exportGenericProjectionFunctions(T & proj) {
       "keypointToEuclideanJk",
       &e2kJp<C>,
       "Map a keypoint to a 3x1 Euclidean point and get the Jacobian of the mapping with respect to small changes in the keypoint.\n(p, Jk) = keypointToEuclideanJk(k)");
+  /*
   proj.def("isValid", &C::template isValid<Eigen::VectorXd>);
+           */
   proj.def("setParameters", &C::setParameters,
            "Set the Parameter Vector/Matrix");
   proj.def("getParameters", &getParameters<C>,
@@ -288,7 +290,6 @@ void exportOmniProjection(std::string name) {
       sm::python::pickle_suite<OmniProjection<D> >());
   exportGenericProjectionFunctions<OmniProjection<D> >(omniProjection);
   //exportGenericProjectionDesignVariable< OmniProjection<D> >(name);
-
 }
 
 template<typename D>
@@ -334,7 +335,6 @@ void exportExtendedUnifiedProjection(std::string name) {
       sm::python::pickle_suite<ExtendedUnifiedProjection<D> >());
   exportGenericProjectionFunctions<ExtendedUnifiedProjection<D> >(extendedUnifiedProjection);
   //exportGenericProjectionDesignVariable< ExtendedUnifiedProjection<D> >(name);
-
 }
 
 template<typename D>
@@ -380,7 +380,6 @@ void exportDoubleSphereProjection(std::string name) {
       sm::python::pickle_suite<DoubleSphereProjection<D> >());
   exportGenericProjectionFunctions<DoubleSphereProjection<D> >(doubleSphereProjection);
   //exportGenericProjectionDesignVariable< DoubleSphereProjection<D> >(name);
-
 }
 
 template<typename D>
@@ -413,18 +412,17 @@ void exportPinholeProjection(std::string name) {
   /// \brief The horizontal resolution in pixels.
       .def("ru", &PinholeProjection<D>::ru)
   /// \brief The vertical resolution in pixels.
-      .def("rv", &PinholeProjection<D>::rv).def(
-      "focalLengthCol", &PinholeProjection<D>::focalLengthCol).def(
-      "focalLengthRow", &PinholeProjection<D>::focalLengthRow).def(
-      "opticalCenterCol", &PinholeProjection<D>::opticalCenterCol).def(
-      "opticalCenterRow", &PinholeProjection<D>::opticalCenterRow)
+      .def("rv", &PinholeProjection<D>::rv)
+      .def("focalLengthCol", &PinholeProjection<D>::focalLengthCol)
+      .def("focalLengthRow", &PinholeProjection<D>::focalLengthRow)
+      .def("opticalCenterCol", &PinholeProjection<D>::opticalCenterCol)
+      .def("opticalCenterRow", &PinholeProjection<D>::opticalCenterRow)
   //.def("distortion",&PinholeProjection<D>::distortion, return_internal_reference<>())
       .def("distortion", distortion1, return_internal_reference<>()).def(
       "setDistortion", &PinholeProjection<D>::setDistortion).def_pickle(
       sm::python::pickle_suite<PinholeProjection<D> >());
   exportGenericProjectionFunctions<PinholeProjection<D> >(pinholeProjection);
   //exportGenericProjectionDesignVariable< PinholeProjection<D> >(name);
-
 }
 
 void exportCameraProjections() {

@@ -1,3 +1,4 @@
+from __future__ import print_function #handle print in 2.x python
 import sm
 import aslam_backend as aopt
 
@@ -38,7 +39,7 @@ class ObservationDatabase(object):
         obs_idx = len(self.observations[cam_id])-1
     
         #find the nearest timestamp in the table
-        timestamps_table = self.targetViews.keys()
+        timestamps_table = list(self.targetViews.keys())
         timestamp_obs = obs.time().toSec()
         
         #check if the table is still empty (initialization)
@@ -83,15 +84,15 @@ class ObservationDatabase(object):
 
     #get the number of cameras that see at least one target
     def numCameras(self):
-        return len(self.observations.keys())
+        return len(list(self.observations.keys()))
 
     #get a list of all timestamps at which we see a target
     def getAllViewTimestamps(self):
-        return self.targetViews.keys()
+        return list(self.targetViews.keys())
     
     #get a list of all cam_ids that see the target at the given time
     def getCamIdsAtTimestamp(self, timestamp):
-        return self.targetViews[timestamp].keys()
+        return list(self.targetViews[timestamp].keys())
     
     #get the observation for given cam_id and timestamp
     def getObservationAtTime(self, timestamp, cam_id):
@@ -143,22 +144,22 @@ class ObservationDatabase(object):
 #############################################################    
     def printTable(self):
         #header
-        print "timestamp \t",        
+        print("timestamp \t", end=' ')        
         for cam_id in range(0, self.numCameras()):
-            print "cam{0} \t".format(cam_id),
-        print
+            print("cam{0} \t".format(cam_id), end=' ')
+        print("")
         
         #sort for time
-        times_sorted = np.sort(self.targetViews.keys())
+        times_sorted = np.sort(list(self.targetViews.keys()))
         
         #data lines
         for time in times_sorted:
-            print time,
+            print(time, end=' ')
             for cam_id in range(0, self.numCameras()):
                 try:
                     numCorners = len(self.targetViews[time][cam_id]['observed_corners'])
                 except KeyError:
                     numCorners = "-"
-                print "\t", numCorners,
-            print
+                print("\t", numCorners, end=' ')
+            print("")
 
