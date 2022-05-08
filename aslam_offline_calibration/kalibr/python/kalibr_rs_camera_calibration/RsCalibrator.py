@@ -9,6 +9,7 @@ from kalibr_common import ConfigReader as cr
 import bsplines
 import numpy as np
 import multiprocessing
+import os
 import sys
 import gc
 import math
@@ -328,7 +329,6 @@ class RsCalibrator(object):
                 # add an error term for every observed corner
                 corner_ids = observation.getCornersIdx()
                 for index, point in enumerate(observation.getCornersImageFrame()):
-                    keypoint_index = int(corner_ids[index])
 
                     # keypoint time offset by line delay as expression type
                     keypoint_time = self.__camera_dv.keypointTime(frame.time(), point)
@@ -342,14 +342,14 @@ class RsCalibrator(object):
                     T_t_w = T_w_t.inverse()
 
                     # transform target point to camera frame
-                    p_t = T_t_w * landmarks_expr[keypoint_index]
+                    p_t = T_t_w * landmarks_expr[corner_ids[index]]
 
                     # create the keypoint
+                    keypoint_index = frame.numKeypoints()
                     keypoint = acv.Keypoint2()
                     keypoint.setMeasurement(point)
                     inverseFeatureCovariance = self.__config.inverseFeatureCovariance
                     keypoint.setInverseMeasurementCovariance(np.eye(len(point)) * inverseFeatureCovariance)
-                    keypoint.setLandmarkId(keypoint_index)
                     frame.addKeypoint(keypoint)
 
                     # create reprojection error
@@ -406,7 +406,7 @@ class RsCalibrator(object):
                 if dist < best_dist:
                     best_r = aa
                     best_dist = dist
-            curve[3:6,i] = best_r;
+            curve[3:6,i] = best_r
 
     def __initPoseDesignVariables(self, problem):
         """Get the design variable representation of the pose spline and add them to the problem"""
@@ -464,8 +464,8 @@ class RsCalibrator(object):
 
     def __saveParametersYaml(self):
         # Create new config file
-        bagtag = self.__cameraGeometry.dataset.bagfile.translate(None, "<>:/\|?*").replace('.bag', '', 1)
-        resultFile = "camchain-" + bagtag + ".yaml"
+        bagtag = os.path.splitext(self.__cameraGeometry.dataset.bagfile)[0]
+        resultFile = bagtag + "-camchain.yaml"
         chain = cr.CameraChainParameters(resultFile, createYaml=True)
         camParams = cr.CameraParameters(resultFile, createYaml=True)
         camParams.setRosTopic(self.__cameraGeometry.dataset.topic)
