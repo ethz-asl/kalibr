@@ -567,7 +567,7 @@ class IccImu(object):
         def printDetails(self, dest=sys.stdout):
             print("  Model: {0}".format(self.data["model"]), file=dest)
             kc.ImuParameters.printDetails(self, dest)
-            print("  T_i_b", file=dest)
+            print("  T_i_b (body to imu)", file=dest)
             print(self.formatIndented("    ", np.array(self.data["T_i_b"])), file=dest)
             print("  time offset with respect to IMU0: {0} [s]".format(self.data["time_offset"]), file=dest)
 
