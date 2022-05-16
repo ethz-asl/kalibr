@@ -576,8 +576,7 @@ class IccImu(object):
         return self.imuConfig
 
     def updateImuConfig(self):
-        self.imuConfig.setImuPose(sm.Transformation(sm.r2quat(self.q_i_b_Dv.toRotationMatrix()), \
-                                                    self.r_b_Dv.toEuclidean()).T())
+        self.imuConfig.setImuPose(self.getTransformationFromBodyToImu())
         self.imuConfig.setTimeOffset(self.timeOffset)
 
     def __init__(self, imuConfig, parsed, isReferenceImu=True, estimateTimedelay=True):
