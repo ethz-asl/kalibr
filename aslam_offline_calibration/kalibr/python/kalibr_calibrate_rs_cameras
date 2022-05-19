@@ -23,10 +23,10 @@ import signal
 
 np.set_printoptions(suppress=True)
 
-def __initBagDataset(bagfile, topic, from_to):
+def __initBagDataset(bagfile, topic, from_to, freq):
     print("\tDataset:          {0}".format(bagfile))
     print("\tTopic:            {0}".format(topic))
-    reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to)
+    reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to, bag_freq=freq)
     print("\tNumber of images: {0}".format(reader.numImages()))
     return reader
 
@@ -90,6 +90,7 @@ def __parseArgs():
     groupSource.add_argument('--bag', dest='bagfile', help='The bag file with the data.')
     groupSource.add_argument('--topic', dest='topic', help='The image topic.', required=True)
     groupSource.add_argument('--bag-from-to', metavar='bag_from_to', type=float, nargs=2, help='Use the bag data starting from up to this time [s].')
+    groupSource.add_argument('--bag-freq', metavar='bag_freq', type=float, help='Frequency to extract features at [hz]')
 
     groupTarget = parser.add_argument_group('Calibration target configuration')
     groupTarget.add_argument('--target', dest='targetYaml', help='Calibration target configuration as yaml file.', required=True)
@@ -135,7 +136,7 @@ def main():
     ######
     ## load bagfile and extract targets:
     targetConfig = kc.CalibrationTargetParameters(parsed.targetYaml)
-    dataset = __initBagDataset(parsed.bagfile, parsed.topic, parsed.bag_from_to)
+    dataset = __initBagDataset(parsed.bagfile, parsed.topic, parsed.bag_from_to, parsed.bag_freq)
 
     #create camera
     cameraModel = cameraModels[parsed.model]
