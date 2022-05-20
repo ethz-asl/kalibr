@@ -776,8 +776,8 @@ class IccImu(object):
         if self.isReferenceImu:
             return sm.Transformation()
         return sm.Transformation(sm.r2quat(self.q_i_b_Dv.toRotationMatrix()) , \
-                                 np.dot(self.q_i_b_Dv.toRotationMatrix(), \
-                                        self.r_b_Dv.toEuclidean()))
+                                 - np.dot(self.q_i_b_Dv.toRotationMatrix(), \
+                                          self.r_b_Dv.toEuclidean()))
 
     def findOrientationPrior(self, referenceImu):
         print("")
