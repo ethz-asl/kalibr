@@ -18,11 +18,11 @@ import pylab as pl
 import scipy.optimize
 
 
-def initCameraBagDataset(bagfile, topic, from_to=None, perform_synchronization=False):
+def initCameraBagDataset(bagfile, topic, from_to, freq, perform_synchronization):
     print("Initializing camera rosbag dataset reader:")
     print("\tDataset:          {0}".format(bagfile))
     print("\tTopic:            {0}".format(topic))
-    reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to, \
+    reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to, bag_freq=freq, \
                                       perform_synchronization=perform_synchronization)
     print("\tNumber of images: {0}".format(len(reader.index)))
     return reader
@@ -420,7 +420,7 @@ class IccCameraChain():
         for camNr in range(0, chainConfig.numCameras()):
             camConfig = chainConfig.getCameraParameters(camNr)
             dataset = initCameraBagDataset(parsed.bagfile[0], camConfig.getRosTopic(), \
-                                           parsed.bag_from_to, parsed.perform_synchronization)
+                                           parsed.bag_from_to, parsed.bag_freq, parsed.perform_synchronization)
             
             #create the camera
             self.camList.append( IccCamera( camConfig, 

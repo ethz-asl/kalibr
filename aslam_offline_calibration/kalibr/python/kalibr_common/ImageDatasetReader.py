@@ -31,7 +31,7 @@ class BagImageDatasetReaderIterator(object):
 
 
 class BagImageDatasetReader(object):
-  def __init__(self, bagfile, imagetopic, bag_from_to=None, perform_synchronization=False):
+  def __init__(self, bagfile, imagetopic, bag_from_to=None, perform_synchronization=False, bag_freq=None):
     self.bagfile = bagfile
     self.topic = imagetopic
     self.perform_synchronization = perform_synchronization
@@ -59,6 +59,10 @@ class BagImageDatasetReader(object):
     # go through the bag and remove the indices outside the timespan [bag_start_time, bag_end_time]
     if bag_from_to:
       self.indices = self.truncateIndicesFromTime(self.indices, bag_from_to)
+
+    # go through and remove indices not at the correct frequency
+    if bag_freq:
+      self.indices = self.truncateIndicesFromFreq(self.indices, bag_freq)
 
   # sort the ros messegaes by the header time not message time
   def sortByTime(self, indices):
@@ -102,7 +106,30 @@ class BagImageDatasetReader(object):
       if timestamp >= (bagstart + bag_from_to[0]) and timestamp <= (bagstart + bag_from_to[1]):
         valid_indices.append(idx)
     sm.logWarn(
-        "BagImageDatasetReader: truncated {0} / {1} images.".format(len(indices) - len(valid_indices), len(indices)))
+        "BagImageDatasetReader: truncated {0} / {1} images (from-to).".format(len(indices) - len(valid_indices), len(indices)))
+    return valid_indices
+
+  def truncateIndicesFromFreq(self, indices, freq):
+
+    # some value checking
+    if freq < 0.0:
+      raise RuntimeError("Frequency {0} Hz is smaller 0".format(freq))
+
+    # find the valid timestamps
+    timestamp_last = -1
+    valid_indices = []
+    for idx in self.indices:
+      topic, data, stamp = self.bag._read_message(self.index[idx].position)
+      timestamp = data.header.stamp.secs + data.header.stamp.nsecs / 1.0e9
+      if timestamp_last < 0.0:
+        timestamp_last = timestamp
+        valid_indices.append(idx)
+        continue
+      if (timestamp - timestamp_last) >= 1.0 / freq:
+        timestamp_last = timestamp
+        valid_indices.append(idx)
+    sm.logWarn(
+      "BagImageDatasetReader: truncated {0} / {1} images (frequency)".format(len(indices) - len(valid_indices), len(indices)))
     return valid_indices
 
   def __iter__(self):
