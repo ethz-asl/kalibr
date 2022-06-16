@@ -40,7 +40,6 @@ ENTRYPOINT export KALIBR_MANUAL_FOCAL_LENGTH_INIT=1 && \
 	cd $WORKSPACE && \
 	/bin/bash
 
+ADD docker_entrypoint.bash /docker_entrypoint.sh
 
-
-
-
+ENTRYPOINT /docker_entrypoint.sh /bin/bash
