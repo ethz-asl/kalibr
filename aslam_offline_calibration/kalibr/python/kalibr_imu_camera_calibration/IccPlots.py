@@ -255,7 +255,7 @@ class CameraPlot:
         #interactive mode
         pl.ion()
         #hack to enforce axis equal (matplotlib doesn't support that)
-        self.ax.set_aspect('equal')
+        #self.ax.set_aspect('equal')
         MAX = 1
         for direction in (-1, 1):
             for point in np.diag(direction * MAX * np.array([1,1,1])):

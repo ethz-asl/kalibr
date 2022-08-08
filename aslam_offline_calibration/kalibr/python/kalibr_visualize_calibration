@@ -52,7 +52,9 @@ def set_axis_equal_3d(ax):
     r = maxsize / 2
     for ctr, dim in zip(centers, 'xyz'):
         getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
-    ax.set_aspect('equal')
+    ax.set_xlim(centers[0]-maxsize, centers[0]+maxsize)
+    ax.set_ylim(centers[1]-maxsize, centers[1]+maxsize)
+    ax.set_zlim(centers[2]-maxsize, centers[2]+maxsize)
 
 
 def set_orthogonal_projection(zfront, zback):
