@@ -147,18 +147,18 @@ def main():
         sys.exit(2)
     
     imus = list()
-    for (imu_yaml, imu_model) in zip(parsed.imu_yamls, parsed.imu_models):
+    for i, (imu_yaml, imu_model) in enumerate(zip(parsed.imu_yamls, parsed.imu_models)):
         imuConfig = kc.ImuParameters(imu_yaml)
         imuConfig.printDetails()
         if imu_model == 'calibrated':
             imus.append( sens.IccImu(imuConfig, parsed, isReferenceImu=(not imus), \
-                         estimateTimedelay=parsed.estimate_imu_delay) )
+                         estimateTimedelay=parsed.estimate_imu_delay, imuNr=i) )
         elif imu_model == 'scale-misalignment':
             imus.append( sens.IccScaledMisalignedImu(imuConfig, parsed, isReferenceImu=(not imus), \
-                         estimateTimedelay=parsed.estimate_imu_delay) )
+                         estimateTimedelay=parsed.estimate_imu_delay, imuNr=i) )
         elif imu_model == 'scale-misalignment-size-effect':
             imus.append( sens.IccScaledMisalignedSizeEffectImu(imuConfig, parsed, isReferenceImu=(not imus), \
-                         estimateTimedelay=parsed.estimate_imu_delay) )
+                         estimateTimedelay=parsed.estimate_imu_delay, imuNr=i) )
         else:
             sm.logError("Model {0} is currently unsupported.".format(imu_model))
             sys.exit(2)

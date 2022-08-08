@@ -550,10 +550,11 @@ class IccCameraChain():
 class IccImu(object):
     
     class ImuParameters(kc.ImuParameters):
-        def __init__(self, imuConfig):
+        def __init__(self, imuConfig, imuNr):
             kc.ImuParameters.__init__(self, '', True)
             self.data = imuConfig.data
             self.data["model"] = "calibrated"
+            self.imuNr = imuNr
 
         def setImuPose(self, T_i_b):
             self.data["T_i_b"] = T_i_b.tolist()
@@ -567,7 +568,7 @@ class IccImu(object):
         def printDetails(self, dest=sys.stdout):
             print("  Model: {0}".format(self.data["model"]), file=dest)
             kc.ImuParameters.printDetails(self, dest)
-            print("  T_i_b", file=dest)
+            print("  T_ib (imu0 to imu{0})".format(self.imuNr), file=dest)
             print(self.formatIndented("    ", np.array(self.data["T_i_b"])), file=dest)
             print("  time offset with respect to IMU0: {0} [s]".format(self.data["time_offset"]), file=dest)
 
@@ -576,18 +577,17 @@ class IccImu(object):
         return self.imuConfig
 
     def updateImuConfig(self):
-        self.imuConfig.setImuPose(sm.Transformation(sm.r2quat(self.q_i_b_Dv.toRotationMatrix()), \
-                                                    self.r_b_Dv.toEuclidean()).T())
+        self.imuConfig.setImuPose(self.getTransformationFromBodyToImu().T())
         self.imuConfig.setTimeOffset(self.timeOffset)
 
-    def __init__(self, imuConfig, parsed, isReferenceImu=True, estimateTimedelay=True):
+    def __init__(self, imuConfig, parsed, isReferenceImu=True, estimateTimedelay=True, imuNr=0):
 
         #determine whether IMU coincides with body frame (for multi-IMU setups)
         self.isReferenceImu = isReferenceImu
         self.estimateTimedelay = estimateTimedelay
 
         #store input
-        self.imuConfig = self.ImuParameters(imuConfig)
+        self.imuConfig = self.ImuParameters(imuConfig, imuNr)
 
         #load dataset
         self.dataset = initImuBagDataset(parsed.bagfile[0], imuConfig.getRosTopic(), \
@@ -776,8 +776,8 @@ class IccImu(object):
         if self.isReferenceImu:
             return sm.Transformation()
         return sm.Transformation(sm.r2quat(self.q_i_b_Dv.toRotationMatrix()) , \
-                                 np.dot(self.q_i_b_Dv.toRotationMatrix(), \
-                                        self.r_b_Dv.toEuclidean()))
+                                 - np.dot(self.q_i_b_Dv.toRotationMatrix(), \
+                                          self.r_b_Dv.toEuclidean()))
 
     def findOrientationPrior(self, referenceImu):
         print("")
@@ -912,8 +912,8 @@ class IccImu(object):
 class IccScaledMisalignedImu(IccImu):
 
     class ImuParameters(IccImu.ImuParameters):
-        def __init__(self, imuConfig):
-            IccImu.ImuParameters.__init__(self, imuConfig)
+        def __init__(self, imuConfig, imuNr):
+            IccImu.ImuParameters.__init__(self, imuConfig, imuNr)
             self.data = imuConfig.data
             self.data["model"] = "scale-misalignment"
 
@@ -1064,8 +1064,8 @@ class IccScaledMisalignedImu(IccImu):
 class IccScaledMisalignedSizeEffectImu(IccScaledMisalignedImu):
 
     class ImuParameters(IccScaledMisalignedImu.ImuParameters):
-        def __init__(self, imuConfig):
-            IccScaledMisalignedImu.ImuParameters.__init__(self, imuConfig)
+        def __init__(self, imuConfig, imuNr):
+            IccScaledMisalignedImu.ImuParameters.__init__(self, imuConfig, imuNr)
             self.data = imuConfig.data
             self.data["model"] = "scale-misalignment-size-effect"
 
