@@ -919,9 +919,9 @@ bool OmniProjection<DISTORTION_T>::estimateTransformation(
   cv::Mat rvec(3, 1, CV_64F);
   cv::Mat tvec(3, 1, CV_64F);
 
-  if (Ps.size() < 4) {
+  if (Ps.size() < 6) {
 //    SM_DEBUG_STREAM(
-//        "At least 4 points are needed for calling PnP. Found " << Ps.size());
+//        "At least 6 points are needed for calling PnP. Found " << Ps.size());
     return false;
   }
 
