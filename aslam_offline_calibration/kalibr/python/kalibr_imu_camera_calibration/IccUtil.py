@@ -194,7 +194,7 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True):
 
 def exportPoses(cself, filename="poses_imu0.csv"):
     f = open(filename, 'w')
-    print >> f, "t x y z r11 r12 r13 r21 r22 r23 r31 r32 r33"
+    print("t x y z r11 r12 r13 r21 r22 r23 r31 r32 r33", file=f)
     imu = cself.ImuList[0]
     bodyspline = cself.poseDv.spline()
     times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.imuData \
@@ -203,8 +203,8 @@ def exportPoses(cself, filename="poses_imu0.csv"):
     for time in times:
         position =  bodyspline.position(time)
         orientation = bodyspline.orientation(time)
-        print >> f, time, ' '.join(map(str, position)), \
-           ' '.join(map(str, orientation.reshape(-1)))
+        print("{} ".format(time) + " ".join(map(str, position)) \
+        + " " + " ".join(map(str, orientation.reshape(-1))) , file=f)
 
 def saveResultTxt(cself, filename='cam_imu_result.txt'):
     f = open(filename, 'w')
