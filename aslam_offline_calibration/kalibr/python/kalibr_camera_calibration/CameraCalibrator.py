@@ -43,9 +43,9 @@ class CameraGeometry(object):
         self.dv = cameraModel.designVariable(self.geometry)
         self.setDvActiveStatus(True, True, False)
         self.isGeometryInitialized = False
-        
+
         #create target detector
-        self.ctarget = TargetDetector(targetConfig, self.geometry, showCorners=verbose, showReproj=verbose)
+        self.ctarget = TargetDetector(targetConfig, self.geometry, showCorners=verbose)
 
     def setDvActiveStatus(self, projectionActive, distortionActive, shutterActice):
         self.dv.projectionDesignVariable().setActive(projectionActive)
