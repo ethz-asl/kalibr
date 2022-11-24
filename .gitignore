@@ -50,3 +50,6 @@ cmake-build-*
 .idea
 build
 Build
+
+# vs-code
+.vscode
