@@ -26,7 +26,8 @@ import math
 import gc
 import sys
 
-np.set_printoptions(suppress=True, precision=8)
+# make numpy print prettier
+np.set_printoptions(suppress=True)
 
 
 def normalize(v):
