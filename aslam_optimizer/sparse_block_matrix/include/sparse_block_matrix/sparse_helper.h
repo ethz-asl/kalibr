@@ -107,9 +107,9 @@ namespace {
 
         ~CholmodExt()
         {
-            if(p) delete[] (INTTYPE*)p; p = 0;
-            if(x) delete[] (double*)x; x = 0;
-            if(i) delete[] (INTTYPE*)i; i = 0;
+            if(p) { delete[] (INTTYPE*)p; p = 0; }
+            if(x) { delete[] (double*)x; x = 0; }
+            if(i) { delete[] (INTTYPE*)i; i = 0; }
         }
         size_t columnsAllocated;
     };
@@ -123,5 +123,3 @@ namespace {
 #include "implementation/sparse_helper.h"
 
 #endif
-
-

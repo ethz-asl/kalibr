@@ -70,31 +70,31 @@ stamp = acv.Time.now()
 # process the images. A real multiframe should only be returned after all images are added.
 MF1 = nullProcessor.addImage( stamp, 0, front )
 if not MF1 is None:
-    print "Expected none!"
+    print("Expected none!")
 MF1 = nullProcessor.addImage( stamp, 1, left )
 if not MF1 is None:
-    print "Expected none!"
+    print("Expected none!")
 MF1 = nullProcessor.addImage( stamp, 2, rear )
 if not MF1 is None:
-    print "Expected none!"
+    print("Expected none!")
 MF1 = nullProcessor.addImage( stamp, 3, right )
 if MF1 is None:
-    print "Expected a completed multiframe!"
+    print("Expected a completed multiframe!")
 
 
 # Do the same for the undistorting processor
 MF2 = undistortingProcessor.addImage( stamp, 0, front )
 if not MF2 is None:
-    print "Expected none!"
+    print("Expected none!")
 MF2 = undistortingProcessor.addImage( stamp, 1, left )
 if not MF2 is None:
-    print "Expected none!"
+    print("Expected none!")
 MF2 = undistortingProcessor.addImage( stamp, 2, rear )
 if not MF2 is None:
-    print "Expected none!"
+    print("Expected none!")
 MF2 = undistortingProcessor.addImage( stamp, 3, right )
 if MF2 is None:
-    print "Expected a completed multiframe!"
+    print("Expected a completed multiframe!")
 
 
 # Now we have a multiframe from each processor.
@@ -106,9 +106,9 @@ plotImages( IM, MF2, 2, "Omni Undistorter")
 
 # Note that the underlying camera geometry objects are different and
 # they have different numbers of features
-print "\nFrom the null undistorter:"
+print("\nFrom the null undistorter:")
 for i in range(0,MF1.numCameras()):
-    print "MF1, camera {0} has geometry {1} and {2} features".format(i, type(MF1.getFrame(i).geometryBase()), MF1.getFrame(i).numKeypoints())
-print "\nFrom the undistorter:"
+    print("MF1, camera {0} has geometry {1} and {2} features".format(i, type(MF1.getFrame(i).geometryBase()), MF1.getFrame(i).numKeypoints()))
+print("\nFrom the undistorter:")
 for i in range(0,MF2.numCameras()):
-    print "MF2, camera {0} has geometry {1} and {2} features".format(i, type(MF2.getFrame(i).geometryBase()), MF2.getFrame(i).numKeypoints())
+    print("MF2, camera {0} has geometry {1} and {2} features".format(i, type(MF2.getFrame(i).geometryBase()), MF2.getFrame(i).numKeypoints()))

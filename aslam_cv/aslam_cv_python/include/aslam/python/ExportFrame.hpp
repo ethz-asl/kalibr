@@ -19,7 +19,6 @@ void exportKeypoint() {
   using namespace aslam;
 
   typedef aslam::Keypoint<D> keypoint_t;
-  typedef DescriptorBase descriptor_t;
 
   std::stringstream str;
   str << "Keypoint" << D;
@@ -141,7 +140,6 @@ void exportFrame(const std::string & name) {
   using namespace boost::python;
   using namespace aslam;
   typedef CAMERA_GEOMETRY_T geometry_t;
-  typedef DescriptorBase descriptor_t;
   typedef Frame<geometry_t> frame_t;
   typedef typename frame_t::keypoint_t keypoint_t;
 

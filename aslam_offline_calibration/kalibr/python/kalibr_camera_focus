@@ -1,10 +1,9 @@
 #!/usr/bin/env python
-print "importing libraries"
+print("importing libraries")
 import rospy
 import cv2
-import cv
 import numpy as np
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 import argparse
 
@@ -12,31 +11,47 @@ class CameraFocus:
     def __init__(self, topic):
         self.topic = topic
         self.windowNameOrig = "Camera: {0}".format(self.topic)
-        cv2.namedWindow(self.windowNameOrig, 2)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber(self.topic, Image, self.callback)
-    
-    def callback(self, msg):
-        #convert image to opencv
+        if "compressed" in self.topic:
+            self.image_sub = rospy.Subscriber(self.topic, CompressedImage, self.callback_compressed)
+        else:
+            self.image_sub = rospy.Subscriber(self.topic, Image, self.callback_raw)
+
+    def callback_raw(self, msg):
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(msg)
-            np_image= np.array(cv_image)
-        except CvBridgeError, e:
-            print "Could not convert ros message to opencv image: ", e
+            if msg.encoding == "rgb8" or msg.encoding == "bgra8":
+                np_image = np.array(self.bridge.imgmsg_to_cv2(msg, "mono8"))
+            else:
+                np_image = np.array(self.bridge.imgmsg_to_cv2(msg))
+        except CvBridgeError as e:
+            print("Could not convert ros message to opencv image: ", e)
             return
-    
+        self.callback_common(np_image)
+
+    def callback_compressed(self, msg):
+        try:
+            np_image = np.array(self.bridge.compressed_imgmsg_to_cv2(msg))
+            if len(np_image.shape) > 2 and np_image.shape[2] == 3:
+                np_image = cv2.cvtColor(np_image, cv2.COLOR_BGR2GRAY)
+        except CvBridgeError as e:
+            print("Could not convert ros message to opencv image: ", e)
+            return
+        self.callback_common(np_image)
+
+    def callback_common(self, np_image):
+
         #calculate the fft magnitude
         img_float32 = np.float32(np_image)
         dft = cv2.dft(img_float32, flags = cv2.DFT_COMPLEX_OUTPUT)
         dft_shift = np.fft.fftshift(dft)
         magnitude_spectrum = cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1])
-        
+
         #normalize
         magnitude_spectrum_normalized = magnitude_spectrum / np.sum(magnitude_spectrum)
-        
+
         #frequency domain entropy (-> Entropy Based Measure of Camera Focus. Matej Kristan, Franjo Pernu. University of Ljubljana. Slovenia)
         fde = np.sum( magnitude_spectrum_normalized * np.log(magnitude_spectrum_normalized) )
-    
+
         y = 20; x = 20
         text = "fde: {0}   (minimize this for focus)".format(np.sum(fde))
         np_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2BGR)
@@ -44,18 +59,22 @@ class CameraFocus:
         cv2.imshow(self.windowNameOrig, np_image)
         cv2.waitKey(10)
 
+
 if __name__ == "__main__":    
     parser = argparse.ArgumentParser(description='Validate the intrinsics of a camera.')
     parser.add_argument('--topic', nargs='+', dest='topics', help='camera topic', required=True)
     parsed = parser.parse_args()
 
+    rospy.init_node('kalibr_camera_focus', anonymous=True)
+
     for topic in parsed.topics:
-        camval = CameraFocus(topic) 
-    
-    rospy.init_node('kalibr_validator', anonymous=True)
+        camval = CameraFocus(topic)
+        cv2.namedWindow(camval.windowNameOrig, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(camval.windowNameOrig, (640, 480))
+
     try:
         rospy.spin()
     except KeyboardInterrupt:
-        print "Shutting down" 
-    
-    cv.DestroyAllWindows()
+        print("Shutting down") 
+
+    cv2.destroyAllWindows()

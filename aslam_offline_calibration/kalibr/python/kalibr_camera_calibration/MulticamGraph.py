@@ -84,8 +84,16 @@ class MulticamCalibrationGraph(object):
 #############################################################    
     #check if all cams are connected through observations
     def isGraphConnected(self):
-        #check if all vertices are connected
-        return self.G.adhesion()
+        if self.numCams == 1:
+            # Since igraph 0.8, adhesion correctly returns 0 instead of -2147483648 for a graph with a single vertex.
+            # As 0 evaluates to False later in the process, kalibr exits with the cameras unconnected error.
+            # So we skip the check and return true in the one camera case.
+            # https://github.com/ethz-asl/kalibr/issues/364
+            # https://github.com/ethz-asl/kalibr/pull/358
+            return True
+        else:
+            #check if all vertices are connected
+            return self.G.adhesion()
         
     #returns the list of cam_ids that share common view with the specified cam_id
     def getCamOverlaps(self, cam_id):
@@ -161,7 +169,7 @@ class MulticamCalibrationGraph(object):
                 camL_nr = vertices[1]
                 camH_nr = vertices[0]
             
-            print "\t initializing camera pair ({0},{1})...  ".format(camL_nr, camH_nr)          
+            print("\t initializing camera pair ({0},{1})...  ".format(camL_nr, camH_nr))
 
             #run the pair extrinsic calibration
             obs_list = self.obs_db.getAllObsTwoCams(camL_nr, camH_nr)

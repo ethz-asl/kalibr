@@ -34,9 +34,9 @@ points = numpy.array(points)
 ebs.setControlVertices(points)
 
 espline = [ ebs.eval(t) for t in numpy.arange(time_min, time_max, 0.1)]
-print numpy.array(espline).transpose();
+print(numpy.array(espline).transpose());
 
 bs = ebs.getBSpline();
 bs.setCoefficientMatrix(points.transpose())
 spline = [ bs.eval (t) for t in numpy.arange(time_min, time_max, 0.1)]
-print numpy.array(spline).transpose();
+print(numpy.array(spline).transpose());

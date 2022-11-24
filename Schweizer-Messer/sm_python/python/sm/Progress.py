@@ -1,3 +1,4 @@
+from __future__ import print_function #handle print in 2.x python
 import time
 import datetime
 import sys
@@ -17,8 +18,8 @@ class Progress(object):
             timePerRun = self.elapsed / self.iteration
             totalTime = self.numIterations * timePerRun
         
-            print "Progress %d / %d" % (self.iteration, self.numIterations)
-            print "Time %s / %s  (%s * %d) " % (datetime.timedelta(seconds=self.elapsed), datetime.timedelta(seconds=totalTime), datetime.timedelta(seconds=timePerRun), self.numIterations)
+            print("Progress %d / %d" % (self.iteration, self.numIterations))
+            print("Time %s / %s  (%s * %d) " % (datetime.timedelta(seconds=self.elapsed), datetime.timedelta(seconds=totalTime), datetime.timedelta(seconds=timePerRun), self.numIterations))
 
         else:
             self.startTime = time.time()
@@ -63,7 +64,7 @@ class Progress2(object):
             if h > 0: t_remaining_str = "%d h " % h
             if m > 0: t_remaining_str = t_remaining_str + "%dm " % m
             if s > 0: t_remaining_str = t_remaining_str + "%ds" % s
-            print "\r  Progress {0} / {1} \t Time remaining: {2}                 ".format(self.iteration, self.numIterations, t_remaining_str),
+            print("\r  Progress {0} / {1} \t Time remaining: {2}                 ".format(self.iteration, self.numIterations, t_remaining_str), end=' ')
             sys.stdout.flush()
         else:
             self.startTime = time.time()

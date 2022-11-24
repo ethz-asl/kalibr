@@ -1,19 +1,22 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(aslam_backend_expressions)
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+set(CMAKE_CXX_STANDARD 14)
 
-SET(CMAKE_CXX_FLAGS "-std=c++0x")
 
-find_package(catkin_simple REQUIRED)
-
-catkin_simple()
-
-include_directories(${EIGEN_INCLUDE_DIRS})
-
+find_package(catkin REQUIRED COMPONENTS aslam_backend sm_boost sm_random sm_kinematics sparse_block_matrix sm_timing)
+find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
-cs_add_library(${PROJECT_NAME}
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS sparse_block_matrix
+)
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
+
+add_library(${PROJECT_NAME}
   src/RotationExpression.cpp
   src/RotationExpressionNode.cpp
   src/RotationQuaternion.cpp
@@ -53,35 +56,45 @@ cs_add_library(${PROJECT_NAME}
   src/MatrixBasic.cpp
   src/MatrixExpression.cpp
   src/MatrixExpressionNode.cpp
-  )
+)
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+##################
+## Installation ##
+##################
+
+install(TARGETS ${PROJECT_NAME}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+## Mark cpp header files for installation
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+)
+
+#############
+## Testing ##
+#############
 
 if(CATKIN_ENABLE_TESTING)
-
   # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
   add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
 
-  catkin_add_gtest(${PROJECT_NAME}_test
-    test/test_main.cpp
-    test/RotationExpression.cpp
-    test/HomogeneousExpression.cpp
-    test/MatrixAndEuclideanExpression.cpp
-    # \todo reenable after I can talk to Hannes.
-    # test/FixedPointNumberTest.cpp
-    test/GenericScalarExpressionTest.cpp
-    test/GenericMatrixExpression.cpp
-    test/QuaternionExpression.cpp
-    test/ScalarExpression.cpp
-    test/ErrorTest_Transformation.cpp
-    test/ErrorTest_Euclidean.cpp
-    )
-
-  target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
-
+  # catkin_add_gtest(${PROJECT_NAME}_test
+  #   test/test_main.cpp
+  #   test/RotationExpression.cpp
+  #   test/HomogeneousExpression.cpp
+  #   test/MatrixAndEuclideanExpression.cpp
+  #   # \todo reenable after I can talk to Hannes.
+  #   # test/FixedPointNumberTest.cpp
+  #   test/GenericScalarExpressionTest.cpp
+  #   test/GenericMatrixExpression.cpp
+  #   test/QuaternionExpression.cpp
+  #   test/ScalarExpression.cpp
+  #   test/ErrorTest_Transformation.cpp
+  #   test/ErrorTest_Euclidean.cpp
+  #   )
+  # target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 endif()
-
-cs_install()
-
-cs_export()
-

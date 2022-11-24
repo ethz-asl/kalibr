@@ -172,7 +172,8 @@ void exportCameraGeometries() {
   class_<ImageMask, boost::shared_ptr<ImageMask> >("ImageMask", init<>())
       .def("setMask", &ImageMask::setMaskFromMatrix)
       .def("getMask", &ImageMask::getMaskAsMatrix)
-      .def("isValid", &ImageMask::isValid<Eigen::VectorXd>);
+    //   .def("isValid", &ImageMask::isValid<Eigen::VectorXd>)  // per https://github.com/ethz-asl/kalibr/pull/405#issuecomment-809779442
+    ;
 
   class_<NoMask, boost::shared_ptr<NoMask> >("NoMask", init<>())
       .def("isValid", &NoMask::isValid<Eigen::VectorXd>);

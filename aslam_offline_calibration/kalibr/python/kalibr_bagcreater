@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-print "importing libraries"
+print("importing libraries")
 
 import rosbag
 import rospy
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import Imu
-import ImageFile
 import time, sys, os
 import argparse
 import cv2
@@ -66,7 +65,7 @@ def getImuCsvFiles(dir):
     
     return imu_files
 
-def loadImageToRosMsg(filename):
+def loadImageToRosMsg(filename, cam_name):
     image_np = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
     
     timestamp_nsecs = os.path.splitext(os.path.basename(filename))[0]
@@ -74,20 +73,22 @@ def loadImageToRosMsg(filename):
 
     rosimage = Image()
     rosimage.header.stamp = timestamp
+    rosimage.header.frame_id = cam_name
     rosimage.height = image_np.shape[0]
     rosimage.width = image_np.shape[1]
     rosimage.step = rosimage.width  #only with mono8! (step = width * byteperpixel * numChannels)
     rosimage.encoding = "mono8"
-    rosimage.data = image_np.tostring()
+    rosimage.data = image_np.tobytes()
     
     return rosimage, timestamp
 
-def createImuMessge(timestamp_int, omega, alpha):
+def createImuMessge(timestamp_int, omega, alpha, imu_name):
     timestamp_nsecs = str(timestamp_int)
     timestamp = rospy.Time( int(timestamp_nsecs[0:-9]), int(timestamp_nsecs[-9:]) )
     
     rosimu = Imu()
     rosimu.header.stamp = timestamp
+    rosimu.header.frame_id = imu_name
     rosimu.angular_velocity.x = float(omega[0])
     rosimu.angular_velocity.y = float(omega[1])
     rosimu.angular_velocity.z = float(omega[2])
@@ -107,18 +108,18 @@ try:
         camdir = parsed.folder + "/{0}".format(camfolder)
         image_files = getImageFilesFromDir(camdir)
         for image_filename in image_files:
-            image_msg, timestamp = loadImageToRosMsg(image_filename)
+            image_msg, timestamp = loadImageToRosMsg(image_filename, camfolder)
             bag.write("/{0}/image_raw".format(camfolder), image_msg, timestamp)
 
     #write imu data
     imufiles = getImuCsvFiles(parsed.folder)
     for imufile in imufiles:
         topic = os.path.splitext(os.path.basename(imufile))[0]
-        with open(imufile, 'rb') as csvfile:
+        with open(imufile, 'r') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             headers = next(reader, None)
             for row in reader:
-                imumsg, timestamp = createImuMessge(row[0], row[1:4], row[4:7])
+                imumsg, timestamp = createImuMessge(row[0], row[1:4], row[4:7], topic)
                 bag.write("/{0}".format(topic), imumsg, timestamp)
 finally:
     bag.close()

@@ -15,6 +15,7 @@
 #include <numpy_eigen/boost_python_headers.hpp>
 //#include <iostream>
 
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 #define PY_ARRAY_UNIQUE_SYMBOL NP_Eigen_AS
 #include <numpy/arrayobject.h> 
@@ -134,8 +135,8 @@ struct NumpyEigenConverter
       
   static void checkMatrixSizes(PyObject * obj_ptr)
   {
-    int rows = PyArray_DIM(obj_ptr, 0);
-    int cols = PyArray_DIM(obj_ptr, 1);
+    int rows = PyArray_DIM((PyArrayObject*)obj_ptr, 0);
+    int cols = PyArray_DIM((PyArrayObject*)obj_ptr, 1);
 
     bool rowsValid = isDimensionValid(rows, RowsAtCompileTime, MaxRowsAtCompileTime);
     bool colsValid = isDimensionValid(cols, ColsAtCompileTime, MaxColsAtCompileTime);
@@ -176,7 +177,7 @@ struct NumpyEigenConverter
 
   static void checkVectorSizes(PyObject * obj_ptr)
   {
-	int size = PyArray_DIM(obj_ptr, 0);
+	int size = PyArray_DIM((PyArrayObject*)obj_ptr, 0);
 
     // If the number of rows is fixed at 1, assume that is the sense of the vector.
     // Otherwise, assume it is a column.
@@ -220,7 +221,7 @@ struct NumpyEigenConverter
     
 
     // Check the array dimensions.
-    int nd = PyArray_NDIM(obj_ptr);
+    int nd = PyArray_NDIM((PyArrayObject*)obj_ptr);
     
     if(nd != 1 && nd != 2)
       {
@@ -266,10 +267,10 @@ struct NumpyEigenConverter
 
     matrix_t & M = *Mp;
 
-    int nd = PyArray_NDIM(obj_ptr);
+    int nd = PyArray_NDIM((PyArrayObject*)obj_ptr);
     if(nd == 1)
       {
-	int size = PyArray_DIM(obj_ptr, 0);
+	int size = PyArray_DIM((PyArrayObject*)obj_ptr, 0);
 	// This is a vector type
 	if(RowsAtCompileTime == 1)
 	  {
@@ -285,8 +286,8 @@ struct NumpyEigenConverter
       }
     else
       {
-	int rows = PyArray_DIM(obj_ptr, 0);
-	int cols = PyArray_DIM(obj_ptr, 1);
+	int rows = PyArray_DIM((PyArrayObject*)obj_ptr, 0);
+	int cols = PyArray_DIM((PyArrayObject*)obj_ptr, 1);
 	
 	M.resize(rows,cols);
 	numpyTypeDemuxer< CopyNumpyToEigenMatrix<matrix_t> >(&M,obj_ptr);	

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from std_msgs.msg import String
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 import message_filters
 
@@ -68,12 +68,14 @@ class CameraChainValidator(object):
         
         #initialize the cameras in the chain
         self.G = igraph.Graph(self.numCameras)
-        self.monovalidators=[]
+        self.monovalidators = []
         for cidx in range(0, self.numCameras):
             camConfig = chainConfig.getCameraParameters(cidx)
             
             #create a mono instance for each cam (detection and mono view)
             monovalidator = MonoCameraValidator(camConfig, targetParams)
+            cv2.namedWindow(monovalidator.windowName, cv2.WINDOW_NORMAL)
+            cv2.resizeWindow(monovalidator.windowName, (640, 480))
             self.monovalidators.append(monovalidator)
             
             #add edges to overlap graph
@@ -89,18 +91,26 @@ class CameraChainValidator(object):
         for edge in self.G.es:
             cidx_src = edge.source
             cidx_dest = edge.target
-
-            edge["rect_map"]=dict();edge["R"]=dict();edge["A"]=dict();
-            
+            edge["rect_map"] = dict()
+            edge["R"] = dict()
+            edge["A"] = dict()
             edge["rect_map"][cidx_src], \
             edge["rect_map"][cidx_dest], \
             edge["R"][cidx_src], \
             edge["R"][cidx_dest], \
             edge["A"][cidx_src], \
             edge["A"][cidx_dest] = self.prepareStereoRectificationMaps(cidx_src, cidx_dest)
+
+        # generate the windows
+        for edge in self.G.es:
+            cidx_src = edge.source
+            cidx_dest = edge.target
+            windowName = "Rectified view (cam{0} and cam{1})".format(cidx_src, cidx_dest)
+            cv2.namedWindow(windowName, cv2.WINDOW_NORMAL)
+            cv2.resizeWindow(windowName, (2*640, 480))
                 
         #register the callback for the synchronized images
-        sync_sub = message_filters.TimeSynchronizer([val.image_sub for val in self.monovalidators],1)
+        sync_sub = message_filters.ApproximateTimeSynchronizer([val.image_sub for val in self.monovalidators], 10, 0.02)
         sync_sub.registerCallback(self.synchronizedCallback)
 
         #initialize message throttler
@@ -115,18 +125,22 @@ class CameraChainValidator(object):
         self.timeLast = timeNow
          
         #process the images of all cameras
-        self.observations=[]; 
+        self.observations=[]
         for cam_nr, msg in enumerate(cam_msgs):
           
-            #convert image to numpy
+            #convert image to gray single channel numpy array
             try:
-                if (msg.encoding == "rgb8"):
-                  cv_image = np.squeeze(np.array(self.bridge.imgmsg_to_cv2(msg, "mono8")))
+                if msg._type == 'sensor_msgs/CompressedImage':
+                    np_image = np.array(self.bridge.compressed_imgmsg_to_cv2(msg))
+                    if len(np_image.shape) > 2 and np_image.shape[2] == 3:
+                        np_image = cv2.cvtColor(np_image, cv2.COLOR_BGR2GRAY)
+                elif msg.encoding == "rgb8" or msg.encoding == "bgra8":
+                    np_image = np.array(self.bridge.imgmsg_to_cv2(msg, "mono8"))
                 else:
-                  cv_image = self.bridge.imgmsg_to_cv2(msg)
-                np_image = np.array(cv_image)
-            except CvBridgeError, e:
-                print e
+                    np_image = np.array(self.bridge.imgmsg_to_cv2(msg))
+            except CvBridgeError as e:
+                print("Could not convert ros message to opencv image: ", e)
+                continue
             
             #get the corresponding monovalidator instance
             validator = self.monovalidators[cam_nr]
@@ -190,10 +204,7 @@ class CameraChainValidator(object):
         return np_rect_image
 
     def generatePairView(self, camAnr, camBnr):
-        #prepare the window
-        windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
-        cv2.namedWindow(windowName, 1)
-            
+
         #get the mono validators for each cam
         camA = self.monovalidators[camAnr]
         camB = self.monovalidators[camBnr]
@@ -241,7 +252,7 @@ class CameraChainValidator(object):
                 reproj_errs = np.hstack((reproj_errs, reprojErr_B.flatten()))     
                 
             reproj_errs = reproj_errs[2:]
-            reproj_errs = reproj_errs.reshape(2, reproj_errs.shape[0]/2)
+            reproj_errs = reproj_errs.reshape(2, int(reproj_errs.shape[0]/2.0))
                     
         #rectify the undistorted images
         edge_idx = self.G.get_eid(camAnr, camBnr)
@@ -257,7 +268,7 @@ class CameraChainValidator(object):
         np_image_rect = cv2.cvtColor(np_image_rect, cv2.COLOR_GRAY2BGR)
         n=10
         for i in range(0,n):
-            y = np_image_rect.shape[0]*i/n
+            y = int(np_image_rect.shape[0]*i/n)
             cv2.line(np_image_rect, (0,y), (2*np_image_rect.shape[1],y),(0,255,0));
     
     
@@ -292,8 +303,9 @@ class CameraChainValidator(object):
                 cv2.putText(np_image_rect, "{0: .4f}".format(err_val), (x+100,y), cv2.FONT_HERSHEY_SIMPLEX, fontScale=fontScale, color=(0, 0, 255), thickness=2)
         else:
  
-            cv2.putText(np_image_rect, "Detection failed...", (np_image_rect.shape[0]/2,np_image_rect.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
-            
+            cv2.putText(np_image_rect, "Detection failed...", (int(np_image_rect.shape[0]/2.0),int(np_image_rect.shape[1]/5.0)), cv2.FONT_HERSHEY_SIMPLEX, fontScale=2, color=(0, 0, 255), thickness=3)
+
+        windowName = "Rectified view (cam{0} and cam{1})".format(camAnr, camBnr)
         cv2.imshow(windowName, np_image_rect)
     
     
@@ -368,20 +380,22 @@ class CameraChainValidator(object):
 class MonoCameraValidator(object):
     def __init__(self, camConfig, targetParams):
         
-        print "initializing camera geometry"
+        print("initializing camera geometry")
         self.camera = kc.ConfigReader.AslamCamera.fromParameters(camConfig)
         self.target = CalibrationTargetDetector(self.camera, targetConfig)
         
         #print details
-        print "Camera {0}:".format(camConfig.getRosTopic())
-        camConfig.printDetails();    
+        print("Camera {0}:".format(camConfig.getRosTopic()))
+        camConfig.printDetails()
         
         self.topic = camConfig.getRosTopic()
         self.windowName = "Camera: {0}".format(self.topic)
-        cv2.namedWindow(self.windowName, 1)
     
         #register the cam topic to the message synchronizer
-        self.image_sub = message_filters.Subscriber(self.topic, Image)
+        if "compressed" in self.topic:
+            self.image_sub = message_filters.Subscriber(self.topic, CompressedImage)
+        else:
+            self.image_sub = message_filters.Subscriber(self.topic, Image)
         
         #create image undistorter
         alpha = 1.0
@@ -400,6 +414,7 @@ class MonoCameraValidator(object):
         
     
     def generateMonoview(self, np_image, observation, obs_valid):
+
         np_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2BGR)
 
         if obs_valid:
@@ -451,7 +466,7 @@ class MonoCameraValidator(object):
                 cv2.circle(np_image, (px_fix, py_fix), radius=radius_fix, color=(255,255,0), thickness=thickness, shift=shift, lineType=cv2.LINE_AA)
 
         else:
-            cv2.putText(np_image, "Detection failed...", (np_image.shape[0]/2,np_image.shape[1]/5), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.5, color=(0, 0, 255), thickness=2)
+            cv2.putText(np_image, "Detection failed...", (int(np_image.shape[0]/2.0),int(np_image.shape[1]/5.0)), cv2.FONT_HERSHEY_SIMPLEX, fontScale=1.5, color=(0, 0, 255), thickness=2)
 
         cv2.imshow(self.windowName, np_image)
         cv2.waitKey(1)
@@ -469,10 +484,13 @@ if __name__ == "__main__":
     else:
         sm.setLoggingLevel(sm.LoggingLevel.Info)
 
+    # init the node
+    rospy.init_node('kalibr_camera_validator', anonymous=True)
+
     #load the configuration yamls
     targetConfig = kc.ConfigReader.CalibrationTargetParameters(parsed.targetYaml)
     
-    print "Initializing calibration target:".format(targetConfig.getTargetType())
+    print("Initializing calibration target:".format(targetConfig.getTargetType()))
     targetConfig.printDetails()
     camchain = kc.ConfigReader.CameraChainParameters(parsed.chainYaml)
         
@@ -480,10 +498,9 @@ if __name__ == "__main__":
     chain_validator = CameraChainValidator(camchain, targetConfig)
     
     #ros message loops
-    rospy.init_node('kalibr_validator', anonymous=True)
     try:
         rospy.spin()
     except KeyboardInterrupt:
-        print "Shutting down"
+        print("Shutting down")
     
     cv2.destroyAllWindows()

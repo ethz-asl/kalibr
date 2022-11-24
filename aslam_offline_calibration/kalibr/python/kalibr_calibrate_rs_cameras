@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-print "importing libraries"
+print("importing libraries")
 import rosbag
 import cv_bridge
 
@@ -23,11 +23,11 @@ import signal
 
 np.set_printoptions(suppress=True)
 
-def __initBagDataset(bagfile, topic, from_to):
-    print "\tDataset:          {0}".format(bagfile)
-    print "\tTopic:            {0}".format(topic)
-    reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to)
-    print "\tNumber of images: {0}".format(reader.numImages())
+def __initBagDataset(bagfile, topic, from_to, freq):
+    print("\tDataset:          {0}".format(bagfile))
+    print("\tTopic:            {0}".format(topic))
+    reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to, bag_freq=freq)
+    print("\tNumber of images: {0}".format(reader.numImages()))
     return reader
 
 #available models
@@ -83,13 +83,14 @@ def __parseArgs():
 
     parser = KalibrArgParser(description='Calibrate the intrinsics of a single rolling shutter camera.', usage=usage)
     parser.add_argument('--model', dest='model', help='The camera model to estimate. '
-                        'Currently supported models are {0}, where the suffix \'-rs\' identifies rolling shutter models.'.format(', '.join(cameraModels.keys())), required=True)
+                        'Currently supported models are {0}, where the suffix \'-rs\' identifies rolling shutter models.'.format(', '.join(list(cameraModels.keys()))), required=True)
     parser.add_argument('--frame-rate', dest='framerate', type=int, help='Approximate framerate of the camera.', required=True)
 
     groupSource = parser.add_argument_group('Data source')
     groupSource.add_argument('--bag', dest='bagfile', help='The bag file with the data.')
     groupSource.add_argument('--topic', dest='topic', help='The image topic.', required=True)
     groupSource.add_argument('--bag-from-to', metavar='bag_from_to', type=float, nargs=2, help='Use the bag data starting from up to this time [s].')
+    groupSource.add_argument('--bag-freq', metavar='bag_freq', type=float, help='Frequency to extract features at [hz]')
 
     groupTarget = parser.add_argument_group('Calibration target configuration')
     groupTarget.add_argument('--target', dest='targetYaml', help='Calibration target configuration as yaml file.', required=True)
@@ -120,22 +121,6 @@ def __parseArgs():
 
     return parsed
 
-# perform corner extraction from bagfile
-# returns the observations
-def __extractObservations(cameraGeometry, verbose=False):
-
-    # extract the targets
-    multithreading = False #not verbose
-    observations = kc.extractCornersFromDataset(
-        cameraGeometry.dataset,
-        cameraGeometry.ctarget.detector,
-        multithreading=multithreading,
-        # transformation estimation will fail with rs cameras and significant distortions
-        noTransformation=True
-    )
-
-    return observations
-
 def main():
     parsed = __parseArgs()
 
@@ -151,14 +136,21 @@ def main():
     ######
     ## load bagfile and extract targets:
     targetConfig = kc.CalibrationTargetParameters(parsed.targetYaml)
-    dataset = __initBagDataset(parsed.bagfile, parsed.topic, parsed.bag_from_to)
+    dataset = __initBagDataset(parsed.bagfile, parsed.topic, parsed.bag_from_to, parsed.bag_freq)
 
     #create camera
     cameraModel = cameraModels[parsed.model]
     cameraGeometry = kcc.CameraGeometry(cameraModel, targetConfig, dataset, verbose=(parsed.verbose or parsed.showextraction))
 
-    # extract observations
-    observations = __extractObservations(cameraGeometry,(parsed.verbose or parsed.showextraction))
+    # extract observations of the targets
+    multithreading = not (parsed.verbose or parsed.showextraction)
+    observations = kc.extractCornersFromDataset(
+        cameraGeometry.dataset,
+        cameraGeometry.ctarget.detector,
+        multithreading=multithreading,
+        # transformation estimation will fail with rs cameras and significant distortions
+        noTransformation=True
+    )
 
     # Calibration Configuration
     config = rscc.RsCalibratorConfiguration()
@@ -176,7 +168,7 @@ def main():
 if __name__ == "__main__":
     try:
         main()
-    except Exception,e:
+    except Exception as e:
         sm.logError("Exception: {0}".format(e))
         sys.exit(-1)
 

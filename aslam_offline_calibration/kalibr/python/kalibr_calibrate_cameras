@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-print "importing libraries"
+print("importing libraries")
 import rosbag
 import cv_bridge
 
@@ -14,6 +14,7 @@ import kalibr_camera_calibration as kcc
 import cv2
 import os
 import numpy as np
+import multiprocessing
 import pylab as pl
 import argparse
 import sys
@@ -22,11 +23,11 @@ import signal
 
 np.set_printoptions(suppress=True)
 
-def initBagDataset(bagfile, topic, from_to):
-    print "\tDataset:          {0}".format(bagfile)
-    print "\tTopic:            {0}".format(topic)
-    reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to)
-    print "\tNumber of images: {0}".format(reader.numImages())
+def initBagDataset(bagfile, topic, from_to, freq):
+    print("\tDataset:          {0}".format(bagfile))
+    print("\tTopic:            {0}".format(topic))
+    reader = kc.BagImageDatasetReader(bagfile, topic, bag_from_to=from_to, bag_freq=freq)
+    print("\tNumber of images: {0}".format(reader.numImages()))
     return reader
 
 #available models
@@ -78,13 +79,14 @@ def parseArgs():
         tagSpacing: 0.3 #percent of tagSize"""
             
     parser = KalibrArgParser(description='Calibrate the intrinsics and extrinsics of a camera system with non-shared overlapping field of view.', usage=usage)
-    parser.add_argument('--models', nargs='+', dest='models', help='The camera model {0} to estimate'.format(cameraModels.keys()), required=True)
+    parser.add_argument('--models', nargs='+', dest='models', help='The camera model {0} to estimate'.format(list(cameraModels.keys())), required=True)
     
     groupSource = parser.add_argument_group('Data source')
     groupSource.add_argument('--bag', dest='bagfile', help='The bag file with the data')
     groupSource.add_argument('--topics', nargs='+', dest='topics', help='The list of image topics', required=True)
     groupSource.add_argument('--bag-from-to', metavar='bag_from_to', type=float, nargs=2, help='Use the bag data starting from up to this time [s]')
-    
+    groupSource.add_argument('--bag-freq', metavar='bag_freq', type=float, help='Frequency to extract features at [hz]')
+
     groupTarget = parser.add_argument_group('Calibration target configuration')
     groupTarget.add_argument('--target', dest='targetYaml', help='Calibration target configuration as yaml file', required=True)
     
@@ -160,12 +162,12 @@ def main():
     for cam_id in range(0, numCams):
         topic = parsed.topics[cam_id]
         modelName = parsed.models[cam_id]
-        print "Initializing cam{0}:".format(cam_id)
-        print "\tCamera model:\t  {0}".format(modelName)
+        print("Initializing cam{0}:".format(cam_id))
+        print("\tCamera model:\t  {0}".format(modelName))
 
         if modelName in cameraModels:
             #open dataset 
-            dataset = initBagDataset(parsed.bagfile, topic, parsed.bag_from_to)
+            dataset = initBagDataset(parsed.bagfile, topic, parsed.bag_from_to, parsed.bag_freq)
         
             #create camera
             cameraModel = cameraModels[modelName]
@@ -185,13 +187,13 @@ def main():
             if not cam.initGeometryFromObservations(observations):
                 raise RuntimeError("Could not initialize the intrinsics for camera with topic: {0}. Try to use --verbose and check whether the calibration target extraction is successful.".format(topic))
             
-            print "\tProjection initialized to: %s" % cam.geometry.projection().getParameters().flatten()
-            print "\tDistortion initialized to: %s" % cam.geometry.projection().distortion().getParameters().flatten()
+            print("\tProjection initialized to: %s" % cam.geometry.projection().getParameters().flatten())
+            print("\tDistortion initialized to: %s" % cam.geometry.projection().distortion().getParameters().flatten())
             
             cameraList.append(cam)
         else:
-            raise RuntimeError( "Unknown camera model: {0}. Try {1}.".format(modelName, cameraModels.keys()) )
-        
+            raise RuntimeError( "Unknown camera model: {0}. Try {1}.".format(modelName, list(cameraModels.keys())) )
+
     if parsed.verbose:
         obsdb.printTable()
     
@@ -200,7 +202,7 @@ def main():
     
     if not graph.isGraphConnected():
         obsdb.printTable()
-        print "Cameras are not connected through mutual observations, please check the dataset. Maybe adjust the approx. sync. tolerance."
+        print("Cameras are not connected through mutual observations, please check the dataset. Maybe adjust the approx. sync. tolerance.")
         graph.plotGraph()
         sys.exit(-1)
        
@@ -211,7 +213,7 @@ def main():
     while True:
         try:
             #compute initial guesses for the baselines, intrinsics
-            print "initializing initial guesses"
+            print("initializing initial guesses")
             if len(cameraList)>1:
                 baseline_guesses = graph.getInitialGuesses(cameraList)
             else:
@@ -221,16 +223,16 @@ def main():
                 graph.plotGraph()
 
             for baseline_idx, baseline in enumerate(baseline_guesses):
-                print "initialized baseline between cam{0} and cam{1} to:".format(baseline_idx, baseline_idx+1)
-                print baseline.T()
+                print("initialized baseline between cam{0} and cam{1} to:".format(baseline_idx, baseline_idx+1))
+                print(baseline.T())
                 
             for cam_idx, cam in enumerate(cameraList):
-                print "initialized cam{0} to:".format(cam_idx)
-                print "\t projection cam{0}: {1}".format(cam_idx, cam.geometry.projection().getParameters().flatten())
-                print "\t distortion cam{0}: {1}".format(cam_idx, cam.geometry.projection().distortion().getParameters().flatten())
+                print("initialized cam{0} to:".format(cam_idx))
+                print("\t projection cam{0}: {1}".format(cam_idx, cam.geometry.projection().getParameters().flatten()))
+                print("\t distortion cam{0}: {1}".format(cam_idx, cam.geometry.projection().distortion().getParameters().flatten()))
                 
 
-            print "initializing calibrator"
+            print("initializing calibrator")
             calibrator = kcc.CameraCalibration(cameraList, baseline_guesses, verbose=parsed.verbose, useBlakeZissermanMest=parsed.doBlakeZisserman)
             options = calibrator.estimator.getOptions()
             options.infoGainDelta = parsed.miTol
@@ -245,12 +247,13 @@ def main():
             
             optimizerOptions = calibrator.estimator.getOptimizerOptions()
             optimizerOptions.maxIterations = 50
+            optimizerOptions.nThreads = max(1,multiprocessing.cpu_count()-1)
             optimizerOptions.verbose = parsed.verbose
             verbose = parsed.verbose
         
             doPlot = parsed.plot
             if doPlot:
-                print "Plotting during calibration. Things may be very slow (but you might learn something)."
+                print("Plotting during calibration. Things may be very slow (but you might learn something).")
 
             #shuffle the views
             timestamps = obsdb.getAllViewTimestamps()
@@ -258,7 +261,7 @@ def main():
                 random.shuffle(timestamps)
 
             #process all target views
-            print "starting calibration..."
+            print("starting calibration...")
             numViews = len(timestamps)
             progress = sm.Progress2(numViews); progress.sample()
             for view_id, timestamp in enumerate(timestamps):
@@ -274,14 +277,14 @@ def main():
                 
                 #display process
                 if (verbose or (view_id % 25) == 0) and calibrator.estimator.getNumBatches()>0 and view_id>1:
-                    print
-                    print "------------------------------------------------------------------"
-                    print
-                    print "Processed {0} of {1} views with {2} views used".format(view_id+1, numViews, calibrator.estimator.getNumBatches())
-                    print
+                    print("")
+                    print("------------------------------------------------------------------")
+                    print("")
+                    print("Processed {0} of {1} views with {2} views used".format(view_id+1, numViews, calibrator.estimator.getNumBatches()))
+                    print("")
                     kcc.printParameters(calibrator)
-                    print
-                    print "------------------------------------------------------------------"
+                    print("")
+                    print("------------------------------------------------------------------")
                     
                 #calibration progress
                 progress.sample()
@@ -304,16 +307,16 @@ def main():
                     #create the list of the batches to check               
                     if initOutlierRejection:
                         #check all views after the min. number of batches has been reached
-                        batches_to_check=range(0, calibrator.estimator.getNumBatches())
-                        print;print
-                        print "Filtering outliers in all batches..."
+                        batches_to_check=list(range(0, calibrator.estimator.getNumBatches()))
+                        print("");print("")
+                        print("Filtering outliers in all batches...")
                         initOutlierRejection=False
                         progress_filter = sm.Progress2(len(batches_to_check)); progress_filter.sample()
                     elif runEndFiltering:
                         #check all batches again after all views have been processed
-                        print;print
-                        print "All views have been processed.\n\nStarting final outlier filtering..."
-                        batches_to_check=range(0, calibrator.estimator.getNumBatches())
+                        print("");print("")
+                        print("All views have been processed.\n\nStarting final outlier filtering...")
+                        batches_to_check=list(range(0, calibrator.estimator.getNumBatches()))
                         progress_filter = sm.Progress2(len(batches_to_check)); progress_filter.sample()
                     else:
                         #only check most recent view
@@ -326,7 +329,7 @@ def main():
                         
                         #check all cameras in this batch
                         cornerRemovalList_allCams=list()
-                        camerasInBatch = calibrator.views[batch_id].rerrs.keys()
+                        camerasInBatch = list(calibrator.views[batch_id].rerrs.keys())
                         for cidx in camerasInBatch:
                             
                             #calculate the reprojection errors statistics
@@ -385,36 +388,36 @@ def main():
                             progress_filter.sample()
                             
             #final output
-            print
-            print
-            print ".................................................................."
-            print
-            print "Calibration complete."
-            print
+            print("")
+            print("")
+            print("..................................................................")
+            print("")
+            print("Calibration complete.")
+            print("")
             if parsed.removeOutliers:
                 sm.logWarn("Removed {0} outlier corners.".format(len(removedOutlierCorners)) )             
-            print
-            print "Processed {0} images with {1} images used".format(numViews, calibrator.estimator.getNumBatches())
+            print("")
+            print("Processed {0} images with {1} images used".format(numViews, calibrator.estimator.getNumBatches()))
             kcc.printParameters(calibrator)
             
             if parsed.verbose and len(calibrator.baselines)>1:
-		        f=pl.figure(100006)
-		        kcc.plotCameraRig(calibrator.baselines, fno=f.number, clearFigure=False)
-		        pl.show()
+                f=pl.figure(100006)
+                kcc.plotCameraRig(calibrator.baselines, fno=f.number, clearFigure=False)
+                pl.show()
             
             #write to file
-            bagtag = parsed.bagfile.translate(None, "<>:/\|?*").replace('.bag', '', 1)
-            resultFile = "camchain-" + bagtag + ".yaml"
+            bagtag = os.path.splitext(parsed.bagfile)[0]
+            resultFile = bagtag + "-camchain.yaml"
             kcc.saveChainParametersYaml(calibrator, resultFile, graph)
-            print "Results written to file: {0}".format(resultFile)
+            print("Results written to file: {0}".format(resultFile))
             
             #save results to file
-            resultFileTxt = "results-cam-" + bagtag + ".txt"
+            resultFileTxt = bagtag + "-results-cam.txt"
             kcc.saveResultTxt(calibrator, filename=resultFileTxt)
-            print "  Detailed results written to file: {0}".format(resultFileTxt)
+            print("  Detailed results written to file: {0}".format(resultFileTxt))
             
             #generate report
-            reportFile = "report-cam-" + bagtag + ".pdf"
+            reportFile = bagtag + "-report-cam.pdf"
             G=None; 
             if numCams>1: 
                 G=graph
@@ -432,13 +435,13 @@ def main():
                 
                 #reinitialize the intrinsics
                 for cam_id, cam in enumerate(cameraList):
-                    print "Reinitialize the intrinsics for camera {0}".format(cam_id)
+                    print("Reinitialize the intrinsics for camera {0}".format(cam_id))
                     observations = obsdb.getAllObsCam(cam_id)
                     if not cam.initGeometryFromObservations(observations):
                         raise RuntimeError("Could not re-initialize the intrinsics for camera with topic: {0}".format(topic))
                     
-                    print "\tProjection initialized to: %s" % cam.geometry.projection().getParameters().flatten()
-                    print "\tDistortion initialized to: %s" % cam.geometry.projection().distortion().getParameters().flatten()
+                    print("\tProjection initialized to: %s" % cam.geometry.projection().getParameters().flatten())
+                    print("\tDistortion initialized to: %s" % cam.geometry.projection().distortion().getParameters().flatten())
                 
         else:
             break #normal exit

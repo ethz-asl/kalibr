@@ -1,28 +1,31 @@
 ![Kalibr](https://raw.githubusercontent.com/wiki/ethz-asl/kalibr/images/kalibr_small.png)
 
-*Ubuntu 14.04+ROS indigo*: [![Build Status](https://jenkins.asl.ethz.ch/buildStatus/icon?job=kalibr_weekly/label=ubuntu-trusty)](https://jenkins.asl.ethz.ch/job/kalibr_weekly/label=ubuntu-trusty/) *Ubuntu 16.04+ROS kinetic*: [![Build Status](https://jenkins.asl.ethz.ch/buildStatus/icon?job=kalibr_weekly/label=ubuntu-trusty)](https://jenkins.asl.ethz.ch/job/kalibr_weekly/label=ubuntu-xenial/)
+[![ROS1 Ubuntu 20.04](https://github.com/ethz-asl/kalibr/actions/workflows/docker_2004_build.yaml/badge.svg)](https://github.com/ethz-asl/kalibr/actions/workflows/docker_2004_build.yaml)
+[![ROS1 Ubuntu 18.04](https://github.com/ethz-asl/kalibr/actions/workflows/docker_1804_build.yaml/badge.svg)](https://github.com/ethz-asl/kalibr/actions/workflows/docker_1804_build.yaml)
+[![ROS1 Ubuntu 16.04](https://github.com/ethz-asl/kalibr/actions/workflows/docker_1604_build.yaml/badge.svg)](https://github.com/ethz-asl/kalibr/actions/workflows/docker_1604_build.yaml)
 
 ## Introduction
 Kalibr is a toolbox that solves the following calibration problems:
 
-1. **Multiple camera calibration**: 
-    intrinsic and extrinsic calibration of a camera-systems with non-globally shared overlapping fields of view
-1. **Visual-inertial calibration calibration (camera-IMU)**:
-    spatial and temporal calibration of an IMU w.r.t a camera-system
-1. **Rolling Shutter Camera calibration**:
-    full intrinsic calibration (projection, distortion and shutter parameters) of rolling shutter cameras
+1. **Multi-Camera Calibration**: Intrinsic and extrinsic calibration of a camera-systems with non-globally shared overlapping fields of view with support for a wide range of [camera models](https://github.com/ethz-asl/kalibr/wiki/supported-models).
+1. **Visual-Inertial Calibration (CAM-IMU)**: Spatial and temporal calibration of an IMU w.r.t a camera-system along with IMU intrinsic parameters
+1. **Multi-Inertial Calibration (IMU-IMU)**: Spatial and temporal calibration of an IMU w.r.t a base inertial sensor along with IMU intrinsic parameters (requires 1-aiding camera sensor).
+1. **Rolling Shutter Camera Calibration**: Full intrinsic calibration (projection, distortion and shutter parameters) of rolling shutter cameras.
+
+To install follow the [install wiki page](https://github.com/ethz-asl/kalibr/wiki/installation) instructions for which you can either use Docker or install from source in a ROS workspace.
+Please find more information on the [wiki pages](https://github.com/ethz-asl/kalibr/wiki) of this repository.
+For questions or comments, please open an issue on Github.
 
 
-**Please find more information on the [wiki pages](https://github.com/ethz-asl/kalibr/wiki) of this repository.**
+## News / Events
 
-**For questions or comments, please open an issue on Github.**
+* **May 3, 2022** - Support for Ubuntu 20.04 along with Docker scripts have been merged into master via PR [#515](https://github.com/ethz-asl/kalibr/pull/515). A large portion was upgrading to Python 3. A special thanks to all the contributors that made this possible. Additionally, contributed fixes for the different validation and visualization scripts have been merged.
+* **Febuary 3, 2020** - Initial Ubuntu 18.04 support has been merged via PR [#241](https://github.com/ethz-asl/kalibr/pull/241). Additionally, support for inputting an initial guess for focal length can be provided from the cmd-line on failure to initialize them.
+* **August 15, 2018** - Double sphere camera models have been contributed to the repository via PR [#210](https://github.com/ethz-asl/kalibr/pull/210). If you are interested you can refer to the [paper](https://arxiv.org/abs/1807.08957) for a nice overview of the models in the repository.
+* **August 25, 2016** - Rolling shutter camera calibration support was added as a feature via PR [#65](https://github.com/ethz-asl/kalibr/pull/65). The [paper](https://www.cv-foundation.org/openaccess/content_cvpr_2013/papers/Oth_Rolling_Shutter_Camera_2013_CVPR_paper.pdf) provides details for those interested.
+* **May 18, 2016** - Support for multiple IMU-to-IMU spacial and IMU intrinsic calibration was released.
+* **June 18, 2014** - Initial public release of the repository.
 
-## Tutorial: IMU-camera calibration
-A video tutorial for the IMU-camera calibration can be found here:
-
-[![alt text](https://user-images.githubusercontent.com/5337083/44033014-50208b8a-9f09-11e8-8e9a-d7d6d3c69d97.png)](https://m.youtube.com/watch?v=puNXsnrYWTY "imu cam calib")
-
-(Credits: @indigomega)
 
 ## Authors
 * Paul Furgale
@@ -31,6 +34,7 @@ A video tutorial for the IMU-camera calibration can be found here:
 * Jörn Rehder
 * Thomas Schneider ([email](thomas.schneider@voliro.com))
 * Luc Oth
+
 
 ## References
 The calibration approaches used in Kalibr are based on the following papers. Please cite the appropriate papers when using this toolbox or parts of it in an academic publication.
