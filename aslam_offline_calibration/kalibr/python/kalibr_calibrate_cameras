@@ -254,7 +254,7 @@ def main():
         
             doPlot = parsed.plot
             if doPlot:
-                print("Plotting during calibration. Things may be very slow (but you might learn something).")
+                sm.logWarn("Plotting during calibration. Things may be very slow (but you might learn something).")
 
             #shuffle the views
             timestamps = obsdb.getAllViewTimestamps()
@@ -299,7 +299,7 @@ def main():
                         fig=pl.figure(view_id*5000+cam_id)
                         kcc.plotAllReprojectionErrors(calibrator, cam_id, fno=fig.number, noShow=True)                        
                         plotter.add_figure("cam{0}".format(cam_id), fig)
-                    plotter.show()   
+                    plotter.show()
                 
                 # Look for outliers
                 runEndFiltering = view_id==(len(timestamps)-1) and parsed.allowEndFiltering # run another filtering step at the end (over all batches)

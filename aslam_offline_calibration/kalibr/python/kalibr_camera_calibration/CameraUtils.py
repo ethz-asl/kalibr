@@ -10,6 +10,14 @@ import incremental_calibration as ic
 import kalibr_camera_calibration as kcc
 
 from matplotlib.backends.backend_pdf import PdfPages
+import io
+try:
+    # Python 2
+    from cStringIO import StringIO
+except ImportError:
+    # Python 3
+    from io import StringIO
+import matplotlib.patches as patches
 import mpl_toolkits.mplot3d.axes3d as p3
 import cv2
 import numpy as np
@@ -403,10 +411,48 @@ def plotOutlierCorners(cself, removedOutlierCorners, fno=1, clearFigure=True, ti
         
 
 def generateReport(cself, filename="report.pdf", showOnScreen=True, graph=None, removedOutlierCorners=None):
+    
     #plotter
+    figs = list()
     plotter = PlotCollection.PlotCollection("Calibration report")
+    offset = 3010
+    
+    #Output calibration results in text form.
+    sstream = StringIO()
+    printParameters(cself, sstream)
+    text = [line for line in StringIO(sstream.getvalue())]
+    linesPerPage = 35
+    
+    while True:
+        fig = pl.figure(offset)
+        offset += 1
 
-    figs = list()    
+        left, width = .05, 1.
+        bottom, height = -.05, 1.
+        right = left + width
+        top = bottom + height
+        
+        ax = fig.add_axes([.0, .0, 1., 1.])
+        # axes coordinates are 0,0 is bottom left and 1,1 is upper right
+        p = patches.Rectangle((left, bottom), width, height, fill=False, transform=ax.transAxes, \
+                                 clip_on=False, edgecolor="none")
+        ax.add_patch(p)
+        pl.axis('off')
+
+        printText = lambda t: ax.text(left, top, t, fontsize=7, \
+                                     horizontalalignment='left', verticalalignment='top',\
+                                     transform=ax.transAxes, wrap=True)
+        
+        if len(text) > linesPerPage:
+            printText("".join(text[0:linesPerPage]))
+            figs.append(fig)
+            text = text[linesPerPage:]
+        else:
+            printText("".join(text[0:]))
+            figs.append(fig)
+            break
+
+    
     #plot graph
     if graph is not None:
         f=pl.figure(1001)
@@ -420,6 +466,14 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True, graph=None, 
         f=pl.figure(1002)
         title="camera system"
         plotCameraRig(cself.baselines, fno=f.number, clearFigure=False, title=title)
+        plotter.add_figure(title, f)
+        figs.append(f)
+    
+    #plot trajectory
+    if len(cself.views)>2:
+        f=pl.figure(1003)
+        title="cam0: estimated poses"
+        plotTrajectory(cself, fno=f.number, clearFigure=False, title=title)
         plotter.add_figure(title, f)
         figs.append(f)
         
@@ -444,7 +498,7 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True, graph=None, 
     #plot all removed outlier corners
     if removedOutlierCorners is not None:
         if len(removedOutlierCorners) > 0:
-            f=pl.figure(1003)
+            f=pl.figure(1004)
             title="Location of removed outlier corners"
             plotOutlierCorners(cself, removedOutlierCorners, fno=f.number, title=title)
             plotter.add_figure("Outlier corners", f)
@@ -489,6 +543,39 @@ def plotCorners(gridobs, fno=1, cornerlist=None, clearFigure=True, plotImage=Tru
     pl.plot(P[:,0], P[:,1],'o-', mfc=color, c=color, mec=color)
     pl.xlim([0,gridobs.imCols()])
     pl.ylim([gridobs.imRows(),0])
+
+
+def plotTrajectory(cself, fno=1, clearFigure=True, title=""):
+    f = pl.figure(fno)
+    if clearFigure:
+        f.clf()
+    f.suptitle(title)
+
+    size = 0.05
+    a3d = f.add_subplot(111, projection='3d')
+    
+    #get the list of camera poses from our problem
+    traj_max = np.array([-9999.0, -9999.0, -9999.0])
+    traj_min = np.array([9999.0, 9999.0, 9999.0])
+    views = sorted(cself.views, key=lambda x: x.timestamp)
+    T_target_camera_last = None;
+    for view in views:
+        # get this view in target frame
+        T_target_camera = sm.Transformation(view.dv_T_target_camera.T())
+        sm.plotCoordinateFrame(a3d, T_target_camera.T(), size=size)
+        # record min max
+        traj_max = np.maximum(traj_max, T_target_camera.t())
+        traj_min = np.minimum(traj_min, T_target_camera.t())
+        # compute relative change between
+        if T_target_camera_last != None:
+            pos1 = T_target_camera_last.t()
+            pos2 = T_target_camera.t()
+            a3d.plot3D([pos1[0], pos2[0]],[pos1[1], pos2[1]],[pos1[2], pos2[2]],'k-', linewidth=1)
+        T_target_camera_last = T_target_camera;
+
+    #TODO: should also plot the target board here!
+
+    a3d.auto_scale_xyz([traj_min[0]-size, traj_max[0]+size], [traj_min[1]-size, traj_max[1]+size], [traj_min[2]-size, traj_max[2]+size])
 
 def plotCameraRig(baselines, fno=1, clearFigure=True, title=""):
     f = pl.figure(fno)
@@ -546,19 +633,13 @@ def exportPoses(cself, filename):
 
 def saveResultTxt(cself, filename="camera_calibration_result.txt"):
     f1=open(filename, 'w')
-    print("Calibration results ", file=f1)
-    print("====================", file=f1)
-    
     printParameters(cself, f1)
-    print("", file=f1)
-    print("", file=f1)
-    print("Target configuration", file=f1)
-    print("====================", file=f1)
-    print("", file=f1)
-
-    cself.cameras[0].ctarget.targetConfig.printDetails(f1)
 
 def printParameters(cself, dest=sys.stdout):
+
+    print("Calibration results ", file=dest)
+    print("====================", file=dest)
+
     #get the covariances
     std_baselines, std_cameras = recoverCovariance(cself)
 
@@ -569,19 +650,19 @@ def printParameters(cself, dest=sys.stdout):
         p = cam.geometry.projection().getParameters().flatten()
         dd = std_cameras[cidx][0:d.shape[0]]
         dp = std_cameras[cidx][d.shape[0]:]
-        print("\tcam{0} ({1}):".format(cidx, cam.dataset.topic), file=dest) 
-        print("\t type: %s" % ( type(cam.geometry) ), file=dest) 
-        print("\t distortion: %s +- %s" % (d, np.array(dd)), file=dest)
-        print("\t projection: %s +- %s" % (p, np.array(dp)), file=dest)
+        print("cam{0} ({1}):".format(cidx, cam.dataset.topic), file=dest) 
+        print("    type: %s" % ( type(cam.geometry) ), file=dest) 
+        print("    distortion: %s +- %s" % (d, np.array(dd)), file=dest)
+        print("    projection: %s +- %s" % (p, np.array(dp)), file=dest)
         
         #reproj error statistics
         corners, reprojs, rerrs = getReprojectionErrors(cself, cidx)        
         if len(rerrs)>0:
             me, se = getReprojectionErrorStatistics(rerrs)
             try:
-              print("\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1]), file=dest)
+              print("    reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1]), file=dest)
             except:
-              print("\t Failed printing the reprojection error.", file=dest)
+              print("    failed printing the reprojection error!", file=dest)
             print(file=dest)
 
     #print baselines
@@ -589,10 +670,18 @@ def printParameters(cself, dest=sys.stdout):
         T = sm.Transformation( baseline.T() )
         dq = std_baselines[bidx][0:3]
         dt = std_baselines[bidx][3:6]
-        print("\tbaseline T_{1}_{0}:".format(bidx, bidx+1), file=dest) 
-        print("\t q: %s +- %s" % (T.q(), np.array(dq)), file=dest)
-        print("\t t: %s +- %s" % (T.t(), np.array(dt)), file=dest)
+        print("baseline T_{1}_{0}:".format(bidx, bidx+1), file=dest) 
+        print("    q: %s +- %s" % (T.q(), np.array(dq)), file=dest)
+        print("    t: %s +- %s" % (T.t(), np.array(dt)), file=dest)
         print(file=dest)
+    
+    print("", file=dest)
+    print("", file=dest)
+    print("Target configuration", file=dest)
+    print("====================", file=dest)
+    print("", file=dest)
+
+    cself.cameras[0].ctarget.targetConfig.printDetails(dest)
 
 def printDebugEnd(cself):
     print("")
