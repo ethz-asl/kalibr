@@ -19,6 +19,7 @@ For questions or comments, please open an issue on Github.
 
 ## News / Events
 
+* **Nov 24, 2022** - Some new visualization of trajectory and IMU rate for the generated report along with fixed support for exporting poses to file (see PR [#578](https://github.com/ethz-asl/kalibr/pull/578),[#581](https://github.com/ethz-asl/kalibr/pull/581),[#582](https://github.com/ethz-asl/kalibr/pull/582))
 * **May 3, 2022** - Support for Ubuntu 20.04 along with Docker scripts have been merged into master via PR [#515](https://github.com/ethz-asl/kalibr/pull/515). A large portion was upgrading to Python 3. A special thanks to all the contributors that made this possible. Additionally, contributed fixes for the different validation and visualization scripts have been merged.
 * **Febuary 3, 2020** - Initial Ubuntu 18.04 support has been merged via PR [#241](https://github.com/ethz-asl/kalibr/pull/241). Additionally, support for inputting an initial guess for focal length can be provided from the cmd-line on failure to initialize them.
 * **August 15, 2018** - Double sphere camera models have been contributed to the repository via PR [#210](https://github.com/ethz-asl/kalibr/pull/210). If you are interested you can refer to the [paper](https://arxiv.org/abs/1807.08957) for a nice overview of the models in the repository.

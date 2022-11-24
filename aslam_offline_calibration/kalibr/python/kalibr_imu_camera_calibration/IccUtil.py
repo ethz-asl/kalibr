@@ -19,6 +19,9 @@ except ImportError:
     from io import StringIO
 import matplotlib.patches as patches
 
+# make numpy print prettier
+np.set_printoptions(suppress=True)
+
 
 def plotTrajectory(cself, fno=1, clearFigure=True, title=""):
     f = pl.figure(fno)
@@ -195,6 +198,13 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True):
     
     #plot imu stuff (if we have imus)
     for iidx, imu in enumerate(cself.ImuList):
+
+        f = pl.figure(offset+iidx)
+        plots.plotIMURates(cself, iidx, fno=f.number, noShow=True)
+        plotter.add_figure("imu{0}: measurement rates".format(iidx), f)
+        figs.append(f)
+        offset += len(cself.ImuList)
+
         f = pl.figure(offset+iidx)
         plots.plotAccelerations(cself, iidx, fno=f.number, noShow=True)
         plotter.add_figure("imu{0}: accelerations".format(iidx), f)
