@@ -102,8 +102,7 @@ def parseArgs():
     outputSettings.add_argument('--extraction-stepping', action='store_true', dest='extractionstepping', help='Show each image during calibration target extraction  (disables plots)', required=False)
     outputSettings.add_argument('--verbose', action='store_true', dest='verbose', help='Verbose output (disables plots)')
     outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
-     
-    outputSettings.add_argument('--export-poses', action='store_true', dest='exportPoses', help='Also export the optimized poses.')
+    outputSettings.add_argument('--export-poses', action='store_true', dest='exportPoses', help='Export the optimized poses into a CSV (time_ns, position, quaterion)')
 
     #print help if no argument is specified
     if len(sys.argv)==1:
@@ -214,14 +213,14 @@ def main():
     print("==================")
     util.printErrorStatistics(iCal)
     util.printResults(iCal, withCov=parsed.recover_cov)
-
     print("")
+
     bagtag = os.path.splitext(parsed.bagfile[0])[0]
     yamlFilename = bagtag + "-camchain-imucam.yaml"
     iCal.saveCamChainParametersYaml(yamlFilename)
+    print("Results written to:")
     print("  Saving camera chain calibration to file: {0}".format(yamlFilename))
 
-    print("")
     yamlFilename = bagtag + "-imu.yaml"
     iCal.saveImuSetParametersYaml(yamlFilename)
     print("  Saving imu calibration to file: {0}".format(yamlFilename))
@@ -229,18 +228,19 @@ def main():
     resultFileTxt = bagtag + "-results-imucam.txt"
     util.saveResultTxt(iCal, filename=resultFileTxt)
     print("  Detailed results written to file: {0}".format(resultFileTxt))
-    
-    print("Generating result report...")    
+
+    print("")
+    print("Generating result report...")
     reportFile = bagtag + "-report-imucam.pdf"
     util.generateReport(iCal, filename=reportFile, showOnScreen=not parsed.dontShowReport)
     print("  Report written to {0}".format(reportFile))
     print("")
-    
+
     if parsed.exportPoses:
         print("Exporting poses...")
         posesFile = bagtag + "-poses-imucam-imu0.csv"
         util.exportPoses(iCal, filename=posesFile)
-        print("Poses written to {0}".format(posesFile))
+        print("  Poses written to {0}".format(posesFile))
         print("")
 
 if __name__ == "__main__":

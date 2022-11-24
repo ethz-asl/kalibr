@@ -110,7 +110,8 @@ def parseArgs():
     outputSettings.add_argument('--show-extraction', action='store_true', dest='showextraction', help='Show the calibration target extraction. (disables plots)')
     outputSettings.add_argument('--plot', action='store_true', dest='plot', help='Plot during calibration (this could be slow).')
     outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
-       
+    outputSettings.add_argument('--export-poses', action='store_true', dest='exportPoses', help='Export the optimized poses into a CSV (time_ns, position, quaterion)')
+
     #print help if no argument is specified
     if len(sys.argv)==1:
         parser.print_help()
@@ -253,7 +254,7 @@ def main():
         
             doPlot = parsed.plot
             if doPlot:
-                print("Plotting during calibration. Things may be very slow (but you might learn something).")
+                sm.logWarn("Plotting during calibration. Things may be very slow (but you might learn something).")
 
             #shuffle the views
             timestamps = obsdb.getAllViewTimestamps()
@@ -273,7 +274,7 @@ def main():
                     est_baselines.append( sm.Transformation(baseline.T()) )
                 T_tc_guess = graph.getTargetPoseGuess(timestamp, cameraList, est_baselines)
                                
-                success = calibrator.addTargetView(obs_tuple, T_tc_guess)
+                success = calibrator.addTargetView(timestamp, obs_tuple, T_tc_guess)
                 
                 #display process
                 if (verbose or (view_id % 25) == 0) and calibrator.estimator.getNumBatches()>0 and view_id>1:
@@ -298,7 +299,7 @@ def main():
                         fig=pl.figure(view_id*5000+cam_id)
                         kcc.plotAllReprojectionErrors(calibrator, cam_id, fno=fig.number, noShow=True)                        
                         plotter.add_figure("cam{0}".format(cam_id), fig)
-                    plotter.show()   
+                    plotter.show()
                 
                 # Look for outliers
                 runEndFiltering = view_id==(len(timestamps)-1) and parsed.allowEndFiltering # run another filtering step at the end (over all batches)
@@ -399,6 +400,7 @@ def main():
             print("")
             print("Processed {0} images with {1} images used".format(numViews, calibrator.estimator.getNumBatches()))
             kcc.printParameters(calibrator)
+            print("")
             
             if parsed.verbose and len(calibrator.baselines)>1:
                 f=pl.figure(100006)
@@ -409,7 +411,8 @@ def main():
             bagtag = os.path.splitext(parsed.bagfile)[0]
             resultFile = bagtag + "-camchain.yaml"
             kcc.saveChainParametersYaml(calibrator, resultFile, graph)
-            print("Results written to file: {0}".format(resultFile))
+            print("Results written to:")
+            print("  Saving camera chain calibration to file: {0}".format(resultFile))
             
             #save results to file
             resultFileTxt = bagtag + "-results-cam.txt"
@@ -417,12 +420,24 @@ def main():
             print("  Detailed results written to file: {0}".format(resultFileTxt))
             
             #generate report
+            print("")
+            print("Generating result report...")
             reportFile = bagtag + "-report-cam.pdf"
             G=None; 
             if numCams>1: 
                 G=graph
             kcc.generateReport(calibrator, reportFile, showOnScreen=not parsed.dontShowReport, graph=G, removedOutlierCorners=removedOutlierCorners);
+            print("  Report written to {0}".format(reportFile))
+            print("")
             
+            #generate trajectory file
+            if parsed.exportPoses:
+                print("Exporting poses...")
+                posesFile = bagtag + "-poses-cam0.csv"
+                kcc.exportPoses(calibrator, filename=posesFile)
+                print("  Poses written to {0}".format(posesFile))
+                print("")
+
         except kcc.OptimizationDiverged:
             restartAttempts-=1
             sm.logWarn("Optimization diverged possibly due to a bad initialization. (Do the models fit the lenses well?)")
