@@ -1,6 +1,7 @@
 from __future__ import print_function #handle print in 2.x python
 from sm import PlotCollection
 from . import IccPlots as plots
+import sm
 import numpy as np
 import pylab as pl
 import sys
@@ -200,18 +201,23 @@ def generateReport(cself, filename="report.pdf", showOnScreen=True):
         plotter.show()
 
 def exportPoses(cself, filename="poses_imu0.csv"):
+    
+    # Append our header, and select times at IMU rate
     f = open(filename, 'w')
-    print("t x y z r11 r12 r13 r21 r22 r23 r31 r32 r33", file=f)
+    print("#timestamp, p_RS_R_x [m], p_RS_R_y [m], p_RS_R_z [m], q_RS_w [], q_RS_x [], q_RS_y [], q_RS_z []", file=f)
     imu = cself.ImuList[0]
     bodyspline = cself.poseDv.spline()
     times = np.array([im.stamp.toSec() + imu.timeOffset for im in imu.imuData \
                       if im.stamp.toSec() + imu.timeOffset > bodyspline.t_min() \
                       and im.stamp.toSec() + imu.timeOffset < bodyspline.t_max() ])
+
+    # Times are in nanoseconds -> convert to seconds
+    # Use the ETH groundtruth csv format [t,q,p,v,bg,ba]
     for time in times:
         position =  bodyspline.position(time)
-        orientation = bodyspline.orientation(time)
-        print("{} ".format(time) + " ".join(map(str, position)) \
-        + " " + " ".join(map(str, orientation.reshape(-1))) , file=f)
+        orientation = sm.r2quat(bodyspline.orientation(time))
+        print("{:.0f},".format(1e9 * time) + ",".join(map("{:.6f}".format, position)) \
+               + "," + ",".join(map("{:.6f}".format, orientation)) , file=f)
 
 def saveResultTxt(cself, filename='cam_imu_result.txt'):
     f = open(filename, 'w')
