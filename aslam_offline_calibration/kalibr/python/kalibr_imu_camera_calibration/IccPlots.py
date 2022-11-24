@@ -45,7 +45,7 @@ def plotIMURates(cself, iidx, fno=1, clearFigure=True, noShow=False):
         f.clf()
     f.suptitle("imu{0}: sample inertial rate".format(iidx))
     pl.scatter(times, rates, s=sizes, c=colors, marker="x")
-    pl.text(0.1, 0.2, 'avg dt ('+unit+') = {:.2f} +- {:.4f}'.format(rate_avg, rate_std), fontsize=12, transform=f.gca().transAxes)
+    pl.text(0.1, 0.9, 'avg dt ('+unit+') = {:.2f} +- {:.4f}'.format(rate_avg, rate_std), fontsize=12, transform=f.gca().transAxes)
     pl.grid('on')
     pl.xlabel("time (s)")
     pl.ylabel("sample rate ("+unit+")")
