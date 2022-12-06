@@ -3,6 +3,7 @@ print("importing libraries")
 import sm
 import kalibr_common as kc
 from kalibr_imu_camera_calibration import *
+import vins_yaml as vy
 
 import numpy as np
 import argparse
@@ -103,6 +104,7 @@ def parseArgs():
     outputSettings.add_argument('--verbose', action='store_true', dest='verbose', help='Verbose output (disables plots)')
     outputSettings.add_argument('--dont-show-report', action='store_true', dest='dontShowReport', help='Do not show the report on screen after calibration.')
     outputSettings.add_argument('--export-poses', action='store_true', dest='exportPoses', help='Export the optimized poses into a CSV (time_ns, position, quaterion)')
+    outputSettings.add_argument('--vins', dest='vinsconfig', nargs=1, help='store config for vins', action=Once, required=True)
 
     #print help if no argument is specified
     if len(sys.argv)==1:
@@ -228,6 +230,11 @@ def main():
     resultFileTxt = bagtag + "-results-imucam.txt"
     util.saveResultTxt(iCal, filename=resultFileTxt)
     print("  Detailed results written to file: {0}".format(resultFileTxt))
+    
+    kalibr_config_path = os.path.dirname(parsed.bagfile[0])
+    VINS_config_path = parsed.vinsconfig[0]
+    vy.saveStereoIMUConfigYaml(kalibr_config_path, VINS_config_path)
+    print("  config yaml files for VINS-fusion are stored to: {0}".format(VINS_config_path))
 
     print("")
     print("Generating result report...")
