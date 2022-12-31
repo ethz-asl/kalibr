@@ -27,6 +27,7 @@
 # Compiled python.
 tools/lint/autolintc
 *.pyc
+venv
 
 # Eclipse.
 .project

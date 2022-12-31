@@ -24,6 +24,7 @@ parser = argparse.ArgumentParser(description='Extract a ROS bag containing a ima
 parser.add_argument('--bag', metavar='bag', help='ROS bag file')
 parser.add_argument('--image-topics',  metavar='image_topics', nargs='+', help='Image topics %(default)s')
 parser.add_argument('--imu-topics',  metavar='imu_topics', nargs='+', help='Imu topics %(default)s')
+parser.add_argument('--mocap-topics',  metavar='mocap_topics', nargs='+', help='Mocap topics %(default)s')
 parser.add_argument('--output-folder',  metavar='output_folder', nargs='?', default="output", help='Output folder %(default)s')
 
 #print help if no argument is specified
@@ -34,8 +35,8 @@ if len(sys.argv)<2:
 #parse the args
 parsed = parser.parse_args()
 
-if parsed.image_topics is None and parsed.imu_topics is None:
-    print("ERROR: Need at least one camera or IMU topic.")
+if parsed.image_topics is None and parsed.imu_topics is None and parsed.mocap_topics is None:
+    print("ERROR: Need at least one CAMERA, IMU, or MOCAP topic.")
     sys.exit(-1)
 
 #create output folder
@@ -94,3 +95,26 @@ if parsed.imu_topics is not None:
             iProgress.sample()
           print("\r      done.                                                          ")
           print("")
+
+# extract mocap data
+if parsed.mocap_topics is not None:
+    for iidx, topic in enumerate(parsed.mocap_topics):
+        dataset = kc.BagMocapDatasetReader(parsed.bag, topic)
+        filename = "mocap{0}.csv".format(iidx)
+
+        # progress bar
+        numMsg = dataset.numMessages()
+        print("Extracting {0} MOCAP messages from topic {1}".format(numMsg, dataset.topic))
+        iProgress.reset(numMsg)
+        iProgress.sample()
+
+        with open("{0}/{1}".format(parsed.output_folder, filename), 'w') as imufile:
+            spamwriter = csv.writer(imufile, delimiter=',')
+            spamwriter.writerow(["timestamp", "quat_x", "quat_y", "quat_z", "quat_w", "pos_x", "pos_y", "pos_z"])
+
+            for timestamp, quat, pos in dataset:
+                timestamp_int = int(timestamp.toSec() * 1e9)
+                spamwriter.writerow([timestamp_int, quat[0], quat[1], quat[2], quat[3], pos[0], pos[1], pos[2]])
+                iProgress.sample()
+            print("\r      done.                                                          ")
+            print("")
