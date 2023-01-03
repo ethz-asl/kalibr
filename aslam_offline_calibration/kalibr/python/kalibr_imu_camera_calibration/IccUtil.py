@@ -271,13 +271,13 @@ def exportPoses(cself, filename="poses_imu0.csv"):
                       if im.stamp.toSec() + imu.timeOffset > bodyspline.t_min() \
                       and im.stamp.toSec() + imu.timeOffset < bodyspline.t_max() ])
 
-    # Times are in nanoseconds -> convert to seconds
-    # Use the ETH groundtruth csv format [t,q,p,v,bg,ba]
+    # Times are in nanoseconds
+    # ETH groundtruth csv format [t,p,q]
     for time in times:
-        position =  bodyspline.position(time)
+        position = bodyspline.position(time)
         orientation = sm.r2quat(bodyspline.orientation(time))
         print("{:.0f},".format(1e9 * time) + ",".join(map("{:.6f}".format, position)) \
-               + "," + ",".join(map("{:.6f}".format, orientation)) , file=f)
+               + ",{:.6f},".format(orientation[3]) + ",".join(map("{:.6f}".format, orientation[0:3])) , file=f)
 
 def saveResultTxt(cself, filename='cam_imu_result.txt'):
     f = open(filename, 'w')

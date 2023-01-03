@@ -98,6 +98,7 @@ class IccCalibrator(object):
         ############################################
         ## initialize camera chain
         ############################################
+
         #estimate the timeshift for all cameras to the main imu
         self.noTimeCalibration = noTimeCalibration
         if not noTimeCalibration:
@@ -112,6 +113,7 @@ class IccCalibrator(object):
         ############################################
         ## init optimization problem
         ############################################
+
         #initialize a pose spline using the camera poses in the camera chain
         poseSpline = self.CameraChain.initializePoseSplineFromCameraChain(splineOrder, poseKnotsPerSecond, timeOffsetPadding)
         
@@ -128,6 +130,7 @@ class IccCalibrator(object):
         ############################################
         ## add error terms
         ############################################
+
         #Add calibration target reprojection error terms for all camera in chain
         self.CameraChain.addCameraChainErrorTerms(problem, self.poseDv, blakeZissermanDf=blakeZisserCam, timeOffsetPadding=timeOffsetPadding)
         

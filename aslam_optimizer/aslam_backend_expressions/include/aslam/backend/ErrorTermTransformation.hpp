@@ -31,7 +31,7 @@ namespace aslam {
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
       ErrorTermTransformation(aslam::backend::TransformationExpression T, sm::kinematics::Transformation prior, Eigen::Matrix<double,6,6> N, int debug=0);
-        ErrorTermTransformation(aslam::backend::TransformationExpression T, sm::kinematics::Transformation prior, double weightRotation, double weightTranslation);
+      ErrorTermTransformation(aslam::backend::TransformationExpression T, sm::kinematics::Transformation prior, double weightRotation, double weightTranslation);
       
       virtual ~ErrorTermTransformation();
 

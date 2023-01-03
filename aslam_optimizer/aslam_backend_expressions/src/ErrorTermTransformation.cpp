@@ -16,20 +16,21 @@ namespace aslam {
     setDesignVariablesIterator(dv.begin(), dv.end());
   }
 
-      ErrorTermTransformation::ErrorTermTransformation(aslam::backend::TransformationExpression T, sm::kinematics::Transformation prior, double weightRotation, double weightTranslation) :
-    _T(T), _prior(prior), _debug(0)
-      {
-          Eigen::Matrix<double, 6, 1> W;
-          W << weightTranslation, weightTranslation, weightTranslation, weightRotation, weightRotation, weightRotation;
-          
-          // Fill in the inverse covariance.
-          setInvR(Eigen::Matrix<double,6,6>(W.asDiagonal()));
-          
-          // Tell the super class about the design variables:
-          aslam::backend::DesignVariable::set_t dv;
-          _T.getDesignVariables(dv);
-          setDesignVariablesIterator(dv.begin(), dv.end());
-      }
+
+  ErrorTermTransformation::ErrorTermTransformation(aslam::backend::TransformationExpression T, sm::kinematics::Transformation prior, double weightRotation, double weightTranslation) :
+_T(T), _prior(prior), _debug(0)
+  {
+      Eigen::Matrix<double, 6, 1> W;
+      W << weightTranslation, weightTranslation, weightTranslation, weightRotation, weightRotation, weightRotation;
+      
+      // Fill in the inverse covariance.
+      setInvR(Eigen::Matrix<double,6,6>(W.asDiagonal()));
+      
+      // Tell the super class about the design variables:
+      aslam::backend::DesignVariable::set_t dv;
+      _T.getDesignVariables(dv);
+      setDesignVariablesIterator(dv.begin(), dv.end());
+  }
 
 
   ErrorTermTransformation::~ErrorTermTransformation()

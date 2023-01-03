@@ -80,8 +80,7 @@ class BagMocapDatasetReader(object):
 
         bagstart = min(timestamps)
         baglength = max(timestamps) - bagstart
-        print("bagstart", bagstart)
-        print("baglength", baglength)
+
         # some value checking
         if bag_from_to[0] >= bag_from_to[1]:
             raise RuntimeError("Bag start time must be bigger than end time.".format(bag_from_to[0]))
@@ -122,7 +121,7 @@ class BagMocapDatasetReader(object):
             timestamp = acv.Time(self.timestamp_corrector.getLocalTime(data.header.stamp.to_sec()))
         else:
             timestamp = acv.Time(data.header.stamp.secs, data.header.stamp.nsecs)
-        quat = np.array([data.pose.orientation.x, data.pose.orientation.y, data.pose.orientation.z, data.pose.orientation.w])
-        pos = np.array([data.pose.position.x, data.pose.position.y, data.pose.position.z])
+        quat = np.array([data.transform.rotation.x, data.transform.rotation.y, data.transform.rotation.z, data.transform.rotation.w])
+        pos = np.array([data.transform.translation.x, data.transform.translation.y, data.transform.translation.z])
 
         return (timestamp, quat, pos)

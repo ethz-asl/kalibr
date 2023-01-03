@@ -50,7 +50,7 @@ def parseArgs():
     Temporal calibration is enabled by default.
     
     %(prog)s --bag MYROSBAG.bag --cam camchain.yaml --imu imu.yaml \\
-             --target aprilgrid.yaml 
+             --imu-models calibrated --target aprilgrid.yaml 
     
     camchain.yaml: is the camera-system calibration output of the multiple-camera
                    calibratin tool (kalibr_calibrate_cameras)
@@ -127,7 +127,7 @@ def parseArgs():
 
 def main():
     # Parse the arguments
-    parsed = parseArgs();
+    parsed = parseArgs()
     
     #logging modess
     if parsed.verbose:

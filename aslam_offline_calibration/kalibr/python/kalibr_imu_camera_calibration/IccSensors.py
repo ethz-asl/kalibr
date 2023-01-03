@@ -177,18 +177,18 @@ class IccCamera():
             sys.exit(-1)
 
         #overwrite the external rotation prior (keep the external translation prior)
-        R_i_c = q_i_c_Dv.toRotationMatrix().transpose()
-        self.T_extrinsic = sm.Transformation( sm.rt2Transform( R_i_c, self.T_extrinsic.t() ) )
+        R_c_i = q_i_c_Dv.toRotationMatrix().transpose()
+        self.T_extrinsic = sm.Transformation( sm.rt2Transform( R_c_i, self.T_extrinsic.t() ) )
 
         #estimate gravity in the world coordinate frame as the mean specific force
         a_w = []
         for im in imu.imuData:
             tk = im.stamp.toSec()
             if tk > poseSpline.t_min() and tk < poseSpline.t_max():
-                a_w.append(np.dot(poseSpline.orientation(tk), np.dot(R_i_c, - im.alpha)))
+                a_w.append(np.dot(poseSpline.orientation(tk), np.dot(R_c_i, - im.alpha)))
         mean_a_w = np.mean(np.asarray(a_w).T, axis=1)
         self.gravity_w = mean_a_w / np.linalg.norm(mean_a_w) * 9.80655
-        print("Gravity was intialized to", self.gravity_w, "[m/s^2]") 
+        print("Gravity was initialized to", self.gravity_w, "[m/s^2]")
 
         #set the gyro bias prior (if we have more than 1 cameras use recursive average)
         b_gyro = bias.toEuclidean() 
@@ -196,8 +196,8 @@ class IccCamera():
         imu.GyroBiasPrior = (imu.GyroBiasPriorCount-1.0)/imu.GyroBiasPriorCount * imu.GyroBiasPrior + 1.0/imu.GyroBiasPriorCount*b_gyro
 
         #print result
-        print("  Orientation prior camera-imu found as: (T_i_c)")
-        print(R_i_c)
+        print("  Orientation prior camera-imu found as: (T_c_i)")
+        print(R_c_i)
         print("  Gyro bias prior found as: (b_gyro)")
         print(b_gyro)
     
@@ -269,7 +269,6 @@ class IccCamera():
         
         #store the timeshift (t_imu = t_cam + timeshiftCamToImuPrior)
         self.timeshiftCamToImuPrior = shift
-        
         print("  Time shift camera to imu (t_imu = t_cam + shift):")
         print(self.timeshiftCamToImuPrior)
         
@@ -607,7 +606,7 @@ class IccImu(object):
         #initial estimates for multi IMU calibration
         self.q_i_b_prior = np.array([0., 0., 0., 1.]) 
         self.timeOffset = 0.0
-        
+
     class ImuMeasurement(object):
         def __init__(self, stamp, omega, alpha, Rgyro, Raccel):
             self.omega = omega
@@ -695,7 +694,7 @@ class IccImu(object):
                 w_dot_b = poseSplineDv.angularAccelerationBodyFrame(tk)
                 C_i_b = self.q_i_b_Dv.toExpression()
                 r_b = self.r_b_Dv.toExpression()
-                a = C_i_b * (C_b_w * (a_w - g_w) + \
+                a = C_i_b * (C_b_w * (a_w - g_w) +
                              w_dot_b.cross(r_b) + w_b.cross(w_b.cross(r_b)))
                 aerr = ket.EuclideanError(im.alpha, im.alphaInvR * weight, a + b_i)
                 aerr.setMEstimatorPolicy(mest)

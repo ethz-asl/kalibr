@@ -87,7 +87,7 @@ if parsed.imu_topics is not None:
 
         with open( "{0}/{1}".format(parsed.output_folder, filename), 'w') as imufile:
           spamwriter = csv.writer(imufile, delimiter=',')
-          spamwriter.writerow(["timestamp", "omega_x", "omega_y", "omega_z", "alpha_x", "alpha_y", "alpha_z"])
+          spamwriter.writerow(["#timestamp", "omega_x", "omega_y", "omega_z", "alpha_x", "alpha_y", "alpha_z"])
       
           for timestamp, omega, alpha in dataset:
             timestamp_int = int(timestamp.toSec()*1e9)
@@ -108,13 +108,15 @@ if parsed.mocap_topics is not None:
         iProgress.reset(numMsg)
         iProgress.sample()
 
+        # Times are in nanoseconds
+        # ETH groundtruth csv format [t,p,q]
         with open("{0}/{1}".format(parsed.output_folder, filename), 'w') as imufile:
             spamwriter = csv.writer(imufile, delimiter=',')
-            spamwriter.writerow(["timestamp", "quat_x", "quat_y", "quat_z", "quat_w", "pos_x", "pos_y", "pos_z"])
+            spamwriter.writerow(["#timestamp", "pos_x", "pos_y", "pos_z", "quat_w", "quat_x", "quat_y", "quat_z"])
 
             for timestamp, quat, pos in dataset:
                 timestamp_int = int(timestamp.toSec() * 1e9)
-                spamwriter.writerow([timestamp_int, quat[0], quat[1], quat[2], quat[3], pos[0], pos[1], pos[2]])
+                spamwriter.writerow([timestamp_int, pos[0], pos[1], pos[2], quat[3], quat[0], quat[1], quat[2]])
                 iProgress.sample()
             print("\r      done.                                                          ")
             print("")

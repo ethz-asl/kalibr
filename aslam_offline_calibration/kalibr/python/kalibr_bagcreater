@@ -117,10 +117,10 @@ def createMocapMessge(timestamp_int, quat, pos, mocap_name):
     rosmocap = PoseStamped()
     rosmocap.header.stamp = timestamp
     rosmocap.header.frame_id = mocap_name
-    rosmocap.pose.orientation.x = float(quat[0])
-    rosmocap.pose.orientation.y = float(quat[1])
-    rosmocap.pose.orientation.z = float(quat[2])
-    rosmocap.pose.orientation.w = float(quat[3])
+    rosmocap.pose.orientation.x = float(quat[1])
+    rosmocap.pose.orientation.y = float(quat[2])
+    rosmocap.pose.orientation.z = float(quat[3])
+    rosmocap.pose.orientation.w = float(quat[0])
     rosmocap.pose.position.x = float(pos[0])
     rosmocap.pose.position.y = float(pos[1])
     rosmocap.pose.position.z = float(pos[2])
@@ -159,7 +159,7 @@ try:
             reader = csv.reader(csvfile, delimiter=',')
             headers = next(reader, None)
             for row in reader:
-                imumsg, timestamp = createMocapMessge(row[0], row[1:5], row[5:8], topic)
+                imumsg, timestamp = createMocapMessge(row[0], row[4:8], row[1:4], topic)
                 bag.write("/{0}".format(topic), imumsg, timestamp)
 
 finally:
