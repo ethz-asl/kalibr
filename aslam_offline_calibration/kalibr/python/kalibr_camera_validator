@@ -249,10 +249,10 @@ class CameraChainValidator(object):
                 
                 #reprojection errors in original camera geomtery
                 reproj_errs = np.hstack((reproj_errs, reprojErr_A.flatten()))
-                reproj_errs = np.hstack((reproj_errs, reprojErr_B.flatten()))     
+                reproj_errs = np.hstack((reproj_errs, reprojErr_B.flatten()))
                 
             reproj_errs = reproj_errs[2:]
-            reproj_errs = reproj_errs.reshape(2, int(reproj_errs.shape[0]/2.0))
+            reproj_errs = reproj_errs.reshape(int(reproj_errs.shape[0]/2.0), 2) # (meas, 2)
                     
         #rectify the undistorted images
         edge_idx = self.G.get_eid(camAnr, camBnr)
@@ -274,7 +274,7 @@ class CameraChainValidator(object):
     
         if len(common_ids) > 0:
             #draw error statistics
-            reproj_L2_errs = np.sum(np.abs(reproj_errs)**2, axis=-2)**(1./2)
+            reproj_L2_errs = np.sum(np.abs(reproj_errs)**2, axis=-1)**(1./2)
             outputList = [ ( "mean_x:  ", np.mean(reproj_errs[:,0]) ),
                            ( "std_x:   ", np.std(reproj_errs[:,0]) ),
                            ( "max_y:   ", np.max(reproj_errs[:,0]) ),
@@ -420,7 +420,9 @@ class MonoCameraValidator(object):
         if obs_valid:
             #calculate the reprojection error statistics
             cornersImage = observation.getCornersImageFrame();
-            cornersReproj = observation.getCornerReprojection(self.camera.geometry);
+            cornersReproj = observation.getCornerReprojection(self.camera.geometry); # (meas, 2)
+
+
             
             reprojectionErrors2 = cornersImage-cornersReproj
             reprojectionErrors = np.sum(np.abs(reprojectionErrors2)**2, axis=-1)**(1./2)
