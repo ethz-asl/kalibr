@@ -172,7 +172,7 @@ bool GridCalibrationTargetAprilgrid::computeObservation(
         cv::cvtColor(imageCopy, imageCopy, cv::COLOR_GRAY2RGB);
 
         //mark all duplicate tags in image
-        for (int j = 0; i < detections.size() - 1; i++) {
+        for (int j = 0; j < detections.size() - 1; j++) {
           if (detections[j].id == detections[j + 1].id) {
             detections[j].draw(imageCopy);
             detections[j + 1].draw(imageCopy);
