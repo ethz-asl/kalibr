@@ -7,7 +7,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
 	apt-get install -y \
 	git wget autoconf automake nano \
 	python3-dev python-pip python-scipy python-matplotlib \
-	ipython python-wxgtk4.0 python-tk python-igraph \
+	ipython python-wxgtk4.0 python-tk python-igraph python-pyx \
 	libeigen3-dev libboost-all-dev libsuitesparse-dev \
 	doxygen \
 	libopencv-dev \
