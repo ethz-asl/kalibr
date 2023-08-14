@@ -3,7 +3,7 @@
 import argparse
 from collections import OrderedDict
 import numpy as np
-import md5
+import hashlib
 import sm
 import sys
 import yaml
@@ -81,7 +81,7 @@ class ImuConfig:
         imu0_dict = imu_dict['imu0']
 
         self.rostopic = imu0_dict['rostopic']
-        self.id = md5.new(self.rostopic).hexdigest()
+        self.id = hashlib.md5(self.rostopic.encode('utf-8')).hexdigest()
         self.T_i_b = np.array(imu0_dict['T_i_b'])
         self.time_offset = imu0_dict['time_offset']
         self.update_rate = imu0_dict['update_rate']
@@ -161,7 +161,7 @@ class CameraConfig:
     def __init__(self, name):
         self.name = name
         self.__is_initialized = False
-        self.id = md5.new(name).hexdigest()
+        self.id = hashlib.md5(name.encode('utf-8')).hexdigest()
         self.line_delay_nanoseconds = 0
         self.cam_overlaps = list()
         self.timeshift_cam_imu = 0.0
@@ -267,7 +267,7 @@ class IndentDumper(yaml.Dumper):
 def read_yaml(file_name):
     yaml_file = open(file_name, 'r')
     try:
-        return yaml.load(yaml_file)
+        return yaml.load(yaml_file, yaml.Loader)
     except yaml.YAMLError as exception:
         print(exception)
 
@@ -297,7 +297,7 @@ class CalibrationConfig:
         self.imu = ImuConfig()
         self.__has_imu = False
         self.ncamera_label = parsed_args.ncamera_label
-        self.id = md5.new(self.ncamera_label).hexdigest()
+        self.id = hashlib.md5(self.ncamera_label.encode('utf-8')).hexdigest()
         self.cameras = dict()
         self.input_file_name = parsed_args.cam_yaml
         data = read_yaml(self.input_file_name)
