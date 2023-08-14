@@ -280,13 +280,17 @@ def write_yaml(file_name,
     try:
         if not use_indent_dumper:
             yaml.dump(
-                output_dict, output_file, default_flow_style=default_flow_style)
+                output_dict,
+                output_file,
+                default_flow_style=default_flow_style,
+                width=2147483647)
         else:
             yaml.dump(
                 output_dict,
                 output_file,
                 Dumper=IndentDumper,
-                default_flow_style=default_flow_style)
+                default_flow_style=default_flow_style,
+                width=2147483647)
     except yaml.YAMLError as exception:
         print(exception)
 
@@ -388,7 +392,7 @@ class CalibrationConfig:
             cam_name = 'cam{0}'.format(cam_index)
             sensors_dict['ncameras'][0]['cameras'].append(
                 self.cameras[cam_name].get_maplab_format())
-        default_flow_style = False
+        default_flow_style = None
         use_indent_dumper = True
         if not self.to_ncamera:
             write_yaml(self.__get_output_file_name(), sensors_dict,
