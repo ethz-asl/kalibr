@@ -1,5 +1,8 @@
 FROM osrf/ros:noetic-desktop-full
 
+#to solve this issue https://github.com/ethz-asl/kalibr/issues/644
+RUN apt-get update && apt-get install libfprint* fprintd* libpam-fprintd* -y 
+RUN dpkg --configure -a 
 
 # Dependencies we use, catkin tools is very good build system
 # https://github.com/ethz-asl/kalibr/wiki/installation
