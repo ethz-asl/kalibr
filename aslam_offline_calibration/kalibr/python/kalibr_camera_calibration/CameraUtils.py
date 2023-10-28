@@ -120,8 +120,8 @@ def getReprojectionErrorStatistics(all_rerrs):
     rerr_matrix = np.array(rerr_matrix)
     gc.enable()
     
-    mean = np.mean(rerr_matrix, 0, dtype=np.float)
-    std = np.std(rerr_matrix, 0, dtype=np.float)
+    mean = np.mean(rerr_matrix, 0, dtype=np.float64)
+    std = np.std(rerr_matrix, 0, dtype=np.float64)
  
     return mean, std
 
