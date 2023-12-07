@@ -4,6 +4,7 @@ project(sparse_block_matrix)
 find_package(catkin REQUIRED COMPONENTS sm_common sm_eigen)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+SET(SuiteSparse_MIN_VERSION "4.3.1")
 find_package(SuiteSparse REQUIRED)
 
 find_package(Eigen3)
