@@ -604,8 +604,8 @@ def plotCameraRig(baselines, fno=1, clearFigure=True, title=""):
     
     #plot each frame in coordinates of first camera
     a3d = f.add_subplot(111, projection='3d')
-    for camera_frame in camera_frames:
-        sm.plotCoordinateFrame(a3d, camera_frame.T(), size=size)
+    for i, camera_frame in enumerate(camera_frames):
+        sm.plotCoordinateFrame(a3d, camera_frame.T(), size=size, name="cam{0}".format(i))
 
     #axis equal
     box_sizes=list()
@@ -614,6 +614,9 @@ def plotCameraRig(baselines, fno=1, clearFigure=True, title=""):
     box_size=1.25*np.max(box_sizes)+size
     
     a3d.auto_scale_xyz([-box_size, box_size], [-box_size, box_size], [-box_size, box_size])
+    a3d.set_xlabel('x')
+    a3d.set_ylabel('y')
+    a3d.set_zlabel('z')
 
 
 def exportPoses(cself, filename):

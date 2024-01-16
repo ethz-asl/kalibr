@@ -3,7 +3,7 @@ import pylab as p
 
 import matplotlib.axes as axes
 
-def plotCoordinateFrame(axis, T_0f, size=1, linewidth=3):
+def plotCoordinateFrame(axis, T_0f, size=1, linewidth=3, name=None):
     """Plot a coordinate frame on a 3d axis. In the resulting plot,
     x = red, y = green, z = blue.
     
@@ -35,12 +35,14 @@ def plotCoordinateFrame(axis, T_0f, size=1, linewidth=3):
 
     p_f = numpy.array([ [ 0,0,0,1], [size,0,0,1], [0,size,0,1], [0,0,size,1]]).T;
     p_0 = numpy.dot(T_0f,p_f)
-    # X-axis
 
-    X = numpy.append( [p_0[:,0].T] , [p_0[:,1].T], axis=0 )
-    Y = numpy.append( [p_0[:,0].T] , [p_0[:,2].T], axis=0 )
-    Z = numpy.append( [p_0[:,0].T] , [p_0[:,3].T], axis=0 )
-    axis.plot3D(X[:,0],X[:,1],X[:,2],'r-', linewidth=linewidth)
-    axis.plot3D(Y[:,0],Y[:,1],Y[:,2],'g-', linewidth=linewidth)
-    axis.plot3D(Z[:,0],Z[:,1],Z[:,2],'b-', linewidth=linewidth)
+    X = numpy.append([p_0[:,0].T], [p_0[:,1].T], axis=0 )
+    Y = numpy.append([p_0[:,0].T], [p_0[:,2].T], axis=0 )
+    Z = numpy.append([p_0[:,0].T], [p_0[:,3].T], axis=0 )
+    axis.plot3D(X[:,0],X[:,1],X[:,2], 'r-', linewidth=linewidth)
+    axis.plot3D(Y[:,0],Y[:,1],Y[:,2], 'g-', linewidth=linewidth)
+    axis.plot3D(Z[:,0],Z[:,1],Z[:,2], 'b-', linewidth=linewidth)
+
+    if name is not None:
+        axis.text(X[0,0],X[0,1],X[0,2], name, zdir='x')
     
