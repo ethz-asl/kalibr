@@ -11,9 +11,11 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
 	libeigen3-dev libboost-all-dev libsuitesparse-dev \
 	doxygen \
 	libopencv-dev \
-	libpoco-dev libtbb-dev libblas-dev liblapack-dev libv4l-dev \
-	python-catkin-tools
+	libpoco-dev libtbb-dev libblas-dev liblapack-dev libv4l-dev
 
+# Install unauthenticated packages
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
+	apt-get install -y --allow-unauthenticated	python-catkin-tools
 
 # Create the workspace and build kalibr in it
 ENV WORKSPACE /catkin_ws
