@@ -1,0 +1,27 @@
+name: "Kalibr ROS1 Ubuntu"
+
+on:
+  push:
+    branches: [ master, feature/docker_push ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: self-hosted
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [16, 18, 20]
+    name: Build Ubuntu ${{ matrix.version }}.04
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+      - name: Create Workspace
+        run: |
+          export REPO=$(basename $GITHUB_REPOSITORY) &&
+          cd $GITHUB_WORKSPACE/.. && mkdir src/ &&
+          mv $REPO/ src/ && mkdir $REPO/ && mv src/ $REPO/ && cd $REPO/
+      - name: Build Docker
+        run: |
+          export REPO=$(basename $GITHUB_REPOSITORY) &&
+          docker build -t kalibr -f $GITHUB_WORKSPACE/src/$REPO/Dockerfile_ros1_${{ matrix.version }}_04 .

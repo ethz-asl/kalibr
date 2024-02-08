@@ -1,0 +1,33 @@
+name: "Publish Ubuntu images"
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  push_to_registries:
+    name: Push Docker image to multiple registries
+    runs-on: self-hosted
+    permissions:
+      packages: write
+      contents: read
+    strategy:
+      matrix:
+        version: [16, 18, 20]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile_ros1_${{ matrix.version }}_04
+          push: true
+          tags: ${{ vars.DOCKER_HUB_REPOSITORY }}/kalibr:${{ matrix.version }}.04
