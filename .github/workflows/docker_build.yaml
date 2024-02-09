@@ -2,7 +2,7 @@ name: "Build Kalibr"
 
 on:
   push:
-    branches: [ master, feature/docker_push ]
+    branches: [ master ]
   pull_request:
 
 jobs:
