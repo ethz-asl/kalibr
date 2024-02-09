@@ -3,16 +3,15 @@ name: "Publish Ubuntu images"
 on:
   release:
     types: [published]
-  push:
-    branches: [ feature/docker_push ]
 
 jobs:
   push_to_registries:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
     strategy:
+      fail-fast: false
       matrix:
         version: [16, 18, 20]
     name: Push Ubuntu ${{ matrix.version }}.04 Docker image
