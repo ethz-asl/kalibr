@@ -1,8 +1,5 @@
 FROM osrf/ros:melodic-desktop-full
 
-# Add expired GPG key
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 4B63CF8FDE49746E98FA01DDAD19BAB3CBF125EA
-
 # Dependencies we use, catkin tools is very good build system
 # https://github.com/ethz-asl/kalibr/wiki/installation
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
