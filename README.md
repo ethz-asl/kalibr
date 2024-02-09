@@ -16,6 +16,12 @@ To install follow the [install wiki page](https://github.com/ethz-asl/kalibr/wik
 Please find more information on the [wiki pages](https://github.com/ethz-asl/kalibr/wiki) of this repository.
 For questions or comments, please open an issue on Github.
 
+## Quick Docker run
+You can run Kalibr from a prebuild image using Docker:
+```bash
+docker run -it -v `pwd`:/pwd  mandulaj/kalibr:20.04
+```
+For more see the Overview on [Docker Hub](https://hub.docker.com/r/mandulaj/kalibr)
 
 ## News / Events
 
