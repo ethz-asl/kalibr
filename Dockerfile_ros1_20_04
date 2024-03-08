@@ -35,10 +35,10 @@ RUN	cd $WORKSPACE &&\
 # When a user runs a command we will run this code before theirs
 # This will allow for using the manual focal length if it fails to init
 # https://github.com/ethz-asl/kalibr/pull/346
-ENTRYPOINT export KALIBR_MANUAL_FOCAL_LENGTH_INIT=1 && \
-	# /bin/bash -c "source \"$WORKSPACE/devel/setup.bash\"" && \ 
-	cd $WORKSPACE && \
-	/bin/bash
+RUN echo "export KALIBR_MANUAL_FOCAL_LENGTH_INIT=1" >> /root/.bashrc && \
+    echo 'source "$WORKSPACE/devel/setup.bash"' >> /root/.bashrc
+
+ENTRYPOINT ["/bin/bash"]
 
 
 
