@@ -171,6 +171,7 @@ if __name__ == "__main__":
     parser.add_argument('--csy', type=float, default=0.03, dest='chessSzY', help='The size of one chessboard square in y direction [m] (default: %(default)s)')
     
     parser.add_argument('--eps', action='store_true', dest='do_eps', help='Also output an EPS file', required=False)
+    parser.add_argument('--svg', action='store_true', dest='do_svg', help='Also output an SVG file', required=False)
 
     #Parser the argument list
     try:
@@ -195,6 +196,8 @@ if __name__ == "__main__":
     
     if parsed.do_eps:
         c.writeEPSfile(parsed.output)
+    if parsed.do_svg:
+        c.writeSVGfile(parsed.output)
     
     os.system("evince " + parsed.output + ".pdf &")
         
