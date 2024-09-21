@@ -92,6 +92,10 @@ def generateAprilBoard(canvas, n_cols, n_rows, tagSize, tagSpacing=0.25, tagFami
         print("[ERROR]: Invalid tagSpacing specified.  [0-1.0] of tagSize")
         sys.exit(0)
 
+    if(n_cols<3 or n_rows<3):
+        print("[ERROR]: The size of Aprilgrid targets must be greater than 3*3.")
+        sys.exit(0)
+
     if skipIds is None:
         skip_ids = []
         
