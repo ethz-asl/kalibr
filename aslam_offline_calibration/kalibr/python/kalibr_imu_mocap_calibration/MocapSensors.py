@@ -59,6 +59,8 @@ class IccMocap():
 
     class MocapMeasurement(object):
         def __init__(self, stamp, quat, pos):
+            # There is a required conjugation between Hamilton's quaternion and JPL convention.
+            quat[:3] = -quat[:3]
             self.T_w_m = sm.Transformation(quat, pos)
             self.stamp = stamp
 

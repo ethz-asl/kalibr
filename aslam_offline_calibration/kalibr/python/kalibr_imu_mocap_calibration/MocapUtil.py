@@ -259,7 +259,7 @@ np.set_printoptions(suppress=True)
 #     if showOnScreen:
 #         plotter.show()
 
-def exportPoses(cself, filename="poses_imu0.csv"):
+def exportPosesHamilton(cself, filename="poses_imu0.csv"):
     # Append our header, and select times at IMU rate
     f = open(filename, 'w')
     print("#timestamp, p_RS_R_x [m], p_RS_R_y [m], p_RS_R_z [m], q_RS_w [], q_RS_x [], q_RS_y [], q_RS_z []", file=f)
@@ -272,12 +272,12 @@ def exportPoses(cself, filename="poses_imu0.csv"):
     # Times are in nanoseconds
     # ETH groundtruth csv format [t,q,p]
     for time in times:
-        T_w_b = sm.Transformation(sm.rt2Transform(bodyspline.orientation(time), bodyspline.position(time)))
-        T_b_m = cself.Mocap.getResultTrafoImuToMocap().inverse()
-        T_m_w = T_w_b * T_b_m
-        time_mocap = time - cself.Mocap.getResultTimeShift()
-        print("{:.0f},".format(1e9 * time_mocap) + ",".join(map("{:.6f}".format, T_m_w.t()))
-              + ",{:.6f},".format(T_m_w.q()[3]) + ",".join(map("{:.6f}".format, T_m_w.q()[0:3])), file=f)
+        position = bodyspline.position(time)
+        orientation = sm.r2quat(bodyspline.orientation(time))
+        # There is a required conjugation between Hamilton's quaternion and JPL convention.
+        orientation[:3] = -orientation[:3]
+        print("{:.0f},".format(1e9 * time) + ",".join(map("{:.6f}".format, position)) \
+               + ",{:.6f},".format(orientation[3]) + ",".join(map("{:.6f}".format, orientation[0:3])) , file=f)
 
 # def saveResultTxt(cself, filename='cam_imu_result.txt'):
 #     f = open(filename, 'w')

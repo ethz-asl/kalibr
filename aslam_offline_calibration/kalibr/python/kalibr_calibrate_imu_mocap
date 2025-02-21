@@ -228,7 +228,7 @@ def main():
 
     print("Exporting poses...")
     posesFile = bagtag + "-poses-imumocap-imu0.csv"
-    util.exportPoses(iCal, filename=posesFile)
+    mocap_util.exportPosesHamilton(iCal, filename=posesFile)
     print("  Poses written to {0}".format(posesFile))
     # posesFile = bagtag + "-poses-imumocap-mocap0.csv"
     # mocap_util.exportPoses(iCal, filename=posesFile)

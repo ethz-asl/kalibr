@@ -121,7 +121,7 @@ class BagMocapDatasetReader(object):
             timestamp = acv.Time(self.timestamp_corrector.getLocalTime(data.header.stamp.to_sec()))
         else:
             timestamp = acv.Time(data.header.stamp.secs, data.header.stamp.nsecs)
-        quat = np.array([data.transform.rotation.x, data.transform.rotation.y, data.transform.rotation.z, data.transform.rotation.w])
-        pos = np.array([data.transform.translation.x, data.transform.translation.y, data.transform.translation.z])
+        quat = np.array([data.pose.orientation.x, data.pose.orientation.y, data.pose.orientation.z, data.pose.orientation.w])
+        pos = np.array([data.pose.position.x, data.pose.position.y, data.pose.position.z])
 
         return (timestamp, quat, pos)
