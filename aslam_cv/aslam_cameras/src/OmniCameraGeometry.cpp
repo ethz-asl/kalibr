@@ -523,7 +523,15 @@ bool OmniProjection::initializeIntrinsics(
           }
         }
 
-        const int MIN_CORNERS = 8;
+        int MIN_CORNERS = 8;
+
+        // allow asymmetric circle grids with half of the minimum corners as 2 asymmetric columns are treated a 1
+        if (const aslam::cameras::GridCalibrationTargetCirclegrid* circleGrid = dynamic_cast<const aslam::cameras::GridCalibrationTargetCirclegrid*>(&target)){
+          if (circleGrid->options().useAsymmetricCirclegrid){
+            MIN_CORNERS = MIN_CORNERS / 2;
+          }
+        }
+
         // MIN_CORNERS is an arbitrary threshold for the number of corners
         if (count > MIN_CORNERS) {
           // Resize P to fit with the count of valid points.

@@ -1,3 +1,5 @@
+#include <aslam/cameras/GridCalibrationTargetCirclegrid.hpp>
+
 namespace aslam {
 
 namespace cameras {
@@ -773,7 +775,15 @@ bool OmniProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<GridCa
       }
 
       // MIN_CORNERS is an arbitrary threshold for the number of corners
-      const size_t MIN_CORNERS = 4;
+      size_t MIN_CORNERS = 4;
+
+      // allow asymmetric circle grids with half of the minimum corners as 2 asymmetric columns are treated a 1
+      if (const aslam::cameras::GridCalibrationTargetCirclegrid* circleGrid = dynamic_cast<const aslam::cameras::GridCalibrationTargetCirclegrid*>(&target)){
+        if (circleGrid->options().useAsymmetricCirclegrid){
+          MIN_CORNERS = MIN_CORNERS / 2;
+        }
+      }
+
       if (count > MIN_CORNERS)
       {
         // Resize P to fit with the count of valid points.

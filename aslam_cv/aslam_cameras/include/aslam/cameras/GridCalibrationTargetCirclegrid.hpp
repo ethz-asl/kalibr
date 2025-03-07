@@ -59,6 +59,9 @@ class GridCalibrationTargetCirclegrid : public GridCalibrationTargetBase {
   bool computeObservation(const cv::Mat &image, Eigen::MatrixXd &outImagePoints,
                           std::vector<bool> &outCornerObserved) const;
 
+  /// \brief receive the circlegrid options
+  const CirclegridOptions options() const {return _options;}
+
  private:
   /// \brief initialize the object
   void initialize();
