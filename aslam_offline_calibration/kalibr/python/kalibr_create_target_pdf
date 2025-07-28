@@ -180,6 +180,7 @@ if __name__ == "__main__":
     aprilOptions.add_argument('--tspace', type=float, default=0.3, dest='tagspacing', help='The space between the tags in fraction of the edge size [0..1] (default: %(default)s)')
     aprilOptions.add_argument('--tfam', default='t36h11', dest='tagfamiliy', help='Familiy of April tags {0} (default: %(default)s)'.format(list(AprilTagCodes.TagFamilies.keys()))) 
     aprilOptions.add_argument('--skip-ids', default='', dest='skipIds', help='Space-separated list of tag ids to leave blank (default: none)')
+    aprilOptions.add_argument('--border-bits', default=1, dest='borderbits', help="Number of bits for border")
 
     checkerOptions = parser.add_argument_group('Checkerboard arguments')    
     checkerOptions.add_argument('--csx', type=float, default=0.05, dest='chessSzX', help='The size of one chessboard square in x direction [m] (default: %(default)s)')
@@ -203,7 +204,7 @@ if __name__ == "__main__":
     
     #draw the board
     if parsed.gridType == "apriltag":
-        generateAprilBoard(canvas, parsed.n_cols, parsed.n_rows, parsed.tsize, parsed.tagspacing, parsed.tagfamiliy, parsed.skipIds)
+        generateAprilBoard(canvas, parsed.n_cols, parsed.n_rows, parsed.tsize, parsed.tagspacing, parsed.tagfamiliy, parsed.skipIds, parsed.borderbits)
     elif parsed.gridType == "checkerboard":
         generateCheckerboard(c, parsed.n_cols, parsed.n_rows, parsed.chessSzX, parsed.chessSzY)
     else:
