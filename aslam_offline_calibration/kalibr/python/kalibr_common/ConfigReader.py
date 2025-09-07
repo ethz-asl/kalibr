@@ -65,7 +65,7 @@ class AslamCamera(object):
                                             principalPoint[0], principalPoint[1], 
                                             resolution[0], resolution[1])
                 
-                self.camera = cv.PinholeCameraGeometry(proj)
+                self.geometry = cv.PinholeCameraGeometry(proj)
                 
                 self.frameType = cv.PinholeFrame
                 self.keypointType = cv.Keypoint2
