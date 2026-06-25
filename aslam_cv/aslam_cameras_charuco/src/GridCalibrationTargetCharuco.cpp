@@ -15,11 +15,12 @@
 namespace aslam {
 namespace cameras {
 
-/// \brief Construct aCharuco calibration target
-///        tagRows:    number of tags in y-dir (gridRows = tagRows - 1)
-///        tagCols:    number of tags in x-dir (gridCols = tagCols - 1)
-///        tagSize:    size of a tag [m]
-///        tagSpacing: space between tags (in tagSpacing [m] = tagSpacing*tagSize)
+/// \brief Construct a Charuco calibration target
+///        tagRows:    number of chessboard squares in y-direction (= OpenCV squaresY)
+///        tagCols:    number of chessboard squares in x-direction (= OpenCV squaresX)
+///        tagSize:    ArUco marker side length [m] (= OpenCV markerLength)
+///        tagSpacing: ratio such that chessboard square length = tagSize * (1 + tagSpacing)
+///                    i.e. tagSpacing = squareLength/markerLength - 1
 ///        dictName:   Name of the Charuco dictionary (one of PREDEFINED_DICTIONARY_NAME without DICT_ prefix).
 ///        markerSize: size of the marker in bits (e.g. 4 for 4x4_50 markers) (only used if dictName is empty).
 ///        nMarkers:   number of markers in the dictionary (e.g. 50 for 4x4_50 markers) (only used if dictName is empty).
@@ -55,7 +56,7 @@ cv::Ptr<cv::aruco::Dictionary> createDictionary(const std::string& dictName, siz
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_4X4_100);
   if (dictName == "4X4_250")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_4X4_250);
-  if (dictName == "4X4_100")
+  if (dictName == "4X4_1000")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_4X4_1000);
   if (dictName == "5X5_50")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_5X5_50);
@@ -63,7 +64,7 @@ cv::Ptr<cv::aruco::Dictionary> createDictionary(const std::string& dictName, siz
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_5X5_100);
   if (dictName == "5X5_250")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_5X5_250);
-  if (dictName == "5X5_100")
+  if (dictName == "5X5_1000")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_5X5_1000);
   if (dictName == "6X6_50")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_6X6_50);
@@ -71,7 +72,7 @@ cv::Ptr<cv::aruco::Dictionary> createDictionary(const std::string& dictName, siz
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_6X6_100);
   if (dictName == "6X6_250")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_6X6_250);
-  if (dictName == "6X6_100")
+  if (dictName == "6X6_1000")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_6X6_1000);
   if (dictName == "7X7_50")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_7X7_50);
@@ -79,7 +80,7 @@ cv::Ptr<cv::aruco::Dictionary> createDictionary(const std::string& dictName, siz
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_7X7_100);
   if (dictName == "7X7_250")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_7X7_250);
-  if (dictName == "7X7_100")
+  if (dictName == "7X7_1000")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_7X7_1000);
   if (dictName == "ARUCO_ORIGINAL")
     return cv::aruco::getPredefinedDictionary(cv::aruco::PREDEFINED_DICTIONARY_NAME::DICT_ARUCO_ORIGINAL);
@@ -111,7 +112,7 @@ void GridCalibrationTargetCharuco::initialize()
   }
 
   //create the tag detector
-  _dict = createDictionary(_dictName, _nMarkers, _markerSize);
+  _dict = createDictionary(_dictName, _markerSize, _nMarkers);
   const auto squareLength = _tagSize * (1.0 + _tagSpacing);
   const auto markerLength = _tagSize;
   _board = cv::aruco::CharucoBoard::create(_cols + 1, _rows + 1, squareLength, markerLength, _dict);
