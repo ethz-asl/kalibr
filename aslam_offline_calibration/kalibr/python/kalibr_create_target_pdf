@@ -5,6 +5,7 @@
 from pyx import *
 import argparse
 import sys
+import cv2.aruco
 
 import math
 import numpy as np
@@ -132,6 +133,47 @@ def generateAprilBoard(canvas, n_cols, n_rows, tagSize, tagSpacing=0.25, tagFami
     c.text(pos[0]+0.6*tagSize, pos[0], caption)
 
 
+#tagSpaceing in % of tagSize
+def generateCharucoBoard(canvas, n_cols, n_rows, tagSize, tagSpacing=0.25, charucoDict="4x4_50"):
+
+    if(tagSpacing<0 or tagSpacing>1.0):
+        print("[ERROR]: Invalid tagSpacing specified.  [0-1.0] of tagSize")
+        sys.exit(0)
+
+    #convert to cm
+    tagSize = tagSize*100.0
+
+    #draw tags
+    if hasattr(cv2.aruco, "DICT_" + charucoDict):
+        d = cv2.aruco.getPredefinedDictionary(getattr(cv2.aruco, "DICT_" + charucoDict))
+    else:
+        sizes, nMarkersStr = charucoDict.split("_", maxsplit=1)
+        markerSize = int(sizes.split('X', maxsplit=1)[0])
+        nMarkers = int(nMarkersStr)
+        d = cv2.aruco.custom_dictionary(nMarkers, markerSize)
+    board = cv2.aruco.CharucoBoard.create(n_cols, n_rows, (tagSpacing + 1.0) * tagSize, tagSize, d)
+    size = ( n_cols*(1+tagSpacing)*tagSize, n_rows*(1+tagSpacing)*tagSize)
+    cv2.aruco.drawPlanarBoard(board, size, canvas)
+
+    #draw axis
+    pos = (-1.5 * tagSpacing * tagSize, -1.5 * tagSpacing * tagSize)
+    canvas.stroke(path.line(pos[0], pos[1], pos[0] + tagSize * 0.3, pos[1]),
+                  [color.rgb.red,
+                   deco.earrow([deco.stroked([color.rgb.red, style.linejoin.round]),
+                                deco.filled([color.rgb.red])], size=tagSize * 0.10)])
+    canvas.text(pos[0] + tagSize * 0.3, pos[1], "x")
+
+    canvas.stroke(path.line(pos[0], pos[1], pos[0], pos[1] + tagSize * 0.3),
+                  [color.rgb.green,
+                   deco.earrow([deco.stroked([color.rgb.green, style.linejoin.round]),
+                                deco.filled([color.rgb.green])], size=tagSize * 0.10)])
+    canvas.text(pos[0], pos[1] + tagSize * 0.3, "y")
+
+    # text
+    caption = "{0}x{1} tags, size={2}cm and spacing={3}cm".format(n_cols, n_rows, tagSize, tagSpacing * tagSize)
+    canvas.text(pos[0] + 0.6 * tagSize, pos[0], caption)
+
+
 def generateCheckerboard(canvas, n_cols, n_rows, size_cols, size_rows):
     #convert to cm
     size_cols = size_cols*100.0
@@ -159,6 +201,8 @@ if __name__ == "__main__":
     usage="""
     Example Aprilgrid:
         kalibr_create_target_pdf --type apriltag --nx 6 --ny 6 --tsize 0.08 --tspace 0.3
+    Example Charuco:
+        kalibr_create_target_pdf --type charuco --nx 6 --ny 6 --tsize 0.08 --tspace 0.3
     Example Checkerboard:
         kalibr_create_target_pdf --type checkerboard --nx 6 --ny 6 -csx 0.05 --csy 0.1
     """
@@ -180,6 +224,9 @@ if __name__ == "__main__":
     aprilOptions.add_argument('--tspace', type=float, default=0.3, dest='tagspacing', help='The space between the tags in fraction of the edge size [0..1] (default: %(default)s)')
     aprilOptions.add_argument('--tfam', default='t36h11', dest='tagfamiliy', help='Familiy of April tags {0} (default: %(default)s)'.format(list(AprilTagCodes.TagFamilies.keys()))) 
     aprilOptions.add_argument('--skip-ids', default='', dest='skipIds', help='Space-separated list of tag ids to leave blank (default: none)')
+
+    charucoOptions = parser.add_argument_group('Charuco arguments')
+    charucoOptions.add_argument('--charucodict', default='4x4_50', dest='charucodict', help='Charuco dict type (default: 4x4_50)')
 
     checkerOptions = parser.add_argument_group('Checkerboard arguments')    
     checkerOptions.add_argument('--csx', type=float, default=0.05, dest='chessSzX', help='The size of one chessboard square in x direction [m] (default: %(default)s)')
@@ -204,6 +251,8 @@ if __name__ == "__main__":
     #draw the board
     if parsed.gridType == "apriltag":
         generateAprilBoard(canvas, parsed.n_cols, parsed.n_rows, parsed.tsize, parsed.tagspacing, parsed.tagfamiliy, parsed.skipIds)
+    if parsed.gridType == "charuco":
+        generateCharucoBoard(c, parsed.n_cols, parsed.n_rows, parsed.tsize, parsed.tagspacing, parsed.charucodict)
     elif parsed.gridType == "checkerboard":
         generateCheckerboard(c, parsed.n_cols, parsed.n_rows, parsed.chessSzX, parsed.chessSzY)
     else:

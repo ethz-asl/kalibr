@@ -827,6 +827,35 @@ size_t PinholeProjection<DISTORTION_T>::computeReprojectionError(
   return count;
 }
 
+inline bool arePointsCollinear(cv::InputArray points)
+{
+  // This is the same algorithm as in cv::findExtrinsicCameraParams2() that decides
+  // whether the points are planar or not. However, that algorithm fails in case
+  // the points are both coplanar and collinear (W[2] / W[1] yields nan in such case).
+  if (points.rows() * points.cols() < 3)
+    return true;
+
+  cv::Mat opoints = points.getMat();
+  double MM[9] = {0}, V[9] = {0}, W[3] = {0};
+  cv::Mat _MM(3, 3, CV_64F, MM);
+  cv::Mat matV(3, 3, CV_64F, V);
+  cv::Mat matW(3, 1, CV_64F, W);
+
+  cv::Mat matM;
+  opoints.convertTo(matM, CV_64F);
+  cv::Scalar Mc = cv::mean(matM);
+  cv::Mat _Mc(1, 3, CV_64F, Mc.val);
+
+  matM = matM.reshape(1, std::max(opoints.cols, opoints.rows));
+  cv::mulTransposed(matM, _MM, true, _Mc);
+  cv::SVDecomp(_MM, matW, cv::noArray(), matV, cv::SVD::MODIFY_A);
+
+  if (W[1] == 0 || !std::isfinite(W[2] / W[1]))
+    return true;
+
+  return false;
+}
+
 /// \brief estimate the transformation of the camera with respect to the calibration target
 ///        On success out_T_t_c is filled in with the transformation that takes points from
 ///        the camera frame to the target frame
@@ -868,16 +897,23 @@ bool PinholeProjection<DISTORTION_T>::estimateTransformation(
   Ps.resize(count);
   Ms.resize(count);
 
+  // We know the Ps points are coplanar (because of their construction, they all lie in plane z=0).
+  // However, if the points are collinear, we cannot estimate the target pose uniquely.
+  if (arePointsCollinear(Ps))
+    return false;
+
   std::vector<double> distCoeffs(4, 0.0);
 
   cv::Mat rvec(3, 1, CV_64F);
   cv::Mat tvec(3, 1, CV_64F);
 
+  // solvePnP() for coplanar points needs at least 4 points (which are not collinear)
   if (Ps.size() < 4)
     return false;
 
   // Call the OpenCV pnp function.
-  cv::solvePnP(Ps, Ms, cv::Mat::eye(3, 3, CV_64F), distCoeffs, rvec, tvec);
+  if (!cv::solvePnP(Ps, Ms, cv::Mat::eye(3, 3, CV_64F), distCoeffs, rvec, tvec))
+    return false;
 
   // convert the rvec/tvec to a transformation
   cv::Mat C_camera_model = cv::Mat::eye(3, 3, CV_64F);

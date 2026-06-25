@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   aslam_backend_python
   incremental_calibration_python
   aslam_cameras_april
+  aslam_cameras_charuco
   aslam_splines_python
   numpy_eigen
   python_module

@@ -15,6 +15,7 @@
   <build_depend>aslam_backend_python</build_depend>
   <build_depend>incremental_calibration_python</build_depend>
   <build_depend>aslam_cameras_april</build_depend>
+  <build_depend>aslam_cameras_charuco</build_depend>
   <build_depend>aslam_splines_python</build_depend>
   <build_depend>numpy_eigen</build_depend>
   <build_depend>python_module</build_depend>

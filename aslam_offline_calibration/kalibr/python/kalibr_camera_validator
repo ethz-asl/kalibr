@@ -10,6 +10,7 @@ import sm
 import aslam_cv as acv
 import aslam_cv_backend as acvb
 import aslam_cameras_april as acv_april
+import aslam_cameras_charuco as acv_charuco
 import kalibr_common as kc
 
 import os
@@ -51,6 +52,15 @@ class CalibrationTargetDetector(object):
                                                             targetParams['tagCols'], 
                                                             targetParams['tagSize'], 
                                                             targetParams['tagSpacing'])
+
+        elif( targetType == 'charuco' ):
+            grid = acv_charuco.GridCalibrationTargetCharuco(targetParams['tagRows'],
+                                                            targetParams['tagCols'],
+                                                            targetParams['tagSize'],
+                                                            targetParams['tagSpacing'],
+                                                            targetParams['dictName'],
+                                                            targetParams['markerSize'],
+                                                            targetParams['nMarkers'])
         else:
             raise RuntimeError( "Unknown calibration target." )
         
@@ -134,7 +144,7 @@ class CameraChainValidator(object):
                     np_image = np.array(self.bridge.compressed_imgmsg_to_cv2(msg))
                     if len(np_image.shape) > 2 and np_image.shape[2] == 3:
                         np_image = cv2.cvtColor(np_image, cv2.COLOR_BGR2GRAY)
-                elif msg.encoding == "rgb8" or msg.encoding == "bgra8":
+                elif msg.encoding in ("rgb8", "bgra8", "bgr8", "rgba8"):
                     np_image = np.array(self.bridge.imgmsg_to_cv2(msg, "mono8"))
                 else:
                     np_image = np.array(self.bridge.imgmsg_to_cv2(msg))

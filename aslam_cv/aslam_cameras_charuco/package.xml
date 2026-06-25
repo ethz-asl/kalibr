@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <name>aslam_cameras_charuco</name>
+  <description>aslam_cameras_charuco</description>
+  <version>0.0.1</version>
+  <maintainer email="paulfurgale@mavt.ethz.ch">Paul Furgale</maintainer>
+  <author>Paul Furgale</author>
+  <author>Martin Pecka</author>
+  <license>New BSD</license>
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>sm_python</build_depend>
+  <build_depend>aslam_cameras</build_depend>
+  <build_depend>numpy_eigen</build_depend>
+  <build_depend>sm_common</build_depend>
+  <build_depend>sm_logging</build_depend>
+  <build_depend>sm_boost</build_depend>
+  <build_depend>sm_eigen</build_depend>
+  <build_depend>python_module</build_depend>
+</package>

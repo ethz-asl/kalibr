@@ -537,6 +537,7 @@ class CalibrationTargetParameters(ParametersBase):
     ###################################################
     def checkTargetType(self, target_type):
         targetTypes = ['aprilgrid', 
+                       'charuco',
                        'checkerboard',
                        'circlegrid']
         
@@ -601,7 +602,7 @@ class CalibrationTargetParameters(ParametersBase):
                             'asymmetricGrid': asymmetricGrid,
                             'targetType': targetType}
             
-        elif targetType == 'aprilgrid':
+        elif targetType in ('aprilgrid', 'charuco'):
             try:
                 tagRows = self.data["tagRows"]
                 tagCols = self.data["tagCols"]
@@ -624,7 +625,24 @@ class CalibrationTargetParameters(ParametersBase):
                             'tagSize': tagSize,
                             'tagSpacing': tagSpacing,
                             'targetType': targetType}
-            
+
+            if targetType == "charuco":
+                dictName = self.data.get("dictName", "")
+                markerSize = self.data.get("markerSize", 4)
+                nMarkers = self.data.get("nMarkers", 50)
+
+                if not isinstance(dictName, str):
+                    errList.append("invalid dictName (str)")
+                if not isinstance(markerSize, int) or markerSize < 3:
+                    errList.append("invalid markerSize (int>=3)")
+                if not isinstance(nMarkers, int) or nMarkers < 1:
+                    errList.append("invalid nMarkers (int>=1)")
+
+                targetParams.update(
+                    {'dictName': dictName,
+                     'markerSize': markerSize,
+                     'nMarkers': nMarkers})
+
         return targetParams
         
     ###################################################
@@ -644,7 +662,7 @@ class CalibrationTargetParameters(ParametersBase):
             print("  Cols", file=dest)
             print("    Count: {0}".format(targetParams['targetCols']), file=dest)
             print("    Distance: {0} [m]".format(targetParams['colSpacingMeters']), file=dest)
-        elif targetType == 'aprilgrid':
+        elif targetType in ('aprilgrid', 'charuco'):
             print("  Tags: ", file=dest)
             print("    Rows: {0}".format(targetParams['tagRows']), file=dest)
             print("    Cols: {0}".format(targetParams['tagCols']), file=dest)

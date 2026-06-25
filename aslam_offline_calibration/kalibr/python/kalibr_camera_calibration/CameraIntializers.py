@@ -218,6 +218,8 @@ def calibrateIntrinsics(cam_geometry, obslist, distortionActive=True, intrinsics
     target_pose_dvs=list()
     for obs in obslist: 
         success, T_t_c = cam_geometry.geometry.estimateTransformation(obs)
+        if not success:
+            continue
         target_pose_dv = addPoseDesignVariable(problem, T_t_c)
         target_pose_dvs.append(target_pose_dv)
         
@@ -318,6 +320,8 @@ def solveFullBatch(cameras, baseline_guesses, graph):
 
         #create a target pose dv for all target views (= T_cam0_w)
         T0 = graph.getTargetPoseGuess(timestamp, cameras, baseline_guesses)
+        if T0 is None:
+            continue
         target_pose_dv = addPoseDesignVariable(problem, T0)
         target_pose_dvs.append(target_pose_dv)
         

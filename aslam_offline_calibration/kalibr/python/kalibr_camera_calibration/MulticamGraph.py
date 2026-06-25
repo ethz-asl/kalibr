@@ -252,6 +252,7 @@ class MulticamCalibrationGraph(object):
                
         if not success:
             sm.logWarn("getTargetPoseGuess: solvePnP failed with solution: {0}".format(T_t_cN))
+            return None
         
         #transform it back to cam0 (T_t_cN --> T_t_c0)
         T_cN_c0 = sm.Transformation()
