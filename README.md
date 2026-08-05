@@ -4,6 +4,15 @@
 [![ROS1 Ubuntu 18.04](https://github.com/ethz-asl/kalibr/actions/workflows/docker_1804_build.yaml/badge.svg)](https://github.com/ethz-asl/kalibr/actions/workflows/docker_1804_build.yaml)
 [![ROS1 Ubuntu 16.04](https://github.com/ethz-asl/kalibr/actions/workflows/docker_1604_build.yaml/badge.svg)](https://github.com/ethz-asl/kalibr/actions/workflows/docker_1604_build.yaml)
 
+## To run Basler Camera
+```
+docker build --network=host -t kalibr -f Dockerfile_ros1_20_04 .
+./docker_run_basler.sh
+
+# Inside the container
+roslaunch basler_camera basler_camera.launch
+```
+
 ## Introduction
 Kalibr is a toolbox that solves the following calibration problems:
 

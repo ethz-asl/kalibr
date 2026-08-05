@@ -1,0 +1,9 @@
+<launch>
+  <arg name="config_file" default="$(find basler_camera)/config/basler_daA3840_45uc.yaml"/>
+  <arg name="node_name" default="pylon_camera_node"/>
+
+  <include file="$(find pylon_camera)/launch/pylon_camera_node.launch">
+    <arg name="config_file" value="$(arg config_file)"/>
+    <arg name="node_name" value="$(arg node_name)"/>
+  </include>
+</launch>

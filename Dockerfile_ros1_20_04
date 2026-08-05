@@ -16,7 +16,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
 
 
 # Create the workspace and build kalibr in it
-ENV WORKSPACE /catkin_ws
+ENV WORKSPACE=/catkin_ws
 
 RUN mkdir -p $WORKSPACE/src && \
 	cd $WORKSPACE && \
@@ -27,6 +27,25 @@ RUN mkdir -p $WORKSPACE/src && \
 ADD . $WORKSPACE/src/kalibr
 # RUN cd $WORKSPACE/src &&\
 # 	git clone https://github.com/ori-drs/kalibr.git
+
+# ROS1 Basler pylon camera driver + drag&bot msgs (required by pylon_camera)
+RUN cd $WORKSPACE/src && \
+	git clone --depth 1 -b master \
+		https://github.com/basler/pylon-ros-camera.git && \
+	git clone --depth 1 \
+		https://github.com/dragandbot/dragandbot_common.git
+
+# Install pylon SDK via Basler rosdep rule, then remaining package deps
+RUN sh -c 'echo "yaml https://raw.githubusercontent.com/basler/pylon-ros-camera/master/pylon_camera/rosdep/pylon_sdk.yaml" \
+		> /etc/ros/rosdep/sources.list.d/30-pylon_camera.list' && \
+	rosdep update && \
+	. /opt/ros/noetic/setup.sh && \
+	cd $WORKSPACE && \
+	rosdep install --from-paths \
+		src/pylon-ros-camera \
+		src/dragandbot_common \
+		src/kalibr/basler_camera \
+		--ignore-src --rosdistro=noetic -y
 
 RUN	cd $WORKSPACE &&\
 	catkin build -j$(nproc)
@@ -39,8 +58,3 @@ ENTRYPOINT export KALIBR_MANUAL_FOCAL_LENGTH_INIT=1 && \
 	# /bin/bash -c "source \"$WORKSPACE/devel/setup.bash\"" && \ 
 	cd $WORKSPACE && \
 	/bin/bash
-
-
-
-
-

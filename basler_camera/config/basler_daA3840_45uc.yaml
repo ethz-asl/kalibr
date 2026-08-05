@@ -1,0 +1,12 @@
+# ROS1 pylon_camera config for Basler daA3840-45uc
+# Ported from isaac_lab_xarm2 ROS2 basler_daA3840_45uc.yaml
+
+camera_frame: pylon_camera_optical_frame
+device_user_id: ""
+image_encoding: "bgr8"
+frame_rate: 30.0
+brightness: 50
+brightness_continuous: true
+exposure_auto: true
+gain_auto: true
+auto_exposure_upper_limit: 30000.0

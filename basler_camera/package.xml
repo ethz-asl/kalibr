@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>basler_camera</name>
+  <version>0.1.0</version>
+  <description>Bringup launch and config for Basler cameras with pylon_camera (ROS1).</description>
+
+  <maintainer email="changkoo@todo.todo">Changkoo</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>pylon_camera</exec_depend>
+  <exec_depend>roslaunch</exec_depend>
+</package>
