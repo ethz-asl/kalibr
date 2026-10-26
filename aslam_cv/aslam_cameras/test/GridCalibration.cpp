@@ -166,3 +166,83 @@ TEST(GridCalibrationTestSuite, testCalibrationTargetCircleGrid)
     FAIL() << e.what();
   }
 }
+
+TEST(GridCalibrationTestSuite, testNonSquareCheckerboardIntrinsicsInit)
+{
+  using namespace aslam::cameras;
+  sm::logging::setLevel(sm::logging::levels::Debug);
+  try {
+    // Test 1: rectangular target with cols > rows (e.g. 6 rows x 11 cols)
+    {
+      const size_t rows = 6;
+      const size_t cols = 11;
+      GridCalibrationTargetCheckerboard::CheckerboardOptions options;
+      GridCalibrationTargetCheckerboard::Ptr target(
+          new GridCalibrationTargetCheckerboard(rows, cols, 0.05, 0.05, options));
+
+      GridCalibrationTargetObservation obs(target);
+      cv::Mat img(480, 640, CV_8UC1, cv::Scalar(0));
+      obs.setImage(img);
+
+      for (size_t r = 0; r < rows; ++r) {
+        double cx = 150.0 + r * 30.0;
+        double cy = 240.0;
+        double radius = 120.0;
+        for (size_t c = 0; c < cols; ++c) {
+          double angle = static_cast<double>(c) / (cols - 1) * (M_PI / 2.0);
+          Eigen::Vector2d pt(cx + radius * std::cos(angle), cy + radius * std::sin(angle));
+          obs.updateImagePoint(target->gridCoordinatesToPoint(r, c), pt);
+        }
+      }
+
+      std::vector<GridCalibrationTargetObservation> observations;
+      observations.push_back(obs);
+      PinholeProjection<NoDistortion> pinhole;
+
+      ASSERT_TRUE(pinhole.initializeIntrinsics(observations));
+      EXPECT_GT(pinhole.fu(), 0.0);
+      EXPECT_GT(pinhole.fv(), 0.0);
+      EXPECT_TRUE(std::isfinite(pinhole.fu()));
+      EXPECT_TRUE(std::isfinite(pinhole.fv()));
+    }
+
+    // Test 2: rectangular target with rows > cols (e.g. 11 rows x 6 cols)
+    {
+      const size_t rows = 11;
+      const size_t cols = 6;
+      GridCalibrationTargetCheckerboard::CheckerboardOptions options;
+      GridCalibrationTargetCheckerboard::Ptr target(
+          new GridCalibrationTargetCheckerboard(rows, cols, 0.05, 0.05, options));
+
+      GridCalibrationTargetObservation obs(target);
+      cv::Mat img(480, 640, CV_8UC1, cv::Scalar(0));
+      obs.setImage(img);
+
+      for (size_t r = 0; r < rows; ++r) {
+        double cx = 150.0 + r * 15.0;
+        double cy = 240.0;
+        double radius = 120.0;
+        for (size_t c = 0; c < cols; ++c) {
+          double angle = static_cast<double>(c) / (cols - 1) * (M_PI / 2.0);
+          Eigen::Vector2d pt(cx + radius * std::cos(angle), cy + radius * std::sin(angle));
+          obs.updateImagePoint(target->gridCoordinatesToPoint(r, c), pt);
+        }
+      }
+
+      std::vector<GridCalibrationTargetObservation> observations;
+      observations.push_back(obs);
+      PinholeProjection<NoDistortion> pinhole;
+
+      ASSERT_TRUE(pinhole.initializeIntrinsics(observations));
+      EXPECT_GT(pinhole.fu(), 0.0);
+      EXPECT_GT(pinhole.fv(), 0.0);
+      EXPECT_TRUE(std::isfinite(pinhole.fu()));
+      EXPECT_TRUE(std::isfinite(pinhole.fv()));
+    }
+
+    SCOPED_TRACE("");
+  }
+  catch (const std::exception & e) {
+    FAIL() << e.what();
+  }
+}

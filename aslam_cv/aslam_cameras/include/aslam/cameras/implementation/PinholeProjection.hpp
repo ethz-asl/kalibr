@@ -740,7 +740,7 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
     const GridCalibrationTargetBase & target = *obs.target();
 
     std::vector<Eigen::Vector2d, Eigen::aligned_allocator<Eigen::Vector2d>> center(target.rows());
-    double radius[target.rows()];
+    std::vector<double> radius(target.rows());
     bool skipImage=false;
 
     for (size_t r=0; r<target.rows(); ++r) {
@@ -763,7 +763,7 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
 
     for (size_t j=0; j<target.rows(); ++j)
     {
-      for (size_t k=j+1; k<target.cols(); ++k)
+      for (size_t k=j+1; k<target.rows(); ++k)
       {
         // find distance between pair of vanishing points which
         // correspond to intersection points of 2 circles
@@ -774,7 +774,7 @@ bool PinholeProjection<DISTORTION_T>::initializeIntrinsics(const std::vector<Gri
           continue;
 
          double f_guess = cv::norm(ipts.at(0) - ipts.at(1)) / M_PI;
-         if(std::isfinite(f_guess))
+         if(std::isfinite(f_guess) && f_guess > 0.0)
             f_guesses.push_back(f_guess);
       }
     }
