@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="3">
   <name>catkin_simple</name>
   <version>0.1.0</version>
   <description>catkin, simpler</description>
@@ -11,7 +11,10 @@
   <author email="william@osrfoundation.org">William Woodall</author>
   <author email="dthomas@osrfoundation.org">Dirk Thomas</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <run_depend>catkin</run_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>catkin</exec_depend>
 
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

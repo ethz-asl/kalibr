@@ -1,6 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 print("importing libraries")
-import rospy
+import rclpy
+from rclpy.node import Node
 import cv2
 import numpy as np
 from sensor_msgs.msg import Image, CompressedImage
@@ -8,14 +9,14 @@ from cv_bridge import CvBridge, CvBridgeError
 import argparse
 
 class CameraFocus:
-    def __init__(self, topic):
+    def __init__(self, node, topic):
         self.topic = topic
         self.windowNameOrig = "Camera: {0}".format(self.topic)
         self.bridge = CvBridge()
         if "compressed" in self.topic:
-            self.image_sub = rospy.Subscriber(self.topic, CompressedImage, self.callback_compressed)
+            self.image_sub = node.create_subscription(CompressedImage, self.topic, self.callback_compressed, 10)
         else:
-            self.image_sub = rospy.Subscriber(self.topic, Image, self.callback_raw)
+            self.image_sub = node.create_subscription(Image, self.topic, self.callback_raw, 10)
 
     def callback_raw(self, msg):
         try:
@@ -65,15 +66,16 @@ if __name__ == "__main__":
     parser.add_argument('--topic', nargs='+', dest='topics', help='camera topic', required=True)
     parsed = parser.parse_args()
 
-    rospy.init_node('kalibr_camera_focus', anonymous=True)
+    rclpy.init()
+    node = Node('kalibr_camera_focus')
 
     for topic in parsed.topics:
-        camval = CameraFocus(topic)
+        camval = CameraFocus(node, topic)
         cv2.namedWindow(camval.windowNameOrig, cv2.WINDOW_NORMAL)
         cv2.resizeWindow(camval.windowNameOrig, (640, 480))
 
     try:
-        rospy.spin()
+        rclpy.spin(node)
     except KeyboardInterrupt:
         print("Shutting down") 
 

@@ -1,14 +1,13 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
+set(BUILD_SHARED_LIBS ON)
+
 project(aslam_time)
 
-find_package(catkin REQUIRED)
+find_package(ament_cmake REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
-catkin_package(
-  LIBRARIES ${PROJECT_NAME}  
-  INCLUDE_DIRS include
-  DEPENDS Boost
-)
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
 
 
 include_directories(include ${Boost_INCLUDE_DIRS})
@@ -26,11 +25,12 @@ endif()
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${OTHER_LIBS})
 
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 install(DIRECTORY include/
-  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+  DESTINATION include
 )
+ament_package()

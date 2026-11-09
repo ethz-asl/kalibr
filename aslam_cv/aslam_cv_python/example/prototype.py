@@ -1,5 +1,3 @@
-import roslib
-roslib.load_manifest('aslam_cv_python')
 import aslam_cv as acv
 import sm
 import cv2

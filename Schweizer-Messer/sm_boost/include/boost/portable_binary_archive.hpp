@@ -28,7 +28,15 @@
 #endif
 
 #include <boost/archive/basic_archive.hpp>
-#include <boost/detail/endian.hpp>
+#include <boost/predef/other/endian.h>
+
+// boost/detail/endian.hpp was removed in Boost >= 1.69; re-create the legacy
+// BOOST_BIG_ENDIAN / BOOST_LITTLE_ENDIAN macros from boost/predef.
+#if BOOST_ENDIAN_BIG_BYTE
+#  define BOOST_BIG_ENDIAN
+#elif BOOST_ENDIAN_LITTLE_BYTE
+#  define BOOST_LITTLE_ENDIAN
+#endif
 
 
 namespace boost {

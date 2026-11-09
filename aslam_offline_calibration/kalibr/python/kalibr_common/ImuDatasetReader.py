@@ -1,4 +1,4 @@
-import rosbag
+from . import rosbag
 import os
 import sm
 import numpy as np

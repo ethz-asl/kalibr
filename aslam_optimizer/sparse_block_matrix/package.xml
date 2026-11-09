@@ -7,7 +7,7 @@
   <maintainer email="paul.furgale@mavt.ethz.ch">Author</maintainer>
   <license>New BSD</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <build_depend>tbb</build_depend>
   <build_depend>sm_common</build_depend>
@@ -23,4 +23,7 @@
   <exec_depend>eigen</exec_depend>
 
   <test_depend>gtest</test_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

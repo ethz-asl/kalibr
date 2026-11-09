@@ -1,15 +1,13 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
+set(BUILD_SHARED_LIBS ON)
+
 project(sm_random)
 
-find_package(catkin REQUIRED)
-include_directories(${catkin_INCLUDE_DIRS})
+find_package(ament_cmake REQUIRED)
+include_directories()
 
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS 
-  DEPENDS
-)
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
 
 include_directories(include)
 
@@ -26,12 +24,13 @@ add_library(${PROJECT_NAME}
 ##################
 
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/
-  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+  DESTINATION include
 )
+ament_package()

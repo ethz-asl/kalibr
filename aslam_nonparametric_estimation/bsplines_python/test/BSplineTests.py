@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('bsplines'); 
 import bsplines
 import numpy
 import scipy.interpolate.fitpack as fp

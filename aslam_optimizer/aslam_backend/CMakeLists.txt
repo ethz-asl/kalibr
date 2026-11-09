@@ -1,33 +1,30 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
+set(BUILD_SHARED_LIBS ON)
+
 project(aslam_backend)
 
 set(CMAKE_CXX_STANDARD 14)
 
-find_package(catkin REQUIRED COMPONENTS
-  sparse_block_matrix
-  sm_boost
-  sm_random
-  sm_timing
-  sm_logging
-  sm_property_tree
-)
+find_package(ament_cmake REQUIRED)
+find_package(sparse_block_matrix REQUIRED)
+find_package(sm_boost REQUIRED)
+find_package(sm_random REQUIRED)
+find_package(sm_timing REQUIRED)
+find_package(sm_logging REQUIRED)
+find_package(sm_property_tree REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system thread)
 find_package(Eigen3 REQUIRED)
 
-catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS
-    sparse_block_matrix
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+ament_export_dependencies(sparse_block_matrix
     sm_boost
     sm_random
     sm_timing
     sm_logging
-    sm_property_tree
-  DEPENDS Boost
-)
+    sm_property_tree)
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
+include_directories(include ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME}
   src/MEstimatorPolicies.cpp
@@ -61,18 +58,19 @@ add_library(${PROJECT_NAME}
   src/DogLegTrustRegionPolicy.cpp
   src/Optimizer2.cpp
 )
+ament_target_dependencies(${PROJECT_NAME} sparse_block_matrix sm_boost sm_random sm_timing sm_logging sm_property_tree)
 target_link_libraries(${PROJECT_NAME}
   ${Boost_LIBRARIES}
   ${TBB_LIBRARIES}
   ${CHOLMOD_LIBRARY}
   ${SUITESPARSE_LIBRARIES}
-  ${catkin_LIBRARIES}
 )
 
-if(CATKIN_ENABLE_TESTING)
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
   # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
   add_definitions(-DGTEST_USE_OWN_TR1_TUPLE=0)
-  catkin_add_gtest(${PROJECT_NAME}_test
+  ament_add_gtest(${PROJECT_NAME}_test
     test/test_main.cpp
     test/JacobianContainer.cpp
     test/test_sparse_matrix_functions.cpp
@@ -89,11 +87,12 @@ if(CATKIN_ENABLE_TESTING)
 endif()
 
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 install(DIRECTORY include/
-  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+  DESTINATION include
 )
+ament_package()

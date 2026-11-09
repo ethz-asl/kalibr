@@ -1,7 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 print("importing libraries")
-import rosbag
-import cv_bridge
 
 import sm
 from sm import PlotCollection

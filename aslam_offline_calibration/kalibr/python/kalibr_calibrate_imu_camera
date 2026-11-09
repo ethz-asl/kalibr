@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 print("importing libraries")
 import sm
 import kalibr_common as kc

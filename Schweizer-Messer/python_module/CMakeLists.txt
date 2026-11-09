@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
+set(BUILD_SHARED_LIBS ON)
+
 project(python_module)
 
-find_package(catkin REQUIRED)
+find_package(ament_cmake REQUIRED)
 
-catkin_package(
-  CFG_EXTRAS add_python_export_library.cmake
-)
+ament_package(CONFIG_EXTRAS cmake/add_python_export_library.cmake)

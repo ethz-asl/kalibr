@@ -1,33 +1,34 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
+set(BUILD_SHARED_LIBS ON)
+
 project(bsplines)
 
-find_package(catkin REQUIRED COMPONENTS
-  sm_common
-  sm_timing
-  sm_eigen
-  sm_kinematics
-  sparse_block_matrix
-)
+find_package(ament_cmake REQUIRED)
+find_package(sm_common REQUIRED)
+find_package(sm_timing REQUIRED)
+find_package(sm_eigen REQUIRED)
+find_package(sm_kinematics REQUIRED)
+find_package(sparse_block_matrix REQUIRED)
 
-catkin_package(
-  LIBRARIES ${PROJECT_NAME}
-  INCLUDE_DIRS include
-)
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include)
 
 add_library(${PROJECT_NAME} 
   src/BSpline.cpp
   src/BSplinePose.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+ament_target_dependencies(${PROJECT_NAME} sm_common sm_timing sm_eigen sm_kinematics sparse_block_matrix)
+target_link_libraries(${PROJECT_NAME})
 
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  DESTINATION include/${PROJECT_NAME}
 )
+ament_package()

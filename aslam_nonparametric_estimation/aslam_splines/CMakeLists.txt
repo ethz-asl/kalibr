@@ -1,36 +1,37 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.8)
+set(BUILD_SHARED_LIBS ON)
+
 project(aslam_splines)
 
-find_package(catkin REQUIRED COMPONENTS
-  aslam_backend
-  aslam_backend_expressions
-  bsplines
-  numpy_eigen
-  sparse_block_matrix
-  sm_common
-  sm_kinematics
-  sm_timing
-  opencv2_catkin
-)
+find_package(ament_cmake REQUIRED)
+find_package(aslam_backend REQUIRED)
+find_package(aslam_backend_expressions REQUIRED)
+find_package(bsplines REQUIRED)
+find_package(numpy_eigen REQUIRED)
+find_package(sparse_block_matrix REQUIRED)
+find_package(sm_common REQUIRED)
+find_package(sm_kinematics REQUIRED)
+find_package(sm_timing REQUIRED)
+find_package(opencv2_catkin REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
-catkin_package(
-  LIBRARIES ${PROJECT_NAME}
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS bsplines
-)
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
+ament_export_dependencies(bsplines)
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include)
 
 add_library(${PROJECT_NAME}
   src/BSplinePoseDesignVariable.cpp
   src/BSplineExpressions.cpp
   src/EuclideanBSplineDesignVariable.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+ament_target_dependencies(${PROJECT_NAME} aslam_backend aslam_backend_expressions bsplines numpy_eigen sparse_block_matrix sm_common sm_kinematics sm_timing opencv2_catkin)
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
-if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(${PROJECT_NAME}_test
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(${PROJECT_NAME}_test
     test/test_main.cpp
     test/TestBSplineExpressions.cpp
     test/TestErrors.cpp
@@ -43,12 +44,13 @@ endif()
 ## Installation ##
 ##################
 install(TARGETS ${PROJECT_NAME}
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 ## Mark cpp header files for installation
 install(DIRECTORY include/
-  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+  DESTINATION include
 )
+ament_package()

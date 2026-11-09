@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 print("importing libraries")
 
-import rosbag
-import rospy
+import kalibr_common.rosbag as rosbag
+from builtin_interfaces.msg import Time
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import Imu
 import time, sys, os
@@ -69,7 +69,7 @@ def loadImageToRosMsg(filename, cam_name):
     image_np = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
     
     timestamp_nsecs = os.path.splitext(os.path.basename(filename))[0]
-    timestamp = rospy.Time( secs=int(timestamp_nsecs[0:-9]), nsecs=int(timestamp_nsecs[-9:]) )
+    timestamp = Time( sec=int(timestamp_nsecs[0:-9]), nanosec=int(timestamp_nsecs[-9:]) )
 
     rosimage = Image()
     rosimage.header.stamp = timestamp
@@ -84,7 +84,7 @@ def loadImageToRosMsg(filename, cam_name):
 
 def createImuMessge(timestamp_int, omega, alpha, imu_name):
     timestamp_nsecs = str(timestamp_int)
-    timestamp = rospy.Time( int(timestamp_nsecs[0:-9]), int(timestamp_nsecs[-9:]) )
+    timestamp = Time( int(timestamp_nsecs[0:-9]), int(timestamp_nsecs[-9:]) )
     
     rosimu = Imu()
     rosimu.header.stamp = timestamp

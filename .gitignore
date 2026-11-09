@@ -53,3 +53,5 @@ Build
 
 # vs-code
 .vscode
+install/*
+log/*

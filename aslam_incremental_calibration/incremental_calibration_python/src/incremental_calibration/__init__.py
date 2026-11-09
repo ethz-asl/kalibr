@@ -1,11 +1,11 @@
 # Import the numpy to Eigen type conversion.
-import roslib; roslib.load_manifest('numpy_eigen'); import numpy_eigen
+import numpy_eigen
 import os
 
 isCompiled = False
 pathToSo = os.path.dirname(os.path.realpath(__file__))
 if os.path.isfile(os.path.join(pathToSo,"libincremental_calibration_python.so")):    
-    roslib.load_manifest('aslam_backend_python'); import aslam_backend
+    import aslam_backend
     # Import the the C++ exports from your package library.
     from .libincremental_calibration_python import *
     # Import other files in the directory

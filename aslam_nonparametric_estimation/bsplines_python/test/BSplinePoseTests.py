@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import roslib; roslib.load_manifest('bsplines');
-roslib.load_manifest('sm_python') 
 import bsplines
 import sm
 import numpy

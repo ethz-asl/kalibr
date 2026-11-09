@@ -1,6 +1,6 @@
 import cv_bridge
 import cv2
-import rosbag
+from . import rosbag
 import os
 import numpy as np
 import pylab as pl

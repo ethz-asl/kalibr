@@ -6,7 +6,7 @@
 
   <maintainer email="paul.furgale@mavt.ethz.ch">Paul Furgale</maintainer>
   <license>New BSD</license>
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>eigen</build_depend>
   <build_depend>sm_common</build_depend>
   <build_depend>numpy_eigen</build_depend>
@@ -24,6 +24,7 @@
   <exec_depend>sm_logging</exec_depend>
   <exec_depend>sm_matrix_archive</exec_depend>
   <exec_depend>sm_property_tree</exec_depend>
-
-  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-wxtools</exec_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>
