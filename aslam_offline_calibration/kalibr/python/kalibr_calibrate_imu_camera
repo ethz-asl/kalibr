@@ -115,9 +115,6 @@ def parseArgs():
     except:
         sys.exit(2)
                  
-    if parsed.verbose:
-        parsed.showextraction = True             
-    
     #there is a with the gtk plot widget, so we cant plot if we have opencv windows open...
     #--> disable the plots in these special situations
     if parsed.showextraction or parsed.extractionstepping or parsed.verbose:
