@@ -17,6 +17,11 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive \
 	apt-get install -y --allow-unauthenticated	python-catkin-tools
 
+# The distro's python-matplotlib ships an /etc/matplotlibrc pinning backend: TkAgg, which
+# overrides matplotlib's own no-display fallback. This image has no X server, so importing
+# pylab aborts with "cannot open display".
+ENV MPLBACKEND Agg
+
 # Create the workspace and build kalibr in it
 ENV WORKSPACE /catkin_ws
 
